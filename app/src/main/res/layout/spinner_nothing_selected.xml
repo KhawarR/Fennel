@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tintash.fennel.views.FontTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:iehp="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/txtView"
+    style="?android:attr/spinnerItemStyle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:ellipsize="marquee"
+    android:padding="@dimen/padding_10"
+    android:singleLine="true"
+    android:textColor="@color/black_txt_color"
+    android:textSize="18sp"
+    iehp:fontName="Avenir-Heavy.ttf"
+    tools:text="Tap to Select" />
