@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
+import com.instabug.library.IBGInvocationEvent;
+import com.instabug.library.Instabug;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -32,6 +34,13 @@ public class Fennel extends Application {
         super.onCreate();
         restClient = new RestClient();
         initImageLoader();
+        initInstaBug();
+    }
+
+    public void initInstaBug() {
+        new Instabug.Builder(this, "6e99244a66b36936b653a4e8dd22a96c")
+                .setInvocationEvent(IBGInvocationEvent.IBGInvocationEventShake)
+                .build();
     }
 
     public void initImageLoader() {
