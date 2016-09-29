@@ -45,6 +45,11 @@ public class EnrollFragment extends BaseContainerFragment {
     @Bind(R.id.tvLeaderYes)
     TextView tvLeaderYes;
 
+    @Bind(R.id.txtFarmerHomeNo)
+    TextView txtFarmerHomeNo;
+
+    @Bind(R.id.txtFarmerHomeYes)
+    TextView txtFarmerHomeYes;
 
     @Nullable
     @Override
@@ -87,6 +92,25 @@ public class EnrollFragment extends BaseContainerFragment {
         tvLeaderNo.setSelected(false);
         tvLeaderYes.setSelected(false);
         view.setSelected(true);
+
+    }
+
+
+    @OnClick({R.id.txtFarmerHomeNo, R.id.txtFarmerHomeYes})
+    void onClickFarmerHomeSelection(View view) {
+        txtFarmerHomeNo.setSelected(false);
+        txtFarmerHomeYes.setSelected(false);
+        view.setSelected(true);
+
+    }
+
+    @OnClick(R.id.txtCreateFarmer)
+    void onClickCreateFarmer(View view) {
+
+    }
+
+    @OnClick(R.id.txtSubmitApproval)
+    void onClickSubmitForApproval(View view) {
 
     }
 

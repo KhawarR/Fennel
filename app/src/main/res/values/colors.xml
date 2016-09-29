@@ -13,4 +13,5 @@
     <color name="btn_disabled_bg_color">#4DE6E6E6</color>
     <color name="grey_light">#F5F5F5</color>
     <color name="dark_red">#d50010</color>
+    <color name="red_disabled_color">#f5bfc4</color>
 </resources>
