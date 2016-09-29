@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fennel="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -9,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
+        android:elevation="4dp"
         android:padding="@dimen/padding_15">
 
         <tintash.fennel.views.FontTextView
@@ -29,130 +31,356 @@
             android:src="@drawable/ic_avatar_small" />
     </RelativeLayout>
 
-    <View
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/border_color" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="@dimen/padding_15">
-
-        <tintash.fennel.views.FontTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="FIRST NAME"
-            fennel:fontName="Avenir-Heavy.ttf" />
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName" />
-
-        <tintash.fennel.views.FontTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/padding_10"
-            android:text="SECOND NAME"
-            fennel:fontName="Avenir-Heavy.ttf" />
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName" />
-
-
-        <tintash.fennel.views.FontTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/padding_10"
-            android:text="SURNAME"
-            fennel:fontName="Avenir-Heavy.ttf" />
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName" />
-
-
-        <tintash.fennel.views.FontTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/padding_10"
-            android:text="ID NUMBER"
-            fennel:fontName="Avenir-Heavy.ttf" />
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number" />
-
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/padding_10"
-            android:orientation="horizontal">
+            android:background="@color/white"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_15">
+
+                <tintash.fennel.views.FontTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/first_name"
+                    android:textColor="@color/black_txt_color"
+                    fennel:fontName="Avenir-Heavy.ttf" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName" />
+
+                <tintash.fennel.views.FontTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:text="@string/second_name"
+                    android:textColor="@color/black_txt_color"
+                    fennel:fontName="Avenir-Heavy.ttf" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName" />
+
+
+                <tintash.fennel.views.FontTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:text="@string/surname"
+                    android:textColor="@color/black_txt_color"
+                    fennel:fontName="Avenir-Heavy.ttf" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName" />
+
+
+                <tintash.fennel.views.FontTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:text="@string/id_number"
+                    android:textColor="@color/black_txt_color"
+                    fennel:fontName="Avenir-Heavy.ttf" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number" />
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:orientation="horizontal">
+
+                    <tintash.fennel.views.FontTextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1.5"
+                        android:text="@string/gender"
+                        android:textColor="@color/black_txt_color"
+                        fennel:fontName="Avenir-Heavy.ttf" />
+
+                    <tintash.fennel.views.FontTextView
+                        android:id="@+id/tvMale"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/padding_10"
+                        android:layout_marginRight="@dimen/padding_10"
+                        android:layout_weight="1"
+                        android:background="@drawable/selector_radio_bg"
+                        android:gravity="center"
+                        android:text="@string/male"
+                        android:textColor="@color/green_white_text_selector"
+                        fennel:fontName="Avenir-Heavy.ttf" />
+
+                    <tintash.fennel.views.FontTextView
+                        android:id="@+id/tvFemale"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/padding_15"
+                        android:layout_marginRight="@dimen/padding_15"
+                        android:layout_weight="1"
+                        android:background="@drawable/selector_radio_bg"
+                        android:gravity="center"
+                        android:text="@string/female"
+                        android:textColor="@color/green_white_text_selector"
+                        fennel:fontName="Avenir-Heavy.ttf" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:orientation="horizontal">
+
+                    <tintash.fennel.views.FontTextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1.5"
+                        android:text="@string/leader"
+                        android:textColor="@color/black_txt_color"
+                        fennel:fontName="Avenir-Heavy.ttf" />
+
+                    <tintash.fennel.views.FontTextView
+                        android:id="@+id/tvLeaderNo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/padding_10"
+                        android:layout_marginRight="@dimen/padding_10"
+                        android:layout_weight="1"
+                        android:background="@drawable/selector_radio_bg"
+                        android:gravity="center"
+
+                        android:text="@string/no"
+                        android:textColor="@color/green_white_text_selector"
+
+
+                        fennel:fontName="Avenir-Heavy.ttf" />
+
+                    <tintash.fennel.views.FontTextView
+                        android:id="@+id/tvLeaderYes"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/padding_15"
+                        android:layout_marginRight="@dimen/padding_15"
+                        android:layout_weight="1"
+                        android:background="@drawable/selector_radio_bg"
+                        android:gravity="center"
+                        android:text="@string/yes"
+                        android:textColor="@color/green_white_text_selector"
+                        fennel:fontName="Avenir-Heavy.ttf" />
+                </LinearLayout>
+
+
+                <Spinner
+                    android:id="@+id/spLocation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:background="@drawable/spinner_bg"
+                    tools:entries="@array/optionsLocation" />
+
+                <Spinner
+                    android:id="@+id/spSubLocation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:background="@drawable/spinner_bg"
+                    tools:entries="@array/optionsLocation" />
+
+                <Spinner
+                    android:id="@+id/spVillage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:background="@drawable/spinner_bg"
+                    tools:entries="@array/optionsLocation" />
+
+                <Spinner
+                    android:id="@+id/spTree"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:background="@drawable/spinner_bg"
+                    tools:entries="@array/optionsLocation" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:orientation="horizontal">
+
+                    <tintash.fennel.views.FontTextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1.5"
+                        android:text="@string/farmer_home"
+                        android:textColor="@color/black_txt_color"
+                        fennel:fontName="Avenir-Heavy.ttf" />
+
+                    <tintash.fennel.views.FontTextView
+                        android:id="@+id/txtFarmerHomeNo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/padding_10"
+                        android:layout_marginRight="@dimen/padding_10"
+                        android:layout_weight="1"
+                        android:background="@drawable/selector_radio_bg"
+                        android:gravity="center"
+                        android:text="@string/no"
+                        android:textColor="@color/green_white_text_selector"
+                        fennel:fontName="Avenir-Heavy.ttf" />
+
+                    <tintash.fennel.views.FontTextView
+                        android:id="@+id/txtFarmerHomeYes"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/padding_15"
+                        android:layout_marginRight="@dimen/padding_15"
+                        android:layout_weight="1"
+                        android:background="@drawable/selector_radio_bg"
+                        android:gravity="center"
+                        android:text="@string/yes"
+                        android:textColor="@color/green_white_text_selector"
+                        fennel:fontName="Avenir-Heavy.ttf" />
+                </LinearLayout>
+
+                <tintash.fennel.views.FontTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:text="@string/mobile_number"
+                    android:textColor="@color/black_txt_color"
+                    fennel:fontName="Avenir-Heavy.ttf" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:imeOptions="actionDone"
+                    android:inputType="phone" />
+
+                <tintash.fennel.views.FontTextView
+                    android:id="@+id/txtCreateFarmer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:background="@drawable/selector_green_button"
+                    android:gravity="center"
+                    android:padding="@dimen/padding_15"
+                    android:text="@string/create"
+                    android:textColor="@color/white"
+                    fennel:fontName="Avenir-Heavy.ttf" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="@dimen/padding_10"
+                android:background="@color/border_color" />
 
             <tintash.fennel.views.FontTextView
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="GENDER"
-                fennel:fontName="Avenir-Heavy.ttf" />
+                android:background="@color/grey_light"
+                android:gravity="center_vertical"
+                android:padding="@dimen/padding_15"
+                android:text="@string/required_documents"
+                android:textColor="@color/black_txt_color"
+                fennel:fontName="Avenir-Black.ttf" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/border_color" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/padding_20">
+
+                <tintash.fennel.views.FontTextView
+                    android:id="@+id/lblFarmerPhoto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:gravity="center_vertical"
+                    android:padding="@dimen/padding_15"
+                    android:text="@string/farmer_photo"
+                    android:textColor="@color/black_txt_color"
+                    fennel:fontName="Avenir-Black.ttf" />
+
+
+                <ImageView
+                    android:id="@+id/imgFarmerPhoto"
+                    android:layout_width="@dimen/enroll_pic_size"
+                    android:layout_height="@dimen/enroll_pic_size"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="@dimen/padding_10"
+
+                    android:background="@drawable/green_rounded_rect"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_avatar_small" />
+
+
+                <tintash.fennel.views.FontTextView
+                    android:id="@+id/lblNationalID"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/imgFarmerPhoto"
+                    android:layout_marginTop="@dimen/padding_20"
+                    android:gravity="center_vertical"
+                    android:padding="@dimen/padding_15"
+                    android:text="@string/national_id_photo"
+                    android:textColor="@color/black_txt_color"
+                    fennel:fontName="Avenir-Black.ttf" />
+
+
+                <ImageView
+                    android:id="@+id/imgNationalID"
+                    android:layout_width="@dimen/enroll_pic_size"
+                    android:layout_height="@dimen/enroll_pic_size"
+                    android:layout_alignLeft="@+id/imgFarmerPhoto"
+                    android:layout_alignTop="@+id/lblNationalID"
+                    android:background="@drawable/green_rounded_rect"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_avatar_small" />
+
+            </RelativeLayout>
 
             <tintash.fennel.views.FontTextView
-                android:layout_width="0dp"
+                android:id="@+id/txtSubmitApproval"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/padding_15"
-                android:layout_weight="1"
+                android:layout_margin="@dimen/padding_15"
+                android:layout_marginTop="@dimen/padding_10"
+                android:background="@drawable/selector_red_button"
+                android:enabled="false"
                 android:gravity="center"
-                android:text="Male"
+                android:padding="@dimen/padding_15"
+                android:text="@string/submit_for_approval"
+                android:textColor="@color/white"
                 fennel:fontName="Avenir-Heavy.ttf" />
 
-            <tintash.fennel.views.FontTextView
-                android:layout_width="0dp"
-                android:layout_marginLeft="@dimen/padding_15"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="Female"
-                fennel:fontName="Avenir-Heavy.ttf" />
+
         </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/padding_10"
-            android:orientation="horizontal">
-
-            <tintash.fennel.views.FontTextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="LEADER?"
-                fennel:fontName="Avenir-Heavy.ttf" />
-
-            <tintash.fennel.views.FontTextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/padding_15"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="No"
-                fennel:fontName="Avenir-Heavy.ttf" />
-
-            <tintash.fennel.views.FontTextView
-                android:layout_width="0dp"
-                android:layout_marginLeft="@dimen/padding_15"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="Yes"
-                fennel:fontName="Avenir-Heavy.ttf" />
-        </LinearLayout>
-    </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>
