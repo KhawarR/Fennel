@@ -32,18 +32,19 @@ public class MainActivity extends BaseActivity {
         mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
         mTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
 
+        mTabHost.getTabWidget().setDividerDrawable(null);
 
         mTabHost.addTab(
                 mTabHost.newTabSpec(TAB_1_TAG).setIndicator("", ContextCompat.getDrawable(this, R.drawable.selector_mysignupos)),
                 MySignUpsContainerFragment.class, null);
         mTabHost.addTab(
-                mTabHost.newTabSpec(TAB_2_TAG).setIndicator("Tab 2", null),
+                mTabHost.newTabSpec(TAB_2_TAG).setIndicator("", ContextCompat.getDrawable(this, R.drawable.selector_myfarmers)),
                 MyFarmerContainerFragment.class, null);
         mTabHost.addTab(
-                mTabHost.newTabSpec(TAB_3_TAG).setIndicator("Tab 3", null),
+                mTabHost.newTabSpec(TAB_3_TAG).setIndicator("", ContextCompat.getDrawable(this, R.drawable.selector_mydashboard)),
                 MyDashboardContainerFragment.class, null);
         mTabHost.addTab(
-                mTabHost.newTabSpec(TAB_4_TAG).setIndicator("Tab 3", null),
+                mTabHost.newTabSpec(TAB_4_TAG).setIndicator("", ContextCompat.getDrawable(this, R.drawable.selector_mylogbook)),
                 MyLogbookContainerFragment.class, null);
     }
 

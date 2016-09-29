@@ -42,10 +42,8 @@ public class MySignUps extends BaseFragment {
         return null;
     }
 
-    @OnClick(R.id.add)
+    @OnClick(R.id.rl_add)
     void onClickAdd(View view) {
-
-
         ((BaseContainerFragment) getParentFragment()).replaceFragment(new EnrollFragment(), true);
     }
 

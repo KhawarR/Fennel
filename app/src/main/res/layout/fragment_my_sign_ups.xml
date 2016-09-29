@@ -12,23 +12,41 @@
         fennel:drawableRight="@drawable/dummy_profile"
         fennel:titleText="@string/my_sign_ups" />
 
-    <View
+    <RelativeLayout
+        android:id="@+id/rl_add"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/border_color" />
+        android:layout_height="150dp"
+        android:background="@color/app_green">
 
-    <TextView
-        android:id="@+id/add"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:padding="@dimen/padding_15"
-        android:text="ADD" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_centerInParent="true"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_add"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_farmers"
+                android:layout_marginLeft="10dp"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/editText"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:drawableRight="@android:drawable/ic_menu_search"
+        android:layout_marginLeft="@dimen/padding_20"
+        android:layout_marginRight="@dimen/padding_20"
+        android:background="@color/white"/>
 
 </LinearLayout>
