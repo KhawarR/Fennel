@@ -8,4 +8,6 @@
     <dimen name="textsize_22">22sp</dimen>
     <dimen name="small_avatar_size">30dp</dimen>
     <dimen name="large_avatar_size">130dp</dimen>
+    <dimen name="padding_30">30dp</dimen>
+    <dimen name="padding_80">80dp</dimen>
 </resources>

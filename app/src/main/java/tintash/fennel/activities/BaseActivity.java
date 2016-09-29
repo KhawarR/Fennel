@@ -28,14 +28,14 @@ public abstract class BaseActivity extends AppCompatActivity {
         mTracker = application.getDefaultTracker();
     }
 
-//    void replaceFragment(Fragment fragment, boolean isBackStack) {
-//
-//        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-//        ft.replace(R.id.fragment_container, fragment);
-//        if (isBackStack)
-//            ft.addToBackStack(null);
-//        ft.commit();
-//    }
+    void replaceFragment(Fragment fragment, boolean isBackStack) {
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.fragment_container, fragment);
+        if (isBackStack)
+            ft.addToBackStack(null);
+        ft.commit();
+    }
 
 
     @Override
