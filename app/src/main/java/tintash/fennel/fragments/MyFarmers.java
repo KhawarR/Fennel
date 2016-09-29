@@ -6,14 +6,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
 import tintash.fennel.R;
+import tintash.fennel.views.TitleBarLayout;
 
-/**
- * Created by Faizan on 9/27/2016.
- */
+
 public class MyFarmers extends BaseFragment {
 
+    @Bind(R.id.titleBar)
+    TitleBarLayout titleBarLayout;
 
     @Nullable
     @Override
@@ -27,10 +29,17 @@ public class MyFarmers extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        titleBarLayout.setOnIconClickListener(this);
     }
 
     @Override
     protected String getTrackerScreenName() {
         return null;
+    }
+
+    @Override
+    public void onTitleBarRightIconClicked(View view) {
+        ((BaseContainerFragment) getParentFragment()).replaceFragment(new AboutMe(), true);
     }
 }

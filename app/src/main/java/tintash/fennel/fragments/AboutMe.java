@@ -6,23 +6,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import tintash.fennel.R;
-import tintash.fennel.views.TitleBarLayout;
 
+/**
+ * Created by Faizan on 9/27/2016.
+ */
+public class AboutMe extends BaseFragment {
 
-public class MyDashboard extends BaseFragment {
-
-
-    @Bind(R.id.titleBar)
-    TitleBarLayout titleBarLayout;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View view = inflater.inflate(R.layout.fragment_my_dashboard, null);
+        View view = inflater.inflate(R.layout.fragment_about_me, null);
         ButterKnife.bind(this, view);
         return view;
     }
@@ -30,8 +28,6 @@ public class MyDashboard extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        titleBarLayout.setOnIconClickListener(this);
     }
 
     @Override
@@ -41,6 +37,11 @@ public class MyDashboard extends BaseFragment {
 
     @Override
     public void onTitleBarRightIconClicked(View view) {
-        ((BaseContainerFragment) getParentFragment()).replaceFragment(new AboutMe(), true);
+
+    }
+
+    @OnClick(R.id.txtSignOut)
+    void onClickSignOut(View view) {
+
     }
 }

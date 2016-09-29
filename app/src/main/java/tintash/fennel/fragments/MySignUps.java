@@ -6,15 +6,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import tintash.fennel.R;
+import tintash.fennel.views.TitleBarLayout;
 
 /**
  * Created by Faizan on 9/27/2016.
  */
 public class MySignUps extends BaseFragment {
 
+
+    @Bind(R.id.titleBar)
+    TitleBarLayout titleBarLayout;
 
     @Nullable
     @Override
@@ -28,6 +33,8 @@ public class MySignUps extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        titleBarLayout.setOnIconClickListener(this);
     }
 
     @Override
@@ -40,5 +47,10 @@ public class MySignUps extends BaseFragment {
 
 
         ((BaseContainerFragment) getParentFragment()).replaceFragment(new EnrollFragment(), true);
+    }
+
+    @Override
+    public void onTitleBarRightIconClicked(View view) {
+        ((BaseContainerFragment) getParentFragment()).replaceFragment(new AboutMe(), true);
     }
 }

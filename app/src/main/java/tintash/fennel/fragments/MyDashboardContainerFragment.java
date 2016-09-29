@@ -37,4 +37,9 @@ public class MyDashboardContainerFragment extends BaseContainerFragment {
     protected String getTrackerScreenName() {
         return null;
     }
+
+    @Override
+    public void onTitleBarRightIconClicked(View view) {
+
+    }
 }

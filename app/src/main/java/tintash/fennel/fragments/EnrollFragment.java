@@ -14,6 +14,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import tintash.fennel.R;
 import tintash.fennel.views.NothingSelectedSpinnerAdapter;
+import tintash.fennel.views.TitleBarLayout;
 
 /**
  * Created by Faizan on 9/27/2016.
@@ -51,6 +52,9 @@ public class EnrollFragment extends BaseContainerFragment {
     @Bind(R.id.txtFarmerHomeYes)
     TextView txtFarmerHomeYes;
 
+    @Bind(R.id.titleBar)
+    TitleBarLayout titleBarLayout;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -76,7 +80,7 @@ public class EnrollFragment extends BaseContainerFragment {
         arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsTree, R.layout.simple_spinner_item);
         spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "TREE SPICES"));
 
-
+        titleBarLayout.setOnIconClickListener(this);
     }
 
     @OnClick({R.id.tvMale, R.id.tvFemale})
@@ -119,5 +123,8 @@ public class EnrollFragment extends BaseContainerFragment {
         return null;
     }
 
+    @Override
+    public void onTitleBarRightIconClicked(View view) {
 
+    }
 }

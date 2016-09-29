@@ -18,6 +18,15 @@
     <string name="farmer_photo">Farmer Photo</string>
     <string name="national_id_photo">National ID Photo</string>
     <string name="submit_for_approval">SUBMIT FOR APPROVAL</string>
+    <string name="enroll_farmer">ENROLL FARMER</string>
+    <string name="about_me">ABOUT ME</string>
+    <string name="managing_field_manager">MANAGING FIELD MANAGER</string>
+    <string name="managing_field_officer">MANAGING FIELD OFFICER</string>
+    <string name="sign_out">SIGN OUT</string>
+    <string name="my_sign_ups">MY SIGN UPS</string>
+    <string name="my_farmers">MY FARMERS</string>
+    <string name="my_logbook">MY LOGBOOK</string>
+    <string name="my_dashboard">MY DASHBOARD</string>
 
     <string-array name="optionsLocation">
         <item>LOCATION 1</item>

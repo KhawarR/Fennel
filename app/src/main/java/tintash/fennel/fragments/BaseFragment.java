@@ -17,8 +17,9 @@ import butterknife.OnClick;
 import tintash.fennel.R;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.utils.Constants;
+import tintash.fennel.views.TitleBarLayout;
 
-public abstract class BaseFragment extends Fragment {
+public abstract class BaseFragment extends Fragment implements TitleBarLayout.TitleBarIconClickListener {
 
     public Tracker mTracker;
     ProgressDialog mProgressDialog;
@@ -116,5 +117,13 @@ public abstract class BaseFragment extends Fragment {
         return true;
     }
 
+    @Override
+    public void onTitleBarLeftIconClicked(View view) {
 
+    }
+
+    @Override
+    public void onTitleBarRightIconClicked(View view) {
+
+    }
 }

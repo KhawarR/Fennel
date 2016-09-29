@@ -6,30 +6,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <RelativeLayout
+
+    <tintash.fennel.views.TitleBarLayout
+        android:id="@+id/titleBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:elevation="4dp"
-        android:padding="@dimen/padding_15">
-
-        <tintash.fennel.views.FontTextView
-            android:id="@+id/txtTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_gravity="center_horizontal"
-            android:text="ENROLL FARMER"
-            android:textColor="@color/black_txt_color"
-            android:textSize="22sp"
-            fennel:fontName="Avenir-Black.ttf" />
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:src="@drawable/ic_avatar_small" />
-    </RelativeLayout>
+        fennel:drawableRight="@drawable/dummy_profile"
+        fennel:titleText="@string/enroll_farmer" />
 
 
     <ScrollView
@@ -333,7 +316,6 @@
                     android:layout_height="@dimen/enroll_pic_size"
                     android:layout_alignParentRight="true"
                     android:layout_marginRight="@dimen/padding_10"
-
                     android:background="@drawable/green_rounded_rect"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_avatar_small" />

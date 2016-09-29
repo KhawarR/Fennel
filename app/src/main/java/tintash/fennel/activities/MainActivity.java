@@ -9,8 +9,11 @@ import android.widget.ImageView;
 import tintash.fennel.R;
 import tintash.fennel.fragments.BaseContainerFragment;
 import tintash.fennel.fragments.MyDashboard;
+import tintash.fennel.fragments.MyDashboardContainerFragment;
+import tintash.fennel.fragments.MyFarmerContainerFragment;
 import tintash.fennel.fragments.MyFarmers;
 import tintash.fennel.fragments.MyLogbook;
+import tintash.fennel.fragments.MyLogbookContainerFragment;
 import tintash.fennel.fragments.MySignUps;
 import tintash.fennel.fragments.MySignUpsContainerFragment;
 
@@ -35,13 +38,13 @@ public class MainActivity extends BaseActivity {
                 MySignUpsContainerFragment.class, null);
         mTabHost.addTab(
                 mTabHost.newTabSpec(TAB_2_TAG).setIndicator("Tab 2", null),
-                MyFarmers.class, null);
+                MyFarmerContainerFragment.class, null);
         mTabHost.addTab(
                 mTabHost.newTabSpec(TAB_3_TAG).setIndicator("Tab 3", null),
-                MyDashboard.class, null);
+                MyDashboardContainerFragment.class, null);
         mTabHost.addTab(
                 mTabHost.newTabSpec(TAB_4_TAG).setIndicator("Tab 3", null),
-                MyLogbook.class, null);
+                MyLogbookContainerFragment.class, null);
     }
 
     @Override
