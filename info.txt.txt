@@ -1,0 +1,12 @@
+SF Connected app:
+-------------------
+
+Consumer key:
+3MVG9eYfd1zvW1E6CGmr.WMml7GUxIj_4B4n2IGfk693m6sEsdV7Eni_5Kgts.uwmLbU03gHKPPrjYN5dcTxr
+
+Consumer Secret:
+1367114753175275829
+
+Callback URL:
+sfdc://success
+	
