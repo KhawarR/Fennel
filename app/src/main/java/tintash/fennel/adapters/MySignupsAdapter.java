@@ -67,10 +67,10 @@ public class MySignupsAdapter extends BaseAdapter {
         }
     }
 
-    @Override
-    public boolean isEnabled(int position) {
-        return getItemViewType(position) != ITEM_VIEW_TYPE_SEPARATOR;
-    }
+//    @Override
+//    public boolean isEnabled(int position) {
+//        return getItemViewType(position) != ITEM_VIEW_TYPE_SEPARATOR;
+//    }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -101,7 +101,7 @@ public class MySignupsAdapter extends BaseAdapter {
             // If separator
 
             FontTextView separatorView = (FontTextView) view.findViewById(R.id.tv_header);
-            separatorView.setText(farmer.getName());
+            separatorView.setText(farmer.getFullName());
         }
         else {
             // If regular
@@ -127,7 +127,7 @@ public class MySignupsAdapter extends BaseAdapter {
             FontTextView name = (FontTextView) view.findViewById(R.id.tv_name);
             FontTextView address = (FontTextView) view.findViewById(R.id.tv_address);
 
-            name.setText( farmer.getName());
+            name.setText( farmer.getFullName());
             address.setText( farmer.getAddress() );
         }
 

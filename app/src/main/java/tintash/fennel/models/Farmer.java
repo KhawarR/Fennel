@@ -1,30 +1,65 @@
 package tintash.fennel.models;
 
+import java.io.Serializable;
+
 /**
  * Created by Khawar on 30/9/2016.
  */
-public class Farmer {
+public class Farmer implements Serializable{
 
-    private String name;
+    private String fullName;
+    private String firstName;
+    private String secondName;
+    private String surname;
     private String thumbUrl;
     private String address;
     private String signupStatus;
     private boolean isHeader = false;
 
     public Farmer(Farmer other) {
-        this.name = other.name;
+        this.fullName = other.fullName;
+        this.firstName = other.firstName;
+        this.secondName = other.secondName;
+        this.surname = other.surname;
         this.thumbUrl = other.thumbUrl;
         this.address = other.address;
         this.signupStatus = other.signupStatus;
         this.isHeader = other.isHeader;
     }
 
-    public Farmer(String name, String thumbUrl, String address, String signupStatus, boolean isHeader) {
-        this.name = name;
+    public Farmer(String fullName, String firstName, String secondName, String surname, String thumbUrl, String address, String signupStatus, boolean isHeader) {
+        this.fullName = fullName;
+        this.firstName = firstName;
+        this.secondName = secondName;
+        this.surname = surname;
         this.thumbUrl = thumbUrl;
         this.address = address;
         this.signupStatus = signupStatus;
         this.isHeader = isHeader;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getSecondName() {
+        return secondName;
+    }
+
+    public void setSecondName(String secondName) {
+        this.secondName = secondName;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
     public boolean isHeader() {
@@ -43,12 +78,12 @@ public class Farmer {
         this.signupStatus = signupStatus;
     }
 
-    public String getName() {
-        return name;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public String getThumbUrl() {

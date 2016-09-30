@@ -35,12 +35,24 @@ public class Login extends BaseFragment implements Callback<Auth> {
 
     @Bind(R.id.etID)
     EditText etId;
+
+    @Bind(R.id.etPassword)
+    EditText etPassword;
+
     private Callback<LoginResponse> loginCallback = new Callback<LoginResponse>() {
         @Override
         public void success(LoginResponse loginResponse, Response response) {
             loadingFinished();
-            startActivity(new Intent(getActivity(), MainActivity.class));
-            getActivity().finish();
+            if(loginResponse.records.size() > 0)
+            {
+                Toast.makeText(getActivity(), "Login success", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(getActivity(), MainActivity.class));
+                getActivity().finish();
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "Login failed", Toast.LENGTH_SHORT).show();
+            }
         }
 
         @Override
@@ -72,28 +84,31 @@ public class Login extends BaseFragment implements Callback<Auth> {
 
     @OnClick(R.id.txtLogin)
     void onClickLogin(View view) {
-        String username = "waajay@westagilelabs.com.waldev";
-        String password = "walshamba123";
-        loadingStarted();
-        Fennel.getAuthWebService().postSFLogin(NetworkHelper.GRANT, NetworkHelper.CLIENT_ID, NetworkHelper.CLIENT_SECRET, username, password, NetworkHelper.REDIRECTURI, this);
-
-
+        if(etId.getText().toString().isEmpty() || etPassword.getText().toString().isEmpty())
+        {
+            Toast.makeText(getActivity(), "Please put username & password", Toast.LENGTH_SHORT).show();
+        }
+        else
+        {
+            String username = "waajay@westagilelabs.com.waldev";
+            String password = "walshamba123";
+            loadingStarted();
+            Fennel.getAuthWebService().postSFLogin(NetworkHelper.GRANT, NetworkHelper.CLIENT_ID, NetworkHelper.CLIENT_SECRET, username, password, NetworkHelper.REDIRECTURI, this);
+        }
     }
 
     @Override
     public void success(Auth auth, Response response) {
         loadingFinished();
         if (getActivity() != null && isAdded() && !isDetached()) {
-            Toast.makeText(getActivity(), "Login success", Toast.LENGTH_SHORT).show();
             Session.saveAuth(getActivity(), auth);
             Fennel.restClient.setApiBaseUrl(auth.instance_url);
-            String username = etId.getText().toString();
+            String username = etId.getText().toString().trim();
             if (username.length() > 0) {
                 String loginQuery = "SELECT Id, Name FROM Mobile_Users__c WHERE Name = '" + username + "'";
                 loadingStarted();
                 Fennel.getWebService().query(Session.getAuthToken(getActivity()), loginQuery, NetworkHelper.API_VERSION, loginCallback);
             }
-
         }
     }
 
@@ -101,6 +116,6 @@ public class Login extends BaseFragment implements Callback<Auth> {
     public void failure(RetrofitError error) {
         loadingFinished();
         error.printStackTrace();
-
+        Toast.makeText(getActivity(), "SalesForce Authentication failed", Toast.LENGTH_LONG).show();
     }
 }
