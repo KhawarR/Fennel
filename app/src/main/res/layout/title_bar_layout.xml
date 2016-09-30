@@ -15,7 +15,7 @@
         android:textColor="@color/black_txt_color"
         android:textSize="22sp"
         fennel:fontName="Avenir-Black.ttf"
-        tools:text="ENROLL FARMER" />
+        tools:text="SCREEN TITLE" />
 
 
     <de.hdodenhof.circleimageview.CircleImageView

@@ -2,6 +2,7 @@ package tintash.fennel.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,6 +56,17 @@ public class EnrollFragment extends BaseContainerFragment {
     @Bind(R.id.titleBar)
     TitleBarLayout titleBarLayout;
 
+    private String title;
+
+    public static EnrollFragment newInstance(String title)
+    {
+        EnrollFragment fragment = new EnrollFragment();
+        Bundle args = new Bundle();
+        args.putString("title", title);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -81,6 +93,10 @@ public class EnrollFragment extends BaseContainerFragment {
         spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "TREE SPICES"));
 
         titleBarLayout.setOnIconClickListener(this);
+
+        title = getArguments().getString("title");
+
+        titleBarLayout.setTitleText(title);
     }
 
     @OnClick({R.id.tvMale, R.id.tvFemale})

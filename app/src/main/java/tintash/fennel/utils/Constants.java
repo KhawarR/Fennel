@@ -31,4 +31,7 @@ public class Constants {
     public static final String STR_INCOMPLETE = "INCOMPLETE";
     public static final String STR_PENDING = "PENDING";
     public static final String STR_APPROVED = "APPROVED";
+
+    public static final String STR_ENROLL_FARMER = "ENROLL FARMER";
+    public static final String STR_EDIT_FARMER = "EDIT FARMER";
 }

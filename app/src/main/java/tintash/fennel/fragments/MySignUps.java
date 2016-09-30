@@ -99,7 +99,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         {
             case R.id.rl_add:
             {
-                ((BaseContainerFragment) getParentFragment()).replaceFragment(new EnrollFragment(), true);
+                ((BaseContainerFragment) getParentFragment()).replaceFragment(EnrollFragment.newInstance(Constants.STR_ENROLL_FARMER), true);
             }
                 break;
         }
