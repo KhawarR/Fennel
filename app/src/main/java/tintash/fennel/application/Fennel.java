@@ -14,6 +14,7 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import tintash.fennel.R;
 import tintash.fennel.network.RestClient;
 import tintash.fennel.network.WebService;
+import tintash.fennel.network.WebServiceAuth;
 
 /**
  * Created by Faizan on 9/27/2016.
@@ -26,6 +27,12 @@ public class Fennel extends Application {
         if (restClient == null)
             restClient = new RestClient();
         return restClient.getService();
+    }
+
+    public static WebServiceAuth getAuthWebService() {
+        if (restClient == null)
+            restClient = new RestClient();
+        return restClient.getAuthService();
     }
 
 
