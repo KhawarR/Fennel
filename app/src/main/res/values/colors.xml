@@ -7,6 +7,7 @@
     <color name="white">#ffffff</color>
     <color name="black_txt_color">#1D1D26</color>
     <color name="border_color">#979797</color>
+    <color name="cell_separator_color">#9b9b9b</color>
     <color name="app_green">#00d55a</color>
     <color name="dark_green">#00d55a</color>
     <color name="transparent_white_overlay">#40FFFFFF</color>

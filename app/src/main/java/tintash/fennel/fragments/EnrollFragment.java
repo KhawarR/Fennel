@@ -125,6 +125,6 @@ public class EnrollFragment extends BaseContainerFragment {
 
     @Override
     public void onTitleBarRightIconClicked(View view) {
-
+        ((BaseContainerFragment) getParentFragment()).replaceFragment(new AboutMe(), true);
     }
 }

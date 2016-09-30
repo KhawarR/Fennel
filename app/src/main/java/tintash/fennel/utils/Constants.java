@@ -27,4 +27,8 @@ public class Constants {
     public static final float REFRESH_BEFORE_EXIRY = 2.5f * 60;
     public static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 1000;
     public static final long MIN_TIME_BW_UPDATES = 5000;
+
+    public static final String STR_INCOMPLETE = "INCOMPLETE";
+    public static final String STR_PENDING = "PENDING";
+    public static final String STR_APPROVED = "APPROVED";
 }

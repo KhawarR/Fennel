@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fennel="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:padding="15dp"
+    android:gravity="center_vertical">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/profile_image"
+        android:layout_width="@dimen/medium_avatar_size"
+        android:layout_height="@dimen/medium_avatar_size"
+        android:src="@drawable/dummy_profile" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.0"
+        android:orientation="vertical"
+        android:layout_marginLeft="10dp">
+
+        <tintash.fennel.views.FontTextView
+            android:id="@+id/tv_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tabu Karisa Karema"
+            android:layout_centerVertical="true"
+            android:textColor="@color/black_txt_color"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textSize="18sp"
+            fennel:fontName="Avenir-Heavy.ttf"/>
+
+        <tintash.fennel.views.FontTextView
+            android:id="@+id/tv_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Kwa Firi, Mihirini"
+            android:layout_centerVertical="true"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/black_txt_color"
+            fennel:fontName="Avenir-Book.ttf"
+            android:textSize="14sp"
+            android:layout_marginTop="5dp"/>
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/iv_mysignups_icon_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_arrow_right"
+        android:layout_marginLeft="5dp"/>
+
+</LinearLayout>

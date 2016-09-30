@@ -43,13 +43,24 @@
                 android:textSize="@dimen/textsize_22"
                 fennel:fontName="Avenir-Medium.ttf" />
 
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/profile_image"
+            <RelativeLayout
                 android:layout_width="@dimen/large_avatar_size"
                 android:layout_height="@dimen/large_avatar_size"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/padding_20"
-                android:src="@drawable/dummy_profile" />
+                android:layout_marginTop="@dimen/padding_20">
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/profile_image"
+                    android:layout_width="@dimen/large_avatar_size"
+                    android:layout_height="@dimen/large_avatar_size"
+                    android:src="@drawable/dummy_profile" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:src="@drawable/ic_add_pic"/>
+
+            </RelativeLayout>
 
             <tintash.fennel.views.FontTextView
                 android:layout_width="wrap_content"
