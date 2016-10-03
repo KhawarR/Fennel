@@ -104,8 +104,9 @@ public class Login extends BaseFragment implements Callback<Auth> {
             Session.saveAuth(getActivity(), auth);
             Fennel.restClient.setApiBaseUrl(auth.instance_url);
             String username = etId.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
             if (username.length() > 0) {
-                String loginQuery = "SELECT Id, Name FROM Mobile_Users__c WHERE Name = '" + username + "'";
+                String loginQuery = "SELECT Id, Name FROM Mobile_Users__c WHERE Name = '" + username + "' AND Password__c = '" + password + "'";
                 loadingStarted();
                 Fennel.getWebService().query(Session.getAuthToken(getActivity()), loginQuery, NetworkHelper.API_VERSION, loginCallback);
             }
