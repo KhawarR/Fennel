@@ -1,9 +1,19 @@
 package tintash.fennel.network;
 
+
 import com.google.gson.GsonBuilder;
 
-import retrofit.RestAdapter;
-import retrofit.converter.GsonConverter;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 
 public class RestClient {
@@ -18,7 +28,7 @@ public class RestClient {
 //    private static String BASE_URL = "";
 
     private WebService apiService;
-    private final WebServiceAuth apiServiceAuth;
+    private WebServiceAuth apiServiceAuth;
 
 
     public RestClient() {
@@ -26,32 +36,49 @@ public class RestClient {
         builder.setDateFormat("yyyy-MM-dd'T'hh:mm:ss");
 
 
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setLogLevel(RestAdapter.LogLevel.FULL)
-                .setEndpoint(BASE_URL)
-
-                .setConverter(new GsonConverter(builder.create()))
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        apiService = restAdapter.create(WebService.class);
+        apiService = retrofit.create(WebService.class);
 
-        restAdapter = new RestAdapter.Builder()
-                .setLogLevel(RestAdapter.LogLevel.FULL)
-                .setEndpoint(BASE_URL_AUTH)
+        OkHttpClient.Builder okHttpBuilder = null;
+        X509TrustManager tm = new X509TrustManager() {
+            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+            }
 
-                .setConverter(new GsonConverter(builder.create()))
-                .build();
-        apiServiceAuth = restAdapter.create(WebServiceAuth.class);
+            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+            }
+
+            public X509Certificate[] getAcceptedIssuers() {
+                return new java.security.cert.X509Certificate[]{};
+            }
+        };
+        try {
+            okHttpBuilder = new OkHttpClient.Builder().sslSocketFactory(new TLSSocketFactory(), tm);
+            retrofit = new Retrofit.Builder()
+                    .baseUrl(BASE_URL_AUTH)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .client(okHttpBuilder.build())
+                    .build();
+            apiServiceAuth = retrofit.create(WebServiceAuth.class);
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
 
 
     }
 
     public void setApiBaseUrl(String newApiBaseUrl) {
         BASE_URL = newApiBaseUrl;
-        GsonBuilder builder = new GsonBuilder();
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setConverter(new GsonConverter(builder.create())).setEndpoint(BASE_URL)
+//        GsonBuilder builder = new GsonBuilder();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        apiService = restAdapter.create(WebService.class);
+        apiService = retrofit.create(WebService.class);
     }
 
     public WebService getService() {

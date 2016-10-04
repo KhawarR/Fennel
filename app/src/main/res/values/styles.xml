@@ -8,4 +8,8 @@
         <item name="colorAccent">@color/app_green</item>
     </style>
 
+    <style name="AppTheme.TranslucentStatusBar" parent="AppTheme">
+
+    </style>
+
 </resources>

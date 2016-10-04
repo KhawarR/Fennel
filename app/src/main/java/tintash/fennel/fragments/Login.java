@@ -16,9 +16,9 @@ import org.json.JSONObject;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import tintash.fennel.R;
 import tintash.fennel.activities.MainActivity;
 import tintash.fennel.application.Fennel;
@@ -37,17 +37,19 @@ public class Login extends BaseFragment implements Callback<Auth> {
     EditText etId;
     private Callback<LoginResponse> loginCallback = new Callback<LoginResponse>() {
         @Override
-        public void success(LoginResponse loginResponse, Response response) {
+        public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
             loadingFinished();
             startActivity(new Intent(getActivity(), MainActivity.class));
             getActivity().finish();
         }
 
         @Override
-        public void failure(RetrofitError error) {
+        public void onFailure(Call<LoginResponse> call, Throwable t) {
             loadingFinished();
-            error.printStackTrace();
+            t.printStackTrace();
         }
+
+
     };
 
 
@@ -75,15 +77,18 @@ public class Login extends BaseFragment implements Callback<Auth> {
         String username = "waajay@westagilelabs.com.waldev";
         String password = "walshamba123";
         loadingStarted();
-        Fennel.getAuthWebService().postSFLogin(NetworkHelper.GRANT, NetworkHelper.CLIENT_ID, NetworkHelper.CLIENT_SECRET, username, password, NetworkHelper.REDIRECTURI, this);
+        Call<Auth> call = Fennel.getAuthWebService().postSFLogin(NetworkHelper.GRANT, NetworkHelper.CLIENT_ID, NetworkHelper.CLIENT_SECRET, username, password, NetworkHelper.REDIRECTURI);
+        call.enqueue(this);
 
 
     }
 
+
     @Override
-    public void success(Auth auth, Response response) {
+    public void onResponse(Call<Auth> call, Response<Auth> response) {
         loadingFinished();
-        if (getActivity() != null && isAdded() && !isDetached()) {
+        Auth auth = response.body();
+        if (getActivity() != null && isAdded() && !isDetached() && auth != null) {
             Toast.makeText(getActivity(), "Login success", Toast.LENGTH_SHORT).show();
             Session.saveAuth(getActivity(), auth);
             Fennel.restClient.setApiBaseUrl(auth.instance_url);
@@ -91,16 +96,16 @@ public class Login extends BaseFragment implements Callback<Auth> {
             if (username.length() > 0) {
                 String loginQuery = "SELECT Id, Name FROM Mobile_Users__c WHERE Name = '" + username + "'";
                 loadingStarted();
-                Fennel.getWebService().query(Session.getAuthToken(getActivity()), loginQuery, NetworkHelper.API_VERSION, loginCallback);
+                Call<LoginResponse> apiCall = Fennel.getWebService().query(Session.getAuthToken(getActivity()), NetworkHelper.API_VERSION,loginQuery);
+                apiCall.enqueue(loginCallback);
             }
 
         }
     }
 
     @Override
-    public void failure(RetrofitError error) {
+    public void onFailure(Call<Auth> call, Throwable t) {
         loadingFinished();
-        error.printStackTrace();
-
+        t.printStackTrace();
     }
 }
