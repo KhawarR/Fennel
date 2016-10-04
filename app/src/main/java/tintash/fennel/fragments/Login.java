@@ -11,26 +11,22 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONObject;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.http.HTTP;
 import tintash.fennel.R;
 import tintash.fennel.activities.MainActivity;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.datamodels.Auth;
-import tintash.fennel.datamodels.LoginResponse;
+import tintash.fennel.datamodels.SFResponse;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
+import tintash.fennel.utils.PreferenceHelper;
 
 public class Login extends BaseFragment implements Callback<Auth> {
-
 
     @Bind(R.id.txtLogin)
     TextView txtLogin;
@@ -40,31 +36,6 @@ public class Login extends BaseFragment implements Callback<Auth> {
 
     @Bind(R.id.etPassword)
     EditText etPassword;
-
-    private Callback<LoginResponse> loginCallback = new Callback<LoginResponse>() {
-        @Override
-        public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-            loadingFinished();
-            if (response.code() == 200) {
-                if (response.body().records.size() > 0) {
-                    Toast.makeText(getActivity(), "Login success", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(getActivity(), MainActivity.class));
-                    getActivity().finish();
-                } else {
-                    Toast.makeText(getActivity(), "Login failed", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-
-        @Override
-        public void onFailure(Call<LoginResponse> call, Throwable t) {
-            loadingFinished();
-            t.printStackTrace();
-        }
-
-
-    };
-
 
     @Nullable
     @Override
@@ -80,9 +51,8 @@ public class Login extends BaseFragment implements Callback<Auth> {
         super.onViewCreated(view, savedInstanceState);
 
         // TODO Remove on release
-//        etId.setText("khawar");
-//        etPassword.setText("khawar");
-
+        etId.setText("khawar");
+        etPassword.setText("khawar");
     }
 
     @Override
@@ -98,13 +68,10 @@ public class Login extends BaseFragment implements Callback<Auth> {
             String username = "waajay@westagilelabs.com.waldev";
             String password = "walshamba123";
             loadingStarted();
-            Call<Auth> call = Fennel.getAuthWebService().postSFLogin(NetworkHelper.GRANT, NetworkHelper.CLIENT_ID, NetworkHelper.CLIENT_SECRET, username, password, NetworkHelper.REDIRECTURI);
+            Call<Auth> call = Fennel.getAuthWebService().postSFLogin(NetworkHelper.GRANT, NetworkHelper.CLIENT_ID, NetworkHelper.CLIENT_SECRET, username, password, NetworkHelper.REDIRECT_URI);
             call.enqueue(this);
         }
-
-
     }
-
 
     @Override
     public void onResponse(Call<Auth> call, Response<Auth> response) {
@@ -112,14 +79,14 @@ public class Login extends BaseFragment implements Callback<Auth> {
 
         Auth auth = response.body();
         if (getActivity() != null && isAdded() && !isDetached() && auth != null) {
-            Session.saveAuth(getActivity(), auth);
+            Session.saveAuth(auth);
             Fennel.restClient.setApiBaseUrl(auth.instance_url);
             String username = etId.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
             if (username.length() > 0) {
-                String loginQuery = "SELECT Id, Name FROM Mobile_Users__c WHERE Name = '" + username + "' AND Password__c = '" + password + "'";
+                String loginQuery = String.format(NetworkHelper.QUERY_LOGIN, username, password);
                 loadingStarted();
-                Call<LoginResponse> apiCall = Fennel.getWebService().query(Session.getAuthToken(getActivity()), NetworkHelper.API_VERSION, loginQuery);
+                Call<SFResponse> apiCall = Fennel.getWebService().loginQuery(Session.getAuthToken(), NetworkHelper.API_VERSION, loginQuery);
                 apiCall.enqueue(loginCallback);
             }
         }
@@ -131,4 +98,31 @@ public class Login extends BaseFragment implements Callback<Auth> {
         t.printStackTrace();
         Toast.makeText(getActivity(), "SalesForce Authentication failed", Toast.LENGTH_LONG).show();
     }
+
+    private Callback<SFResponse> loginCallback = new Callback<SFResponse>() {
+        @Override
+        public void onResponse(Call<SFResponse> call, Response<SFResponse> response) {
+            loadingFinished();
+            if (response.code() == 200) {
+                if (response.body().records.size() > 0) {
+                    PreferenceHelper.getInstance().writeUserId(etId.getText().toString().trim());
+                    PreferenceHelper.getInstance().writePassword(etPassword.getText().toString().trim());
+                    startActivity(new Intent(getActivity(), MainActivity.class));
+                    getActivity().finish();
+                } else {
+                    Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
+                }
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onFailure(Call<SFResponse> call, Throwable t) {
+            loadingFinished();
+            t.printStackTrace();
+        }
+    };
 }
