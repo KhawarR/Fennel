@@ -4,6 +4,7 @@ import android.support.v4.app.FragmentTabHost;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
 import tintash.fennel.R;
@@ -29,21 +30,26 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
         mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);
         mTabHost.setup(this, getSupportFragmentManager(), android.R.id.tabcontent);
 
+        mTabHost.getTabWidget().setDividerDrawable(null);
 
         mTabHost.addTab(
                 mTabHost.newTabSpec(TAB_1_TAG).setIndicator("", ContextCompat.getDrawable(this, R.drawable.selector_mysignupos)),
                 MySignUpsContainerFragment.class, null);
         mTabHost.addTab(
-                mTabHost.newTabSpec(TAB_2_TAG).setIndicator("Tab 2", null),
+                mTabHost.newTabSpec(TAB_2_TAG).setIndicator("", ContextCompat.getDrawable(this, R.drawable.selector_myfarmers)),
                 MyFarmerContainerFragment.class, null);
         mTabHost.addTab(
-                mTabHost.newTabSpec(TAB_3_TAG).setIndicator("Tab 3", null),
+                mTabHost.newTabSpec(TAB_3_TAG).setIndicator("", ContextCompat.getDrawable(this, R.drawable.selector_mydashboard)),
                 MyDashboardContainerFragment.class, null);
         mTabHost.addTab(
-                mTabHost.newTabSpec(TAB_4_TAG).setIndicator("Tab 3", null),
+                mTabHost.newTabSpec(TAB_4_TAG).setIndicator("", ContextCompat.getDrawable(this, R.drawable.selector_mylogbook)),
                 MyLogbookContainerFragment.class, null);
     }
 

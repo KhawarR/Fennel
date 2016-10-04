@@ -1,5 +1,6 @@
 package tintash.fennel.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -9,11 +10,13 @@ import android.view.ViewGroup;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import tintash.fennel.R;
+import tintash.fennel.activities.LoginActivity;
 
 /**
  * Created by Faizan on 9/27/2016.
  */
 public class AboutMe extends BaseFragment {
+
 
 
     @Nullable
@@ -42,6 +45,7 @@ public class AboutMe extends BaseFragment {
 
     @OnClick(R.id.txtSignOut)
     void onClickSignOut(View view) {
-
+        startActivity(new Intent(getActivity(), LoginActivity.class));
+        getActivity().finish();
     }
 }

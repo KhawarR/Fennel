@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -13,6 +14,8 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import tintash.fennel.R;
+import tintash.fennel.models.Farmer;
+import tintash.fennel.utils.Constants;
 import tintash.fennel.views.NothingSelectedSpinnerAdapter;
 import tintash.fennel.views.TitleBarLayout;
 
@@ -52,8 +55,30 @@ public class EnrollFragment extends BaseContainerFragment {
     @Bind(R.id.txtFarmerHomeYes)
     TextView txtFarmerHomeYes;
 
+    @Bind(R.id.et_first_name)
+    EditText etFirstName;
+
+    @Bind(R.id.et_second_name)
+    EditText etSecondName;
+
+    @Bind(R.id.et_sur_name)
+    EditText etSurname;
+
     @Bind(R.id.titleBar)
     TitleBarLayout titleBarLayout;
+
+    private String title;
+    private Farmer farmer;
+
+    public static EnrollFragment newInstance(String title, Farmer farmer)
+    {
+        EnrollFragment fragment = new EnrollFragment();
+        Bundle args = new Bundle();
+        args.putString("title", title);
+        args.putSerializable("farmer", farmer);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Nullable
     @Override
@@ -81,6 +106,25 @@ public class EnrollFragment extends BaseContainerFragment {
         spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "TREE SPICES"));
 
         titleBarLayout.setOnIconClickListener(this);
+
+        title = getArguments().getString("title");
+        if(title.equalsIgnoreCase(Constants.STR_EDIT_FARMER))
+        {
+            farmer = (Farmer) getArguments().getSerializable("farmer");
+            populateFarmer();
+        }
+
+        titleBarLayout.setTitleText(title);
+    }
+
+    private void populateFarmer()
+    {
+        if(farmer != null)
+        {
+            etFirstName.setText(farmer.getFirstName());
+            etSecondName.setText(farmer.getSecondName());
+            etSurname.setText(farmer.getSurname());
+        }
     }
 
     @OnClick({R.id.tvMale, R.id.tvFemale})
@@ -125,6 +169,6 @@ public class EnrollFragment extends BaseContainerFragment {
 
     @Override
     public void onTitleBarRightIconClicked(View view) {
-
+        ((BaseContainerFragment) getParentFragment()).replaceFragment(new AboutMe(), true);
     }
 }

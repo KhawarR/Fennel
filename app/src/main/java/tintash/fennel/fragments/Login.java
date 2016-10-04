@@ -19,6 +19,8 @@ import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.http.HTTP;
 import tintash.fennel.R;
 import tintash.fennel.activities.MainActivity;
 import tintash.fennel.application.Fennel;
@@ -35,12 +37,23 @@ public class Login extends BaseFragment implements Callback<Auth> {
 
     @Bind(R.id.etID)
     EditText etId;
+
+    @Bind(R.id.etPassword)
+    EditText etPassword;
+
     private Callback<LoginResponse> loginCallback = new Callback<LoginResponse>() {
         @Override
         public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
             loadingFinished();
-            startActivity(new Intent(getActivity(), MainActivity.class));
-            getActivity().finish();
+            if (response.code() == 200) {
+                if (response.body().records.size() > 0) {
+                    Toast.makeText(getActivity(), "Login success", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(getActivity(), MainActivity.class));
+                    getActivity().finish();
+                } else {
+                    Toast.makeText(getActivity(), "Login failed", Toast.LENGTH_SHORT).show();
+                }
+            }
         }
 
         @Override
@@ -74,11 +87,15 @@ public class Login extends BaseFragment implements Callback<Auth> {
 
     @OnClick(R.id.txtLogin)
     void onClickLogin(View view) {
-        String username = "waajay@westagilelabs.com.waldev";
-        String password = "walshamba123";
-        loadingStarted();
-        Call<Auth> call = Fennel.getAuthWebService().postSFLogin(NetworkHelper.GRANT, NetworkHelper.CLIENT_ID, NetworkHelper.CLIENT_SECRET, username, password, NetworkHelper.REDIRECTURI);
-        call.enqueue(this);
+        if (etId.getText().toString().isEmpty() || etPassword.getText().toString().isEmpty()) {
+            Toast.makeText(getActivity(), "Please put username & password", Toast.LENGTH_SHORT).show();
+        } else {
+            String username = "waajay@westagilelabs.com.waldev";
+            String password = "walshamba123";
+            loadingStarted();
+            Call<Auth> call = Fennel.getAuthWebService().postSFLogin(NetworkHelper.GRANT, NetworkHelper.CLIENT_ID, NetworkHelper.CLIENT_SECRET, username, password, NetworkHelper.REDIRECTURI);
+            call.enqueue(this);
+        }
 
 
     }
@@ -87,19 +104,19 @@ public class Login extends BaseFragment implements Callback<Auth> {
     @Override
     public void onResponse(Call<Auth> call, Response<Auth> response) {
         loadingFinished();
+
         Auth auth = response.body();
         if (getActivity() != null && isAdded() && !isDetached() && auth != null) {
-            Toast.makeText(getActivity(), "Login success", Toast.LENGTH_SHORT).show();
             Session.saveAuth(getActivity(), auth);
             Fennel.restClient.setApiBaseUrl(auth.instance_url);
-            String username = etId.getText().toString();
+            String username = etId.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
             if (username.length() > 0) {
-                String loginQuery = "SELECT Id, Name FROM Mobile_Users__c WHERE Name = '" + username + "'";
+                String loginQuery = "SELECT Id, Name FROM Mobile_Users__c WHERE Name = '" + username + "' AND Password__c = '" + password + "'";
                 loadingStarted();
-                Call<LoginResponse> apiCall = Fennel.getWebService().query(Session.getAuthToken(getActivity()), NetworkHelper.API_VERSION,loginQuery);
+                Call<LoginResponse> apiCall = Fennel.getWebService().query(Session.getAuthToken(getActivity()), NetworkHelper.API_VERSION, loginQuery);
                 apiCall.enqueue(loginCallback);
             }
-
         }
     }
 
@@ -107,5 +124,6 @@ public class Login extends BaseFragment implements Callback<Auth> {
     public void onFailure(Call<Auth> call, Throwable t) {
         loadingFinished();
         t.printStackTrace();
+        Toast.makeText(getActivity(), "SalesForce Authentication failed", Toast.LENGTH_LONG).show();
     }
 }

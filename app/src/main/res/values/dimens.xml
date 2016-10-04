@@ -7,6 +7,7 @@
     <dimen name="enroll_pic_size">100dp</dimen>
     <dimen name="textsize_22">22sp</dimen>
     <dimen name="small_avatar_size">30dp</dimen>
+    <dimen name="medium_avatar_size">40dp</dimen>
     <dimen name="large_avatar_size">130dp</dimen>
     <dimen name="padding_30">30dp</dimen>
     <dimen name="padding_80">80dp</dimen>
