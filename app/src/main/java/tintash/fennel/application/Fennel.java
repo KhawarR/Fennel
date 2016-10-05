@@ -11,7 +11,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
-import tintash.fennel.R;
+import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.network.RestClient;
 import tintash.fennel.network.WebService;
 import tintash.fennel.network.WebServiceAuth;
@@ -43,7 +43,9 @@ public class Fennel extends Application {
         restClient = new RestClient();
         initImageLoader();
         initInstaBug();
+
         PreferenceHelper.initializeInstance(getApplicationContext());
+        DatabaseHelper.initializeInstance(this);
     }
 
     public void initInstaBug() {

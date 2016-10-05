@@ -7,21 +7,44 @@ import java.io.Serializable;
  */
 public class Farmer implements Serializable{
 
-    private String fullName;
-    private String firstName;
-    private String secondName;
-    private String surname;
-    private String thumbUrl;
-    private String address;
-    private String signupStatus;
-    private boolean isHeader = false;
+    public String fullName;
+    public String firstName;
+    public String secondName;
+    public String surname;
+    public String idNumber;
+    public int gender;
+    public boolean isLeader;
+    public String location;
+    public String subLocation;
+    public String villageName;
+    public String treeSpecies;
+    public boolean farmerHome;
+    public String mobileNumber;
+    public String thumbUrl;
+    public String farmerIdPhotoUrl;
+    public String address;
+    public String signupStatus;
+    public boolean isHeader = false;
+
+    public Farmer() {}
 
     public Farmer(Farmer other) {
+
         this.fullName = other.fullName;
         this.firstName = other.firstName;
         this.secondName = other.secondName;
         this.surname = other.surname;
+        this.idNumber = other.idNumber;
+        this.gender = other.gender;
+        this.isLeader = other.isLeader;
+        this.location = other.location;
+        this.subLocation = other.subLocation;
+        this.villageName = other.villageName;
+        this.treeSpecies = other.treeSpecies;
+        this.farmerHome = other.farmerHome;
+        this.mobileNumber = other.mobileNumber;
         this.thumbUrl = other.thumbUrl;
+        this.farmerIdPhotoUrl = other.farmerIdPhotoUrl;
         this.address = other.address;
         this.signupStatus = other.signupStatus;
         this.isHeader = other.isHeader;
@@ -61,6 +84,47 @@ public class Farmer implements Serializable{
     public void setSurname(String surname) {
         this.surname = surname;
     }
+
+    public void setIdNumber(java.lang.String idNumber) {
+        this.idNumber = idNumber;
+    }
+
+    public void setGender(int gender) {
+        this.gender = gender;
+    }
+
+    public void setIsLeader(boolean leader) {
+        this.isLeader = leader;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public void setSubLocation(String subLocation) {
+        this.subLocation = subLocation;
+    }
+
+    public void setVillageName(String villageName) {
+        this.villageName = villageName;
+    }
+
+    public void setTreeSpecies(String treeSpecies) {
+        this.treeSpecies = treeSpecies;
+    }
+
+    public void setFarmerHome(boolean farmerHome) {
+        this.farmerHome = farmerHome;
+    }
+
+    public void setMobileNumber(String mobileNumber) {
+        this.mobileNumber = mobileNumber;
+    }
+
+    public void setFarmerIdPhotoUrl(String farmerIdPhotoUrl) {
+        this.farmerIdPhotoUrl = farmerIdPhotoUrl;
+    }
+
 
     public boolean isHeader() {
         return isHeader;

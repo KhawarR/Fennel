@@ -10,10 +10,13 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import tintash.fennel.R;
+import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.models.Farmer;
 import tintash.fennel.utils.Constants;
 import tintash.fennel.views.NothingSelectedSpinnerAdapter;
@@ -66,6 +69,12 @@ public class EnrollFragment extends BaseContainerFragment {
 
     @Bind(R.id.titleBar)
     TitleBarLayout titleBarLayout;
+
+    @Bind(R.id.et_id_number)
+    EditText etIdNumber;
+
+    @Bind(R.id.et_mobile_number)
+    EditText etMobileNumber;
 
     private String title;
     private Farmer farmer;
@@ -155,6 +164,17 @@ public class EnrollFragment extends BaseContainerFragment {
     @OnClick(R.id.txtCreateFarmer)
     void onClickCreateFarmer(View view) {
 
+        Farmer newFarmer = new Farmer();
+        newFarmer.setFirstName(etFirstName.getText() != null ? etFirstName.getText().toString() : "");
+        newFarmer.setSecondName(etSecondName.getText() != null ? etSecondName.getText().toString() : "");
+        newFarmer.setSurname(etSurname.getText() != null ? etSurname.getText().toString() : "");
+        newFarmer.setIdNumber(etIdNumber.getText() != null ? etIdNumber.getText().toString() : "");
+        newFarmer.setMobileNumber(etMobileNumber.getText() != null ? etMobileNumber.getText().toString() : "");
+
+        DatabaseHelper.getInstance().insertFarmer(newFarmer);
+
+        Gson gson = new Gson();
+        String farmerJson = gson.toJson(newFarmer);
     }
 
     @OnClick(R.id.txtSubmitApproval)
