@@ -12,6 +12,7 @@ public class PreferenceHelper {
     private static final String KEY_TOKEN = "_token";
     private static final String KEY_USER_ID = "_user_id";
     private static final String KEY_PASSWORD = "_password";
+    private static final String KEY_FACILITATOR_ID = "_fac_id";
 
     private static PreferenceHelper sInstance;
     private final SharedPreferences mPref;
@@ -65,5 +66,16 @@ public class PreferenceHelper {
     public String readPassword() {
         String password = mPref.getString(KEY_PASSWORD, null);
         return password;
+    }
+
+    public void writeFacilitatorId(String id) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putString(KEY_FACILITATOR_ID, id);
+        editor.commit();
+    }
+
+    public String readFacilitatorId() {
+        String id = mPref.getString(KEY_FACILITATOR_ID, null);
+        return id;
     }
 }

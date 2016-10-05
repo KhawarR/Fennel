@@ -137,6 +137,10 @@ public class AboutMe extends BaseFragment {
             etFieldManager.setText(fm_name);
 
         }
+        else
+        {
+            Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

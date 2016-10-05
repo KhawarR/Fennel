@@ -11,9 +11,16 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -86,7 +93,7 @@ public class Login extends BaseFragment implements Callback<Auth> {
             if (username.length() > 0) {
                 String loginQuery = String.format(NetworkHelper.QUERY_LOGIN, username, password);
                 loadingStarted();
-                Call<SFResponse> apiCall = Fennel.getWebService().loginQuery(Session.getAuthToken(), NetworkHelper.API_VERSION, loginQuery);
+                Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, loginQuery);
                 apiCall.enqueue(loginCallback);
             }
         }
@@ -99,18 +106,35 @@ public class Login extends BaseFragment implements Callback<Auth> {
         Toast.makeText(getActivity(), "SalesForce Authentication failed", Toast.LENGTH_LONG).show();
     }
 
-    private Callback<SFResponse> loginCallback = new Callback<SFResponse>() {
+    private Callback<ResponseBody> loginCallback = new Callback<ResponseBody>() {
         @Override
-        public void onResponse(Call<SFResponse> call, Response<SFResponse> response) {
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//            loadingFinished();
+//            if (response.code() == 200) {
+//                if (response.body().records.size() > 0) {
+//                    PreferenceHelper.getInstance().writeUserId(etId.getText().toString().trim());
+//                    PreferenceHelper.getInstance().writePassword(etPassword.getText().toString().trim());
+//                    startActivity(new Intent(getActivity(), MainActivity.class));
+//                    getActivity().finish();
+//                } else {
+//                    Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//            else
+//            {
+//                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+//            }
             loadingFinished();
             if (response.code() == 200) {
-                if (response.body().records.size() > 0) {
-                    PreferenceHelper.getInstance().writeUserId(etId.getText().toString().trim());
-                    PreferenceHelper.getInstance().writePassword(etPassword.getText().toString().trim());
-                    startActivity(new Intent(getActivity(), MainActivity.class));
-                    getActivity().finish();
-                } else {
-                    Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
+                String responseStr = "";
+
+                try {
+                    responseStr = response.body().string();
+                    parseData(responseStr);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             }
             else
@@ -120,9 +144,33 @@ public class Login extends BaseFragment implements Callback<Auth> {
         }
 
         @Override
-        public void onFailure(Call<SFResponse> call, Throwable t) {
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
             loadingFinished();
             t.printStackTrace();
         }
     };
+
+    private void parseData(String data) throws JSONException {
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if(arrRecords.length() > 0)
+        {
+            JSONObject objRecord = arrRecords.getJSONObject(0);
+            String id = objRecord.getString("Id");
+
+            JSONObject objFacilitator = objRecord.getJSONObject("Facilitator__r");
+            String facilitatorId = objFacilitator.getString("Id");
+
+            PreferenceHelper.getInstance().writeFacilitatorId(facilitatorId);
+            PreferenceHelper.getInstance().writeUserId(etId.getText().toString().trim());
+            PreferenceHelper.getInstance().writePassword(etPassword.getText().toString().trim());
+            startActivity(new Intent(getActivity(), MainActivity.class));
+            getActivity().finish();
+        }
+        else
+        {
+            Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
+        }
+    }
 }

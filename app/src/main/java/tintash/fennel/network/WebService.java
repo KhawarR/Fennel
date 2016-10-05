@@ -11,8 +11,8 @@ import tintash.fennel.datamodels.SFResponse;
 
 public interface WebService {
 
-    @GET("/services/data/{apiVersion}/query")
-    Call<SFResponse> loginQuery(@Header("Authorization") String token, @Path("apiVersion") String apiVersion, @Query("q") String query);
+//    @GET("/services/data/{apiVersion}/query")
+//    Call<SFResponse> loginQuery(@Header("Authorization") String token, @Path("apiVersion") String apiVersion, @Query("q") String query);
 
     @GET("/services/data/{apiVersion}/query")
     Call<ResponseBody> query(@Header("Authorization") String token, @Path("apiVersion") String apiVersion, @Query("q") String query);

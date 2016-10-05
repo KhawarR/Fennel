@@ -8,22 +8,33 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import tintash.fennel.R;
 import tintash.fennel.adapters.MySignupsAdapter;
+import tintash.fennel.application.Fennel;
 import tintash.fennel.models.Farmer;
+import tintash.fennel.network.NetworkHelper;
+import tintash.fennel.network.Session;
 import tintash.fennel.utils.Constants;
+import tintash.fennel.utils.PreferenceHelper;
 import tintash.fennel.views.TitleBarLayout;
 
 /**
  * Created by Faizan on 9/27/2016.
  */
 public class MySignUps extends BaseFragment implements View.OnClickListener {
-
 
     @Bind(R.id.titleBar)
     TitleBarLayout titleBarLayout;
@@ -43,6 +54,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         ButterKnife.bind(this, view);
 
         populateDummyData();
+        getMySignups();
 
         return view;
     }
@@ -61,6 +73,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         myHeader.setEnabled(false);
         myHeader.setOnClickListener(null);
         mLvFarmers.addHeaderView(myHeader);
+
         // Creating our custom adapter
         MySignupsAdapter adapter = new MySignupsAdapter(getActivity(), myFarmers);
 
@@ -78,8 +91,43 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
         });
-
     }
+
+    private void getMySignups()
+    {
+        String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS, PreferenceHelper.getInstance().readFacilitatorId());
+        loadingStarted();
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        apiCall.enqueue(mySignupsCallback);
+    }
+
+    private Callback<ResponseBody> mySignupsCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            loadingFinished();
+            if (response.code() == 200) {
+                String responseStr = "";
+
+                try {
+                    responseStr = response.body().string();
+                    responseStr = "";
+//                    parseData(responseStr);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            loadingFinished();
+            t.printStackTrace();
+        }
+    };
 
     @Override
     protected String getTrackerScreenName() {
