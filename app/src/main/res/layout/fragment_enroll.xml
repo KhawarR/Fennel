@@ -82,9 +82,10 @@
                     fennel:fontName="Avenir-Heavy.ttf" />
 
                 <EditText
+                    android:id="@+id/et_id_number"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="number" />
+                    android:inputType="text" />
 
 
                 <LinearLayout
@@ -255,6 +256,7 @@
                     fennel:fontName="Avenir-Heavy.ttf" />
 
                 <EditText
+                    android:id="@+id/et_mobile_number"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:imeOptions="actionDone"
