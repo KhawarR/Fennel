@@ -3,6 +3,7 @@ package tintash.fennel.views;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
@@ -67,12 +68,16 @@ public class TitleBarLayout extends RelativeLayout implements View.OnClickListen
         imgLeft = (ImageView) view.findViewById(R.id.imgLeft);
         imgRight.setOnClickListener(this);
         imgLeft.setOnClickListener(this);
-        int pad = (int) getResources().getDimension(R.dimen.padding_15);
-        setPadding(pad, pad, pad, pad);
         setBackgroundColor(ContextCompat.getColor(getContext(), R.color.white));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             setElevation(4.0f);
         }
+        else
+        {
+            setBackgroundResource(R.drawable.title_divider);
+        }
+        int pad = (int) getResources().getDimension(R.dimen.padding_15);
+        setPadding(pad, pad, pad, pad);
     }
 
     public void setOnIconClickListener(TitleBarIconClickListener aListener) {

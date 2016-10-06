@@ -19,25 +19,25 @@ import tintash.fennel.utils.FarmerFieldsExclusion;
 
 public class RestClient {
 
-    /////////////////// STAGING SERVER ////////////////////////
-
+/////////////////// STAGING SERVER ////////////////////////
     private static String BASE_URL_AUTH = "https://test.salesforce.com";
     private static String BASE_URL = "https://test.salesforce.com";
 
-    /////////// PRODUCTION SERVER ////////////////
-
-//    private static String BASE_URL = "";
+/////////////////// PRODUCTION SERVER //////////////////////
+//    private static String BASE_URL_AUTH = "https://login.salesforce.com";
+//    private static String BASE_URL = "https://login.salesforce.com";
 
     private WebService apiService;
     private WebServiceAuth apiServiceAuth;
 
+    private Gson gson;
 
     public RestClient() {
         GsonBuilder builder = new GsonBuilder();
         builder.setDateFormat("yyyy-MM-dd'T'hh:mm:ss");
         builder.setExclusionStrategies(new FarmerFieldsExclusion());
 
-        Gson gson = builder.create();
+        gson = builder.create();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
@@ -45,60 +45,16 @@ public class RestClient {
                 .build();
         apiService = retrofit.create(WebService.class);
 
-
-        int currentApiVersion = android.os.Build.VERSION.SDK_INT;
-        if (currentApiVersion <= android.os.Build.VERSION_CODES.KITKAT){
-            // Do something for lollipop and above versions
-
-            OkHttpClient.Builder okHttpBuilder = null;
-            X509TrustManager tm = new X509TrustManager() {
-                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                }
-
-                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                }
-
-                public X509Certificate[] getAcceptedIssuers() {
-                    return new java.security.cert.X509Certificate[]{};
-                }
-            };
-            try {
-                okHttpBuilder = new OkHttpClient.Builder().sslSocketFactory(new TLSSocketFactory(), tm);
-                retrofit = new Retrofit.Builder()
-                        .baseUrl(BASE_URL_AUTH)
-                        .addConverterFactory(GsonConverterFactory.create(gson))
-                        .client(okHttpBuilder.build())
-                        .build();
-                apiServiceAuth = retrofit.create(WebServiceAuth.class);
-            } catch (KeyManagementException e) {
-                e.printStackTrace();
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            }
-
-        } else{
-            retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL_AUTH)
-                    .addConverterFactory(GsonConverterFactory.create(gson))
-                    .build();
-            apiServiceAuth = retrofit.create(WebServiceAuth.class);
-        }
+        setService(BASE_URL_AUTH, true);
     }
 
     public void setApiBaseUrl(String newApiBaseUrl) {
         BASE_URL = newApiBaseUrl;
-        GsonBuilder builder = new GsonBuilder();
-        builder.setDateFormat("yyyy-MM-dd'T'hh:mm:ss");
-        builder.setExclusionStrategies(new FarmerFieldsExclusion());
+        setService(BASE_URL, false);
+    }
 
-        Gson gson = builder.create();
-//        GsonBuilder builder = new GsonBuilder();
-//        Retrofit retrofit = new Retrofit.Builder()
-//                .baseUrl(BASE_URL)
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build();
-//        apiService = retrofit.create(WebService.class);
-
+    private void setService(String baseUrl, boolean isAuth)
+    {
         int currentApiVersion = android.os.Build.VERSION.SDK_INT;
         if (currentApiVersion <= android.os.Build.VERSION_CODES.KITKAT){
             // Do something for lollipop and above versions
@@ -118,11 +74,14 @@ public class RestClient {
             try {
                 okHttpBuilder = new OkHttpClient.Builder().sslSocketFactory(new TLSSocketFactory(), tm);
                 Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(BASE_URL)
+                        .baseUrl(baseUrl)
                         .addConverterFactory(GsonConverterFactory.create(gson))
                         .client(okHttpBuilder.build())
                         .build();
-                apiService = retrofit.create(WebService.class);
+                if(isAuth)
+                    apiServiceAuth = retrofit.create(WebServiceAuth.class);
+                else
+                    apiService = retrofit.create(WebService.class);
             } catch (KeyManagementException e) {
                 e.printStackTrace();
             } catch (NoSuchAlgorithmException e) {
@@ -131,13 +90,14 @@ public class RestClient {
 
         } else{
             Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
+                    .baseUrl(baseUrl)
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .build();
-            apiService = retrofit.create(WebService.class);
+            if(isAuth)
+                apiServiceAuth = retrofit.create(WebServiceAuth.class);
+            else
+                apiService = retrofit.create(WebService.class);
         }
-
-
     }
 
     public WebService getService() {

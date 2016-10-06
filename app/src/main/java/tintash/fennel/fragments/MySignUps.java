@@ -8,22 +8,35 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import tintash.fennel.R;
 import tintash.fennel.adapters.MySignupsAdapter;
+import tintash.fennel.application.Fennel;
 import tintash.fennel.models.Farmer;
+import tintash.fennel.network.NetworkHelper;
+import tintash.fennel.network.Session;
 import tintash.fennel.utils.Constants;
+import tintash.fennel.utils.PreferenceHelper;
 import tintash.fennel.views.TitleBarLayout;
 
 /**
  * Created by Faizan on 9/27/2016.
  */
 public class MySignUps extends BaseFragment implements View.OnClickListener {
-
 
     @Bind(R.id.titleBar)
     TitleBarLayout titleBarLayout;
@@ -42,7 +55,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.fragment_my_sign_ups, container, false);
         ButterKnife.bind(this, view);
 
-        populateDummyData();
+//        populateDummyData();
+        getMySignups();
 
         return view;
     }
@@ -61,11 +75,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         myHeader.setEnabled(false);
         myHeader.setOnClickListener(null);
         mLvFarmers.addHeaderView(myHeader);
-        // Creating our custom adapter
-        MySignupsAdapter adapter = new MySignupsAdapter(getActivity(), myFarmers);
-
-        // Create the list view and bind the adapter
-        mLvFarmers.setAdapter(adapter);
 
         mLvFarmers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -74,11 +83,165 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 Farmer farmer = myFarmers.get(position);
                 if(!farmer.isHeader())
                 {
-                    ((BaseContainerFragment) getParentFragment()).replaceFragment(EnrollFragment.newInstance(Constants.STR_EDIT_FARMER, farmer), true);
+                    ((BaseContainerFragment) getParentFragment()).addFragment(EnrollFragment.newInstance(Constants.STR_EDIT_FARMER, farmer), true);
                 }
             }
         });
+    }
 
+    private void getMySignups()
+    {
+        String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS, PreferenceHelper.getInstance().readFacilitatorId());
+        loadingStarted();
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        apiCall.enqueue(mySignupsCallback);
+    }
+
+    private Callback<ResponseBody> mySignupsCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            loadingFinished();
+            if (response.code() == 200) {
+                String responseStr = "";
+
+                try {
+                    responseStr = response.body().string();
+                    parseData(responseStr);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
+    private void parseData(String data) throws JSONException {
+
+        myFarmers.clear();
+
+        ArrayList<Farmer> incompleteFarmersList = new ArrayList<>();
+        ArrayList<Farmer> pendingFarmersList = new ArrayList<>();
+        ArrayList<Farmer> approvedFarmersList = new ArrayList<>();
+
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if(arrRecords.length() > 0)
+        {
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject farmObj = arrRecords.getJSONObject(i);
+
+                String location = "";
+                String subLocation = "";
+                String tree = "";
+                String village = "";
+
+                String fullName = "";
+                String firstName = "";
+                String secondName = "";
+                String surname = "";
+                String idNumber = "";
+                String gender = "";
+                String mobileNumber = "";
+                boolean leader = false;
+
+                JSONObject objLocation = farmObj.optJSONObject("Location__r");
+                if(objLocation != null)
+                {
+                    location = objLocation.getString("Name");
+                }
+
+                JSONObject objSubLocation = farmObj.optJSONObject("Sub_Location__r");
+                if(objSubLocation != null)
+                {
+                    subLocation = objSubLocation.getString("Name");
+                }
+
+                JSONObject objTree = farmObj.optJSONObject("Tree__r");
+                if(objTree != null)
+                {
+                    tree = objTree.getString("Name");
+                }
+
+                JSONObject objVillage = farmObj.optJSONObject("Village__r");
+                if(objVillage != null)
+                {
+                    village = objVillage.getString("Name");
+                }
+
+                JSONObject objFarmer = farmObj.optJSONObject("Farmers__r");
+                if(objFarmer != null)
+                {
+                    fullName = objFarmer.getString("FullName__c");
+                    if(fullName.equalsIgnoreCase("null")) fullName = "";
+                    firstName = objFarmer.getString("First_Name__c");
+                    if(firstName.equalsIgnoreCase("null")) firstName = "";
+                    secondName = objFarmer.getString("Second_Name__c");
+                    if(secondName.equalsIgnoreCase("null")) secondName = "";
+                    surname = objFarmer.getString("Surname__c");
+                    if(surname.equalsIgnoreCase("null")) surname = "";
+                    idNumber = objFarmer.getString("Name");
+                    if(idNumber.equalsIgnoreCase("null")) idNumber = "";
+                    gender = objFarmer.getString("Gender__c");
+                    if(gender.equalsIgnoreCase("null")) gender = "";
+                    mobileNumber = objFarmer.getString("Mobile_Number__c");
+                    if(mobileNumber.equalsIgnoreCase("null")) mobileNumber = "";
+                    leader = objFarmer.getBoolean("Leader__c");
+                }
+
+                String status = farmObj.getString("Status__c");
+
+                if(status.equalsIgnoreCase(Constants.STR_INCOMPLETE))
+                {
+                    incompleteFarmersList.add(new Farmer(fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, false, mobileNumber, "", "", "", status, false));
+                }
+                else if(status.equalsIgnoreCase(Constants.STR_PENDING))
+                {
+                    pendingFarmersList.add(new Farmer(fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, false, mobileNumber, "", "", "", status, false));
+                }
+                else if(status.equalsIgnoreCase(Constants.STR_APPROVED))
+                {
+                    approvedFarmersList.add(new Farmer(fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, false, mobileNumber, "", "", "", status, false));
+                }
+            }
+        }
+        else
+        {
+            Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
+        }
+
+        if(incompleteFarmersList.size() > 0)
+        {
+            myFarmers.add(new Farmer(Constants.STR_INCOMPLETE, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", "", true));
+            myFarmers.addAll(incompleteFarmersList);
+        }
+        if(pendingFarmersList.size() > 0)
+        {
+            myFarmers.add(new Farmer(Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", "", true));
+            myFarmers.addAll(pendingFarmersList);
+        }
+        if(approvedFarmersList.size() > 0)
+        {
+            myFarmers.add(new Farmer(Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", "", true));
+            myFarmers.addAll(approvedFarmersList);
+        }
+
+        // Creating our custom adapter
+        MySignupsAdapter adapter = new MySignupsAdapter(getActivity(), myFarmers);
+        // Create the list view and bind the adapter
+        mLvFarmers.setAdapter(adapter);
     }
 
     @Override
@@ -88,22 +251,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     @Override
     public void onTitleBarRightIconClicked(View view) {
-        ((BaseContainerFragment) getParentFragment()).replaceFragment(new AboutMe(), true);
-    }
-
-    private void populateDummyData()
-    {
-        myFarmers.clear();
-        myFarmers.add(new Farmer(Constants.STR_INCOMPLETE, "", "", "", "", "", "", true));
-        myFarmers.add(new Farmer("Tabu Karisa Karema", "Tabu", "Karisa", "Karema",  "", "Kwa Firi, Mihirini", Constants.STR_INCOMPLETE, false));
-        myFarmers.add(new Farmer("Safari Kazungu Zapo", "Safari", "Kazungu", "Zapo", "", "Kombe Nzai, Madzeni", Constants.STR_INCOMPLETE, false));
-        myFarmers.add(new Farmer(Constants.STR_PENDING, "", "", "", "", "", "", true));
-        myFarmers.add(new Farmer("Kabibi Mumba Nzai", "Kabibi", "Mumba", "Nzai", "", "Mwalimu Shikari, Madzeni", Constants.STR_PENDING, false));
-        myFarmers.add(new Farmer("Hadija Kitsao Mujisi", "Hadija", "Kitsao", "Mujisi", "", "Kombe Nzai, Madzeni", Constants.STR_PENDING, false));
-        myFarmers.add(new Farmer(Constants.STR_APPROVED, "", "", "", "", "", "", true));
-        myFarmers.add(new Farmer("Agnes Dama Mwaro", "Agnes", "Dama", "Mwaro", "", "Madzeni", Constants.STR_APPROVED, false));
-        myFarmers.add(new Farmer("Chengo Mumba Nzai", "Chengo", "Mumba", "Nzai", "", "Nidgiria, Kwa Nzai", Constants.STR_APPROVED, false));
-        myFarmers.add(new Farmer("Kadii Gohu Nzaro", "Kadii", "Gohu", "Nzaro", "", "Nidgiria, Kwa Nzai", Constants.STR_APPROVED, false));
+        ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
     }
 
     @Override
@@ -112,7 +260,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         {
             case R.id.rl_add:
             {
-                ((BaseContainerFragment) getParentFragment()).replaceFragment(EnrollFragment.newInstance(Constants.STR_ENROLL_FARMER, null), true);
+                ((BaseContainerFragment) getParentFragment()).addFragment(EnrollFragment.newInstance(Constants.STR_ENROLL_FARMER, null), true);
             }
                 break;
         }

@@ -41,6 +41,6 @@ public class MyLogbook extends BaseFragment {
 
     @Override
     public void onTitleBarRightIconClicked(View view) {
-        ((BaseContainerFragment) getParentFragment()).replaceFragment(new AboutMe(), true);
+        ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
     }
 }

@@ -38,9 +38,9 @@
     </string-array>
 
     <string-array name="optionsSubLocation">
-        <item>SUBLOCATION 1</item>
-        <item>SUBLOCATION 2</item>
-        <item>SUBLOCATION 3</item>
+        <item>SUB LOCATION 1</item>
+        <item>SUB LOCATION 2</item>
+        <item>SUB LOCATION 3</item>
     </string-array>
 
     <string-array name="optionsVillage">
@@ -50,8 +50,8 @@
     </string-array>
 
     <string-array name="optionsTree">
-        <item>TREESPECIES 1</item>
-        <item>TREESPECIES 2</item>
-        <item>TREESPECIES 3</item>
+        <item>TREE SPECIES 1</item>
+        <item>TREE SPECIES 2</item>
+        <item>TREE SPECIES 3</item>
     </string-array>
 </resources>

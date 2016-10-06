@@ -15,6 +15,7 @@ import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.network.RestClient;
 import tintash.fennel.network.WebService;
 import tintash.fennel.network.WebServiceAuth;
+import tintash.fennel.utils.PreferenceHelper;
 
 /**
  * Created by Faizan on 9/27/2016.
@@ -42,6 +43,8 @@ public class Fennel extends Application {
         restClient = new RestClient();
         initImageLoader();
         initInstaBug();
+
+        PreferenceHelper.initializeInstance(getApplicationContext());
         DatabaseHelper.initializeInstance(this);
     }
 

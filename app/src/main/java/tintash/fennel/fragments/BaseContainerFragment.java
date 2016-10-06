@@ -18,6 +18,16 @@ public abstract class BaseContainerFragment extends BaseFragment {
         getChildFragmentManager().executePendingTransactions();
     }
 
+    public void addFragment(Fragment fragment, boolean addToBackStack) {
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        if (addToBackStack) {
+            transaction.addToBackStack(null);
+        }
+        transaction.add(R.id.container_framelayout, fragment);
+        transaction.commit();
+        getChildFragmentManager().executePendingTransactions();
+    }
+
     public boolean popFragment() {
         Log.e("fennel", "pop fragment: " + getChildFragmentManager().getBackStackEntryCount());
         boolean isPop = false;

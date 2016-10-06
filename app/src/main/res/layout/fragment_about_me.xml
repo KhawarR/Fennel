@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fennel="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/white">
 
     <tintash.fennel.views.TitleBarLayout
         android:id="@+id/titleBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        fennel:drawableRight="@drawable/dummy_profile"
         fennel:titleText="@string/about_me" />
-
 
     <ScrollView
         android:layout_width="match_parent"
@@ -48,6 +48,7 @@
                 android:layout_height="@dimen/large_avatar_size"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="@dimen/padding_20">
+
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/profile_image"
                     android:layout_width="@dimen/large_avatar_size"
@@ -58,7 +59,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
-                    android:src="@drawable/ic_add_pic"/>
+                    android:src="@drawable/ic_add_pic" />
 
             </RelativeLayout>
 
@@ -71,10 +72,12 @@
                 fennel:fontName="Avenir-Heavy.ttf" />
 
             <EditText
+                android:id="@+id/et_first_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
-                android:text="Abdalla" />
+                android:editable="false"
+                android:focusable="false"/>
 
             <tintash.fennel.views.FontTextView
                 android:layout_width="wrap_content"
@@ -85,11 +88,12 @@
                 fennel:fontName="Avenir-Heavy.ttf" />
 
             <EditText
+                android:id="@+id/et_second_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
-                android:text="Nzaro" />
-
+                android:editable="false"
+                android:focusable="false" />
 
             <tintash.fennel.views.FontTextView
                 android:layout_width="wrap_content"
@@ -100,11 +104,12 @@
                 fennel:fontName="Avenir-Heavy.ttf" />
 
             <EditText
+                android:id="@+id/et_sur_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
-                android:text="Mkare" />
-
+                android:editable="false"
+                android:focusable="false" />
 
             <tintash.fennel.views.FontTextView
                 android:layout_width="wrap_content"
@@ -115,11 +120,12 @@
                 fennel:fontName="Avenir-Heavy.ttf" />
 
             <EditText
+                android:id="@+id/et_field_officer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
-                android:text="Francisco Mpoa" />
-
+                android:editable="false"
+                android:focusable="false" />
 
             <tintash.fennel.views.FontTextView
                 android:layout_width="wrap_content"
@@ -130,11 +136,12 @@
                 fennel:fontName="Avenir-Heavy.ttf" />
 
             <EditText
+                android:id="@+id/et_field_manager"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
-                android:text="James Karaba" />
-
+                android:editable="false"
+                android:focusable="false" />
 
             <tintash.fennel.views.FontTextView
                 android:id="@+id/txtSignOut"
@@ -147,7 +154,6 @@
                 android:text="@string/sign_out"
                 android:textColor="@color/white"
                 fennel:fontName="Avenir-Heavy.ttf" />
-
 
         </LinearLayout>
     </ScrollView>
