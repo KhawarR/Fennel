@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.kbeanie.multipicker.api.ImagePicker;
 import com.kbeanie.multipicker.api.Picker;
@@ -158,6 +159,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         titleBarLayout.setOnIconClickListener(this);
 
+        tvMale.setSelected(true);
+        tvLeaderNo.setSelected(true);
+        txtFarmerHomeNo.setSelected(true);
+
         ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsLocation, R.layout.simple_spinner_item);
         spLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "LOCATION"));
         spLocation.setOnItemSelectedListener(this);
@@ -274,26 +279,46 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         newFarmer.setIdNumber(etIdNumber.getText() != null ? etIdNumber.getText().toString() : "");
         newFarmer.setMobileNumber(etMobileNumber.getText() != null ? etMobileNumber.getText().toString() : "");
 
-        Call<ResponseModel> apiCall = Fennel.getWebService().addFarmer(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, newFarmer);
-        apiCall.enqueue(new Callback<ResponseModel>() {
-            @Override
-            public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
-                if (response.body() != null && response.body().success == true) {
-                    Log.i("LP", "Farmer Added To Server");
-                    addFarmerToDB(newFarmer, response.body().id, true);
-                    addFarmWithFarmerId(response.body().id);
-                } else {
+        boolean goodToGo = true;
+        String missingData = "";
+        if(newFarmer.getFirstName().isEmpty())
+        {
+            goodToGo = false;
+            missingData += "\n- First Name";
+        }
+        if(newFarmer.getIdNumber().isEmpty())
+        {
+            goodToGo = false;
+            missingData += "\n- ID Number";
+        }
+
+        if(goodToGo)
+        {
+            Call<ResponseModel> apiCall = Fennel.getWebService().addFarmer(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, newFarmer);
+            apiCall.enqueue(new Callback<ResponseModel>() {
+                @Override
+                public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
+                    if (response.body() != null && response.body().success == true) {
+                        Log.i("LP", "Farmer Added To Server");
+                        addFarmerToDB(newFarmer, response.body().id, true);
+                        addFarmWithFarmerId(response.body().id);
+                    } else {
+                        addFarmerToDB(newFarmer, null, false);
+                    }
+                    Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
+                }
+
+                @Override
+                public void onFailure(Call<ResponseModel> call, Throwable t) {
+                    Log.i("LP", t.getMessage().toString());
                     addFarmerToDB(newFarmer, null, false);
                 }
-                Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
-            }
-
-            @Override
-            public void onFailure(Call<ResponseModel> call, Throwable t) {
-                Log.i("LP", t.getMessage().toString());
-                addFarmerToDB(newFarmer, null, false);
-            }
-        });
+            });
+        }
+        else
+        {
+            Toast.makeText(getActivity(), "Please fill the following fields: " + missingData, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void addFarmerToDB(Farmer newFarmer, String id, boolean synced) {
