@@ -63,7 +63,7 @@ public class FarmTable {
         // Insert the new row, returning the primary key value of the new row
         long newRowId = 0;
 
-        if (!farmExists(dbHelper, id)) {
+        if (id != null && !farmExists(dbHelper, id)) {
             newRowId = db.insert(
                     TABLE_FARM,
                     null,

@@ -315,7 +315,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                     addFarmerToDB(newFarmer, null, false);
                     Farm newFarm = createFarmWithFarmerId(null);
                     addFarmToDB(newFarm, null, false);
-                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT);
+                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
 
                     loadingFinished();
                     popToSignupsFragment();
@@ -329,7 +329,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 addFarmerToDB(newFarmer, null, false);
                 Farm newFarm = createFarmWithFarmerId(null);
                 addFarmToDB(newFarm, null, false);
-                Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT);
+                Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
                 loadingFinished();
                 popToSignupsFragment();
             }

@@ -9,7 +9,7 @@ import java.io.Serializable;
  */
 public class Farmer implements Serializable{
 
-    public String farmerId = "";
+    public String farmerId = null;
 
     @SerializedName("FullName__c")
     public String fullName = "";
