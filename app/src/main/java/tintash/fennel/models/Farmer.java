@@ -12,43 +12,43 @@ public class Farmer implements Serializable{
     public String farmerId = null;
 
     @SerializedName("FullName__c")
-    public String fullName = "";
+    public String fullName;
 
     @SerializedName("First_Name__c")
-    public String firstName = "";
+    public String firstName;
 
     @SerializedName("Second_Name__c")
-    public String secondName = "";
+    public String secondName;
 
     @SerializedName("Surname__c")
-    public String surname = "";
+    public String surname;
 
     @SerializedName("Name")
-    public String idNumber = "";
+    public String idNumber;
 
     @SerializedName("Gender__c")
-    public String gender = "";
+    public String gender;
 
     @SerializedName("Leader__c")
     public boolean isLeader;
 
     @SerializedName("Location__c")
-    public String location = "";
+    public String location;
 
     @SerializedName("Sub_Location__c")
-    public String subLocation = "";
+    public String subLocation;
 
     @SerializedName("Mobile_Number__c")
-    public String mobileNumber = "";
+    public String mobileNumber;
 
-    public String villageName = "";
-    public String treeSpecies = "";
+    public String villageName;
+    public String treeSpecies;
     public boolean farmerHome;
-    public String thumbUrl = "";
-    public String farmerIdPhotoUrl = "";
+    public String thumbUrl;
+    public String farmerIdPhotoUrl;
 
-    public String address = "";
-    public String signupStatus = "";
+    public String address;
+    public String signupStatus;
     public boolean isHeader = false;
 
     public Farmer() {}

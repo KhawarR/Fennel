@@ -218,19 +218,19 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             else
                 tvLeaderNo.setSelected(true);
 
-            if(!farmer.getLocation().isEmpty()) {
+            if(farmer.getLocation()!= null && !farmer.getLocation().isEmpty()) {
                 ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsLocation, R.layout.simple_spinner_item);
                 spLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getLocation()));
             }
-            if(!farmer.getSubLocation().isEmpty()) {
+            if(farmer.getSubLocation()!= null && !farmer.getSubLocation().isEmpty()) {
                 ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsSubLocation, R.layout.simple_spinner_item);
                 spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getSubLocation()));
             }
-            if(!farmer.getTreeSpecies().isEmpty()) {
+            if(farmer.getTreeSpecies()!= null && !farmer.getTreeSpecies().isEmpty()) {
                 ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsTree, R.layout.simple_spinner_item);
                 spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getTreeSpecies()));
             }
-            if(!farmer.getVillageName().isEmpty()) {
+            if(farmer.getVillageName()!= null && !farmer.getVillageName().isEmpty()) {
                 ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsVillage, R.layout.simple_spinner_item);
                 spVillage.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getVillageName()));
             }
@@ -242,8 +242,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
             etMobileNumber.setText(farmer.getMobileNumber());
 
-            if(!farmer.getThumbUrl().isEmpty()) ImageLoader.getInstance().displayImage(farmer.getThumbUrl(), imgFarmerPhoto, options);
-            if(!farmer.getFarmerIdPhotoUrl().isEmpty()) ImageLoader.getInstance().displayImage(farmer.getFarmerIdPhotoUrl(), imgNationalID, options);
+            if(farmer.getThumbUrl()!= null && !farmer.getThumbUrl().isEmpty()) ImageLoader.getInstance().displayImage(farmer.getThumbUrl(), imgFarmerPhoto, options);
+            if(farmer.getFarmerIdPhotoUrl()!= null && !farmer.getFarmerIdPhotoUrl().isEmpty()) ImageLoader.getInstance().displayImage(farmer.getFarmerIdPhotoUrl(), imgNationalID, options);
         }
     }
 
@@ -363,10 +363,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 if (response.body() != null && response.body().success == true) {
                     Log.i("LP", "Farm Added To Server");
                     addFarmToDB(farm, response.body().id, true);
-                    Toast.makeText(getContext(), "Farmer Enrolled Successfully!", Toast.LENGTH_SHORT);
+                    Toast.makeText(getContext(), "Farmer Enrolled Successfully!", Toast.LENGTH_SHORT).show();
                 } else {
                     addFarmToDB(farm, null, false);
-                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT);
+                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
                 }
                 Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
 
@@ -378,7 +378,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             public void onFailure(Call<ResponseModel> call, Throwable t) {
                 Log.i("LP", t.getMessage().toString());
                 addFarmToDB(farm, null, false);
-                Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT);
+                Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
                 loadingFinished();
                 popToSignupsFragment();
             }
