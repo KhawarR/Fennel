@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -58,6 +59,12 @@ public class EnrollFragment extends BaseContainerFragment {
     @Bind(R.id.txtFarmerHomeYes)
     TextView txtFarmerHomeYes;
 
+    @Bind(R.id.txtCreateFarmer)
+    TextView txtCreateFarmer;
+
+    @Bind(R.id.txtSubmitApproval)
+    TextView txtSubmitApproval;
+
     @Bind(R.id.et_first_name)
     EditText etFirstName;
 
@@ -76,8 +83,15 @@ public class EnrollFragment extends BaseContainerFragment {
     @Bind(R.id.et_mobile_number)
     EditText etMobileNumber;
 
+    @Bind(R.id.imgFarmerPhoto)
+    ImageView imgFarmerPhoto;
+
+    @Bind(R.id.imgNationalID)
+    ImageView imgNationalID;
+
     private String title;
     private Farmer farmer;
+    boolean isEdit = false;
 
     public static EnrollFragment newInstance(String title, Farmer farmer)
     {
@@ -102,6 +116,9 @@ public class EnrollFragment extends BaseContainerFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         System.out.println("ViewCreated Enroll ");
+
+        titleBarLayout.setOnIconClickListener(this);
+
         ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsLocation, R.layout.simple_spinner_item);
         spLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "LOCATION"));
 
@@ -112,14 +129,19 @@ public class EnrollFragment extends BaseContainerFragment {
         spVillage.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "VILLAGE"));
 
         arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsTree, R.layout.simple_spinner_item);
-        spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "TREE SPICES"));
-
-        titleBarLayout.setOnIconClickListener(this);
+        spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "TREE SPECIES"));
 
         title = getArguments().getString("title");
         if(title.equalsIgnoreCase(Constants.STR_EDIT_FARMER))
         {
             farmer = (Farmer) getArguments().getSerializable("farmer");
+            txtCreateFarmer.setText("SAVE");
+
+            if(!farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_INCOMPLETE))
+            {
+                disableForm();
+            }
+
             populateFarmer();
         }
 
@@ -133,6 +155,41 @@ public class EnrollFragment extends BaseContainerFragment {
             etFirstName.setText(farmer.getFirstName());
             etSecondName.setText(farmer.getSecondName());
             etSurname.setText(farmer.getSurname());
+            etIdNumber.setText(farmer.getIdNumber());
+
+            if(farmer.getGender().equalsIgnoreCase("male"))
+                tvMale.setSelected(true);
+            else
+                tvFemale.setSelected(true);
+
+            if(farmer.isLeader())
+                tvLeaderYes.setSelected(true);
+            else
+                tvLeaderNo.setSelected(true);
+
+            if(!farmer.getLocation().isEmpty()) {
+                ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsLocation, R.layout.simple_spinner_item);
+                spLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getLocation()));
+            }
+            if(!farmer.getSubLocation().isEmpty()) {
+                ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsSubLocation, R.layout.simple_spinner_item);
+                spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getSubLocation()));
+            }
+            if(!farmer.getTreeSpecies().isEmpty()) {
+                ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsTree, R.layout.simple_spinner_item);
+                spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getTreeSpecies()));
+            }
+            if(!farmer.getVillageName().isEmpty()) {
+                ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsVillage, R.layout.simple_spinner_item);
+                spVillage.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getVillageName()));
+            }
+
+            if(farmer.isFarmerHome())
+                txtFarmerHomeYes.setSelected(true);
+            else
+                txtFarmerHomeNo.setSelected(true);
+
+            etMobileNumber.setText(farmer.getMobileNumber());
         }
     }
 
@@ -189,6 +246,35 @@ public class EnrollFragment extends BaseContainerFragment {
 
     @Override
     public void onTitleBarRightIconClicked(View view) {
-        ((BaseContainerFragment) getParentFragment()).replaceFragment(new AboutMe(), true);
+        ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
+    }
+
+    private void disableForm()
+    {
+        disableView(etFirstName);
+        disableView(etSecondName);
+        disableView(etSurname);
+        disableView(etIdNumber);
+        disableView(tvMale);
+        disableView(tvFemale);
+        disableView(tvLeaderYes);
+        disableView(tvLeaderNo);
+        disableView(spLocation);
+        disableView(spSubLocation);
+        disableView(spTree);
+        disableView(spVillage);
+        disableView(txtFarmerHomeYes);
+        disableView(txtFarmerHomeNo);
+        disableView(etMobileNumber);
+        disableView(txtCreateFarmer);
+        disableView(imgFarmerPhoto);
+        disableView(imgNationalID);
+        disableView(txtSubmitApproval);
+    }
+
+    private void disableView(View view)
+    {
+        view.setEnabled(false);
+        view.setFocusable(false);
     }
 }

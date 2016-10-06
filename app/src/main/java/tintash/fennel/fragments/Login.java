@@ -82,7 +82,6 @@ public class Login extends BaseFragment implements Callback<Auth> {
 
     @Override
     public void onResponse(Call<Auth> call, Response<Auth> response) {
-        loadingFinished();
 
         Auth auth = response.body();
         if (getActivity() != null && isAdded() && !isDetached() && auth != null) {
@@ -92,10 +91,17 @@ public class Login extends BaseFragment implements Callback<Auth> {
             String password = etPassword.getText().toString().trim();
             if (username.length() > 0) {
                 String loginQuery = String.format(NetworkHelper.QUERY_LOGIN, username, password);
-                loadingStarted();
                 Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, loginQuery);
                 apiCall.enqueue(loginCallback);
             }
+            else
+            {
+                loadingFinished();
+            }
+        }
+        else
+        {
+            loadingFinished();
         }
     }
 
@@ -109,21 +115,6 @@ public class Login extends BaseFragment implements Callback<Auth> {
     private Callback<ResponseBody> loginCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//            loadingFinished();
-//            if (response.code() == 200) {
-//                if (response.body().records.size() > 0) {
-//                    PreferenceHelper.getInstance().writeUserId(etId.getText().toString().trim());
-//                    PreferenceHelper.getInstance().writePassword(etPassword.getText().toString().trim());
-//                    startActivity(new Intent(getActivity(), MainActivity.class));
-//                    getActivity().finish();
-//                } else {
-//                    Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//            else
-//            {
-//                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
-//            }
             loadingFinished();
             if (response.code() == 200) {
                 String responseStr = "";
@@ -170,7 +161,7 @@ public class Login extends BaseFragment implements Callback<Auth> {
         }
         else
         {
-            Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Login failed", Toast.LENGTH_SHORT).show();
         }
     }
 }
