@@ -33,18 +33,35 @@
             android:textSize="18sp"
             fennel:fontName="Avenir-Heavy.ttf"/>
 
-        <tintash.fennel.views.FontTextView
-            android:id="@+id/tv_address"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Kwa Firi, Mihirini"
-            android:layout_centerVertical="true"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:textColor="@color/black_txt_color"
-            fennel:fontName="Avenir-Book.ttf"
-            android:textSize="14sp"
-            android:layout_marginTop="5dp"/>
+            android:orientation="horizontal">
+            <tintash.fennel.views.FontTextView
+                android:id="@+id/tv_sublocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Kwa Firi, "
+                android:layout_centerVertical="true"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="@color/black_txt_color"
+                fennel:fontName="Avenir-Book.ttf"
+                android:textSize="14sp"
+                android:layout_marginTop="5dp"/>
+            <tintash.fennel.views.FontTextView
+                android:id="@+id/tv_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mihirini"
+                android:layout_centerVertical="true"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="@color/black_txt_color"
+                fennel:fontName="Avenir-Book.ttf"
+                android:textSize="14sp"
+                android:layout_marginTop="5dp"/>
+        </LinearLayout>
 
     </LinearLayout>
 

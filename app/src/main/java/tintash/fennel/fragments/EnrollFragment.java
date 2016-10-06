@@ -1,5 +1,7 @@
 package tintash.fennel.fragments;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -12,6 +14,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.kbeanie.multipicker.api.ImagePicker;
+import com.kbeanie.multipicker.api.Picker;
+import com.kbeanie.multipicker.api.callbacks.ImagePickerCallback;
+import com.kbeanie.multipicker.api.entity.ChosenImage;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
+
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -93,6 +104,12 @@ public class EnrollFragment extends BaseContainerFragment {
     private Farmer farmer;
     boolean isEdit = false;
 
+    private DisplayImageOptions options;
+
+    private ImagePicker imagePicker;
+    private ImagePickerCallback farmerPhotoPickerCallback;
+    private ImagePickerCallback nationalIdPickerCallback;
+
     public static EnrollFragment newInstance(String title, Farmer farmer)
     {
         EnrollFragment fragment = new EnrollFragment();
@@ -109,6 +126,14 @@ public class EnrollFragment extends BaseContainerFragment {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_enroll, null);
         ButterKnife.bind(this, view);
+
+        float density = getActivity().getResources().getDisplayMetrics().density;
+        float px = 10 * density;
+        options = new DisplayImageOptions.Builder()
+        .displayer(new RoundedBitmapDisplayer((int)px)).build(); // default
+
+        imagePicker = new ImagePicker(EnrollFragment.this);
+
         return view;
     }
 
@@ -190,6 +215,9 @@ public class EnrollFragment extends BaseContainerFragment {
                 txtFarmerHomeNo.setSelected(true);
 
             etMobileNumber.setText(farmer.getMobileNumber());
+
+            if(!farmer.getThumbUrl().isEmpty()) ImageLoader.getInstance().displayImage(farmer.getThumbUrl(), imgFarmerPhoto, options);
+            if(!farmer.getFarmerIdPhotoUrl().isEmpty()) ImageLoader.getInstance().displayImage(farmer.getFarmerIdPhotoUrl(), imgNationalID, options);
         }
     }
 
@@ -239,6 +267,16 @@ public class EnrollFragment extends BaseContainerFragment {
 
     }
 
+    @OnClick(R.id.imgFarmerPhoto)
+    void onClickFarmerPhoto(View view) {
+        pickFarmerImage();
+    }
+
+    @OnClick(R.id.imgNationalID)
+    void onClickNationalID(View view) {
+        pickNationalIdImage();
+    }
+
     @Override
     protected String getTrackerScreenName() {
         return null;
@@ -247,6 +285,46 @@ public class EnrollFragment extends BaseContainerFragment {
     @Override
     public void onTitleBarRightIconClicked(View view) {
         ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
+    }
+
+    private void pickFarmerImage() {
+        farmerPhotoPickerCallback = new ImagePickerCallback() {
+            @Override
+            public void onImagesChosen(List<ChosenImage> images) {
+                // Display images
+                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgFarmerPhoto, options);
+            }
+
+            @Override
+            public void onError(String message) {
+                // Do error handling
+            }
+        };
+        imagePicker.setImagePickerCallback(farmerPhotoPickerCallback);
+        // imagePicker.allowMultiple(); // Default is false
+        // imagePicker.shouldGenerateMetadata(false); // Default is true
+        // imagePicker.shouldGenerateThumbnails(false); // Default is true
+        imagePicker.pickImage();
+    }
+
+    private void pickNationalIdImage() {
+        nationalIdPickerCallback = new ImagePickerCallback() {
+            @Override
+            public void onImagesChosen(List<ChosenImage> images) {
+                // Display images
+                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgNationalID, options);
+            }
+
+            @Override
+            public void onError(String message) {
+                // Do error handling
+            }
+        };
+        imagePicker.setImagePickerCallback(nationalIdPickerCallback);
+        // imagePicker.allowMultiple(); // Default is false
+        // imagePicker.shouldGenerateMetadata(false); // Default is true
+        // imagePicker.shouldGenerateThumbnails(false); // Default is true
+        imagePicker.pickImage();
     }
 
     private void disableForm()
@@ -276,5 +354,19 @@ public class EnrollFragment extends BaseContainerFragment {
     {
         view.setEnabled(false);
         view.setFocusable(false);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == Activity.RESULT_OK) {
+            if(requestCode == Picker.PICK_IMAGE_DEVICE) {
+                if(imagePicker == null) {
+                    imagePicker = new ImagePicker(getActivity());
+                    imagePicker.setImagePickerCallback(farmerPhotoPickerCallback);
+                }
+                imagePicker.submit(data);
+            }
+        }
     }
 }

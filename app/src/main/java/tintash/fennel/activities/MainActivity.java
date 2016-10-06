@@ -1,11 +1,17 @@
 package tintash.fennel.activities;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTabHost;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.WindowManager;
 import android.widget.ImageView;
+
+import com.kbeanie.multipicker.api.ImagePicker;
+import com.kbeanie.multipicker.api.Picker;
 
 import tintash.fennel.R;
 import tintash.fennel.fragments.BaseContainerFragment;
@@ -71,4 +77,8 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 }

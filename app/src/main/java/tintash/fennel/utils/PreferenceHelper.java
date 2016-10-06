@@ -14,6 +14,7 @@ public class PreferenceHelper {
     private static final String KEY_PASSWORD = "_password";
     private static final String KEY_FACILITATOR_ID = "_fac_id";
 
+
     private static PreferenceHelper sInstance;
     private final SharedPreferences mPref;
 

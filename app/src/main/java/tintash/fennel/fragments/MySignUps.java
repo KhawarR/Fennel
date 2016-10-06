@@ -48,6 +48,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     ArrayList<Farmer> myFarmers = new ArrayList<>();
 
+    MySignupsAdapter adapter;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -97,7 +99,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         apiCall.enqueue(mySignupsCallback);
     }
 
-    private Callback<ResponseBody> mySignupsCallback = new Callback<ResponseBody>() {
+    private void getMyFarmerAttachments()
+    {
+        String query = NetworkHelper.FARMER_QUERY;
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        apiCall.enqueue(myFarmersAttachments);
+    }
+
+    private Callback<ResponseBody> myFarmersAttachments = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
@@ -106,7 +115,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                 try {
                     responseStr = response.body().string();
-                    parseData(responseStr);
+                    parseFarmerAttachmentData(responseStr);
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (JSONException e) {
@@ -126,6 +135,82 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
     };
 
+    private Callback<ResponseBody> mySignupsCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            loadingFinished();
+            if (response.code() == 200) {
+                String responseStr = "";
+
+                try {
+                    responseStr = response.body().string();
+                    parseData(responseStr);
+                    getMyFarmerAttachments();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
+    private void parseFarmerAttachmentData(String data) throws JSONException {
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if(arrRecords.length() > 0)
+        {
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject farmerObj = arrRecords.getJSONObject(i);
+                String id = farmerObj.getString("Id");
+
+                String farmerPicId = "";
+                String farmerNatId = "";
+
+                JSONObject attachmentObj = farmerObj.optJSONObject("Attachments");
+                if(attachmentObj != null)
+                {
+                    JSONArray attRecords = attachmentObj.getJSONArray("records");
+                    if(attRecords.length() > 0)
+                    {
+                        JSONObject objFarmerPhoto = attRecords.getJSONObject(0);
+                        farmerPicId = objFarmerPhoto.getString("Id");
+                    }
+
+                    if(attRecords.length() > 1)
+                    {
+                        JSONObject objFarmerPhoto = attRecords.getJSONObject(1);
+                        farmerNatId = objFarmerPhoto.getString("Id");
+                    }
+                }
+
+                for (int j = 0; j < myFarmers.size(); j++) {
+                    Farmer farmer = myFarmers.get(j);
+                    if(farmer.getId().equalsIgnoreCase(id))
+                    {
+                        farmer.setThumbUrl(farmerPicId);
+                        farmer.setFarmerIdPhotoUrl(farmerNatId);
+                        break;
+                    }
+                }
+            }
+
+            adapter.notifyDataSetChanged();
+        }
+    }
+
     private void parseData(String data) throws JSONException {
 
         myFarmers.clear();
@@ -143,11 +228,11 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                 JSONObject farmObj = arrRecords.getJSONObject(i);
 
+                String id = "";
                 String location = "";
                 String subLocation = "";
                 String tree = "";
                 String village = "";
-
                 String fullName = "";
                 String firstName = "";
                 String secondName = "";
@@ -184,13 +269,15 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 JSONObject objFarmer = farmObj.optJSONObject("Farmers__r");
                 if(objFarmer != null)
                 {
+                    id = objFarmer.getString("Id");
+                    if(id.equalsIgnoreCase("null")) id = "";
                     fullName = objFarmer.getString("FullName__c");
                     if(fullName.equalsIgnoreCase("null")) fullName = "";
                     firstName = objFarmer.getString("First_Name__c");
                     if(firstName.equalsIgnoreCase("null")) firstName = "";
-                    secondName = objFarmer.getString("Second_Name__c");
+                    secondName = objFarmer.getString("Middle_Name__c");
                     if(secondName.equalsIgnoreCase("null")) secondName = "";
-                    surname = objFarmer.getString("Surname__c");
+                    surname = objFarmer.getString("Last_Name__c");
                     if(surname.equalsIgnoreCase("null")) surname = "";
                     idNumber = objFarmer.getString("Name");
                     if(idNumber.equalsIgnoreCase("null")) idNumber = "";
@@ -205,15 +292,15 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                 if(status.equalsIgnoreCase(Constants.STR_INCOMPLETE))
                 {
-                    incompleteFarmersList.add(new Farmer(fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, false, mobileNumber, "", "", "", status, false));
+                    incompleteFarmersList.add(new Farmer(id, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, false, mobileNumber, "", "", "", status, false));
                 }
                 else if(status.equalsIgnoreCase(Constants.STR_PENDING))
                 {
-                    pendingFarmersList.add(new Farmer(fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, false, mobileNumber, "", "", "", status, false));
+                    pendingFarmersList.add(new Farmer(id, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, false, mobileNumber, "", "", "", status, false));
                 }
                 else if(status.equalsIgnoreCase(Constants.STR_APPROVED))
                 {
-                    approvedFarmersList.add(new Farmer(fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, false, mobileNumber, "", "", "", status, false));
+                    approvedFarmersList.add(new Farmer(id, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, false, mobileNumber, "", "", "", status, false));
                 }
             }
         }
@@ -224,22 +311,22 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         if(incompleteFarmersList.size() > 0)
         {
-            myFarmers.add(new Farmer(Constants.STR_INCOMPLETE, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", "", true));
+            myFarmers.add(new Farmer("", Constants.STR_INCOMPLETE, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", "", true));
             myFarmers.addAll(incompleteFarmersList);
         }
         if(pendingFarmersList.size() > 0)
         {
-            myFarmers.add(new Farmer(Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", "", true));
+            myFarmers.add(new Farmer("", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", "", true));
             myFarmers.addAll(pendingFarmersList);
         }
         if(approvedFarmersList.size() > 0)
         {
-            myFarmers.add(new Farmer(Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", "", true));
+            myFarmers.add(new Farmer("", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", "", true));
             myFarmers.addAll(approvedFarmersList);
         }
 
         // Creating our custom adapter
-        MySignupsAdapter adapter = new MySignupsAdapter(getActivity(), myFarmers);
+        adapter = new MySignupsAdapter(getActivity(), myFarmers);
         // Create the list view and bind the adapter
         mLvFarmers.setAdapter(adapter);
     }
