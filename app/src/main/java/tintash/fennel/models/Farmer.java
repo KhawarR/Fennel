@@ -1,5 +1,7 @@
 package tintash.fennel.models;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 /**
@@ -7,25 +9,47 @@ import java.io.Serializable;
  */
 public class Farmer implements Serializable{
 
-    private String id;
-    private String fullName;
-    private String firstName;
-    private String secondName;
-    private String surname;
-    private String idNumber;
-    private String gender;
-    private boolean isLeader;
-    private String location;
-    private String subLocation;
-    private String villageName;
-    private String treeSpecies;
-    private boolean farmerHome;
-    private String mobileNumber;
-    private String thumbUrl;
-    private String farmerIdPhotoUrl;
-    private String address;
-    private String signupStatus;
-    private boolean isHeader = false;
+    public String id = "";
+
+    @SerializedName("FullName__c")
+    public String fullName = "";
+
+    @SerializedName("First_Name__c")
+    public String firstName = "";
+
+    @SerializedName("Second_Name__c")
+    public String secondName = "";
+
+    @SerializedName("Surname__c")
+    public String surname = "";
+
+    @SerializedName("Name")
+    public String idNumber = "";
+
+    @SerializedName("Gender__c")
+    public String gender = "";
+
+    @SerializedName("Leader__c")
+    public boolean isLeader;
+
+    @SerializedName("Location__c")
+    public String location = "";
+
+    @SerializedName("Sub_Location__c")
+    public String subLocation = "";
+
+    @SerializedName("Mobile_Number__c")
+    public String mobileNumber = "";
+
+    public String villageName = "";
+    public String treeSpecies = "";
+    public boolean farmerHome;
+    public String thumbUrl = "";
+    public String farmerIdPhotoUrl = "";
+
+    public String address = "";
+    public String signupStatus = "";
+    public boolean isHeader = false;
 
     public Farmer() {}
 
@@ -66,12 +90,12 @@ public class Farmer implements Serializable{
         this.isLeader = isLeader;
         this.location = location;
         this.subLocation = subLocation;
-        this.villageName = villageName;
-        this.treeSpecies = treeSpecies;
-        this.farmerHome = farmerHome;
+//        this.villageName = villageName;
+//        this.treeSpecies = treeSpecies;
+//        this.farmerHome = farmerHome;
         this.mobileNumber = mobileNumber;
-        this.thumbUrl = thumbUrl;
-        this.farmerIdPhotoUrl = farmerIdPhotoUrl;
+//        this.thumbUrl = thumbUrl;
+//        this.farmerIdPhotoUrl = farmerIdPhotoUrl;
         this.address = address;
         this.signupStatus = signupStatus;
         this.isHeader = isHeader;
@@ -83,14 +107,6 @@ public class Farmer implements Serializable{
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
     }
 
     public String getFirstName() {
@@ -115,6 +131,14 @@ public class Farmer implements Serializable{
 
     public void setSurname(String surname) {
         this.surname = surname;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public String getIdNumber() {
@@ -157,12 +181,12 @@ public class Farmer implements Serializable{
         this.subLocation = subLocation;
     }
 
-    public String getVillageName() {
-        return villageName;
-    }
-
     public void setVillageName(String villageName) {
         this.villageName = villageName;
+    }
+
+    public String getVillageName() {
+        return villageName;
     }
 
     public String getTreeSpecies() {

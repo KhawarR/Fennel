@@ -54,33 +54,36 @@ public class FarmerTable {
             COLUMN_SYNCED + ")";
 
 
-    public static long insert(DatabaseHelper dbHelper, Farmer farmer) {
+    public static long insert(DatabaseHelper dbHelper, Farmer farmer, String id, boolean synced) {
 
         // Gets the data repository in write mode
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         //Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
-        values.put(COLUMN_FIRST_NAME, farmer.getFirstName());
-        values.put(COLUMN_MIDDLE_NAME, farmer.getSecondName());
-        values.put(COLUMN_LAST_NAME, farmer.getSurname());
-        values.put(COLUMN_ID_NUMBER, farmer.getIdNumber());
-        values.put(COLUMN_GENDER, farmer.getGender());
-        values.put(COLUMN_LEADER, farmer.isLeader());
-        values.put(COLUMN_LOCATION, farmer.getLocation());
-        values.put(COLUMN_SUB_LOCATION, farmer.getSubLocation());
-        values.put(COLUMN_VILLAGE_NAME, farmer.getVillageName());
-        values.put(COLUMN_TREE_SPECIES, farmer.getTreeSpecies());
-        values.put(COLUMN_FARMER_HOME, farmer.isFarmerHome());
-        values.put(COLUMN_MOBILE_NUMBER, farmer.getMobileNumber());
-        values.put(COLUMN_FARMER_PHOTO, farmer.getThumbUrl());
-        values.put(COLUMN_FARMER_ID_PHOTO, farmer.getFarmerIdPhotoUrl());
-        values.put(COLUMN_SYNCED, false);
+        if (id != null) {
+            values.put(COLUMN_SFDC_ID, id);
+        }
+        values.put(COLUMN_FIRST_NAME, farmer.firstName);
+        values.put(COLUMN_MIDDLE_NAME, farmer.secondName);
+        values.put(COLUMN_LAST_NAME, farmer.surname);
+        values.put(COLUMN_ID_NUMBER, farmer.idNumber);
+        values.put(COLUMN_GENDER, farmer.gender);
+        values.put(COLUMN_LEADER, farmer.isLeader);
+        values.put(COLUMN_LOCATION, farmer.location);
+        values.put(COLUMN_SUB_LOCATION, farmer.subLocation);
+        values.put(COLUMN_VILLAGE_NAME, farmer.villageName);
+        values.put(COLUMN_TREE_SPECIES, farmer.treeSpecies);
+        values.put(COLUMN_FARMER_HOME, farmer.farmerHome);
+        values.put(COLUMN_MOBILE_NUMBER, farmer.mobileNumber);
+        values.put(COLUMN_FARMER_PHOTO, farmer.thumbUrl);
+        values.put(COLUMN_FARMER_ID_PHOTO, farmer.farmerIdPhotoUrl);
+        values.put(COLUMN_SYNCED, synced);
 
         // Insert the new row, returning the primary key value of the new row
         long newRowId = 0;
 
-        if (!userExists(dbHelper, farmer.getIdNumber())) {
+        if (!userExists(dbHelper, farmer.idNumber)) {
             newRowId = db.insert(
                     TABLE_FARMERS,
                     null,

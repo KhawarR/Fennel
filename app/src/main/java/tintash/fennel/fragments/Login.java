@@ -28,7 +28,6 @@ import tintash.fennel.R;
 import tintash.fennel.activities.MainActivity;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.datamodels.Auth;
-import tintash.fennel.datamodels.SFResponse;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
 import tintash.fennel.utils.PreferenceHelper;
