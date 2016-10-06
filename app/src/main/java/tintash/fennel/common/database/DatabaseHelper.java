@@ -64,9 +64,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     //region Database Helper Methods
-    public void insertFarmer(Farmer newFarmer) {
+    public void insertFarmer(Farmer newFarmer, String id,  boolean synced) {
 
-        long rowInserted = FarmerTable.insert(this, newFarmer);
+        long rowInserted = FarmerTable.insert(this, newFarmer, id,  synced);
         if (rowInserted != -1) {
             Log.i("FENNEL", "Row inserted!");
         }

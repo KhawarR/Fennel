@@ -1,6 +1,7 @@
 package tintash.fennel.network;
 
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.security.KeyManagementException;
@@ -8,12 +9,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import tintash.fennel.utils.FarmerFieldsExclusion;
 
 
 public class RestClient {
@@ -34,11 +35,13 @@ public class RestClient {
     public RestClient() {
         GsonBuilder builder = new GsonBuilder();
         builder.setDateFormat("yyyy-MM-dd'T'hh:mm:ss");
+        builder.setExclusionStrategies(new FarmerFieldsExclusion());
 
+        Gson gson = builder.create();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
         apiService = retrofit.create(WebService.class);
 
@@ -63,7 +66,7 @@ public class RestClient {
                 okHttpBuilder = new OkHttpClient.Builder().sslSocketFactory(new TLSSocketFactory(), tm);
                 retrofit = new Retrofit.Builder()
                         .baseUrl(BASE_URL_AUTH)
-                        .addConverterFactory(GsonConverterFactory.create())
+                        .addConverterFactory(GsonConverterFactory.create(gson))
                         .client(okHttpBuilder.build())
                         .build();
                 apiServiceAuth = retrofit.create(WebServiceAuth.class);
@@ -76,7 +79,7 @@ public class RestClient {
         } else{
             retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL_AUTH)
-                    .addConverterFactory(GsonConverterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create(gson))
                     .build();
             apiServiceAuth = retrofit.create(WebServiceAuth.class);
         }
@@ -84,6 +87,11 @@ public class RestClient {
 
     public void setApiBaseUrl(String newApiBaseUrl) {
         BASE_URL = newApiBaseUrl;
+        GsonBuilder builder = new GsonBuilder();
+        builder.setDateFormat("yyyy-MM-dd'T'hh:mm:ss");
+        builder.setExclusionStrategies(new FarmerFieldsExclusion());
+
+        Gson gson = builder.create();
 //        GsonBuilder builder = new GsonBuilder();
 //        Retrofit retrofit = new Retrofit.Builder()
 //                .baseUrl(BASE_URL)
@@ -111,7 +119,7 @@ public class RestClient {
                 okHttpBuilder = new OkHttpClient.Builder().sslSocketFactory(new TLSSocketFactory(), tm);
                 Retrofit retrofit = new Retrofit.Builder()
                         .baseUrl(BASE_URL)
-                        .addConverterFactory(GsonConverterFactory.create())
+                        .addConverterFactory(GsonConverterFactory.create(gson))
                         .client(okHttpBuilder.build())
                         .build();
                 apiService = retrofit.create(WebService.class);
@@ -124,7 +132,7 @@ public class RestClient {
         } else{
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create(gson))
                     .build();
             apiService = retrofit.create(WebService.class);
         }

@@ -2,6 +2,7 @@ package tintash.fennel.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,14 +11,19 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import tintash.fennel.R;
+import tintash.fennel.application.Fennel;
 import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.models.Farmer;
+import tintash.fennel.models.FarmerResponse;
+import tintash.fennel.network.NetworkHelper;
+import tintash.fennel.network.Session;
 import tintash.fennel.utils.Constants;
 import tintash.fennel.views.NothingSelectedSpinnerAdapter;
 import tintash.fennel.views.TitleBarLayout;
@@ -164,17 +170,32 @@ public class EnrollFragment extends BaseContainerFragment {
     @OnClick(R.id.txtCreateFarmer)
     void onClickCreateFarmer(View view) {
 
-        Farmer newFarmer = new Farmer();
+        final Farmer newFarmer = new Farmer();
         newFarmer.setFirstName(etFirstName.getText() != null ? etFirstName.getText().toString() : "");
         newFarmer.setSecondName(etSecondName.getText() != null ? etSecondName.getText().toString() : "");
         newFarmer.setSurname(etSurname.getText() != null ? etSurname.getText().toString() : "");
         newFarmer.setIdNumber(etIdNumber.getText() != null ? etIdNumber.getText().toString() : "");
         newFarmer.setMobileNumber(etMobileNumber.getText() != null ? etMobileNumber.getText().toString() : "");
 
-        DatabaseHelper.getInstance().insertFarmer(newFarmer);
+        Call<FarmerResponse> apiCall = Fennel.getWebService().addFarmer(Session.getAuthToken(getActivity()), "application/json", NetworkHelper.API_VERSION, newFarmer);
+        apiCall.enqueue(new Callback<FarmerResponse>() {
+            @Override
+            public void onResponse(Call<FarmerResponse> call, Response<FarmerResponse> response) {
+                if (response.body() != null && response.body().success == true) {
+                    Log.i("LP", "Farmer Added To Server");
+                    DatabaseHelper.getInstance().insertFarmer(newFarmer, response.body().id, true);
+                } else {
+                    DatabaseHelper.getInstance().insertFarmer(newFarmer, null, false);
+                }
+                Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
+            }
 
-        Gson gson = new Gson();
-        String farmerJson = gson.toJson(newFarmer);
+            @Override
+            public void onFailure(Call<FarmerResponse> call, Throwable t) {
+                Log.i("LP", t.getMessage().toString());
+                DatabaseHelper.getInstance().insertFarmer(newFarmer, null,  false);
+            }
+        });
     }
 
     @OnClick(R.id.txtSubmitApproval)
