@@ -14,7 +14,7 @@ import javax.net.ssl.X509TrustManager;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-//import tintash.fennel.utils.FarmerFieldsExclusion;
+import tintash.fennel.utils.FarmerFieldsExclusion;
 
 
 public class RestClient {
@@ -35,7 +35,7 @@ public class RestClient {
     public RestClient() {
         GsonBuilder builder = new GsonBuilder();
         builder.setDateFormat("yyyy-MM-dd'T'hh:mm:ss");
-//        builder.setExclusionStrategies(new FarmerFieldsExclusion());
+        builder.setExclusionStrategies(new FarmerFieldsExclusion());
 
         gson = builder.create();
 

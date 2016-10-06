@@ -9,7 +9,7 @@ import java.io.Serializable;
  */
 public class Farmer implements Serializable{
 
-    public String id = "";
+    public String farmerId = "";
 
     @SerializedName("FullName__c")
     public String fullName = "";
@@ -54,7 +54,7 @@ public class Farmer implements Serializable{
     public Farmer() {}
 
     public Farmer(Farmer other) {
-        this.id = other.id;
+        this.farmerId = other.farmerId;
         this.fullName = other.fullName;
         this.firstName = other.firstName;
         this.secondName = other.secondName;
@@ -75,12 +75,12 @@ public class Farmer implements Serializable{
         this.isHeader = other.isHeader;
     }
 
-    public Farmer(String id, String fullName, String firstName, String secondName, String surname,
+    public Farmer(String farmerId, String fullName, String firstName, String secondName, String surname,
                   String idNumber, String gender, boolean isLeader, String location,
                   String subLocation, String villageName, String treeSpecies, boolean farmerHome,
                   String mobileNumber, String farmerIdPhotoUrl, String thumbUrl, String address,
                   String signupStatus, boolean isHeader) {
-        this.id = id;
+        this.farmerId = farmerId;
         this.fullName = fullName;
         this.firstName = firstName;
         this.secondName = secondName;
@@ -101,12 +101,12 @@ public class Farmer implements Serializable{
         this.isHeader = isHeader;
     }
 
-    public String getId() {
-        return id;
+    public String getFarmerId() {
+        return farmerId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setFarmerId(String farmerId) {
+        this.farmerId = farmerId;
     }
 
     public String getFirstName() {

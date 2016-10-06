@@ -198,7 +198,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                 for (int j = 0; j < myFarmers.size(); j++) {
                     Farmer farmer = myFarmers.get(j);
-                    if(farmer.getId().equalsIgnoreCase(id))
+                    if(farmer.getFarmerId().equalsIgnoreCase(id))
                     {
                         farmer.setThumbUrl(farmerPicId);
                         farmer.setFarmerIdPhotoUrl(farmerNatId);

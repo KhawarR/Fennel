@@ -5,7 +5,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import tintash.fennel.common.database.models.FarmerTable;
+import tintash.fennel.common.database.tables.FarmTable;
+import tintash.fennel.common.database.tables.FarmerTable;
+import tintash.fennel.models.Farm;
 import tintash.fennel.models.Farmer;
 
 /**
@@ -42,6 +44,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(FarmerTable.CREATE_TABLE_FARMER);
+        db.execSQL(FarmTable.CREATE_TABLE_FARM);
 
         Log.d(TAG, "onCreate called");
 
@@ -67,6 +70,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void insertFarmer(Farmer newFarmer, String id,  boolean synced) {
 
         long rowInserted = FarmerTable.insert(this, newFarmer, id,  synced);
+        if (rowInserted != -1) {
+            Log.i("FENNEL", "Row inserted!");
+        }
+    }
+
+    public void insertFarm(Farm newFarm, String id, boolean synced) {
+
+        long rowInserted = FarmTable.insert(this, newFarm, id,  synced);
         if (rowInserted != -1) {
             Log.i("FENNEL", "Row inserted!");
         }
