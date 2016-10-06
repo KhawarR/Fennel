@@ -322,9 +322,8 @@
                     android:layout_height="@dimen/enroll_pic_size"
                     android:layout_alignParentRight="true"
                     android:layout_marginRight="@dimen/padding_10"
-                    android:background="@drawable/green_rounded_rect"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/ic_avatar_small" />
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/green_rounded_rect"/>
 
 
                 <tintash.fennel.views.FontTextView
@@ -347,9 +346,8 @@
                     android:layout_height="@dimen/enroll_pic_size"
                     android:layout_alignLeft="@+id/imgFarmerPhoto"
                     android:layout_alignTop="@+id/lblNationalID"
-                    android:background="@drawable/green_rounded_rect"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/ic_avatar_small" />
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/green_rounded_rect" />
 
             </RelativeLayout>
 

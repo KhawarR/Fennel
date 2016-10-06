@@ -44,6 +44,7 @@
                 fennel:fontName="Avenir-Medium.ttf" />
 
             <RelativeLayout
+                android:id="@+id/rl_pick_image"
                 android:layout_width="@dimen/large_avatar_size"
                 android:layout_height="@dimen/large_avatar_size"
                 android:layout_gravity="center_horizontal"

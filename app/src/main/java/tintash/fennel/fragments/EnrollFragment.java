@@ -1,6 +1,8 @@
 package tintash.fennel.fragments;
 
 import android.content.Context;
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -15,6 +17,17 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toast;
+
+import com.kbeanie.multipicker.api.ImagePicker;
+import com.kbeanie.multipicker.api.Picker;
+import com.kbeanie.multipicker.api.callbacks.ImagePickerCallback;
+import com.kbeanie.multipicker.api.entity.ChosenImage;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
+
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -23,10 +36,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import tintash.fennel.R;
+import tintash.fennel.models.Farmer;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.models.Farm;
-import tintash.fennel.models.Farmer;
 import tintash.fennel.models.ResponseModel;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
@@ -105,11 +118,15 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private Farmer farmer;
     boolean isEdit = false;
 
+    private DisplayImageOptions options;
+
+    private ImagePicker imagePicker;
+    private ImagePickerCallback farmerPhotoPickerCallback;
+    private ImagePickerCallback nationalIdPickerCallback;
     private String location;
     private String subLocation;
     private String village;
     private String treeSpecies;
-
 
     public static EnrollFragment newInstance(String title, Farmer farmer)
     {
@@ -127,6 +144,14 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_enroll, null);
         ButterKnife.bind(this, view);
+
+        float density = getActivity().getResources().getDisplayMetrics().density;
+        float px = 10 * density;
+        options = new DisplayImageOptions.Builder()
+        .displayer(new RoundedBitmapDisplayer((int)px)).build(); // default
+
+        imagePicker = new ImagePicker(EnrollFragment.this);
+
         return view;
     }
 
@@ -136,6 +161,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         System.out.println("ViewCreated Enroll ");
 
         titleBarLayout.setOnIconClickListener(this);
+
+        tvMale.setSelected(true);
+        tvLeaderNo.setSelected(true);
+        txtFarmerHomeNo.setSelected(true);
 
         ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsLocation, R.layout.simple_spinner_item);
         spLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "LOCATION"));
@@ -212,6 +241,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 txtFarmerHomeNo.setSelected(true);
 
             etMobileNumber.setText(farmer.getMobileNumber());
+
+            if(!farmer.getThumbUrl().isEmpty()) ImageLoader.getInstance().displayImage(farmer.getThumbUrl(), imgFarmerPhoto, options);
+            if(!farmer.getFarmerIdPhotoUrl().isEmpty()) ImageLoader.getInstance().displayImage(farmer.getFarmerIdPhotoUrl(), imgNationalID, options);
         }
     }
 
@@ -254,8 +286,23 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         newFarmer.setIdNumber(etIdNumber.getText() != null ? etIdNumber.getText().toString() : "");
         newFarmer.setMobileNumber(etMobileNumber.getText() != null ? etMobileNumber.getText().toString() : "");
 
-        Call<ResponseModel> apiCall = Fennel.getWebService().addFarmer(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, newFarmer);
-        apiCall.enqueue(new Callback<ResponseModel>() {
+        boolean goodToGo = true;
+        String missingData = "";
+        if(newFarmer.getFirstName().isEmpty())
+        {
+            goodToGo = false;
+            missingData += "\n- First Name";
+        }
+        if(newFarmer.getIdNumber().isEmpty())
+        {
+            goodToGo = false;
+            missingData += "\n- ID Number";
+        }
+
+        if(goodToGo)
+        {
+            Call<ResponseModel> apiCall = Fennel.getWebService().addFarmer(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, newFarmer);
+            apiCall.enqueue(new Callback<ResponseModel>() {
             @Override
             public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
                 if (response.body() != null && response.body().success == true) {
@@ -287,6 +334,11 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 popToSignupsFragment();
             }
         });
+        }
+        else
+        {
+            Toast.makeText(getActivity(), "Please fill the following fields: " + missingData, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void popToSignupsFragment() {
@@ -352,6 +404,16 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     }
 
+    @OnClick(R.id.imgFarmerPhoto)
+    void onClickFarmerPhoto(View view) {
+        pickFarmerImage();
+    }
+
+    @OnClick(R.id.imgNationalID)
+    void onClickNationalID(View view) {
+        pickNationalIdImage();
+    }
+
     @Override
     protected String getTrackerScreenName() {
         return null;
@@ -360,6 +422,46 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     @Override
     public void onTitleBarRightIconClicked(View view) {
         ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
+    }
+
+    private void pickFarmerImage() {
+        farmerPhotoPickerCallback = new ImagePickerCallback() {
+            @Override
+            public void onImagesChosen(List<ChosenImage> images) {
+                // Display images
+                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgFarmerPhoto, options);
+            }
+
+            @Override
+            public void onError(String message) {
+                // Do error handling
+            }
+        };
+        imagePicker.setImagePickerCallback(farmerPhotoPickerCallback);
+        // imagePicker.allowMultiple(); // Default is false
+        // imagePicker.shouldGenerateMetadata(false); // Default is true
+        // imagePicker.shouldGenerateThumbnails(false); // Default is true
+        imagePicker.pickImage();
+    }
+
+    private void pickNationalIdImage() {
+        nationalIdPickerCallback = new ImagePickerCallback() {
+            @Override
+            public void onImagesChosen(List<ChosenImage> images) {
+                // Display images
+                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgNationalID, options);
+            }
+
+            @Override
+            public void onError(String message) {
+                // Do error handling
+            }
+        };
+        imagePicker.setImagePickerCallback(nationalIdPickerCallback);
+        // imagePicker.allowMultiple(); // Default is false
+        // imagePicker.shouldGenerateMetadata(false); // Default is true
+        // imagePicker.shouldGenerateThumbnails(false); // Default is true
+        imagePicker.pickImage();
     }
 
     private void disableForm()
@@ -389,6 +491,20 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     {
         view.setEnabled(false);
         view.setFocusable(false);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == Activity.RESULT_OK) {
+            if(requestCode == Picker.PICK_IMAGE_DEVICE) {
+                if(imagePicker == null) {
+                    imagePicker = new ImagePicker(getActivity());
+                    imagePicker.setImagePickerCallback(farmerPhotoPickerCallback);
+                }
+                imagePicker.submit(data);
+            }
+        }
     }
 
     @Override

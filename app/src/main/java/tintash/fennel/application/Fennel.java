@@ -15,6 +15,7 @@ import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.network.RestClient;
 import tintash.fennel.network.WebService;
 import tintash.fennel.network.WebServiceAuth;
+import tintash.fennel.utils.CustomImageDownloader;
 import tintash.fennel.utils.PreferenceHelper;
 
 /**
@@ -57,11 +58,9 @@ public class Fennel extends Application {
     public void initImageLoader() {
 
         DisplayImageOptions options = new DisplayImageOptions.Builder().showImageForEmptyUri(android.R.color.darker_gray).showImageOnFail(android.R.color.darker_gray).resetViewBeforeLoading(true).cacheInMemory(true).cacheOnDisk(true)
-
                 .bitmapConfig(Bitmap.Config.RGB_565).build();
-
+//        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext()).imageDownloader(new CustomImageDownloader()).defaultDisplayImageOptions(options).build();
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext()).defaultDisplayImageOptions(options).build();
-
         ImageLoader.getInstance().init(config);
     }
 

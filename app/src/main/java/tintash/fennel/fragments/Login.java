@@ -57,8 +57,8 @@ public class Login extends BaseFragment implements Callback<Auth> {
         super.onViewCreated(view, savedInstanceState);
 
         // TODO Remove on release
-        etId.setText("khawar");
-        etPassword.setText("khawar");
+//        etId.setText("khawar");
+//        etPassword.setText("khawar");
     }
 
     @Override
