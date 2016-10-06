@@ -1,17 +1,20 @@
 package tintash.fennel.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -106,6 +109,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private String subLocation;
     private String village;
     private String treeSpecies;
+
 
     public static EnrollFragment newInstance(String title, Farmer farmer)
     {
@@ -239,6 +243,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     @OnClick(R.id.txtCreateFarmer)
     void onClickCreateFarmer(View view) {
 
+        InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        loadingStarted();
+
         final Farmer newFarmer = new Farmer();
         newFarmer.setFirstName(etFirstName.getText() != null ? etFirstName.getText().toString() : "");
         newFarmer.setSecondName(etSecondName.getText() != null ? etSecondName.getText().toString() : "");
@@ -253,9 +261,17 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 if (response.body() != null && response.body().success == true) {
                     Log.i("LP", "Farmer Added To Server");
                     addFarmerToDB(newFarmer, response.body().id, true);
-                    addFarmWithFarmerId(response.body().id);
+                    Farm newFarm = createFarmWithFarmerId(response.body().id);
+                    addFarmWithFarmerId(newFarm, response.body().id);
+
                 } else {
                     addFarmerToDB(newFarmer, null, false);
+                    Farm newFarm = createFarmWithFarmerId(null);
+                    addFarmToDB(newFarm, null, false);
+                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT);
+
+                    loadingFinished();
+                    popToSignupsFragment();
                 }
                 Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
             }
@@ -264,8 +280,17 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             public void onFailure(Call<ResponseModel> call, Throwable t) {
                 Log.i("LP", t.getMessage().toString());
                 addFarmerToDB(newFarmer, null, false);
+                Farm newFarm = createFarmWithFarmerId(null);
+                addFarmToDB(newFarm, null, false);
+                Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT);
+                loadingFinished();
+                popToSignupsFragment();
             }
         });
+    }
+
+    private void popToSignupsFragment() {
+        ((BaseContainerFragment)(getParentFragment())).popFragment();
     }
 
     private void addFarmerToDB(Farmer newFarmer, String id, boolean synced) {
@@ -277,35 +302,49 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         DatabaseHelper.getInstance().insertFarm(newFarm, id, synced);
     }
 
-    private void addFarmWithFarmerId(String id) {
+    private void addFarmWithFarmerId(final Farm farm, String id) {
 
-        final Farm newFarm = new Farm();
-        newFarm.setFacilitatorId(PreferenceHelper.getInstance().readFacilitatorId());
-        newFarm.setFarmerId(id);
-        newFarm.setLocation(location != null ? location : "");
-        newFarm.setSubLocation(subLocation != null ? subLocation : "");
-        newFarm.setVillageName(village != null ? village : "");
-        newFarm.setTreeSpecies(treeSpecies != null ? treeSpecies : "");
-
-        Call<ResponseModel> apiCall = Fennel.getWebService().addFarm(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, newFarm);
+        Call<ResponseModel> apiCall = Fennel.getWebService().addFarm(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farm);
         apiCall.enqueue(new Callback<ResponseModel>() {
             @Override
             public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
                 if (response.body() != null && response.body().success == true) {
                     Log.i("LP", "Farm Added To Server");
-                    addFarmToDB(newFarm, response.body().id, true);
+                    addFarmToDB(farm, response.body().id, true);
+                    Toast.makeText(getContext(), "Farmer Enrolled Successfully!", Toast.LENGTH_SHORT);
                 } else {
-                    addFarmToDB(newFarm, null, false);
+                    addFarmToDB(farm, null, false);
+                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT);
                 }
                 Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
+
+                loadingFinished();
+                popToSignupsFragment();
             }
 
             @Override
             public void onFailure(Call<ResponseModel> call, Throwable t) {
                 Log.i("LP", t.getMessage().toString());
-                addFarmToDB(newFarm, null, false);
+                addFarmToDB(farm, null, false);
+                Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT);
+                loadingFinished();
+                popToSignupsFragment();
             }
         });
+    }
+
+    private Farm createFarmWithFarmerId(String farmerId) {
+
+        final Farm newFarm = new Farm();
+        if (farmerId != null)
+            newFarm.setFarmerId(farmerId);
+
+        newFarm.setFacilitatorId(PreferenceHelper.getInstance().readFacilitatorId());
+        newFarm.setLocation("");//location != null ? location : "");
+        newFarm.setSubLocation("");//subLocation != null ? subLocation : "");
+        newFarm.setVillageName("");//village != null ? village : "");
+        newFarm.setTreeSpecies("");//treeSpecies != null ? treeSpecies : "");
+        return newFarm;
     }
 
     @OnClick(R.id.txtSubmitApproval)
