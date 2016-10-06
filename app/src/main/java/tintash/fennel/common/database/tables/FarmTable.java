@@ -1,4 +1,4 @@
-package tintash.fennel.common.database.models;
+package tintash.fennel.common.database.tables;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -6,55 +6,42 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import tintash.fennel.common.database.DatabaseHelper;
+import tintash.fennel.models.Farm;
 import tintash.fennel.models.Farmer;
 
 /**
- * Created by irfanayaz on 9/29/16.
+ * Created by irfanayaz on 10/6/16.
  */
-public class FarmerTable {
+public class FarmTable {
 
-    public final static String TAG = "Farmer";
+    public final static String TAG = "Farm";
 
-    public static final String TABLE_FARMERS = "farmer";
+    public static final String TABLE_FARM = "farm";
 
     public static final String COLUMN_SFDC_ID = "sfdc_id";
-    public static final String COLUMN_FIRST_NAME = "first_name";
-    public static final String COLUMN_MIDDLE_NAME = "middle_name";
-    public static final String COLUMN_LAST_NAME = "last_name";
-    public static final String COLUMN_ID_NUMBER = "id_number";
-    public static final String COLUMN_GENDER = "gender";
-    public static final String COLUMN_LEADER = "leader";
+    public static final String COLUMN_FACILITATOR_ID = "facilitator_id";
+    public static final String COLUMN_FARMER_ID = "farmer_id";
+    public static final String COLUMN_FARMER_ENROLLMENT_DATE = "farmer_enrollment_date";
     public static final String COLUMN_LOCATION = "location";
     public static final String COLUMN_SUB_LOCATION = "sub_location";
     public static final String COLUMN_VILLAGE_NAME = "village_name";
     public static final String COLUMN_TREE_SPECIES = "tree_species";
-    public static final String COLUMN_FARMER_HOME = "farmer_home";
-    public static final String COLUMN_MOBILE_NUMBER = "mobile_number";
-    public static final String COLUMN_FARMER_PHOTO = "farmer_photo";
-    public static final String COLUMN_FARMER_ID_PHOTO = "farmer_id_photo";
     public static final String COLUMN_SYNCED = "synced";
 
-    public static final String CREATE_TABLE_FARMER = "CREATE TABLE " +
-            TABLE_FARMERS + "(" +
+    public static final String CREATE_TABLE_FARM = "CREATE TABLE " +
+            TABLE_FARM + "(" +
             COLUMN_SFDC_ID + " text," +
-            COLUMN_FIRST_NAME + " text," +
-            COLUMN_MIDDLE_NAME + " text," +
-            COLUMN_LAST_NAME + " integer," +
-            COLUMN_ID_NUMBER + " text not null," +
-            COLUMN_GENDER + " integer," +
-            COLUMN_LEADER + " integer," +
+            COLUMN_FACILITATOR_ID + " text," +
+            COLUMN_FARMER_ID + " text," +
+            COLUMN_FARMER_ENROLLMENT_DATE + " text," +
             COLUMN_LOCATION + " text," +
             COLUMN_SUB_LOCATION + " text," +
             COLUMN_VILLAGE_NAME + " text," +
             COLUMN_TREE_SPECIES + " text," +
-            COLUMN_FARMER_HOME + " integer," +
-            COLUMN_MOBILE_NUMBER + " text," +
-            COLUMN_FARMER_PHOTO + " text," +
-            COLUMN_FARMER_ID_PHOTO + " text," +
-            COLUMN_SYNCED + ")";
+            COLUMN_SYNCED + " integer" + ")";
 
 
-    public static long insert(DatabaseHelper dbHelper, Farmer farmer, String id, boolean synced) {
+    public static long insert(DatabaseHelper dbHelper, Farm farm, String id, boolean synced) {
 
         // Gets the data repository in write mode
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -64,28 +51,21 @@ public class FarmerTable {
         if (id != null) {
             values.put(COLUMN_SFDC_ID, id);
         }
-        values.put(COLUMN_FIRST_NAME, farmer.firstName);
-        values.put(COLUMN_MIDDLE_NAME, farmer.secondName);
-        values.put(COLUMN_LAST_NAME, farmer.surname);
-        values.put(COLUMN_ID_NUMBER, farmer.idNumber);
-        values.put(COLUMN_GENDER, farmer.gender);
-        values.put(COLUMN_LEADER, farmer.isLeader);
-        values.put(COLUMN_LOCATION, farmer.location);
-        values.put(COLUMN_SUB_LOCATION, farmer.subLocation);
-        values.put(COLUMN_VILLAGE_NAME, farmer.villageName);
-        values.put(COLUMN_TREE_SPECIES, farmer.treeSpecies);
-        values.put(COLUMN_FARMER_HOME, farmer.farmerHome);
-        values.put(COLUMN_MOBILE_NUMBER, farmer.mobileNumber);
-        values.put(COLUMN_FARMER_PHOTO, farmer.thumbUrl);
-        values.put(COLUMN_FARMER_ID_PHOTO, farmer.farmerIdPhotoUrl);
+        values.put(COLUMN_FACILITATOR_ID, farm.facilitatorId);
+        values.put(COLUMN_FARMER_ID, farm.farmerId);
+        values.put(COLUMN_FARMER_ENROLLMENT_DATE, farm.farmerEnrollmentDate);
+        values.put(COLUMN_LOCATION, farm.location);
+        values.put(COLUMN_SUB_LOCATION, farm.subLocation);
+        values.put(COLUMN_VILLAGE_NAME, farm.villageName);
+        values.put(COLUMN_TREE_SPECIES, farm.treeSpecies);
         values.put(COLUMN_SYNCED, synced);
 
         // Insert the new row, returning the primary key value of the new row
         long newRowId = 0;
 
-        if (!userExists(dbHelper, farmer.idNumber)) {
+        if (!farmExists(dbHelper, id)) {
             newRowId = db.insert(
-                    TABLE_FARMERS,
+                    TABLE_FARM,
                     null,
                     values);
             Log.i(TAG, "Row inserted at ID: " + newRowId);
@@ -95,9 +75,9 @@ public class FarmerTable {
     }
 
 
-    public static boolean userExists(DatabaseHelper dbHelper, String idNum) {
+    public static boolean farmExists(DatabaseHelper dbHelper, String idNum) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String query = "SELECT * FROM " + TABLE_FARMERS + " WHERE " + COLUMN_ID_NUMBER + " = ?";
+        String query = "SELECT * FROM " + TABLE_FARM + " WHERE " + COLUMN_SFDC_ID + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{idNum});
         if (cursor.getCount() <= 0) {
             cursor.close();
@@ -271,3 +251,4 @@ public class FarmerTable {
 //    }
 
 }
+

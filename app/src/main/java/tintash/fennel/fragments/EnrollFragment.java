@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -21,18 +22,20 @@ import retrofit2.Response;
 import tintash.fennel.R;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.common.database.DatabaseHelper;
+import tintash.fennel.models.Farm;
 import tintash.fennel.models.Farmer;
-import tintash.fennel.models.FarmerResponse;
+import tintash.fennel.models.ResponseModel;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
 import tintash.fennel.utils.Constants;
+import tintash.fennel.utils.PreferenceHelper;
 import tintash.fennel.views.NothingSelectedSpinnerAdapter;
 import tintash.fennel.views.TitleBarLayout;
 
 /**
  * Created by Faizan on 9/27/2016.
  */
-public class EnrollFragment extends BaseContainerFragment {
+public class EnrollFragment extends BaseContainerFragment implements AdapterView.OnItemSelectedListener {
 
 
     @Bind(R.id.spLocation)
@@ -99,6 +102,11 @@ public class EnrollFragment extends BaseContainerFragment {
     private Farmer farmer;
     boolean isEdit = false;
 
+    private String location;
+    private String subLocation;
+    private String village;
+    private String treeSpecies;
+
     public static EnrollFragment newInstance(String title, Farmer farmer)
     {
         EnrollFragment fragment = new EnrollFragment();
@@ -127,15 +135,19 @@ public class EnrollFragment extends BaseContainerFragment {
 
         ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsLocation, R.layout.simple_spinner_item);
         spLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "LOCATION"));
+        spLocation.setOnItemSelectedListener(this);
 
         arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsSubLocation, R.layout.simple_spinner_item);
         spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "SUB LOCATION"));
+        spSubLocation.setOnItemSelectedListener(this);
 
         arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsVillage, R.layout.simple_spinner_item);
         spVillage.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "VILLAGE"));
+        spVillage.setOnItemSelectedListener(this);
 
         arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsTree, R.layout.simple_spinner_item);
         spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "TREE SPECIES"));
+        spTree.setOnItemSelectedListener(this);
 
         title = getArguments().getString("title");
         if(title.equalsIgnoreCase(Constants.STR_EDIT_FARMER))
@@ -234,23 +246,64 @@ public class EnrollFragment extends BaseContainerFragment {
         newFarmer.setIdNumber(etIdNumber.getText() != null ? etIdNumber.getText().toString() : "");
         newFarmer.setMobileNumber(etMobileNumber.getText() != null ? etMobileNumber.getText().toString() : "");
 
-        Call<FarmerResponse> apiCall = Fennel.getWebService().addFarmer(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, newFarmer);
-        apiCall.enqueue(new Callback<FarmerResponse>() {
+        Call<ResponseModel> apiCall = Fennel.getWebService().addFarmer(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, newFarmer);
+        apiCall.enqueue(new Callback<ResponseModel>() {
             @Override
-            public void onResponse(Call<FarmerResponse> call, Response<FarmerResponse> response) {
+            public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
                 if (response.body() != null && response.body().success == true) {
                     Log.i("LP", "Farmer Added To Server");
-                    DatabaseHelper.getInstance().insertFarmer(newFarmer, response.body().id, true);
+                    addFarmerToDB(newFarmer, response.body().id, true);
+                    addFarmWithFarmerId(response.body().id);
                 } else {
-                    DatabaseHelper.getInstance().insertFarmer(newFarmer, null, false);
+                    addFarmerToDB(newFarmer, null, false);
                 }
                 Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
             }
 
             @Override
-            public void onFailure(Call<FarmerResponse> call, Throwable t) {
+            public void onFailure(Call<ResponseModel> call, Throwable t) {
                 Log.i("LP", t.getMessage().toString());
-                DatabaseHelper.getInstance().insertFarmer(newFarmer, null,  false);
+                addFarmerToDB(newFarmer, null, false);
+            }
+        });
+    }
+
+    private void addFarmerToDB(Farmer newFarmer, String id, boolean synced) {
+
+        DatabaseHelper.getInstance().insertFarmer(newFarmer, id, synced);
+    }
+
+    private void addFarmToDB(Farm newFarm, String id, boolean synced) {
+        DatabaseHelper.getInstance().insertFarm(newFarm, id, synced);
+    }
+
+    private void addFarmWithFarmerId(String id) {
+
+        final Farm newFarm = new Farm();
+        newFarm.setFacilitatorId(PreferenceHelper.getInstance().readFacilitatorId());
+        newFarm.setFarmerId(id);
+        newFarm.setLocation(location != null ? location : "");
+        newFarm.setSubLocation(subLocation != null ? subLocation : "");
+        newFarm.setVillageName(village != null ? village : "");
+        newFarm.setTreeSpecies(treeSpecies != null ? treeSpecies : "");
+
+        Call<ResponseModel> apiCall = Fennel.getWebService().addFarm(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, newFarm);
+        apiCall.enqueue(new Callback<ResponseModel>() {
+            @Override
+            public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
+                if (response.body() != null && response.body().success == true) {
+                    Log.i("LP", "Farm Added To Server");
+                    addFarmToDB(newFarm, response.body().id, true);
+                } else {
+                    addFarmToDB(newFarm, null, false);
+                }
+                Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
+            }
+
+            @Override
+            public void onFailure(Call<ResponseModel> call, Throwable t) {
+                Log.i("LP", t.getMessage().toString());
+                addFarmToDB(newFarm, null, false);
             }
         });
     }
@@ -297,5 +350,29 @@ public class EnrollFragment extends BaseContainerFragment {
     {
         view.setEnabled(false);
         view.setFocusable(false);
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        Spinner spinnerView = (Spinner) parent;
+        switch (spinnerView.getId()) {
+            case R.id.spLocation:
+                location = (String) parent.getItemAtPosition(position);
+                break;
+            case R.id.spSubLocation:
+                subLocation = (String) parent.getItemAtPosition(position);
+                break;
+            case R.id.spVillage:
+                village = (String) parent.getItemAtPosition(position);
+                break;
+            case R.id.spTree:
+                treeSpecies = (String) parent.getItemAtPosition(position);
+                break;
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 }
