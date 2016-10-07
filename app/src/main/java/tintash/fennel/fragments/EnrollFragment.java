@@ -437,11 +437,12 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
                 if (response.body() != null && response.body().success == true) {
                     Log.i("LP", "Farm Added To Server");
+                    Toast.makeText(getContext(), "Farmer Enrolled Successfully!", Toast.LENGTH_SHORT).show();
+
                     addFarmToDB(farm, response.body().id, true);
-                    Toast.makeText(getContext(), "Farm Created Successfully!", Toast.LENGTH_SHORT).show();
                 } else {
                     addFarmToDB(farm, null, false);
-                    Toast.makeText(getContext(), "Farm Created Failed!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
                 }
                 Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
 
@@ -452,8 +453,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             @Override
             public void onFailure(Call<ResponseModel> call, Throwable t) {
                 Log.i("LP", t.getMessage().toString());
-                addFarmToDB(farm, null, false);
                 Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
+
+                addFarmToDB(farm, null, false);
+                
                 loadingFinished();
                 popToSignupsFragment();
             }
