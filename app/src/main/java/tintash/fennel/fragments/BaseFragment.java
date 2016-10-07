@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,6 @@ import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import tintash.fennel.R;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.utils.Constants;
@@ -98,6 +96,7 @@ public abstract class BaseFragment extends Fragment implements TitleBarLayout.Ti
     public void loadingFinished() {
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.dismiss();
+            mProgressDialog.setMessage(getString(R.string.loading));
         }
     }
 

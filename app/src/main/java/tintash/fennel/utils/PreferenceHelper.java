@@ -14,6 +14,7 @@ public class PreferenceHelper {
     private static final String KEY_USER_ID = "_user_id";
     private static final String KEY_PASSWORD = "_password";
     private static final String KEY_FACILITATOR_ID = "_fac_id";
+    private static final String KEY_FIRST_RUN = "_first_run";
 
 
     private static PreferenceHelper sInstance;
@@ -90,6 +91,17 @@ public class PreferenceHelper {
     public String readFacilitatorId() {
         String id = mPref.getString(KEY_FACILITATOR_ID, null);
         return id;
+    }
+
+    public void writeFirstRun(boolean fRun) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putBoolean(KEY_FIRST_RUN, fRun);
+        editor.commit();
+    }
+
+    public boolean readFirstRun() {
+        boolean firstRun = mPref.getBoolean(KEY_FIRST_RUN, true);
+        return firstRun;
     }
 
     public void clearSession() {

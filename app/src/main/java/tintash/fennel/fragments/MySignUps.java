@@ -30,7 +30,12 @@ import retrofit2.Response;
 import tintash.fennel.R;
 import tintash.fennel.adapters.MySignupsAdapter;
 import tintash.fennel.application.Fennel;
+import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.models.Farmer;
+import tintash.fennel.models.Location;
+import tintash.fennel.models.SubLocation;
+import tintash.fennel.models.Tree;
+import tintash.fennel.models.Village;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
 import tintash.fennel.utils.Constants;
@@ -55,6 +60,129 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     ArrayList<Farmer> myFarmers = new ArrayList<>();
 
     MySignupsAdapter adapter;
+
+    int locationsResponseCounter = 0;
+
+    private Callback<ResponseBody> getLocationsCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            locationsResponseCounter++;
+            if (locationsResponseCounter == 4)
+                loadingFinished();
+
+            if (response.code() == 200) {
+                try {
+                    parseLocations(response.body().string());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            locationsResponseCounter++;
+            if (locationsResponseCounter == 4)
+                loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
+    private Callback<ResponseBody> getSubLocationsCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            locationsResponseCounter++;
+            if (locationsResponseCounter == 4)
+                loadingFinished();
+            if (response.code() == 200) {
+                try {
+                    parseSubLocations(response.body().string());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            locationsResponseCounter++;
+            if (locationsResponseCounter == 4)
+                loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
+    private Callback<ResponseBody> getVillagesCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            locationsResponseCounter++;
+            if (locationsResponseCounter == 4)
+                loadingFinished();
+            if (response.code() == 200) {
+                try {
+                    parseVillages(response.body().string());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            locationsResponseCounter++;
+            if (locationsResponseCounter == 4)
+                loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
+    private Callback<ResponseBody> getTreesCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            locationsResponseCounter++;
+            if (locationsResponseCounter == 4)
+                loadingFinished();
+            if (response.code() == 200) {
+                try {
+                    parseTrees(response.body().string());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            locationsResponseCounter++;
+            if (locationsResponseCounter == 4)
+                loadingFinished();
+            t.printStackTrace();
+        }
+    };
 
     @Nullable
     @Override
@@ -116,6 +244,12 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
         });
+
+        boolean isFirstRun = PreferenceHelper.getInstance().readFirstRun();
+        if (isFirstRun) {
+            PreferenceHelper.getInstance().writeFirstRun(false);
+            getLocationsData();
+        }
     }
 
     private void getMySignups()
@@ -131,6 +265,29 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         String query = NetworkHelper.FARMER_QUERY;
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         apiCall.enqueue(myFarmersAttachments);
+    }
+
+    private void getLocationsData() {
+
+        mProgressDialog.setMessage("Initializing!");
+        loadingStarted();
+
+        String locationsQuery = NetworkHelper.GET_LOCATIONS;
+        Call<ResponseBody> locationsApi = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, locationsQuery);
+        locationsApi.enqueue(getLocationsCallback);
+
+        String subLocationsQuery = NetworkHelper.GET_SUB_LOCATIONS;
+        Call<ResponseBody> subLocationsApi = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, subLocationsQuery);
+        subLocationsApi.enqueue(getSubLocationsCallback);
+
+        String villagesQuery = NetworkHelper.GET_VILLAGES;
+        Call<ResponseBody> villagesApi = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, villagesQuery);
+        villagesApi.enqueue(getVillagesCallback);
+
+        String treesQuery = NetworkHelper.GET_TREES;
+        Call<ResponseBody> treesApi = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, treesQuery);
+        treesApi.enqueue(getTreesCallback);
+
     }
 
     private Callback<ResponseBody> myFarmersAttachments = new Callback<ResponseBody>() {
@@ -360,6 +517,140 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         // Create the list view and bind the adapter
         mLvFarmers.setAdapter(adapter);
     }
+
+    private void parseLocations(String data) throws JSONException {
+
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if(arrRecords.length() > 0) {
+            ArrayList<Location> allLocations = new ArrayList<>();
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject locationObj = arrRecords.getJSONObject(i);
+
+                String id = "";
+                String name = "";
+
+                id = locationObj.getString("Id");
+                if (id.equalsIgnoreCase("null")) id = "";
+
+                name = locationObj.getString("Name");
+                if (name.equalsIgnoreCase("null")) name = "";
+
+                Location location = new Location(id, name);
+                allLocations.add(location);
+                DatabaseHelper.getInstance().insertLocation(location);
+            }
+        }
+        else
+        {
+            Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void parseSubLocations(String data) throws JSONException {
+
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if(arrRecords.length() > 0) {
+            ArrayList<SubLocation> allSubLocations = new ArrayList<>();
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject subLocationObj = arrRecords.getJSONObject(i);
+
+                String id = "";
+                String name = "";
+                String locationId = "";
+
+                id = subLocationObj.getString("Id");
+                if (id.equalsIgnoreCase("null")) id = "";
+
+                name = subLocationObj.getString("Name");
+                if (name.equalsIgnoreCase("null")) name = "";
+
+                locationId = subLocationObj.getString("Location__c");
+                if (locationId.equalsIgnoreCase("null")) locationId = "";
+
+                SubLocation subLocation = new SubLocation(id, name, locationId);
+                allSubLocations.add(subLocation);
+                DatabaseHelper.getInstance().insertSubLocation(subLocation);
+            }
+        }
+        else
+        {
+            Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void parseVillages(String data) throws JSONException {
+
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if(arrRecords.length() > 0) {
+            ArrayList<Village> allVillages = new ArrayList<>();
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject subLocationObj = arrRecords.getJSONObject(i);
+
+                String id = "";
+                String name = "";
+                String subLocationId = "";
+
+                id = subLocationObj.getString("Id");
+                if (id.equalsIgnoreCase("null")) id = "";
+
+                name = subLocationObj.getString("Name");
+                if (name.equalsIgnoreCase("null")) name = "";
+
+                subLocationId = subLocationObj.getString("Sub_Location__c");
+                if (subLocationId.equalsIgnoreCase("null")) subLocationId = "";
+
+                Village village = new Village(id, name, subLocationId);
+                allVillages.add(village);
+                DatabaseHelper.getInstance().inserVillage(village);
+            }
+        }
+        else
+        {
+            Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void parseTrees(String data) throws JSONException {
+
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if(arrRecords.length() > 0) {
+            ArrayList<Tree> allTrees = new ArrayList<>();
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject subLocationObj = arrRecords.getJSONObject(i);
+
+                String id = "";
+                String name = "";
+                String subLocationId = "";
+
+                id = subLocationObj.getString("Id");
+                if (id.equalsIgnoreCase("null")) id = "";
+
+                name = subLocationObj.getString("Name");
+                if (name.equalsIgnoreCase("null")) name = "";
+
+                Tree tree = new Tree(id, name);
+                allTrees.add(tree);
+                DatabaseHelper.getInstance().insertTree(tree);
+            }
+        }
+        else
+        {
+            Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     @Override
     protected String getTrackerScreenName() {

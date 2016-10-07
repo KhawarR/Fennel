@@ -316,11 +316,12 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        loadingStarted();
 
         if (!isFormFilled()) {
             return;
         }
+
+        loadingStarted();
 
         if (isEdit) {
             editFarmer();
