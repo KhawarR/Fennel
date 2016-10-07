@@ -17,6 +17,11 @@ public class NetworkHelper {
     public static final String QUERY_MY_SIGNUPS = "SELECT Farmers__r.Id, Farmers__r.FullName__c, Farmers__r.First_Name__c, Farmers__r.Middle_Name__c, Farmers__r.Last_Name__c, Farmers__r.Name, Farmers__r.Gender__c, Farmers__r.Leader__c, Farmers__r.Mobile_Number__c, Status__c, Location__r.Name, Sub_Location__r.Name, Tree__r.Name, Village__r.Name FROM Farm__c WHERE Facilitator__c = '%s' Order By Status__c";
     public static final String FARMER_QUERY = "SELECT Id, Name, (SELECT Id, ParentId, Name FROM Attachments) FROM Farmer__c";
 
+    public static final String GET_LOCATIONS = "SELECT Id, Name FROM Location__c";
+    public static final String GET_SUB_LOCATIONS = "SELECT Id, Name, Location__c FROM Sub_Location__c";
+    public static final String GET_VILLAGES = "SELECT Id, Name, Sub_Location__c FROM Village__c";
+    public static final String GET_TREES = "SELECT Id, Name FROM Tree__c";
+
     /**
      * - Full name
      * Location Name

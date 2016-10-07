@@ -7,8 +7,16 @@ import android.util.Log;
 
 import tintash.fennel.common.database.tables.FarmTable;
 import tintash.fennel.common.database.tables.FarmerTable;
+import tintash.fennel.common.database.tables.LocationTable;
+import tintash.fennel.common.database.tables.SubLocationTable;
+import tintash.fennel.common.database.tables.TreeTable;
+import tintash.fennel.common.database.tables.VillageTable;
 import tintash.fennel.models.Farm;
 import tintash.fennel.models.Farmer;
+import tintash.fennel.models.Location;
+import tintash.fennel.models.SubLocation;
+import tintash.fennel.models.Tree;
+import tintash.fennel.models.Village;
 
 /**
  * Created by Irfan Ayaz on 30-Sep-16.
@@ -45,6 +53,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(FarmerTable.CREATE_TABLE_FARMER);
         db.execSQL(FarmTable.CREATE_TABLE_FARM);
+        db.execSQL(LocationTable.CREATE_TABLE_LOCATION);
+        db.execSQL(SubLocationTable.CREATE_TABLE_SUB_LOCATION);
+        db.execSQL(VillageTable.CREATE_TABLE_VILLAGE);
+        db.execSQL(TreeTable.CREATE_TABLE_TREE);
 
         Log.d(TAG, "onCreate called");
 
@@ -71,7 +83,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         long rowInserted = FarmerTable.insert(this, newFarmer, id,  synced);
         if (rowInserted != -1) {
-            Log.i("FENNEL", "Row inserted!");
+            Log.i("FENNEL", "Farmer inserted!");
         }
     }
 
@@ -79,7 +91,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         long rowInserted = FarmTable.insert(this, newFarm, id,  synced);
         if (rowInserted != -1) {
-            Log.i("FENNEL", "Row inserted!");
+            Log.i("FENNEL", "Farm inserted!");
+        }
+    }
+
+    public void insertLocation(Location newLocation) {
+        long rowInserted = LocationTable.insert(this, newLocation);
+        if (rowInserted != -1) {
+            Log.i("FENNEL", "Location inserted!");
+        }
+    }
+
+    public void insertSubLocation(SubLocation newSubLocation) {
+        long rowInserted = SubLocationTable.insert(this, newSubLocation);
+        if (rowInserted != -1) {
+            Log.i("FENNEL", "SubLocation inserted!");
+        }
+    }
+
+    public void inserVillage(Village newVillage) {
+        long rowInserted = VillageTable.insert(this, newVillage);
+        if (rowInserted != -1) {
+            Log.i("FENNEL", "Village inserted!");
+        }
+    }
+
+    public void insertTree(Tree newTree) {
+        long rowInserted = TreeTable.insert(this, newTree);
+        if (rowInserted != -1) {
+            Log.i("FENNEL", "Tree inserted!");
         }
     }
     //endregion
