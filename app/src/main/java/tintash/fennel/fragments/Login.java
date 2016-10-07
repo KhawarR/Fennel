@@ -16,6 +16,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookieStore;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -57,8 +66,8 @@ public class Login extends BaseFragment implements Callback<Auth> {
         super.onViewCreated(view, savedInstanceState);
 
         // TODO Remove on release
-//        etId.setText("khawar");
-//        etPassword.setText("khawar");
+        etId.setText("khawar");
+        etPassword.setText("khawar");
     }
 
     @Override
@@ -88,6 +97,20 @@ public class Login extends BaseFragment implements Callback<Auth> {
             Fennel.restClient.setApiBaseUrl(auth.instance_url);
             String username = etId.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
+
+//            CookieHandler cookieManager = CookieManager.getDefault();
+//            try {
+//                Map<String,List<String>> map = new HashMap<>();
+//                List<String> l = new ArrayList<>();
+//                l.add(auth.access_token);
+//                map.put("sid",l);
+//                cookieManager.put(new URI("https://c.cs25.content.force.com/"),map);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } catch (URISyntaxException e) {
+//                e.printStackTrace();
+//            }
+
             if (username.length() > 0) {
                 String loginQuery = String.format(NetworkHelper.QUERY_LOGIN, username, password);
                 Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, loginQuery);
