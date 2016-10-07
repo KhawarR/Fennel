@@ -300,20 +300,24 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             }
 
             if(farmer.getLocation()!= null && !farmer.getLocation().isEmpty()) {
-                ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsLocation, R.layout.simple_spinner_item);
-                spLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getLocation()));
+//                ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsLocation, R.layout.simple_spinner_item);
+//                spLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getLocation()));
+                spLocation.setSelection(getPositionForSpinnerArray(farmer.getLocation(), strArrLocations));
             }
             if(farmer.getSubLocation()!= null && !farmer.getSubLocation().isEmpty()) {
-                ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsSubLocation, R.layout.simple_spinner_item);
-                spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getSubLocation()));
+//                ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsSubLocation, R.layout.simple_spinner_item);
+//                spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getSubLocation()));
+                spSubLocation.setSelection(getPositionForSpinnerArray(farmer.getSubLocation(), strArrSubLocations));
             }
             if(farmer.getTreeSpecies()!= null && !farmer.getTreeSpecies().isEmpty()) {
-                ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsTree, R.layout.simple_spinner_item);
-                spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getTreeSpecies()));
+//                ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsTree, R.layout.simple_spinner_item);
+//                spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getTreeSpecies()));
+                spTree.setSelection(getPositionForSpinnerArray(farmer.getTreeSpecies(), strArrTrees));
             }
             if(farmer.getVillageName()!= null && !farmer.getVillageName().isEmpty()) {
-                ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsVillage, R.layout.simple_spinner_item);
-                spVillage.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getVillageName()));
+//                ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsVillage, R.layout.simple_spinner_item);
+//                spVillage.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getVillageName()));
+                spVillage.setSelection(getPositionForSpinnerArray(farmer.getVillageName(), strArrVillages));
             }
 
             if(farmer.isFarmerHome()) {
@@ -330,6 +334,15 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             if(farmer.getThumbUrl()!= null && !farmer.getThumbUrl().isEmpty()) ImageLoader.getInstance().displayImage(farmer.getThumbUrl(), imgFarmerPhoto, options);
             if(farmer.getFarmerIdPhotoUrl()!= null && !farmer.getFarmerIdPhotoUrl().isEmpty()) ImageLoader.getInstance().displayImage(farmer.getFarmerIdPhotoUrl(), imgNationalID, options);
         }
+    }
+
+    private int getPositionForSpinnerArray(String location, ArrayList<String> array) {
+        for (int i = 0; i < array.size(); i++) {
+            if(array.get(i).equalsIgnoreCase(location)){
+                return i + 1;
+            }
+        }
+        return 0;
     }
 
     @OnClick({R.id.tvMale, R.id.tvFemale})
