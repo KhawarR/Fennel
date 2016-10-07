@@ -164,8 +164,13 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         titleBarLayout.setOnIconClickListener(this);
 
         tvMale.setSelected(true);
+        tvFemale.setSelected(false);
+
         tvLeaderNo.setSelected(true);
+        tvLeaderYes.setSelected(false);
+
         txtFarmerHomeNo.setSelected(true);
+        txtFarmerHomeYes.setSelected(false);
 
         ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsLocation, R.layout.simple_spinner_item);
         spLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "LOCATION"));
@@ -211,15 +216,23 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             etSurname.setText(farmer.getSurname());
             etIdNumber.setText(farmer.getIdNumber());
 
-            if(farmer.getGender().equalsIgnoreCase("male"))
+            if(farmer.getGender().equalsIgnoreCase("male")) {
                 tvMale.setSelected(true);
-            else
+                tvFemale.setSelected(false);
+            }
+            else {
                 tvFemale.setSelected(true);
+                tvMale.setSelected(false);
+            }
 
-            if(farmer.isLeader())
+            if(farmer.isLeader()) {
                 tvLeaderYes.setSelected(true);
-            else
+                tvLeaderNo.setSelected(false);
+            }
+            else {
                 tvLeaderNo.setSelected(true);
+                tvLeaderYes.setSelected(false);
+            }
 
             if(farmer.getLocation()!= null && !farmer.getLocation().isEmpty()) {
                 ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsLocation, R.layout.simple_spinner_item);
@@ -238,10 +251,14 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 spVillage.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getVillageName()));
             }
 
-            if(farmer.isFarmerHome())
+            if(farmer.isFarmerHome()) {
                 txtFarmerHomeYes.setSelected(true);
-            else
+                txtFarmerHomeNo.setSelected(false);
+            }
+            else {
                 txtFarmerHomeNo.setSelected(true);
+                txtFarmerHomeYes.setSelected(false);
+            }
 
             etMobileNumber.setText(farmer.getMobileNumber());
 
