@@ -5,7 +5,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 import tintash.fennel.common.database.DatabaseHelper;
+import tintash.fennel.models.SubLocation;
 import tintash.fennel.models.Village;
 
 /**
@@ -52,7 +55,6 @@ public class VillageTable {
         return newRowId;
     }
 
-
     public static boolean villageExits(DatabaseHelper dbHelper, String locId) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_VILLAGE + " WHERE " + COLUMN_SFDC_ID + " = ?";
@@ -63,5 +65,51 @@ public class VillageTable {
         }
         cursor.close();
         return true;
+    }
+
+    public static ArrayList<Village> getVillagesFromSubLocation(DatabaseHelper dbHelper, String id) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        ArrayList<Village> allLocations = new ArrayList<>();
+
+        String query = "SELECT * FROM " + TABLE_VILLAGE + " WHERE " + COLUMN_SUB_LOCATION_ID + " = ?";
+        Cursor c = db.rawQuery(query, new String[]{id});
+
+        if (c.moveToFirst()) {
+            do {
+                Village location = new Village(
+                        c.getString(0),
+                        c.getString(1),
+                        c.getString(2)
+                );
+
+                allLocations.add(location);
+            } while (c.moveToNext());
+        }
+        c.close();
+
+        return allLocations;
+    }
+
+    public static ArrayList<Village> getAllVillages(DatabaseHelper dbHelper) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        ArrayList<Village> allLocations = new ArrayList<>();
+
+        Cursor c = db.rawQuery("SELECT * FROM "
+                + TABLE_VILLAGE, null);
+
+        if (c.moveToFirst()) {
+            do {
+                Village location = new Village(
+                        c.getString(0),
+                        c.getString(1),
+                        c.getString(2)
+                );
+
+                allLocations.add(location);
+            } while (c.moveToNext());
+        }
+        c.close();
+
+        return allLocations;
     }
 }

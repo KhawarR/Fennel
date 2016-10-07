@@ -5,6 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 import tintash.fennel.common.database.tables.FarmTable;
 import tintash.fennel.common.database.tables.FarmerTable;
 import tintash.fennel.common.database.tables.LocationTable;
@@ -93,6 +95,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (rowInserted != -1) {
             Log.i("FENNEL", "Farm inserted!");
         }
+    }
+
+    public ArrayList<Location> getAllLocations()
+    {
+        return LocationTable.getAllLocations(this);
+    }
+
+    public ArrayList<SubLocation> getAllSubLocations()
+    {
+        return SubLocationTable.getAllSubLocations(this);
+    }
+
+    public ArrayList<SubLocation> getSubLocationsFromLocation(String id)
+    {
+        return SubLocationTable.getSubLocationsFromLocation(this, id);
+    }
+
+    public ArrayList<Village> getAllVillages()
+    {
+        return VillageTable.getAllVillages(this);
+    }
+
+    public ArrayList<Village> getVillagesFromSubLocation(String id)
+    {
+        return VillageTable.getVillagesFromSubLocation(this, id);
+    }
+
+    public ArrayList<Tree> getAllTrees()
+    {
+        return TreeTable.getAllTrees(this);
     }
 
     public void insertLocation(Location newLocation) {

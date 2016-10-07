@@ -63,127 +63,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     int locationsResponseCounter = 0;
 
-    private Callback<ResponseBody> getLocationsCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
-
-            if (response.code() == 200) {
-                try {
-                    parseLocations(response.body().string());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            else
-            {
-                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
-            t.printStackTrace();
-        }
-    };
-
-    private Callback<ResponseBody> getSubLocationsCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
-            if (response.code() == 200) {
-                try {
-                    parseSubLocations(response.body().string());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            else
-            {
-                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
-            t.printStackTrace();
-        }
-    };
-
-    private Callback<ResponseBody> getVillagesCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
-            if (response.code() == 200) {
-                try {
-                    parseVillages(response.body().string());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            else
-            {
-                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
-            t.printStackTrace();
-        }
-    };
-
-    private Callback<ResponseBody> getTreesCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
-            if (response.code() == 200) {
-                try {
-                    parseTrees(response.body().string());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            else
-            {
-                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
-            t.printStackTrace();
-        }
-    };
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -191,7 +70,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.fragment_my_sign_ups, container, false);
         ButterKnife.bind(this, view);
 
-//        populateDummyData();
         getMySignups();
 
         return view;
@@ -673,4 +551,126 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 break;
         }
     }
+
+    private Callback<ResponseBody> getLocationsCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            locationsResponseCounter++;
+            if (locationsResponseCounter == 4)
+                loadingFinished();
+
+            if (response.code() == 200) {
+                try {
+                    parseLocations(response.body().string());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            locationsResponseCounter++;
+            if (locationsResponseCounter == 4)
+                loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
+    private Callback<ResponseBody> getSubLocationsCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            locationsResponseCounter++;
+            if (locationsResponseCounter == 4)
+                loadingFinished();
+            if (response.code() == 200) {
+                try {
+                    parseSubLocations(response.body().string());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            locationsResponseCounter++;
+            if (locationsResponseCounter == 4)
+                loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
+    private Callback<ResponseBody> getVillagesCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            locationsResponseCounter++;
+            if (locationsResponseCounter == 4)
+                loadingFinished();
+            if (response.code() == 200) {
+                try {
+                    parseVillages(response.body().string());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            locationsResponseCounter++;
+            if (locationsResponseCounter == 4)
+                loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
+    private Callback<ResponseBody> getTreesCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            locationsResponseCounter++;
+            if (locationsResponseCounter == 4)
+                loadingFinished();
+            if (response.code() == 200) {
+                try {
+                    parseTrees(response.body().string());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            locationsResponseCounter++;
+            if (locationsResponseCounter == 4)
+                loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
 }

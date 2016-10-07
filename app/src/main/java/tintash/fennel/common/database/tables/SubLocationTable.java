@@ -5,7 +5,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 import tintash.fennel.common.database.DatabaseHelper;
+import tintash.fennel.models.Location;
 import tintash.fennel.models.SubLocation;
 
 /**
@@ -52,7 +55,6 @@ public class SubLocationTable {
         return newRowId;
     }
 
-
     public static boolean subLocationsExits(DatabaseHelper dbHelper, String locId) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_SUB_LOCATION + " WHERE " + COLUMN_SFDC_ID + " = ?";
@@ -63,5 +65,51 @@ public class SubLocationTable {
         }
         cursor.close();
         return true;
+    }
+
+    public static ArrayList<SubLocation> getSubLocationsFromLocation(DatabaseHelper dbHelper, String id) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        ArrayList<SubLocation> allLocations = new ArrayList<>();
+
+        String query = "SELECT * FROM " + TABLE_SUB_LOCATION + " WHERE " + COLUMN_LOCATION_ID + " = ?";
+        Cursor c = db.rawQuery(query, new String[]{id});
+
+        if (c.moveToFirst()) {
+            do {
+                SubLocation location = new SubLocation(
+                        c.getString(0),
+                        c.getString(1),
+                        c.getString(2)
+                );
+
+                allLocations.add(location);
+            } while (c.moveToNext());
+        }
+        c.close();
+
+        return allLocations;
+    }
+
+    public static ArrayList<SubLocation> getAllSubLocations(DatabaseHelper dbHelper) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        ArrayList<SubLocation> allLocations = new ArrayList<>();
+
+        Cursor c = db.rawQuery("SELECT * FROM "
+                + TABLE_SUB_LOCATION, null);
+
+        if (c.moveToFirst()) {
+            do {
+                SubLocation location = new SubLocation(
+                        c.getString(0),
+                        c.getString(1),
+                        c.getString(2)
+                );
+
+                allLocations.add(location);
+            } while (c.moveToNext());
+        }
+        c.close();
+
+        return allLocations;
     }
 }

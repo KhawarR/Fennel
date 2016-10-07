@@ -31,6 +31,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -46,7 +47,11 @@ import tintash.fennel.application.Fennel;
 import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.models.Farm;
 import tintash.fennel.models.Farmer;
+import tintash.fennel.models.Location;
 import tintash.fennel.models.ResponseModel;
+import tintash.fennel.models.SubLocation;
+import tintash.fennel.models.Tree;
+import tintash.fennel.models.Village;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
 import tintash.fennel.utils.Constants;
@@ -136,10 +141,14 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private boolean isFarmerPhotoSet = false;
     private boolean isNationalIdPhotoSet = false;
 
-//    private int PICKER_REQUEST_FARMER_DEVICE = 12001;
-//    private int PICKER_REQUEST_FARMER_CAMERA = 12002;
-//    private int PICKER_REQUEST_NAT_ID_DEVICE = 12003;
-//    private int PICKER_REQUEST_NAT_ID_CAMERA = 12004;
+    private ArrayList<Location> arrLocations = new ArrayList<>();
+    private ArrayList<String> strArrLocations = new ArrayList<>();
+    private ArrayList<SubLocation> arrSubLocations = new ArrayList<>();
+    private ArrayList<String> strArrSubLocations = new ArrayList<>();
+    private ArrayList<Village> arrVillages = new ArrayList<>();
+    private ArrayList<String> strArrVillages = new ArrayList<>();
+    private ArrayList<Tree> arrTrees = new ArrayList<>();
+    private ArrayList<String> strArrTrees = new ArrayList<>();
 
     public static EnrollFragment newInstance(String title, Farmer farmer)
     {
@@ -185,20 +194,51 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         txtFarmerHomeNo.setSelected(true);
         txtFarmerHomeYes.setSelected(false);
 
-        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsLocation, R.layout.simple_spinner_item);
-        spLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "LOCATION"));
+        arrLocations = DatabaseHelper.getInstance().getAllLocations();
+        strArrLocations = new ArrayList<>();
+
+        for (int i = 0; i < arrLocations.size(); i++) {
+            strArrLocations.add(arrLocations.get(i).name);
+        }
+
+        arrSubLocations = DatabaseHelper.getInstance().getAllSubLocations();
+        strArrSubLocations = new ArrayList<>();
+
+        for (int i = 0; i < arrSubLocations.size(); i++) {
+            strArrSubLocations.add(arrSubLocations.get(i).name);
+        }
+
+        arrVillages = DatabaseHelper.getInstance().getAllVillages();
+        strArrVillages = new ArrayList<>();
+
+        for (int i = 0; i < arrVillages.size(); i++) {
+            strArrVillages.add(arrVillages.get(i).name);
+        }
+
+        arrTrees = DatabaseHelper.getInstance().getAllTrees();
+        strArrTrees = new ArrayList<>();
+
+        for (int i = 0; i < arrTrees.size(); i++) {
+            strArrTrees.add(arrTrees.get(i).name);
+        }
+
+        ArrayAdapter<String> arrayAdapterLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrLocations);
+        spLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterLoc, R.layout.spinner_nothing_selected, getContext(), "LOCATION"));
         spLocation.setOnItemSelectedListener(this);
 
-        arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsSubLocation, R.layout.simple_spinner_item);
-        spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "SUB LOCATION"));
+//        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsSubLocation, R.layout.simple_spinner_item);
+        ArrayAdapter<String> arrayAdapterSubLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrSubLocations);
+        spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterSubLoc, R.layout.spinner_nothing_selected, getContext(), "SUB LOCATION"));
         spSubLocation.setOnItemSelectedListener(this);
 
-        arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsVillage, R.layout.simple_spinner_item);
-        spVillage.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "VILLAGE"));
+//        arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsVillage, R.layout.simple_spinner_item);
+        ArrayAdapter<String> arrayAdapterVillage = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrVillages);
+        spVillage.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterVillage, R.layout.spinner_nothing_selected, getContext(), "VILLAGE"));
         spVillage.setOnItemSelectedListener(this);
 
-        arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsTree, R.layout.simple_spinner_item);
-        spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), "TREE SPECIES"));
+//        arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsTree, R.layout.simple_spinner_item);
+        ArrayAdapter<String> arrayAdapterTree = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrTrees);
+        spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterTree, R.layout.spinner_nothing_selected, getContext(), "TREE SPECIES"));
         spTree.setOnItemSelectedListener(this);
 
         title = getArguments().getString("title");
@@ -641,20 +681,53 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     }
 
     @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         Spinner spinnerView = (Spinner) parent;
+        int position = pos - 1;
+        if(position == -1)
+            position = 0;
         switch (spinnerView.getId()) {
             case R.id.spLocation:
-                location = (String) parent.getItemAtPosition(position);
+                location = arrLocations.get(position).id;
+//                arrSubLocations = DatabaseHelper.getInstance().getSubLocationsFromLocation(location);
+//                strArrSubLocations.clear();
+//                for (int i = 0; i < arrSubLocations.size(); i++) {
+//                    strArrSubLocations.add(arrSubLocations.get(i).name);
+//                }
+//                if(strArrSubLocations.size() > 0)
+//                {
+//                    spSubLocation.setEnabled(true);
+////                    spSubLocation.getAdapter().notify();
+//                }
+//                else
+//                {
+//                    strArrSubLocations.add("");
+//                    spSubLocation.setEnabled(false);
+//                }
                 break;
             case R.id.spSubLocation:
-                subLocation = (String) parent.getItemAtPosition(position);
+                subLocation = arrSubLocations.get(position).id;
+//                arrVillages = DatabaseHelper.getInstance().getVillagesFromSubLocation(subLocation);
+//                strArrVillages.clear();
+//                for (int i = 0; i < arrVillages.size(); i++) {
+//                    strArrVillages.add(arrVillages.get(i).name);
+//                }
+//                if(strArrVillages.size() > 0)
+//                {
+//                    spVillage.setEnabled(true);
+////                    spVillage.getAdapter().notify();
+//                }
+//                else
+//                {
+//                    strArrVillages.add("");
+//                    spVillage.setEnabled(false);
+//                }
                 break;
             case R.id.spVillage:
-                village = (String) parent.getItemAtPosition(position);
+                village = arrVillages.get(position).id;
                 break;
             case R.id.spTree:
-                treeSpecies = (String) parent.getItemAtPosition(position);
+                treeSpecies = arrTrees.get(position).id;
                 break;
         }
         checkEnableSubmit();
