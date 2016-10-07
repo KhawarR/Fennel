@@ -7,7 +7,6 @@ import android.util.Log;
 
 import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.models.Farm;
-import tintash.fennel.models.Farmer;
 
 /**
  * Created by irfanayaz on 10/6/16.
@@ -87,41 +86,33 @@ public class FarmTable {
         return true;
     }
 
-    public int update(Farmer farmer) {
+    public static int update(DatabaseHelper dbHelper, Farm farm, boolean synced) {
 
-//        SQLiteDatabase db = dbHelper.getWritableDatabase();
-//
-//        ContentValues values = new ContentValues();
-//        values.put(COLUMN_FOLLOWER_USERNAME, user.username);
-//        values.put(COLUMN_FOLLOWER_BOTH, user.both);
-//        values.put(COLUMN_FOLLOWER_NAME, user.name);
-//        values.put(COLUMN_FOLLOWER_RELATIONSHIP, user.relationship);
-//        values.put(COLUMN_FOLLOWER_CREATED_AT, user.createdAt);
-//        values.put(COLUMN_FOLLOWER_PROFILE_PHOTO, user.profilephoto);
-//        values.put(COLUMN_FOLLOWER_EMAIL, user.email);
-//        values.put(COLUMN_FOLLOWER_COVER_PHOTO, user.coverphoto);
-//        values.put(COLUMN_FOLLOWER_CREATED_AT, user.createdAt);
-//        values.put(COLUMN_FOLLOWER_NOTIFY, user.notify);
-//        values.put(COLUMN_FOLLOWER_KEY, user.key);
-//        values.put(COLUMN_FOLLOWER_ASK, user.ask);
-//        values.put(COLUMN_FOLLOWER_FOLLOW, user.follow);
-//        values.put(COLUMN_FOLLOWER_THUMBNAIL, user.thumbnail);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-//        // Which row to update, based on the email
-//        String selection = COLUMN_FOLLOWER_USERNAME + " = ?";
-//        String[] selectionArgs = {user.username};
-//
-//        int count = db.update(
-//                TABLE_FOLLOWER,
-//                values,
-//                selection,
-//                selectionArgs);
-//
-//        Log.i(TAG, "Rows updated: " + count);
-//        return count;
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_FACILITATOR_ID, farm.facilitatorId);
+        values.put(COLUMN_FARMER_ID, farm.farmerId);
+        values.put(COLUMN_FARMER_ENROLLMENT_DATE, farm.farmerEnrollmentDate);
+        values.put(COLUMN_LOCATION, farm.location);
+        values.put(COLUMN_SUB_LOCATION, farm.subLocation);
+        values.put(COLUMN_VILLAGE_NAME, farm.villageName);
+        values.put(COLUMN_TREE_SPECIES, farm.treeSpecies);
+        values.put(COLUMN_SYNCED, synced);
 
-        return 0;
-    }
+        // Which row to update, based on the email
+        String selection = COLUMN_SFDC_ID + " = ?";
+        String[] selectionArgs = {farm.farmId};
+
+        int count = db.update(
+                TABLE_FARM,
+                values,
+                selection,
+                selectionArgs);
+
+        Log.i(TAG, "Rows updated: " + count);
+        return count;
+ }
 
 //    public int delete(String username) {
 //

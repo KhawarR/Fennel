@@ -12,7 +12,6 @@ import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
-import tintash.fennel.models.Farm;
 import tintash.fennel.models.ResponseModel;
 
 public interface WebService {
@@ -30,5 +29,8 @@ public interface WebService {
     Call<ResponseBody> editFarmer(@Header("Authorization") String token, @Header("Content-Type") String contentType, @Path("apiVersion") String apiVersion, @Path("farmerId") String farmerId, @Body HashMap<String, Object> farmer);
 
     @POST ("/services/data/{apiVersion}/sobjects/Farm__c/")
-    Call<ResponseModel> addFarm(@Header("Authorization") String token, @Header("Content-Type") String contentType, @Path("apiVersion") String apiVersion, @Body Farm farm);
+    Call<ResponseModel> addFarm(@Header("Authorization") String token, @Header("Content-Type") String contentType, @Path("apiVersion") String apiVersion, @Body HashMap<String, Object> farm);
+
+    @PATCH ("/services/data/{apiVersion}/sobjects/Farm__c/{farmId}")
+    Call<ResponseBody> editFarm(@Header("Authorization") String token, @Header("Content-Type") String contentType, @Path("apiVersion") String apiVersion, @Path("farmId") String farmId,  @Body HashMap<String, Object> farm);
 }

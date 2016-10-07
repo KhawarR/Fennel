@@ -87,11 +87,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    public void updateFarmer(Farmer newFarmer, boolean synced) {
+        long rowsUpdated = FarmerTable.update(this, newFarmer,  synced);
+        if (rowsUpdated != -1) {
+            Log.i("FENNEL", "Farmer updated!");
+        }
+    }
+
     public void insertFarm(Farm newFarm, String id, boolean synced) {
 
         long rowInserted = FarmTable.insert(this, newFarm, id,  synced);
         if (rowInserted != -1) {
             Log.i("FENNEL", "Farm inserted!");
+        }
+    }
+
+    public void updateFarm(Farm newFarm, boolean synced) {
+        long rowsUpdated = FarmTable.update(this, newFarm,  synced);
+        if (rowsUpdated != -1) {
+            Log.i("FENNEL", "Farm udpated!");
         }
     }
 

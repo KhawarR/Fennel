@@ -136,6 +136,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private boolean isFarmerPhotoSet = false;
     private boolean isNationalIdPhotoSet = false;
 
+    private String farmerStatus = null;
+
 //    private int PICKER_REQUEST_FARMER_DEVICE = 12001;
 //    private int PICKER_REQUEST_FARMER_CAMERA = 12002;
 //    private int PICKER_REQUEST_NAT_ID_DEVICE = 12003;
@@ -323,6 +325,12 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         loadingStarted();
 
+        farmerStatus = "Incomplete";
+        createOrEditFarmer();
+    }
+
+    private void createOrEditFarmer() {
+
         if (isEdit) {
             editFarmer();
         } else {
@@ -362,13 +370,23 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         DatabaseHelper.getInstance().insertFarmer(newFarmer, id, synced);
     }
 
+    private void updateFarmer(Farmer newFarmer, boolean synced) {
+        DatabaseHelper.getInstance().updateFarmer(newFarmer, synced);
+    }
+
     private void addFarmToDB(Farm newFarm, String id, boolean synced) {
         DatabaseHelper.getInstance().insertFarm(newFarm, id, synced);
     }
 
+    private void updateFarm(Farm newFarm, boolean synced) {
+        DatabaseHelper.getInstance().updateFarm(newFarm, synced);
+    }
+
     private void addFarmWithFarmerId(final Farm farm, String id) {
 
-        Call<ResponseModel> apiCall = Fennel.getWebService().addFarm(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farm);
+        HashMap<String, Object> farmMap = getFarmMap();
+
+        Call<ResponseModel> apiCall = Fennel.getWebService().addFarm(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmMap);
         apiCall.enqueue(new Callback<ResponseModel>() {
             @Override
             public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
@@ -397,6 +415,39 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         });
     }
 
+    private void editFarmWithFarmId(final Farm farm, String farmId) {
+
+        HashMap<String, Object> farmMap = getFarmMap();
+        Call<ResponseBody> apiCall = Fennel.getWebService().editFarm(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmId, farmMap);
+        apiCall.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                    Log.i("LP", "Farm Edited Successfully");
+                    updateFarm(farm, true);
+                    Toast.makeText(getContext(), "Farmer Enrolled Successfully!", Toast.LENGTH_SHORT).show();
+                } else {
+                    updateFarm(farm, false);
+                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
+                }
+                Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
+
+                loadingFinished();
+                popToSignupsFragment();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.i("LP", t.getMessage().toString());
+                Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
+
+                updateFarm(farm, false);
+                loadingFinished();
+                popToSignupsFragment();
+            }
+        });
+    }
+
     private Farm createFarmWithFarmerId(String farmerId) {
 
         final Farm newFarm = new Farm();
@@ -404,7 +455,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             newFarm.setFarmerId(farmerId);
 
         newFarm.setFacilitatorId(PreferenceHelper.getInstance().readFacilitatorId());
-        newFarm.setFarmerStatus("Incomplete");
+        newFarm.setFarmerStatus(farmerStatus);
         newFarm.setLocation("");//location != null ? location : "");
         newFarm.setSubLocation("");//subLocation != null ? subLocation : "");
         newFarm.setVillageName("");//village != null ? village : "");
@@ -440,6 +491,19 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         newFarmer.setLeader((tvLeaderYes.isSelected() == true) ? true : false);
 
         return newFarmer;
+    }
+
+    private HashMap<String, Object> getFarmMap() {
+
+        final HashMap<String, Object> newFarmMap = new HashMap<>();
+        newFarmMap.put("Location__c" , location);
+        newFarmMap.put("Sub_Location__c", subLocation);
+        newFarmMap.put("Village__c", village);
+        newFarmMap.put("Tree__c", treeSpecies);
+        newFarmMap.put("Status__c", farmerStatus);
+        newFarmMap.put("Facilitator__c" , PreferenceHelper.getInstance().readFacilitatorId());
+
+        return newFarmMap;
     }
 
     private final TextWatcher watcher = new TextWatcher(){
@@ -483,7 +547,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     @OnClick(R.id.txtSubmitApproval)
     void onClickSubmitForApproval(View view) {
-        Toast.makeText(getActivity(), "Clicked", Toast.LENGTH_SHORT).show();
+        loadingStarted();
+
+        farmerStatus = "Pending";
+        createOrEditFarmer();
     }
 
     @OnClick(R.id.imgFarmerPhoto)
@@ -669,14 +736,6 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         final HashMap<String, Object> farmerMap = getFarmerMap();
 
-//        farmer.setFirstName(etFirstName.getText() != null ? etFirstName.getText().toString() : "");
-//        farmer.setSecondName(etSecondName.getText() != null ? etSecondName.getText().toString() : "");
-//        farmer.setSurname(etSurname.getText() != null ? etSurname.getText().toString() : "");
-//        farmer.setIdNumber(etIdNumber.getText() != null ? etIdNumber.getText().toString() : "");
-//        farmer.setMobileNumber(etMobileNumber.getText() != null ? etMobileNumber.getText().toString() : "");
-//        //String fullName = ((etFirstName.getText() != null && !etFirstName.getText().equals("")) ? etFirstName.getText().toString() : "") + ((etSecondName.getText() != null && !etSecondName.getText().equals("")) ? " " + etSecondName.getText().toString() : "") + ((etSurname.getText() != null && !etSecondName.getText().equals("")) ? " " + etSurname.getText().toString() : "");
-//        //farmer.setFullName(fullName);
-
         Call<ResponseBody> apiCall = Fennel.getWebService().editFarmer(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmer.farmerId, farmerMap);
         apiCall.enqueue(new Callback<ResponseBody>() {
             @Override
@@ -684,19 +743,33 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                     Log.i("LP", "Farmer Edited!");
                     Toast.makeText(getContext(), "Farmer Edited Successfully!", Toast.LENGTH_SHORT).show();
+                    updateFarmer(farmer, true);
+                    Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
+                    newFarm.farmId = farmer.farmId;
+                    editFarmWithFarmId(newFarm, farmer.farmId);
 
                 } else {
                     Toast.makeText(getContext(), "Farmer Edit Failed!", Toast.LENGTH_SHORT).show();
+                    updateFarmer(farmer, false);
+                    Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
+                    newFarm.farmId = farmer.farmId;
+                    updateFarm(newFarm, false);
+
+                    loadingFinished();
+                    popToSignupsFragment();
                 }
-                loadingFinished();
-                popToSignupsFragment();
+
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.i("LP", t.getMessage().toString());
-
                 Toast.makeText(getContext(), "Farmer Edit Failed!", Toast.LENGTH_SHORT).show();
+
+                updateFarmer(farmer, false);
+                Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
+                newFarm.farmId = farmer.farmId;
+                updateFarm(newFarm, false);
                 loadingFinished();
                 popToSignupsFragment();
             }
@@ -715,6 +788,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 Farmer newFarmer = getFarmer();
                 if (response.body() != null && response.body().success == true) {
                     Log.i("LP", "Farmer Added To Server");
+                    newFarmer.farmerId = response.body().id;
                     addFarmerToDB(newFarmer, response.body().id, true);
                     Farm newFarm = createFarmWithFarmerId(response.body().id);
                     addFarmWithFarmerId(newFarm, response.body().id);
@@ -735,11 +809,13 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             @Override
             public void onFailure(Call<ResponseModel> call, Throwable t) {
                 Log.i("LP", t.getMessage().toString());
+                Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
+
                 Farmer newFarmer = getFarmer();
                 addFarmerToDB(newFarmer, null, false);
                 Farm newFarm = createFarmWithFarmerId(null);
                 addFarmToDB(newFarm, null, false);
-                Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
+
                 loadingFinished();
                 popToSignupsFragment();
             }
