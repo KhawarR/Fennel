@@ -93,12 +93,12 @@ public class Farmer implements Serializable{
         this.isLeader = isLeader;
         this.location = location;
         this.subLocation = subLocation;
-//        this.villageName = villageName;
-//        this.treeSpecies = treeSpecies;
-//        this.farmerHome = farmerHome;
+        this.villageName = villageName;
+        this.treeSpecies = treeSpecies;
+        this.farmerHome = farmerHome;
         this.mobileNumber = mobileNumber;
-//        this.thumbUrl = thumbUrl;
-//        this.farmerIdPhotoUrl = farmerIdPhotoUrl;
+        this.thumbUrl = thumbUrl;
+        this.farmerIdPhotoUrl = farmerIdPhotoUrl;
         this.address = address;
         this.signupStatus = signupStatus;
         this.isHeader = isHeader;
