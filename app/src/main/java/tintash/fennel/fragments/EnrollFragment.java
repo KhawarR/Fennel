@@ -759,11 +759,12 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         Spinner spinnerView = (Spinner) parent;
         int position = pos - 1;
-        if(position == -1)
-            position = 0;
         switch (spinnerView.getId()) {
             case R.id.spLocation:
-                location = arrLocations.get(position).id;
+                if(position < 0 )
+                    location = "";
+                else
+                    location = arrLocations.get(position).id;
 //                arrSubLocations = DatabaseHelper.getInstance().getSubLocationsFromLocation(location);
 //                strArrSubLocations.clear();
 //                for (int i = 0; i < arrSubLocations.size(); i++) {
@@ -781,7 +782,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                }
                 break;
             case R.id.spSubLocation:
-                subLocation = arrSubLocations.get(position).id;
+                if(position < 0 )
+                    subLocation = "";
+                else
+                    subLocation = arrSubLocations.get(position).id;
 //                arrVillages = DatabaseHelper.getInstance().getVillagesFromSubLocation(subLocation);
 //                strArrVillages.clear();
 //                for (int i = 0; i < arrVillages.size(); i++) {
@@ -799,10 +803,16 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                }
                 break;
             case R.id.spVillage:
-                village = arrVillages.get(position).id;
+                if(position < 0 )
+                    village = "";
+                else
+                    village = arrVillages.get(position).id;
                 break;
             case R.id.spTree:
-                treeSpecies = arrTrees.get(position).id;
+                if(position < 0 )
+                    treeSpecies = "";
+                else
+                    treeSpecies = arrTrees.get(position).id;
                 break;
         }
         checkEnableSubmit();
