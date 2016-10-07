@@ -147,15 +147,18 @@ public class MySignupsAdapter extends BaseAdapter {
             else
                 location.setText("");
 
-//            CircleImageView thumb = (CircleImageView) view.findViewById(R.id.profile_image);
-//            if(farmer.getThumbUrl().isEmpty())
+            CircleImageView thumb = (CircleImageView) view.findViewById(R.id.profile_image);
+            String thumbUrl = "https://c.cs25.content.force.com/servlet/servlet.FileDownload?file=00P1b000000TNGE";
+            ImageLoader.getInstance().displayImage(thumbUrl, thumb);
+//            if(farmer.getThumbUrl() != null && !farmer.getThumbUrl().isEmpty())
 //            {
-//                thumb.setImageResource(R.drawable.dummy_profile);
+////                String thumbUrl = "https://c.cs25.content.force.com/servlet/servlet.FileDownload?file=" + farmer.getThumbUrl();
+//                String thumbUrl = "https://c.cs25.content.force.com/servlet/servlet.FileDownload?file=00P1b000000TNGE";
+//                ImageLoader.getInstance().displayImage(thumbUrl, thumb);
 //            }
 //            else
 //            {
-//                String thumbUrl = "https://c.cs25.content.force.com/servlet/servlet.FileDownload?file=" + farmer.getThumbUrl();
-//                ImageLoader.getInstance().displayImage(thumbUrl, thumb);
+//                thumb.setImageResource(R.drawable.dummy_profile);
 //            }
         }
 

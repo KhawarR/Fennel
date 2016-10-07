@@ -98,18 +98,21 @@ public class Login extends BaseFragment implements Callback<Auth> {
             String username = etId.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
 
-//            CookieHandler cookieManager = CookieManager.getDefault();
-//            try {
-//                Map<String,List<String>> map = new HashMap<>();
-//                List<String> l = new ArrayList<>();
-//                l.add(auth.access_token);
-//                map.put("sid",l);
-//                cookieManager.put(new URI("https://c.cs25.content.force.com/"),map);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            } catch (URISyntaxException e) {
-//                e.printStackTrace();
-//            }
+
+            CookieManager.setDefault(new CookieManager());
+
+            CookieHandler cookieManager = CookieManager.getDefault();
+            try {
+                Map<String,List<String>> map = new HashMap<>();
+                List<String> l = new ArrayList<>();
+                l.add(auth.access_token);
+                map.put("sid",l);
+                cookieManager.put(new URI("https://c.cs25.content.force.com/"),map);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
 
             if (username.length() > 0) {
                 String loginQuery = String.format(NetworkHelper.QUERY_LOGIN, username, password);
