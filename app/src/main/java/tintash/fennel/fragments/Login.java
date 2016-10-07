@@ -68,6 +68,13 @@ public class Login extends BaseFragment implements Callback<Auth> {
         // TODO Remove on release
         etId.setText("khawar");
         etPassword.setText("khawar");
+
+        if(!PreferenceHelper.getInstance().readToken().isEmpty())
+        {
+            Fennel.restClient.setApiBaseUrl(PreferenceHelper.getInstance().readInstanceUrl());
+            startActivity(new Intent(getActivity(), MainActivity.class));
+            getActivity().finish();
+        }
     }
 
     @Override
@@ -98,6 +105,8 @@ public class Login extends BaseFragment implements Callback<Auth> {
             String username = etId.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
 
+//            CookieManager.setDefault(new CookieManager());
+//
 //            CookieHandler cookieManager = CookieManager.getDefault();
 //            try {
 //                Map<String,List<String>> map = new HashMap<>();
