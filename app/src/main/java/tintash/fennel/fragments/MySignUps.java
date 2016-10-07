@@ -118,7 +118,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 Farmer farmer = myFarmers.get(position);
                 if(!farmer.isHeader())
                 {
-                    ((BaseContainerFragment) getParentFragment()).addFragment(EnrollFragment.newInstance(Constants.STR_EDIT_FARMER, farmer), true);
+                    ((BaseContainerFragment) getParentFragment()).replaceFragment(EnrollFragment.newInstance(Constants.STR_EDIT_FARMER, farmer), true);
                 }
             }
         });
@@ -546,7 +546,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         {
             case R.id.rl_add:
             {
-                ((BaseContainerFragment) getParentFragment()).addFragment(EnrollFragment.newInstance(Constants.STR_ENROLL_FARMER, null), true);
+                ((BaseContainerFragment) getParentFragment()).replaceFragment(EnrollFragment.newInstance(Constants.STR_ENROLL_FARMER, null), true);
             }
                 break;
         }
