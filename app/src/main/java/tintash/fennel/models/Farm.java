@@ -9,6 +9,9 @@ public class Farm {
 
     public String farmId;
 
+    @SerializedName("Name")
+    public String name = "";
+
     @SerializedName("Facilitator__c")
     public String facilitatorId;
 
@@ -29,6 +32,9 @@ public class Farm {
 
     @SerializedName("Tree__c")
     public String treeSpecies;
+
+    @SerializedName("Status__c")
+    public String farmerStatus;
 
     public void setFacilitatorId(String facilitatorId) {
         this.facilitatorId = facilitatorId;
@@ -56,6 +62,10 @@ public class Farm {
 
     public void setTreeSpecies(String treeSpecies) {
         this.treeSpecies = treeSpecies;
+    }
+
+    public void setFarmerStatus(String farmerStatus) {
+        this.farmerStatus = farmerStatus;
     }
 
 }

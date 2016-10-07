@@ -17,10 +17,10 @@ public class Farmer implements Serializable{
     @SerializedName("First_Name__c")
     public String firstName;
 
-    @SerializedName("Second_Name__c")
+    @SerializedName("Middle_Name__c")
     public String secondName;
 
-    @SerializedName("Surname__c")
+    @SerializedName("Last_Name__c")
     public String surname;
 
     @SerializedName("Name")

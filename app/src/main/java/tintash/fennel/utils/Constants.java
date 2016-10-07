@@ -21,4 +21,8 @@ public class Constants {
 
     public static final String STR_ENROLL_FARMER = "ENROLL FARMER";
     public static final String STR_EDIT_FARMER = "EDIT FARMER";
+
+    public static final int RESPONSE_SUCCESS = 200;
+    public static final int RESPONSE_SUCCESS_ADDED = 201;
+    public static final int RESPONSE_SUCCESS_NO_CONTENT = 204;
 }
