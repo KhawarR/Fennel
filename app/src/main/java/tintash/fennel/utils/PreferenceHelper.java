@@ -10,6 +10,7 @@ public class PreferenceHelper {
     private static final String PREF_NAME = "fennel_prefs";
 
     private static final String KEY_TOKEN = "_token";
+    private static final String KEY_INSTANCE_URL = "_instance_url";
     private static final String KEY_USER_ID = "_user_id";
     private static final String KEY_PASSWORD = "_password";
     private static final String KEY_FACILITATOR_ID = "_fac_id";
@@ -43,8 +44,19 @@ public class PreferenceHelper {
     }
 
     public String readToken() {
-        String user = mPref.getString(KEY_TOKEN, null);
+        String user = mPref.getString(KEY_TOKEN, "");
         return user;
+    }
+
+    public void writeInstanceUrl(String url) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putString(KEY_INSTANCE_URL, url);
+        editor.commit();
+    }
+
+    public String readInstanceUrl() {
+        String url = mPref.getString(KEY_INSTANCE_URL, null);
+        return url;
     }
 
     public void writeUserId(String id) {
@@ -78,5 +90,13 @@ public class PreferenceHelper {
     public String readFacilitatorId() {
         String id = mPref.getString(KEY_FACILITATOR_ID, null);
         return id;
+    }
+
+    public void clearSession() {
+        writeToken("");
+        writeInstanceUrl("");
+        writeFacilitatorId("");
+        writeUserId("");
+        writePassword("");
     }
 }

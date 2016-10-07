@@ -165,6 +165,7 @@ public class AboutMe extends BaseFragment {
 
     @OnClick(R.id.txtSignOut)
     void onClickSignOut(View view) {
+        PreferenceHelper.getInstance().clearSession();
         startActivity(new Intent(getActivity(), LoginActivity.class));
         getActivity().finish();
     }

@@ -14,6 +14,7 @@ import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import tintash.fennel.R;
@@ -27,7 +28,8 @@ import tintash.fennel.views.FontTextView;
 public class MySignupsAdapter extends BaseAdapter {
 
     private Context mContext;
-    private ArrayList<Farmer> mList;
+    private ArrayList<Farmer> mList = new ArrayList<>();
+    private ArrayList<Farmer> mFarmersList = new ArrayList<>();
 
     // View Type for Separators
     private static final int ITEM_VIEW_TYPE_SEPARATOR = 0;
@@ -39,7 +41,8 @@ public class MySignupsAdapter extends BaseAdapter {
 
     public MySignupsAdapter(Context context, ArrayList list) {
         mContext = context;
-        mList = list;
+        mList.addAll(list);
+        mFarmersList.addAll(list);
     }
 
     @Override
@@ -147,9 +150,9 @@ public class MySignupsAdapter extends BaseAdapter {
             else
                 location.setText("");
 
-            CircleImageView thumb = (CircleImageView) view.findViewById(R.id.profile_image);
-            String thumbUrl = "https://c.cs25.content.force.com/servlet/servlet.FileDownload?file=00P1b000000TNGE";
-            ImageLoader.getInstance().displayImage(thumbUrl, thumb);
+//            CircleImageView thumb = (CircleImageView) view.findViewById(R.id.profile_image);
+//            String thumbUrl = "https://c.cs25.content.force.com/servlet/servlet.FileDownload?file=00P1b000000TNGE";
+//            ImageLoader.getInstance().displayImage(thumbUrl, thumb);
 //            if(farmer.getThumbUrl() != null && !farmer.getThumbUrl().isEmpty())
 //            {
 ////                String thumbUrl = "https://c.cs25.content.force.com/servlet/servlet.FileDownload?file=" + farmer.getThumbUrl();
@@ -163,5 +166,25 @@ public class MySignupsAdapter extends BaseAdapter {
         }
 
         return view;
+    }
+
+    // Filter Class
+    public void filter(String charText) {
+        charText = charText.toLowerCase(Locale.getDefault());
+        mList.clear();
+        if (charText.length() == 0) {
+            mList.addAll(mFarmersList);
+        }
+        else
+        {
+            for (Farmer farmer : mFarmersList)
+            {
+                if (farmer.getFullName().toLowerCase(Locale.getDefault()).contains(charText) || farmer.isHeader())
+                {
+                    mList.add(farmer);
+                }
+            }
+        }
+        notifyDataSetChanged();
     }
 }

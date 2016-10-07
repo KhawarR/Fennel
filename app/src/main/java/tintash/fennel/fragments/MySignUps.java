@@ -2,10 +2,13 @@ package tintash.fennel.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -16,6 +19,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -43,6 +47,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     @Bind(R.id.lv_farmers)
     ListView mLvFarmers;
+
+    EditText etSearch;
 
     RelativeLayout rlAdd;
 
@@ -74,6 +80,27 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         rlAdd = (RelativeLayout) myHeader.findViewById(R.id.rl_add);
         rlAdd.setOnClickListener(this);
+
+        etSearch = (EditText) myHeader.findViewById(R.id.et_search);
+        etSearch.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void afterTextChanged(Editable arg0) {
+                String text = etSearch.getText().toString().toLowerCase(Locale.getDefault());
+                adapter.filter(text);
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence arg0, int arg1,
+                                          int arg2, int arg3) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence arg0, int arg1, int arg2,
+                                      int arg3) {
+            }
+        });
+
         myHeader.setEnabled(false);
         myHeader.setOnClickListener(null);
         mLvFarmers.addHeaderView(myHeader);

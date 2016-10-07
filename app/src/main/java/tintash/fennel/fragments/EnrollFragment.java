@@ -2,9 +2,13 @@ package tintash.fennel.fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +22,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.kbeanie.multipicker.api.CameraImagePicker;
 import com.kbeanie.multipicker.api.ImagePicker;
 import com.kbeanie.multipicker.api.Picker;
 import com.kbeanie.multipicker.api.callbacks.ImagePickerCallback;
@@ -121,13 +126,20 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     private DisplayImageOptions options;
 
+    private CameraImagePicker cameraImagePicker;
     private ImagePicker imagePicker;
-    private ImagePickerCallback farmerPhotoPickerCallback;
-    private ImagePickerCallback nationalIdPickerCallback;
     private String location;
     private String subLocation;
     private String village;
     private String treeSpecies;
+
+    private boolean isFarmerPhotoSet = false;
+    private boolean isNationalIdPhotoSet = false;
+
+//    private int PICKER_REQUEST_FARMER_DEVICE = 12001;
+//    private int PICKER_REQUEST_FARMER_CAMERA = 12002;
+//    private int PICKER_REQUEST_NAT_ID_DEVICE = 12003;
+//    private int PICKER_REQUEST_NAT_ID_CAMERA = 12004;
 
     public static EnrollFragment newInstance(String title, Farmer farmer)
     {
@@ -152,6 +164,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         .displayer(new RoundedBitmapDisplayer((int)px)).build(); // default
 
         imagePicker = new ImagePicker(EnrollFragment.this);
+        cameraImagePicker = new CameraImagePicker(EnrollFragment.this);
 
         return view;
     }
@@ -205,6 +218,12 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         }
 
         titleBarLayout.setTitleText(title);
+
+        etFirstName.addTextChangedListener(watcher);
+        etSecondName.addTextChangedListener(watcher);
+        etSurname.addTextChangedListener(watcher);
+        etIdNumber.addTextChangedListener(watcher);
+        etMobileNumber.addTextChangedListener(watcher);
     }
 
     private void populateFarmer()
@@ -308,7 +327,6 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         } else {
             createFarmer();
         }
-
     }
 
     private boolean isFormFilled() {
@@ -423,19 +441,60 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         return newFarmer;
     }
 
+    private final TextWatcher watcher = new TextWatcher(){
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            checkEnableSubmit();
+        }
+    };
+
+    private void checkEnableSubmit()
+    {
+        if(etFirstName.getText().toString().isEmpty()
+                || etSecondName.getText().toString().isEmpty()
+                || etSurname.getText().toString().isEmpty()
+                || etIdNumber.getText().toString().isEmpty()
+                || etMobileNumber.getText().toString().isEmpty()
+                || !isFarmerPhotoSet
+                || !isNationalIdPhotoSet
+                || spLocation.getSelectedItem() == null
+                || spSubLocation.getSelectedItem() == null
+                || spVillage.getSelectedItem() == null
+                || spTree.getSelectedItem() == null)
+        {
+            txtSubmitApproval.setEnabled(false);
+        }
+        else {
+            txtSubmitApproval.setEnabled(true);
+        }
+    }
+
     @OnClick(R.id.txtSubmitApproval)
     void onClickSubmitForApproval(View view) {
-
+        Toast.makeText(getActivity(), "Clicked", Toast.LENGTH_SHORT).show();
     }
 
     @OnClick(R.id.imgFarmerPhoto)
     void onClickFarmerPhoto(View view) {
-        pickFarmerImage();
+//        showPickerDialog(true);
+        pickFarmerImage(true);
     }
 
     @OnClick(R.id.imgNationalID)
     void onClickNationalID(View view) {
-        pickNationalIdImage();
+//        showPickerDialog(false);
+        pickNationalIdImage(true);
     }
 
     @Override
@@ -448,12 +507,48 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
     }
 
-    private void pickFarmerImage() {
-        farmerPhotoPickerCallback = new ImagePickerCallback() {
+    private void showPickerDialog(final boolean isFarmer) {
+        AlertDialog.Builder pickerDialog = new AlertDialog.Builder(getActivity());
+        pickerDialog.setTitle("Choose image from?");
+        pickerDialog.setPositiveButton("Gallery",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(isFarmer)
+                        {
+                            pickFarmerImage(true);
+                        }
+                        else
+                        {
+                            pickNationalIdImage(true);
+                        }
+                        dialog.dismiss();
+                    }
+                });
+        pickerDialog.setNegativeButton("Camera",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(isFarmer)
+                        {
+                            pickFarmerImage(false);
+                        }
+                        else
+                        {
+                            pickNationalIdImage(false);
+                        }
+                        dialog.dismiss();
+                    }
+                });
+        pickerDialog.show();
+    }
+
+    private void pickFarmerImage(boolean isDevice) {
+        ImagePickerCallback imagePickerCallback = new ImagePickerCallback() {
             @Override
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
                 ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgFarmerPhoto, options);
+                isFarmerPhotoSet = true;
+                checkEnableSubmit();
             }
 
             @Override
@@ -461,19 +556,24 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 // Do error handling
             }
         };
-        imagePicker.setImagePickerCallback(farmerPhotoPickerCallback);
-        // imagePicker.allowMultiple(); // Default is false
-        // imagePicker.shouldGenerateMetadata(false); // Default is true
-        // imagePicker.shouldGenerateThumbnails(false); // Default is true
-        imagePicker.pickImage();
+        if(isDevice) {
+            imagePicker.setImagePickerCallback(imagePickerCallback);
+            imagePicker.pickImage();
+        }
+        else {
+            cameraImagePicker.setImagePickerCallback(imagePickerCallback);
+            cameraImagePicker.pickImage();
+        }
     }
 
-    private void pickNationalIdImage() {
-        nationalIdPickerCallback = new ImagePickerCallback() {
+    private void pickNationalIdImage(boolean isDevice) {
+        ImagePickerCallback imagePickerCallback = new ImagePickerCallback() {
             @Override
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
                 ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgNationalID, options);
+                isNationalIdPhotoSet = true;
+                checkEnableSubmit();
             }
 
             @Override
@@ -481,11 +581,15 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 // Do error handling
             }
         };
-        imagePicker.setImagePickerCallback(nationalIdPickerCallback);
-        // imagePicker.allowMultiple(); // Default is false
-        // imagePicker.shouldGenerateMetadata(false); // Default is true
-        // imagePicker.shouldGenerateThumbnails(false); // Default is true
-        imagePicker.pickImage();
+        if(isDevice) {
+            imagePicker.setImagePickerCallback(imagePickerCallback);
+            imagePicker.pickImage();
+        }
+        else {
+            cameraImagePicker.setImagePickerCallback(imagePickerCallback);
+            String pickedImage = cameraImagePicker.pickImage();
+            pickedImage = "";
+        }
     }
 
     private void disableForm()
@@ -522,11 +626,15 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == Activity.RESULT_OK) {
             if(requestCode == Picker.PICK_IMAGE_DEVICE) {
-                if(imagePicker == null) {
-                    imagePicker = new ImagePicker(getActivity());
-                    imagePicker.setImagePickerCallback(farmerPhotoPickerCallback);
-                }
+//                if(imagePicker == null) {
+//                    imagePicker = new ImagePicker(getActivity());
+//                    imagePicker.setImagePickerCallback(farmerPhotoPickerCallback);
+//                }
                 imagePicker.submit(data);
+            }
+            else if(requestCode == Picker.PICK_IMAGE_CAMERA)
+            {
+                cameraImagePicker.submit(data);
             }
         }
     }
@@ -548,6 +656,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 treeSpecies = (String) parent.getItemAtPosition(position);
                 break;
         }
+        checkEnableSubmit();
     }
 
     @Override
