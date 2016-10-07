@@ -1,7 +1,7 @@
 package tintash.fennel.fragments;
 
-import android.content.Context;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toast;
 
 import com.kbeanie.multipicker.api.ImagePicker;
 import com.kbeanie.multipicker.api.Picker;
@@ -27,19 +26,21 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 
+import java.util.HashMap;
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import tintash.fennel.R;
-import tintash.fennel.models.Farmer;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.models.Farm;
+import tintash.fennel.models.Farmer;
 import tintash.fennel.models.ResponseModel;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
@@ -196,6 +197,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             if(!farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_INCOMPLETE))
             {
                 disableForm();
+            } else {
+                isEdit = true;
             }
 
             populateFarmer();
@@ -294,69 +297,41 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        loadingStarted();
 
-        final Farmer newFarmer = new Farmer();
-        newFarmer.setFirstName(etFirstName.getText() != null ? etFirstName.getText().toString() : "");
-        newFarmer.setSecondName(etSecondName.getText() != null ? etSecondName.getText().toString() : "");
-        newFarmer.setSurname(etSurname.getText() != null ? etSurname.getText().toString() : "");
-        newFarmer.setIdNumber(etIdNumber.getText() != null ? etIdNumber.getText().toString() : "");
-        newFarmer.setMobileNumber(etMobileNumber.getText() != null ? etMobileNumber.getText().toString() : "");
+        if (!isFormFilled()) {
+            return;
+        }
+
+        if (isEdit) {
+            editFarmer();
+        } else {
+            createFarmer();
+        }
+
+    }
+
+    private boolean isFormFilled() {
 
         boolean goodToGo = true;
         String missingData = "";
-        if(newFarmer.getFirstName().isEmpty())
+        if(etFirstName.getText() == null || etFirstName.getText().equals(""))
         {
             goodToGo = false;
             missingData += "\n- First Name";
         }
-        if(newFarmer.getIdNumber().isEmpty())
+        if(etIdNumber.getText() == null || etIdNumber.getText().equals(""))
         {
             goodToGo = false;
             missingData += "\n- ID Number";
         }
 
-        if(goodToGo)
-        {
-            loadingStarted();
-
-            Call<ResponseModel> apiCall = Fennel.getWebService().addFarmer(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, newFarmer);
-            apiCall.enqueue(new Callback<ResponseModel>() {
-            @Override
-            public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
-                if (response.body() != null && response.body().success == true) {
-                    Log.i("LP", "Farmer Added To Server");
-                    addFarmerToDB(newFarmer, response.body().id, true);
-                    Farm newFarm = createFarmWithFarmerId(response.body().id);
-                    addFarmWithFarmerId(newFarm, response.body().id);
-
-                } else {
-                    addFarmerToDB(newFarmer, null, false);
-                    Farm newFarm = createFarmWithFarmerId(null);
-                    addFarmToDB(newFarm, null, false);
-                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
-
-                    loadingFinished();
-                    popToSignupsFragment();
-                }
-                Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
-            }
-
-            @Override
-            public void onFailure(Call<ResponseModel> call, Throwable t) {
-                Log.i("LP", t.getMessage().toString());
-                addFarmerToDB(newFarmer, null, false);
-                Farm newFarm = createFarmWithFarmerId(null);
-                addFarmToDB(newFarm, null, false);
-                Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
-                loadingFinished();
-                popToSignupsFragment();
-            }
-        });
+        if (!goodToGo) {
+            Toast.makeText(getActivity(), "Please fill the following fields: " + missingData, Toast.LENGTH_SHORT).show();
         }
-        else
-        {
-            Toast.makeText(getActivity(), "Please fill the following fields: " + missingData, Toast.LENGTH_LONG).show();
-        }
+
+        return goodToGo;
+
     }
 
     private void popToSignupsFragment() {
@@ -410,11 +385,42 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             newFarm.setFarmerId(farmerId);
 
         newFarm.setFacilitatorId(PreferenceHelper.getInstance().readFacilitatorId());
+        newFarm.setFarmerStatus("Incomplete");
         newFarm.setLocation("");//location != null ? location : "");
         newFarm.setSubLocation("");//subLocation != null ? subLocation : "");
         newFarm.setVillageName("");//village != null ? village : "");
         newFarm.setTreeSpecies("");//treeSpecies != null ? treeSpecies : "");
         return newFarm;
+    }
+
+    private HashMap<String, Object> getFarmerMap() {
+
+        final HashMap<String, Object> newFarmerMap = new HashMap<>();
+        newFarmerMap.put("First_Name__c" , etFirstName.getText() != null ? etFirstName.getText().toString() : "");
+        newFarmerMap.put("Middle_Name__c", etSecondName.getText() != null ? etSecondName.getText().toString() : "");
+        newFarmerMap.put("Last_Name__c", etSurname.getText() != null ? etSurname.getText().toString() : "");
+        newFarmerMap.put("Name", etIdNumber.getText() != null ? etIdNumber.getText().toString() : "");
+        newFarmerMap.put("Mobile_Number__c", etMobileNumber.getText() != null ? etMobileNumber.getText().toString() : "");
+        newFarmerMap.put("Gender__c" , (tvFemale.isSelected() == true) ? "Female" : "Male");
+        newFarmerMap.put("Leader__c", (tvLeaderYes.isSelected() == true) ? 1 : 0);
+//        String fullName = ((etFirstName.getText() != null && !etFirstName.getText().equals("")) ? etFirstName.getText().toString() : "") + ((etSecondName.getText() != null && !etSecondName.getText().equals("")) ? " " + etSecondName.getText().toString() : "") + ((etSurname.getText() != null && !etSecondName.getText().equals("")) ? " " + etSurname.getText().toString() : "");
+//        newFarmer.setFullName(fullName);
+
+        return newFarmerMap;
+    }
+
+    private Farmer getFarmer() {
+
+        final Farmer newFarmer = new Farmer();
+        newFarmer.setFirstName(etFirstName.getText() != null ? etFirstName.getText().toString() : "");
+        newFarmer.setSecondName(etSecondName.getText() != null ? etSecondName.getText().toString() : "");
+        newFarmer.setSurname(etSurname.getText() != null ? etSurname.getText().toString() : "");
+        newFarmer.setIdNumber(etIdNumber.getText() != null ? etIdNumber.getText().toString() : "");
+        newFarmer.setMobileNumber(etMobileNumber.getText() != null ? etMobileNumber.getText().toString() : "");
+        newFarmer.setGender((tvFemale.isSelected() == true) ? "Female" : "Male");
+        newFarmer.setLeader((tvLeaderYes.isSelected() == true) ? true : false);
+
+        return newFarmer;
     }
 
     @OnClick(R.id.txtSubmitApproval)
@@ -547,5 +553,86 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
+    }
+
+    private void editFarmer() {
+
+        final HashMap<String, Object> farmerMap = getFarmerMap();
+
+//        farmer.setFirstName(etFirstName.getText() != null ? etFirstName.getText().toString() : "");
+//        farmer.setSecondName(etSecondName.getText() != null ? etSecondName.getText().toString() : "");
+//        farmer.setSurname(etSurname.getText() != null ? etSurname.getText().toString() : "");
+//        farmer.setIdNumber(etIdNumber.getText() != null ? etIdNumber.getText().toString() : "");
+//        farmer.setMobileNumber(etMobileNumber.getText() != null ? etMobileNumber.getText().toString() : "");
+//        //String fullName = ((etFirstName.getText() != null && !etFirstName.getText().equals("")) ? etFirstName.getText().toString() : "") + ((etSecondName.getText() != null && !etSecondName.getText().equals("")) ? " " + etSecondName.getText().toString() : "") + ((etSurname.getText() != null && !etSecondName.getText().equals("")) ? " " + etSurname.getText().toString() : "");
+//        //farmer.setFullName(fullName);
+
+        Call<ResponseBody> apiCall = Fennel.getWebService().editFarmer(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmer.farmerId, farmerMap);
+        apiCall.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                    Log.i("LP", "Farmer Edited!");
+                    Toast.makeText(getContext(), "Farmer Edited Successfully!", Toast.LENGTH_SHORT).show();
+
+                } else {
+                    Toast.makeText(getContext(), "Farmer Edit Failed!", Toast.LENGTH_SHORT).show();
+                }
+                loadingFinished();
+                popToSignupsFragment();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.i("LP", t.getMessage().toString());
+
+                Toast.makeText(getContext(), "Farmer Edit Failed!", Toast.LENGTH_SHORT).show();
+                loadingFinished();
+                popToSignupsFragment();
+            }
+        });
+
+    }
+
+    private void createFarmer() {
+
+        final HashMap<String, Object> farmerMap = getFarmerMap();
+
+        Call<ResponseModel> apiCall = Fennel.getWebService().addFarmer(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmerMap);
+        apiCall.enqueue(new Callback<ResponseModel>() {
+            @Override
+            public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
+                Farmer newFarmer = getFarmer();
+                if (response.body() != null && response.body().success == true) {
+                    Log.i("LP", "Farmer Added To Server");
+                    addFarmerToDB(newFarmer, response.body().id, true);
+                    Farm newFarm = createFarmWithFarmerId(response.body().id);
+                    addFarmWithFarmerId(newFarm, response.body().id);
+
+                } else {
+
+                    addFarmerToDB(newFarmer, null, false);
+                    Farm newFarm = createFarmWithFarmerId(null);
+                    addFarmToDB(newFarm, null, false);
+                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
+
+                    loadingFinished();
+                    popToSignupsFragment();
+                }
+                Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
+            }
+
+            @Override
+            public void onFailure(Call<ResponseModel> call, Throwable t) {
+                Log.i("LP", t.getMessage().toString());
+                Farmer newFarmer = getFarmer();
+                addFarmerToDB(newFarmer, null, false);
+                Farm newFarm = createFarmWithFarmerId(null);
+                addFarmToDB(newFarm, null, false);
+                Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
+                loadingFinished();
+                popToSignupsFragment();
+            }
+        });
     }
 }
