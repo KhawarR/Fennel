@@ -275,9 +275,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     if(fullName.equalsIgnoreCase("null")) fullName = "";
                     firstName = objFarmer.getString("First_Name__c");
                     if(firstName.equalsIgnoreCase("null")) firstName = "";
-                    secondName = objFarmer.getString("Middle_Name__c");
+                    secondName = objFarmer.getString("Second_Name__c");
                     if(secondName.equalsIgnoreCase("null")) secondName = "";
-                    surname = objFarmer.getString("Last_Name__c");
+                    surname = objFarmer.getString("Surname__c");
                     if(surname.equalsIgnoreCase("null")) surname = "";
                     idNumber = objFarmer.getString("Name");
                     if(idNumber.equalsIgnoreCase("null")) idNumber = "";
