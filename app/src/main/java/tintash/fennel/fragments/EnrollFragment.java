@@ -429,6 +429,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private void addFarmWithFarmerId(final Farm farm, String id) {
 
         HashMap<String, Object> farmMap = getFarmMap();
+        farmMap.put("Farmers__c", id);
 
         Call<ResponseModel> apiCall = Fennel.getWebService().addFarm(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmMap);
         apiCall.enqueue(new Callback<ResponseModel>() {
@@ -462,6 +463,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private void editFarmWithFarmId(final Farm farm, String farmId) {
 
         HashMap<String, Object> farmMap = getFarmMap();
+        farmMap.put("Farmers__c", farmer.farmerId);
+
         Call<ResponseBody> apiCall = Fennel.getWebService().editFarm(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmId, farmMap);
         apiCall.enqueue(new Callback<ResponseBody>() {
             @Override
@@ -546,6 +549,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         newFarmMap.put("Tree__c", treeSpecies);
         newFarmMap.put("Status__c", farmerStatus);
         newFarmMap.put("Facilitator__c" , PreferenceHelper.getInstance().readFacilitatorId());
+
 
         return newFarmMap;
     }
