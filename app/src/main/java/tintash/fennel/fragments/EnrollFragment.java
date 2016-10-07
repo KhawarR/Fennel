@@ -437,8 +437,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
                 if (response.body() != null && response.body().success == true) {
                     Log.i("LP", "Farm Added To Server");
-                    addFarmToDB(farm, response.body().id, true);
                     Toast.makeText(getContext(), "Farmer Enrolled Successfully!", Toast.LENGTH_SHORT).show();
+
+                    addFarmToDB(farm, response.body().id, true);
                 } else {
                     addFarmToDB(farm, null, false);
                     Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
@@ -452,8 +453,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             @Override
             public void onFailure(Call<ResponseModel> call, Throwable t) {
                 Log.i("LP", t.getMessage().toString());
-                addFarmToDB(farm, null, false);
                 Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
+
+                addFarmToDB(farm, null, false);
+                
                 loadingFinished();
                 popToSignupsFragment();
             }
@@ -470,12 +473,13 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                    Log.i("LP", "Farm Edited Successfully");
+                    Log.i("LP", "Farmer Edited Successfully");
+                    Toast.makeText(getContext(), "Farmer Edited Successfully", Toast.LENGTH_SHORT).show();
                     updateFarm(farm, true);
-                    Toast.makeText(getContext(), "Farmer Enrolled Successfully!", Toast.LENGTH_SHORT).show();
+
                 } else {
                     updateFarm(farm, false);
-                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Farmer Edit Failed!", Toast.LENGTH_SHORT).show();
                 }
                 Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
 
@@ -486,7 +490,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.i("LP", t.getMessage().toString());
-                Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Farmer Edit Failed!", Toast.LENGTH_SHORT).show();
 
                 updateFarm(farm, false);
                 loadingFinished();
@@ -833,7 +837,6 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                     Log.i("LP", "Farmer Edited!");
-                    Toast.makeText(getContext(), "Farmer Edited Successfully!", Toast.LENGTH_SHORT).show();
                     updateFarmer(farmer, true);
                     Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
                     newFarm.farmId = farmer.farmId;
