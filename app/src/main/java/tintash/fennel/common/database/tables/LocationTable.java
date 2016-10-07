@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.models.Location;
 
@@ -60,5 +62,27 @@ public class LocationTable {
         }
         cursor.close();
         return true;
+    }
+
+    public static ArrayList<Location> getAllLocations(DatabaseHelper dbHelper) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        ArrayList<Location> allLocations = new ArrayList<>();
+
+        Cursor c = db.rawQuery("SELECT * FROM "
+                + TABLE_LOCATION, null);
+
+        if (c.moveToFirst()) {
+            do {
+                Location location = new Location(
+                        c.getString(0),
+                        c.getString(1)
+                );
+
+                allLocations.add(location);
+            } while (c.moveToNext());
+        }
+        c.close();
+
+        return allLocations;
     }
 }

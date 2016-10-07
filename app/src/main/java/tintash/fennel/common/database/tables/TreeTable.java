@@ -5,7 +5,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 import tintash.fennel.common.database.DatabaseHelper;
+import tintash.fennel.models.Location;
 import tintash.fennel.models.Tree;
 
 /**
@@ -49,7 +52,6 @@ public class TreeTable {
         return newRowId;
     }
 
-
     public static boolean treeExists(DatabaseHelper dbHelper, String locId) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_TREE + " WHERE " + COLUMN_SFDC_ID + " = ?";
@@ -60,5 +62,27 @@ public class TreeTable {
         }
         cursor.close();
         return true;
+    }
+
+    public static ArrayList<Tree> getAllTrees(DatabaseHelper dbHelper) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        ArrayList<Tree> allTrees = new ArrayList<>();
+
+        Cursor c = db.rawQuery("SELECT * FROM "
+                + TABLE_TREE, null);
+
+        if (c.moveToFirst()) {
+            do {
+                Tree tree = new Tree(
+                        c.getString(0),
+                        c.getString(1)
+                );
+
+                allTrees.add(tree);
+            } while (c.moveToNext());
+        }
+        c.close();
+
+        return allTrees;
     }
 }
