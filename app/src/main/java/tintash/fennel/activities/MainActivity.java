@@ -12,6 +12,8 @@ import android.widget.ImageView;
 
 import com.kbeanie.multipicker.api.ImagePicker;
 import com.kbeanie.multipicker.api.Picker;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import tintash.fennel.R;
 import tintash.fennel.fragments.BaseContainerFragment;
@@ -23,6 +25,7 @@ import tintash.fennel.fragments.MyLogbook;
 import tintash.fennel.fragments.MyLogbookContainerFragment;
 import tintash.fennel.fragments.MySignUps;
 import tintash.fennel.fragments.MySignUpsContainerFragment;
+import tintash.fennel.utils.CustomImageDownloader;
 
 public class MainActivity extends BaseActivity {
 

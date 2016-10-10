@@ -9,16 +9,24 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.jakewharton.picasso.OkHttp3Downloader;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
+import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import tintash.fennel.R;
 import tintash.fennel.models.Farmer;
+import tintash.fennel.network.Session;
 import tintash.fennel.utils.Constants;
 import tintash.fennel.views.FontTextView;
 
@@ -26,6 +34,8 @@ import tintash.fennel.views.FontTextView;
  * Created by Khawar on 30/9/2016.
  */
 public class MySignupsAdapter extends BaseAdapter {
+
+    private Picasso picasso;
 
     private Context mContext;
     private ArrayList<Farmer> mList = new ArrayList<>();
@@ -43,6 +53,22 @@ public class MySignupsAdapter extends BaseAdapter {
         mContext = context;
         mList.addAll(list);
         mFarmersList.addAll(list);
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new Interceptor() {
+                    @Override
+                    public Response intercept(Interceptor.Chain chain) throws IOException {
+                        Request newRequest = chain.request().newBuilder()
+                                .addHeader("Authorization", Session.getAuthToken())
+                                .build();
+                        return chain.proceed(newRequest);
+                    }
+                })
+                .build();
+
+        picasso = new Picasso.Builder(context)
+                .downloader(new OkHttp3Downloader(client))
+                .build();
     }
 
     @Override
@@ -150,19 +176,17 @@ public class MySignupsAdapter extends BaseAdapter {
             else
                 location.setText("");
 
-//            CircleImageView thumb = (CircleImageView) view.findViewById(R.id.profile_image);
-//            String thumbUrl = "https://c.cs25.content.force.com/servlet/servlet.FileDownload?file=00P1b000000TNGE";
-//            ImageLoader.getInstance().displayImage(thumbUrl, thumb);
-//            if(farmer.getThumbUrl() != null && !farmer.getThumbUrl().isEmpty())
-//            {
-////                String thumbUrl = "https://c.cs25.content.force.com/servlet/servlet.FileDownload?file=" + farmer.getThumbUrl();
-//                String thumbUrl = "https://c.cs25.content.force.com/servlet/servlet.FileDownload?file=00P1b000000TNGE";
-//                ImageLoader.getInstance().displayImage(thumbUrl, thumb);
-//            }
-//            else
-//            {
-//                thumb.setImageResource(R.drawable.dummy_profile);
-//            }
+            CircleImageView thumb = (CircleImageView) view.findViewById(R.id.profile_image);
+            if(farmer.getThumbUrl() != null && !farmer.getThumbUrl().isEmpty())
+            {
+                String thumbUrl = "https://cs25.salesforce.com/services/data/v36.0/sobjects/Attachment/%s/body";
+                thumbUrl = String.format(thumbUrl, farmer.getThumbUrl());
+                picasso.load(thumbUrl).into(thumb);
+            }
+            else
+            {
+                thumb.setImageResource(R.drawable.dummy_profile);
+            }
         }
 
         return view;

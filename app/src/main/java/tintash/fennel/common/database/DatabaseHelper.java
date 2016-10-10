@@ -141,6 +141,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return TreeTable.getAllTrees(this);
     }
 
+    public ArrayList<Tree> getTreesFromSubLocation(String id)
+    {
+        return TreeTable.getTreesFromSubLocation(this, id);
+    }
+
     public void insertLocation(Location newLocation) {
         long rowInserted = LocationTable.insert(this, newLocation);
         if (rowInserted != -1) {

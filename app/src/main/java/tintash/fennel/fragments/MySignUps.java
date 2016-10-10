@@ -2,6 +2,7 @@ package tintash.fennel.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -63,6 +64,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     int locationsResponseCounter = 0;
 
+    SwipeRefreshLayout mSwipeRefreshLayout;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -80,6 +83,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         super.onViewCreated(view, savedInstanceState);
 
         titleBarLayout.setOnIconClickListener(this);
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout.setOnRefreshListener(onRefreshListener);
 
         LayoutInflater myinflater = getActivity().getLayoutInflater();
         ViewGroup myHeader = (ViewGroup)myinflater.inflate(R.layout.header_mysignups_list, mLvFarmers, false);
@@ -118,7 +124,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 Farmer farmer = myFarmers.get(position);
                 if(!farmer.isHeader())
                 {
-                    ((BaseContainerFragment) getParentFragment()).replaceFragment(EnrollFragment.newInstance(Constants.STR_EDIT_FARMER, farmer), true);
+                    ((BaseContainerFragment) getParentFragment()).addFragment(EnrollFragment.newInstance(Constants.STR_EDIT_FARMER, farmer), true);
                 }
             }
         });
@@ -130,8 +136,16 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
     }
 
+    private SwipeRefreshLayout.OnRefreshListener onRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
+        @Override
+        public void onRefresh() {
+            getMySignups();
+        }
+    };
+
     private void getMySignups()
     {
+        if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS, PreferenceHelper.getInstance().readFacilitatorId());
         loadingStarted();
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
@@ -518,7 +532,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 name = subLocationObj.getString("Name");
                 if (name.equalsIgnoreCase("null")) name = "";
 
-                Tree tree = new Tree(id, name);
+                subLocationId = subLocationObj.getString("Sub_Location__c");
+                if (subLocationId.equalsIgnoreCase("null")) subLocationId = "";
+
+                Tree tree = new Tree(id, name, subLocationId);
                 allTrees.add(tree);
                 DatabaseHelper.getInstance().insertTree(tree);
             }
@@ -546,7 +563,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         {
             case R.id.rl_add:
             {
-                ((BaseContainerFragment) getParentFragment()).replaceFragment(EnrollFragment.newInstance(Constants.STR_ENROLL_FARMER, null), true);
+                ((BaseContainerFragment) getParentFragment()).addFragment(EnrollFragment.newInstance(Constants.STR_ENROLL_FARMER, null), true);
             }
                 break;
         }

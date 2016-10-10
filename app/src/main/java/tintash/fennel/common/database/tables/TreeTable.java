@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.models.Location;
 import tintash.fennel.models.Tree;
+import tintash.fennel.models.Village;
 
 /**
  * Created by irfanayaz on 10/7/16.
@@ -22,11 +23,13 @@ public class TreeTable {
 
     public static final String COLUMN_SFDC_ID = "sfdc_id";
     public static final String COLUMN_NAME = "name";
+    public static final String COLUMN_SUB_LOCATION_ID = "sub_location_id";
 
     public static final String CREATE_TABLE_TREE = "CREATE TABLE " +
             TABLE_TREE + "(" +
             COLUMN_SFDC_ID + " text," +
-            COLUMN_NAME + " text )";
+            COLUMN_NAME + " text," +
+            COLUMN_SUB_LOCATION_ID + " text )";
 
     public static long insert(DatabaseHelper dbHelper, Tree tree) {
 
@@ -37,6 +40,7 @@ public class TreeTable {
         ContentValues values = new ContentValues();
         values.put(COLUMN_SFDC_ID, tree.id);
         values.put(COLUMN_NAME, tree.name);
+        values.put(COLUMN_SUB_LOCATION_ID, tree.subLocationId);
 
         // Insert the new row, returning the primary key value of the new row
         long newRowId = 0;
@@ -75,7 +79,8 @@ public class TreeTable {
             do {
                 Tree tree = new Tree(
                         c.getString(0),
-                        c.getString(1)
+                        c.getString(1),
+                        c.getString(2)
                 );
 
                 allTrees.add(tree);
@@ -84,5 +89,28 @@ public class TreeTable {
         c.close();
 
         return allTrees;
+    }
+
+    public static ArrayList<Tree> getTreesFromSubLocation(DatabaseHelper dbHelper, String id) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        ArrayList<Tree> allLocations = new ArrayList<>();
+
+        String query = "SELECT * FROM " + TABLE_TREE + " WHERE " + COLUMN_SUB_LOCATION_ID + " = ?";
+        Cursor c = db.rawQuery(query, new String[]{id});
+
+        if (c.moveToFirst()) {
+            do {
+                Tree location = new Tree(
+                        c.getString(0),
+                        c.getString(1),
+                        c.getString(2)
+                );
+
+                allLocations.add(location);
+            } while (c.moveToNext());
+        }
+        c.close();
+
+        return allLocations;
     }
 }

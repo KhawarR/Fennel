@@ -143,7 +143,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     private String farmerStatus = null;
 
-//    private int PICKER_REQUEST_FARMER_DEVICE = 12001;
+    //    private int PICKER_REQUEST_FARMER_DEVICE = 12001;
 //    private int PICKER_REQUEST_FARMER_CAMERA = 12002;
 //    private int PICKER_REQUEST_NAT_ID_DEVICE = 12003;
 //    private int PICKER_REQUEST_NAT_ID_CAMERA = 12004;
@@ -156,8 +156,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private ArrayList<Tree> arrTrees = new ArrayList<>();
     private ArrayList<String> strArrTrees = new ArrayList<>();
 
-    public static EnrollFragment newInstance(String title, Farmer farmer)
-    {
+    public static EnrollFragment newInstance(String title, Farmer farmer) {
         EnrollFragment fragment = new EnrollFragment();
         Bundle args = new Bundle();
         args.putString("title", title);
@@ -176,7 +175,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         float density = getActivity().getResources().getDisplayMetrics().density;
         float px = 10 * density;
         options = new DisplayImageOptions.Builder()
-        .displayer(new RoundedBitmapDisplayer((int)px)).build(); // default
+                .displayer(new RoundedBitmapDisplayer((int) px)).build(); // default
 
         imagePicker = new ImagePicker(EnrollFragment.this);
         cameraImagePicker = new CameraImagePicker(EnrollFragment.this);
@@ -228,33 +227,35 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             strArrTrees.add(arrTrees.get(i).name);
         }
 
+        spLocation.setTag(true);
         ArrayAdapter<String> arrayAdapterLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrLocations);
         spLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterLoc, R.layout.spinner_nothing_selected, getContext(), "LOCATION"));
         spLocation.setOnItemSelectedListener(this);
 
+        spSubLocation.setTag(true);
 //        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsSubLocation, R.layout.simple_spinner_item);
         ArrayAdapter<String> arrayAdapterSubLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrSubLocations);
         spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterSubLoc, R.layout.spinner_nothing_selected, getContext(), "SUB LOCATION"));
         spSubLocation.setOnItemSelectedListener(this);
 
+        spVillage.setTag(true);
 //        arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsVillage, R.layout.simple_spinner_item);
         ArrayAdapter<String> arrayAdapterVillage = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrVillages);
         spVillage.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterVillage, R.layout.spinner_nothing_selected, getContext(), "VILLAGE"));
         spVillage.setOnItemSelectedListener(this);
 
+        spTree.setTag(true);
 //        arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsTree, R.layout.simple_spinner_item);
         ArrayAdapter<String> arrayAdapterTree = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrTrees);
         spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterTree, R.layout.spinner_nothing_selected, getContext(), "TREE SPECIES"));
         spTree.setOnItemSelectedListener(this);
 
         title = getArguments().getString("title");
-        if(title.equalsIgnoreCase(Constants.STR_EDIT_FARMER))
-        {
+        if (title.equalsIgnoreCase(Constants.STR_EDIT_FARMER)) {
             farmer = (Farmer) getArguments().getSerializable("farmer");
             txtCreateFarmer.setText("SAVE");
 
-            if(!farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_INCOMPLETE))
-            {
+            if (!farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_INCOMPLETE)) {
                 disableForm();
             } else {
                 isEdit = true;
@@ -272,74 +273,93 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         etMobileNumber.addTextChangedListener(watcher);
     }
 
-    private void populateFarmer()
-    {
-        if(farmer != null)
-        {
+    private void populateFarmer() {
+        if (farmer != null) {
             etFirstName.setText(farmer.getFirstName());
             etSecondName.setText(farmer.getSecondName());
             etSurname.setText(farmer.getSurname());
             etIdNumber.setText(farmer.getIdNumber());
 
-            if(farmer.getGender().equalsIgnoreCase("male")) {
+            if (farmer.getGender().equalsIgnoreCase("male")) {
                 tvMale.setSelected(true);
                 tvFemale.setSelected(false);
-            }
-            else {
+            } else {
                 tvFemale.setSelected(true);
                 tvMale.setSelected(false);
             }
 
-            if(farmer.isLeader()) {
+            if (farmer.isLeader()) {
                 tvLeaderYes.setSelected(true);
                 tvLeaderNo.setSelected(false);
-            }
-            else {
+            } else {
                 tvLeaderNo.setSelected(true);
                 tvLeaderYes.setSelected(false);
             }
 
-            if(farmer.getLocation()!= null && !farmer.getLocation().isEmpty()) {
-//                ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsLocation, R.layout.simple_spinner_item);
-//                spLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getLocation()));
-                spLocation.setSelection(getPositionForSpinnerArray(farmer.getLocation(), strArrLocations));
+            if (farmer.getLocation() != null && !farmer.getLocation().isEmpty()) {
+                int index = getPositionForSpinnerArray(farmer.getLocation(), strArrLocations);
+                if(index >= 0)
+                {
+                    updateSubLocFromLocation(arrLocations.get(index).id);
+                    ArrayAdapter<String> arrayAdapterSubLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrSubLocations);
+                    spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterSubLoc, R.layout.spinner_nothing_selected, getContext(), "SUB LOCATION"));
+
+                    spLocation.setTag(false);
+                    spLocation.setSelection(index + 1);
+                }
             }
-            if(farmer.getSubLocation()!= null && !farmer.getSubLocation().isEmpty()) {
-//                ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsSubLocation, R.layout.simple_spinner_item);
-//                spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getSubLocation()));
-                spSubLocation.setSelection(getPositionForSpinnerArray(farmer.getSubLocation(), strArrSubLocations));
+            if (farmer.getSubLocation() != null && !farmer.getSubLocation().isEmpty()) {
+                int index = getPositionForSpinnerArray(farmer.getSubLocation(), strArrSubLocations);
+                if(index >= 0)
+                {
+                    spSubLocation.setTag(false);
+                    spSubLocation.setSelection(index + 1);
+                    updateVillageAndTreeFromSubLocation(arrSubLocations.get(index).id);
+
+                    ArrayAdapter<String> arrayAdapterVillage = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrVillages);
+                    spVillage.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterVillage, R.layout.spinner_nothing_selected, getContext(), "VILLAGE"));
+
+                    ArrayAdapter<String> arrayAdapterTree = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrTrees);
+                    spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterTree, R.layout.spinner_nothing_selected, getContext(), "TREE SPECIES"));
+                }
             }
-            if(farmer.getTreeSpecies()!= null && !farmer.getTreeSpecies().isEmpty()) {
-//                ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsTree, R.layout.simple_spinner_item);
-//                spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getTreeSpecies()));
-                spTree.setSelection(getPositionForSpinnerArray(farmer.getTreeSpecies(), strArrTrees));
+            if (farmer.getVillageName() != null && !farmer.getVillageName().isEmpty()) {
+                spVillage.setTag(false);
+                spVillage.setSelection(getPositionForSpinnerArray(farmer.getVillageName(), strArrVillages) + 1);
             }
-            if(farmer.getVillageName()!= null && !farmer.getVillageName().isEmpty()) {
-//                ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsVillage, R.layout.simple_spinner_item);
-//                spVillage.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapter, R.layout.spinner_nothing_selected, getContext(), farmer.getVillageName()));
-                spVillage.setSelection(getPositionForSpinnerArray(farmer.getVillageName(), strArrVillages));
+            if (farmer.getTreeSpecies() != null && !farmer.getTreeSpecies().isEmpty()) {
+                spTree.setTag(false);
+                spTree.setSelection(getPositionForSpinnerArray(farmer.getTreeSpecies(), strArrTrees) + 1);
             }
 
-            if(farmer.isFarmerHome()) {
+            if (farmer.isFarmerHome()) {
                 txtFarmerHomeYes.setSelected(true);
                 txtFarmerHomeNo.setSelected(false);
-            }
-            else {
+            } else {
                 txtFarmerHomeNo.setSelected(true);
                 txtFarmerHomeYes.setSelected(false);
             }
 
             etMobileNumber.setText(farmer.getMobileNumber());
 
-            if(farmer.getThumbUrl()!= null && !farmer.getThumbUrl().isEmpty()) ImageLoader.getInstance().displayImage(farmer.getThumbUrl(), imgFarmerPhoto, options);
-            if(farmer.getFarmerIdPhotoUrl()!= null && !farmer.getFarmerIdPhotoUrl().isEmpty()) ImageLoader.getInstance().displayImage(farmer.getFarmerIdPhotoUrl(), imgNationalID, options);
+            if (farmer.getThumbUrl() != null && !farmer.getThumbUrl().isEmpty()) {
+                String thumbUrl = "https://cs25.salesforce.com/services/data/v36.0/sobjects/Attachment/%s/body";
+                thumbUrl = String.format(thumbUrl, farmer.getThumbUrl());
+                ImageLoader.getInstance().displayImage(thumbUrl, imgFarmerPhoto, options);
+            }
+            if (farmer.getFarmerIdPhotoUrl() != null && !farmer.getFarmerIdPhotoUrl().isEmpty())
+            {
+                String thumbUrl = "https://cs25.salesforce.com/services/data/v36.0/sobjects/Attachment/%s/body";
+                thumbUrl = String.format(thumbUrl, farmer.getFarmerIdPhotoUrl());
+                ImageLoader.getInstance().displayImage(thumbUrl, imgNationalID, options);
+            }
         }
     }
 
     private int getPositionForSpinnerArray(String location, ArrayList<String> array) {
         for (int i = 0; i < array.size(); i++) {
-            if(array.get(i).equalsIgnoreCase(location)){
-                return i + 1;
+            if (array.get(i).equalsIgnoreCase(location)) {
+                return i;
             }
         }
         return 0;
@@ -373,7 +393,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     @OnClick(R.id.txtCreateFarmer)
     void onClickCreateFarmer(View view) {
 
-        InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
         if (!isFormFilled()) {
@@ -399,13 +419,11 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         boolean goodToGo = true;
         String missingData = "";
-        if(etFirstName.getText() == null || etFirstName.getText().equals(""))
-        {
+        if (etFirstName.getText() == null || etFirstName.getText().equals("")) {
             goodToGo = false;
             missingData += "\n- First Name";
         }
-        if(etIdNumber.getText() == null || etIdNumber.getText().equals(""))
-        {
+        if (etIdNumber.getText() == null || etIdNumber.getText().equals("")) {
             goodToGo = false;
             missingData += "\n- ID Number";
         }
@@ -419,7 +437,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     }
 
     private void popToSignupsFragment() {
-        ((BaseContainerFragment)(getParentFragment())).popFragment();
+        ((BaseContainerFragment) (getParentFragment())).popFragment();
     }
 
     private void addFarmerToDB(Farmer newFarmer, String id, boolean synced) {
@@ -469,7 +487,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
 
                 addFarmToDB(farm, null, false);
-                
+
                 loadingFinished();
                 popToSignupsFragment();
             }
@@ -530,12 +548,12 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private HashMap<String, Object> getFarmerMap() {
 
         final HashMap<String, Object> newFarmerMap = new HashMap<>();
-        newFarmerMap.put("First_Name__c" , etFirstName.getText() != null ? etFirstName.getText().toString() : "");
+        newFarmerMap.put("First_Name__c", etFirstName.getText() != null ? etFirstName.getText().toString() : "");
         newFarmerMap.put("Middle_Name__c", etSecondName.getText() != null ? etSecondName.getText().toString() : "");
         newFarmerMap.put("Last_Name__c", etSurname.getText() != null ? etSurname.getText().toString() : "");
         newFarmerMap.put("Name", etIdNumber.getText() != null ? etIdNumber.getText().toString() : "");
         newFarmerMap.put("Mobile_Number__c", etMobileNumber.getText() != null ? etMobileNumber.getText().toString() : "");
-        newFarmerMap.put("Gender__c" , (tvFemale.isSelected() == true) ? "Female" : "Male");
+        newFarmerMap.put("Gender__c", (tvFemale.isSelected() == true) ? "Female" : "Male");
         newFarmerMap.put("Leader__c", (tvLeaderYes.isSelected() == true) ? 1 : 0);
 //        String fullName = ((etFirstName.getText() != null && !etFirstName.getText().equals("")) ? etFirstName.getText().toString() : "") + ((etSecondName.getText() != null && !etSecondName.getText().equals("")) ? " " + etSecondName.getText().toString() : "") + ((etSurname.getText() != null && !etSecondName.getText().equals("")) ? " " + etSurname.getText().toString() : "");
 //        newFarmer.setFullName(fullName);
@@ -560,18 +578,18 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private HashMap<String, Object> getFarmMap() {
 
         final HashMap<String, Object> newFarmMap = new HashMap<>();
-        newFarmMap.put("Location__c" , location);
+        newFarmMap.put("Location__c", location);
         newFarmMap.put("Sub_Location__c", subLocation);
         newFarmMap.put("Village__c", village);
         newFarmMap.put("Tree__c", treeSpecies);
         newFarmMap.put("Status__c", farmerStatus);
-        newFarmMap.put("Facilitator__c" , PreferenceHelper.getInstance().readFacilitatorId());
+        newFarmMap.put("Facilitator__c", PreferenceHelper.getInstance().readFacilitatorId());
 
 
         return newFarmMap;
     }
 
-    private final TextWatcher watcher = new TextWatcher(){
+    private final TextWatcher watcher = new TextWatcher() {
 
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -589,9 +607,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         }
     };
 
-    private void checkEnableSubmit()
-    {
-        if(etFirstName.getText().toString().isEmpty()
+    private void checkEnableSubmit() {
+        if (etFirstName.getText().toString().isEmpty()
                 || etSecondName.getText().toString().isEmpty()
                 || etSurname.getText().toString().isEmpty()
                 || etIdNumber.getText().toString().isEmpty()
@@ -601,11 +618,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 || spLocation.getSelectedItem() == null
                 || spSubLocation.getSelectedItem() == null
                 || spVillage.getSelectedItem() == null
-                || spTree.getSelectedItem() == null)
-        {
+                || spTree.getSelectedItem() == null) {
             txtSubmitApproval.setEnabled(false);
-        }
-        else {
+        } else {
             txtSubmitApproval.setEnabled(true);
         }
     }
@@ -646,12 +661,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         pickerDialog.setPositiveButton("Gallery",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        if(isFarmer)
-                        {
+                        if (isFarmer) {
                             pickFarmerImage(true);
-                        }
-                        else
-                        {
+                        } else {
                             pickNationalIdImage(true);
                         }
                         dialog.dismiss();
@@ -660,12 +672,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         pickerDialog.setNegativeButton("Camera",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        if(isFarmer)
-                        {
+                        if (isFarmer) {
                             pickFarmerImage(false);
-                        }
-                        else
-                        {
+                        } else {
                             pickNationalIdImage(false);
                         }
                         dialog.dismiss();
@@ -689,11 +698,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 // Do error handling
             }
         };
-        if(isDevice) {
+        if (isDevice) {
             imagePicker.setImagePickerCallback(imagePickerCallback);
             imagePicker.pickImage();
-        }
-        else {
+        } else {
             cameraImagePicker.setImagePickerCallback(imagePickerCallback);
             cameraImagePicker.pickImage();
         }
@@ -714,19 +722,17 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 // Do error handling
             }
         };
-        if(isDevice) {
+        if (isDevice) {
             imagePicker.setImagePickerCallback(imagePickerCallback);
             imagePicker.pickImage();
-        }
-        else {
+        } else {
             cameraImagePicker.setImagePickerCallback(imagePickerCallback);
             String pickedImage = cameraImagePicker.pickImage();
             pickedImage = "";
         }
     }
 
-    private void disableForm()
-    {
+    private void disableForm() {
         disableView(etFirstName);
         disableView(etSecondName);
         disableView(etSurname);
@@ -748,8 +754,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         disableView(txtSubmitApproval);
     }
 
-    private void disableView(View view)
-    {
+    private void disableView(View view) {
         view.setEnabled(false);
         view.setFocusable(false);
     }
@@ -757,18 +762,40 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == Activity.RESULT_OK) {
-            if(requestCode == Picker.PICK_IMAGE_DEVICE) {
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == Picker.PICK_IMAGE_DEVICE) {
 //                if(imagePicker == null) {
 //                    imagePicker = new ImagePicker(getActivity());
 //                    imagePicker.setImagePickerCallback(farmerPhotoPickerCallback);
 //                }
                 imagePicker.submit(data);
-            }
-            else if(requestCode == Picker.PICK_IMAGE_CAMERA)
-            {
+            } else if (requestCode == Picker.PICK_IMAGE_CAMERA) {
                 cameraImagePicker.submit(data);
             }
+        }
+    }
+
+    private void updateSubLocFromLocation(String locationId)
+    {
+        arrSubLocations = DatabaseHelper.getInstance().getSubLocationsFromLocation(locationId);
+        strArrSubLocations.clear();
+        for (int i = 0; i < arrSubLocations.size(); i++) {
+            strArrSubLocations.add(arrSubLocations.get(i).name);
+        }
+    }
+
+    private void updateVillageAndTreeFromSubLocation(String subLocationId)
+    {
+        arrVillages = DatabaseHelper.getInstance().getVillagesFromSubLocation(subLocationId);
+        strArrVillages.clear();
+        for (int i = 0; i < arrVillages.size(); i++) {
+            strArrVillages.add(arrVillages.get(i).name);
+        }
+
+        arrTrees = DatabaseHelper.getInstance().getTreesFromSubLocation(subLocationId);
+        strArrTrees.clear();
+        for (int i = 0; i < arrTrees.size(); i++) {
+            strArrTrees.add(arrTrees.get(i).name);
         }
     }
 
@@ -778,55 +805,62 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         int position = pos - 1;
         switch (spinnerView.getId()) {
             case R.id.spLocation:
-                if(position < 0 )
+            {
+                if (position < 0)
                     location = "";
                 else
                     location = arrLocations.get(position).id;
-//                arrSubLocations = DatabaseHelper.getInstance().getSubLocationsFromLocation(location);
-//                strArrSubLocations.clear();
-//                for (int i = 0; i < arrSubLocations.size(); i++) {
-//                    strArrSubLocations.add(arrSubLocations.get(i).name);
-//                }
-//                if(strArrSubLocations.size() > 0)
-//                {
-//                    spSubLocation.setEnabled(true);
-////                    spSubLocation.getAdapter().notify();
-//                }
-//                else
-//                {
-//                    strArrSubLocations.add("");
-//                    spSubLocation.setEnabled(false);
-//                }
+                if((boolean)spLocation.getTag())
+                {
+                    updateSubLocFromLocation(location);
+
+                    ArrayAdapter<String> arrayAdapterSubLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrSubLocations);
+                    spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterSubLoc, R.layout.spinner_nothing_selected, getContext(), "SUB LOCATION"));
+
+                    strArrVillages.clear();
+                    ArrayAdapter<String> arrayAdapterVillages = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrVillages);
+                    spVillage.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterVillages, R.layout.spinner_nothing_selected, getContext(), "VILLAGE"));
+
+                    strArrTrees.clear();
+                    ArrayAdapter<String> arrayAdapterTrees = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrTrees);
+                    spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterTrees, R.layout.spinner_nothing_selected, getContext(), "TREE SPECIES"));
+                }
+                else
+                {
+                    spLocation.setTag(true);
+                }
+            }
                 break;
             case R.id.spSubLocation:
-                if(position < 0 )
+            {
+                if (position < 0)
                     subLocation = "";
                 else
                     subLocation = arrSubLocations.get(position).id;
-//                arrVillages = DatabaseHelper.getInstance().getVillagesFromSubLocation(subLocation);
-//                strArrVillages.clear();
-//                for (int i = 0; i < arrVillages.size(); i++) {
-//                    strArrVillages.add(arrVillages.get(i).name);
-//                }
-//                if(strArrVillages.size() > 0)
-//                {
-//                    spVillage.setEnabled(true);
-////                    spVillage.getAdapter().notify();
-//                }
-//                else
-//                {
-//                    strArrVillages.add("");
-//                    spVillage.setEnabled(false);
-//                }
+                if((boolean)spSubLocation.getTag())
+                {
+                    updateVillageAndTreeFromSubLocation(subLocation);
+
+                    ArrayAdapter<String> arrayAdapterVillages = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrVillages);
+                    spVillage.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterVillages, R.layout.spinner_nothing_selected, getContext(), "VILLAGE"));
+
+                    ArrayAdapter<String> arrayAdapterTrees = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrTrees);
+                    spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterTrees, R.layout.spinner_nothing_selected, getContext(), "TREE SPECIES"));
+                }
+                else
+                {
+                    spSubLocation.setTag(true);
+                }
+            }
                 break;
             case R.id.spVillage:
-                if(position < 0 )
+                if (position < 0)
                     village = "";
                 else
                     village = arrVillages.get(position).id;
                 break;
             case R.id.spTree:
-                if(position < 0 )
+                if (position < 0)
                     treeSpecies = "";
                 else
                     treeSpecies = arrTrees.get(position).id;
