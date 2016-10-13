@@ -32,6 +32,7 @@
                 android:padding="@dimen/padding_15">
 
                 <tintash.fennel.views.FontTextView
+                    android:id="@+id/lblFirstName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/first_name"
@@ -60,6 +61,7 @@
 
 
                 <tintash.fennel.views.FontTextView
+                    android:id="@+id/lblSurname"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/padding_10"
@@ -96,6 +98,7 @@
                     android:orientation="horizontal">
 
                     <tintash.fennel.views.FontTextView
+                        android:id="@+id/lblGender"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1.5"
@@ -137,6 +140,7 @@
                     android:orientation="horizontal">
 
                     <tintash.fennel.views.FontTextView
+                        android:id="@+id/lblLeader"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1.5"
@@ -215,6 +219,7 @@
                     android:orientation="horizontal">
 
                     <tintash.fennel.views.FontTextView
+                        android:id="@+id/lblFarmerHome"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1.5"

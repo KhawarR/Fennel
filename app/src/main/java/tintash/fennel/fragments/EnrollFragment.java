@@ -113,6 +113,21 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     @Bind(R.id.txtSubmitApproval)
     TextView txtSubmitApproval;
 
+    @Bind(R.id.lblFirstName)
+    TextView lblFirstName;
+
+    @Bind(R.id.lblSurname)
+    TextView lblSurname;
+
+    @Bind(R.id.lblGender)
+    TextView lblGender;
+
+    @Bind(R.id.lblLeader)
+    TextView lblLeader;
+
+    @Bind(R.id.lblFarmerHome)
+    TextView lblFarmerHome;
+
     @Bind(R.id.et_first_name)
     EditText etFirstName;
 
@@ -222,13 +237,13 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         titleBarLayout.setOnIconClickListener(this);
 
-        tvMale.setSelected(true);
+        tvMale.setSelected(false);
         tvFemale.setSelected(false);
 
-        tvLeaderNo.setSelected(true);
+        tvLeaderNo.setSelected(false);
         tvLeaderYes.setSelected(false);
 
-        txtFarmerHomeNo.setSelected(true);
+        txtFarmerHomeNo.setSelected(false);
         txtFarmerHomeYes.setSelected(false);
 
         arrLocations = DatabaseHelper.getInstance().getAllLocations();
@@ -467,26 +482,86 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         if (etFirstName.getText() == null || etFirstName.getText().toString().isEmpty()) {
             goodToGo = false;
             missingData += "\n- First Name";
+            lblFirstName.setTextColor(getResources().getColor(R.color.dark_red));
+        }
+        else
+        {
+            lblFirstName.setTextColor(getResources().getColor(R.color.black));
         }
         if (etSurname.getText() == null || etSurname.getText().toString().isEmpty()) {
             goodToGo = false;
             missingData += "\n- Surname";
+            lblSurname.setTextColor(getResources().getColor(R.color.dark_red));
+        }
+        else
+        {
+            lblSurname.setTextColor(getResources().getColor(R.color.black));
+        }
+        if(!tvMale.isSelected() && !tvFemale.isSelected())
+        {
+            goodToGo = false;
+            missingData += "\n- Gender";
+            lblGender.setTextColor(getResources().getColor(R.color.dark_red));
+        }
+        else
+        {
+            lblGender.setTextColor(getResources().getColor(R.color.black));
+        }
+        if(!tvLeaderNo.isSelected() && !tvLeaderYes.isSelected())
+        {
+            goodToGo = false;
+            missingData += "\n- Leader?";
+            lblLeader.setTextColor(getResources().getColor(R.color.dark_red));
+        }
+        else
+        {
+            lblLeader.setTextColor(getResources().getColor(R.color.black));
         }
         if (spLocation.getSelectedItem() == null) {
             goodToGo = false;
             missingData += "\n- Location";
+            spLocation.setBackgroundResource(R.drawable.spinner_bg_error);
+        }
+        else
+        {
+            spLocation.setBackgroundResource(R.drawable.spinner_bg);
         }
         if (spSubLocation.getSelectedItem() == null) {
             goodToGo = false;
             missingData += "\n- Sub location";
+            spSubLocation.setBackgroundResource(R.drawable.spinner_bg_error);
+        }
+        else
+        {
+            spSubLocation.setBackgroundResource(R.drawable.spinner_bg);
         }
         if (spVillage.getSelectedItem() == null) {
             goodToGo = false;
             missingData += "\n- Village";
+            spVillage.setBackgroundResource(R.drawable.spinner_bg_error);
+        }
+        else
+        {
+            spVillage.setBackgroundResource(R.drawable.spinner_bg);
         }
         if (spTree.getSelectedItem() == null) {
             goodToGo = false;
             missingData += "\n- Tree";
+            spTree.setBackgroundResource(R.drawable.spinner_bg_error);
+        }
+        else
+        {
+            spTree.setBackgroundResource(R.drawable.spinner_bg);
+        }
+        if(!txtFarmerHomeNo.isSelected() && !txtFarmerHomeYes.isSelected())
+        {
+            goodToGo = false;
+            missingData += "\n- Farmer Home?";
+            lblFarmerHome.setTextColor(getResources().getColor(R.color.dark_red));
+        }
+        else
+        {
+            lblFarmerHome.setTextColor(getResources().getColor(R.color.black));
         }
 
         if (!goodToGo) {
