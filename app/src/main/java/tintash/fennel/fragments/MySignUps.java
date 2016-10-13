@@ -124,16 +124,16 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 Farmer farmer = myFarmers.get(position);
                 if(!farmer.isHeader())
                 {
-                    ((BaseContainerFragment) getParentFragment()).addFragment(EnrollFragment.newInstance(Constants.STR_EDIT_FARMER, farmer), true);
+                    ((BaseContainerFragment) getParentFragment()).replaceFragment(EnrollFragment.newInstance(Constants.STR_EDIT_FARMER, farmer), true);
                 }
             }
         });
 
-        boolean isFirstRun = PreferenceHelper.getInstance().readFirstRun();
-        if (isFirstRun) {
-            PreferenceHelper.getInstance().writeFirstRun(false);
+//        boolean isFirstRun = PreferenceHelper.getInstance().readFirstRun();
+//        if (isFirstRun) {
+//            PreferenceHelper.getInstance().writeFirstRun(false);
             getLocationsData();
-        }
+//        }
     }
 
     private SwipeRefreshLayout.OnRefreshListener onRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
@@ -161,8 +161,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     private void getLocationsData() {
 
-        mProgressDialog.setMessage("Initializing!");
-        loadingStarted();
+//        mProgressDialog.setMessage("Initializing!");
+//        loadingStarted();
 
         String locationsQuery = NetworkHelper.GET_LOCATIONS;
         Call<ResponseBody> locationsApi = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, locationsQuery);
@@ -317,6 +317,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 String idNumber = "";
                 String gender = "";
                 String mobileNumber = "";
+                boolean isFarmerHome = false;
                 boolean leader = false;
 
                 farmId = farmObj.getString("Id");
@@ -367,19 +368,21 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     leader = objFarmer.getBoolean("Leader__c");
                 }
 
+                isFarmerHome = farmObj.getBoolean("Is_Farmer_Home__c");
+
                 String status = farmObj.getString("Status__c");
 
                 if(status.equalsIgnoreCase(Constants.STR_INCOMPLETE))
                 {
-                    incompleteFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, false, mobileNumber, "", "", "", status, false));
+                    incompleteFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false));
                 }
                 else if(status.equalsIgnoreCase(Constants.STR_PENDING))
                 {
-                    pendingFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, false, mobileNumber, "", "", "", status, false));
+                    pendingFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false));
                 }
                 else if(status.equalsIgnoreCase(Constants.STR_APPROVED))
                 {
-                    approvedFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, false, mobileNumber, "", "", "", status, false));
+                    approvedFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false));
                 }
             }
         }
@@ -563,7 +566,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         {
             case R.id.rl_add:
             {
-                ((BaseContainerFragment) getParentFragment()).addFragment(EnrollFragment.newInstance(Constants.STR_ENROLL_FARMER, null), true);
+                ((BaseContainerFragment) getParentFragment()).replaceFragment(EnrollFragment.newInstance(Constants.STR_ENROLL_FARMER, null), true);
             }
                 break;
         }
@@ -573,8 +576,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
+//            if (locationsResponseCounter == 4)
+//                loadingFinished();
 
             if (response.code() == 200) {
                 try {
@@ -604,8 +607,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
+//            if (locationsResponseCounter == 4)
+//                loadingFinished();
             if (response.code() == 200) {
                 try {
                     parseSubLocations(response.body().string());
@@ -634,8 +637,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
+//            if (locationsResponseCounter == 4)
+//                loadingFinished();
             if (response.code() == 200) {
                 try {
                     parseVillages(response.body().string());
@@ -664,8 +667,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
+//            if (locationsResponseCounter == 4)
+//                loadingFinished();
             if (response.code() == 200) {
                 try {
                     parseTrees(response.body().string());

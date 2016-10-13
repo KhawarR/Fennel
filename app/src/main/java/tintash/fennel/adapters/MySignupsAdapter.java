@@ -26,8 +26,10 @@ import okhttp3.Request;
 import okhttp3.Response;
 import tintash.fennel.R;
 import tintash.fennel.models.Farmer;
+import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
 import tintash.fennel.utils.Constants;
+import tintash.fennel.utils.PreferenceHelper;
 import tintash.fennel.views.FontTextView;
 
 /**
@@ -163,24 +165,23 @@ public class MySignupsAdapter extends BaseAdapter {
             FontTextView name = (FontTextView) view.findViewById(R.id.tv_name);
             name.setText( farmer.getFullName());
 
-            FontTextView location = (FontTextView) view.findViewById(R.id.tv_location);
+            FontTextView village = (FontTextView) view.findViewById(R.id.tv_village);
             FontTextView sublocation = (FontTextView) view.findViewById(R.id.tv_sublocation);
 
             if(!farmer.getSubLocation().isEmpty())
-                sublocation.setText(farmer.getSubLocation() + ", ");
+                sublocation.setText(farmer.getSubLocation());
             else
                 sublocation.setText("");
 
-            if(!farmer.getLocation().isEmpty())
-                location.setText(farmer.getLocation());
+            if(!farmer.getVillageName().isEmpty())
+                village.setText(farmer.getVillageName() + ", ");
             else
-                location.setText("");
+                village.setText("");
 
             CircleImageView thumb = (CircleImageView) view.findViewById(R.id.profile_image);
             if(farmer.getThumbUrl() != null && !farmer.getThumbUrl().isEmpty())
             {
-                String thumbUrl = "https://cs25.salesforce.com/services/data/v36.0/sobjects/Attachment/%s/body";
-                thumbUrl = String.format(thumbUrl, farmer.getThumbUrl());
+                String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getThumbUrl());
                 picasso.load(thumbUrl).into(thumb);
             }
             else

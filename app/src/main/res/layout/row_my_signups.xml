@@ -38,10 +38,9 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
             <tintash.fennel.views.FontTextView
-                android:id="@+id/tv_sublocation"
+                android:id="@+id/tv_village"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Kwa Firi, "
                 android:layout_centerVertical="true"
                 android:maxLines="1"
                 android:ellipsize="end"
@@ -50,10 +49,9 @@
                 android:textSize="14sp"
                 android:layout_marginTop="5dp"/>
             <tintash.fennel.views.FontTextView
-                android:id="@+id/tv_location"
+                android:id="@+id/tv_sublocation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Mihirini"
                 android:layout_centerVertical="true"
                 android:maxLines="1"
                 android:ellipsize="end"

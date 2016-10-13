@@ -31,6 +31,11 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -296,6 +301,15 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 tvLeaderYes.setSelected(false);
             }
 
+            if(farmer.isFarmerHome())
+            {
+                txtFarmerHomeYes.setSelected(true);
+                txtFarmerHomeNo.setSelected(false);
+            } else {
+                txtFarmerHomeNo.setSelected(true);
+                txtFarmerHomeYes.setSelected(false);
+            }
+
             if (farmer.getLocation() != null && !farmer.getLocation().isEmpty()) {
                 int index = getPositionForSpinnerArray(farmer.getLocation(), strArrLocations);
                 if(index >= 0)
@@ -343,14 +357,16 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             etMobileNumber.setText(farmer.getMobileNumber());
 
             if (farmer.getThumbUrl() != null && !farmer.getThumbUrl().isEmpty()) {
-                String thumbUrl = "https://cs25.salesforce.com/services/data/v36.0/sobjects/Attachment/%s/body";
-                thumbUrl = String.format(thumbUrl, farmer.getThumbUrl());
+                String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getThumbUrl());
+//                String thumbUrl = "https://cs25.salesforce.com/services/data/v36.0/sobjects/Attachment/%s/body";
+//                thumbUrl = String.format(thumbUrl, farmer.getThumbUrl());
                 ImageLoader.getInstance().displayImage(thumbUrl, imgFarmerPhoto, options);
             }
             if (farmer.getFarmerIdPhotoUrl() != null && !farmer.getFarmerIdPhotoUrl().isEmpty())
             {
-                String thumbUrl = "https://cs25.salesforce.com/services/data/v36.0/sobjects/Attachment/%s/body";
-                thumbUrl = String.format(thumbUrl, farmer.getFarmerIdPhotoUrl());
+                String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getFarmerIdPhotoUrl());
+//                String thumbUrl = "https://cs25.salesforce.com/services/data/v36.0/sobjects/Attachment/%s/body";
+//                thumbUrl = String.format(thumbUrl, farmer.getFarmerIdPhotoUrl());
                 ImageLoader.getInstance().displayImage(thumbUrl, imgNationalID, options);
             }
         }
@@ -419,17 +435,33 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         boolean goodToGo = true;
         String missingData = "";
-        if (etFirstName.getText() == null || etFirstName.getText().equals("")) {
+        if (etFirstName.getText() == null || etFirstName.getText().toString().isEmpty()) {
             goodToGo = false;
             missingData += "\n- First Name";
         }
-        if (etIdNumber.getText() == null || etIdNumber.getText().equals("")) {
+        if (etSurname.getText() == null || etSurname.getText().toString().isEmpty()) {
             goodToGo = false;
-            missingData += "\n- ID Number";
+            missingData += "\n- Surname";
+        }
+        if (spLocation.getSelectedItem() == null) {
+            goodToGo = false;
+            missingData += "\n- Location";
+        }
+        if (spSubLocation.getSelectedItem() == null) {
+            goodToGo = false;
+            missingData += "\n- Sub location";
+        }
+        if (spVillage.getSelectedItem() == null) {
+            goodToGo = false;
+            missingData += "\n- Village";
+        }
+        if (spTree.getSelectedItem() == null) {
+            goodToGo = false;
+            missingData += "\n- Tree";
         }
 
         if (!goodToGo) {
-            Toast.makeText(getActivity(), "Please fill the following fields: " + missingData, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Please fill the following fields: " + missingData, Toast.LENGTH_LONG).show();
         }
 
         return goodToGo;
@@ -466,30 +498,45 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         apiCall.enqueue(new Callback<ResponseModel>() {
             @Override
             public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
+                loadingFinished();
                 if (response.body() != null && response.body().success == true) {
                     Log.i("LP", "Farm Added To Server");
-                    Toast.makeText(getContext(), "Farmer Enrolled Successfully!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Farmer Enrolled Successfully", Toast.LENGTH_SHORT).show();
 
                     addFarmToDB(farm, response.body().id, true);
+                    popToSignupsFragment();
                 } else {
-                    addFarmToDB(farm, null, false);
-                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
+//                    addFarmToDB(farm, null, false);
+//                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
+                    String message = "";
+                    try {
+                        String error = response.errorBody().string();
+                        JSONArray arr = new JSONArray(error);
+                        JSONObject obj = arr.getJSONObject(0);
+                        message = obj.getString("message");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    catch (ArrayIndexOutOfBoundsException e) {
+                        e.printStackTrace();
+                    }
+
+                    if(message.isEmpty())
+                        message = "Farmer Enrollment Failed";
+                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
                 }
                 Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
-
-                loadingFinished();
-                popToSignupsFragment();
             }
 
             @Override
             public void onFailure(Call<ResponseModel> call, Throwable t) {
                 Log.i("LP", t.getMessage().toString());
-                Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
-
-                addFarmToDB(farm, null, false);
-
+                Toast.makeText(getContext(), "Farmer Enrollment Failed", Toast.LENGTH_SHORT).show();
+//                addFarmToDB(farm, null, false);
                 loadingFinished();
-                popToSignupsFragment();
+//                popToSignupsFragment();
             }
         });
     }
@@ -503,29 +550,46 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         apiCall.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                loadingFinished();
                 if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                     Log.i("LP", "Farmer Edited Successfully");
                     Toast.makeText(getContext(), "Farmer Edited Successfully", Toast.LENGTH_SHORT).show();
                     updateFarm(farm, true);
+                    popToSignupsFragment();
 
                 } else {
-                    updateFarm(farm, false);
-                    Toast.makeText(getContext(), "Farmer Edit Failed!", Toast.LENGTH_SHORT).show();
+//                    updateFarm(farm, false);
+//                    Toast.makeText(getContext(), "Farmer Edit Failed", Toast.LENGTH_SHORT).show();
+                    String message = "";
+                    try {
+                        String error = response.errorBody().string();
+                        JSONArray arr = new JSONArray(error);
+                        JSONObject obj = arr.getJSONObject(0);
+                        message = obj.getString("message");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    catch (ArrayIndexOutOfBoundsException e) {
+                        e.printStackTrace();
+                    }
+
+                    if(message.isEmpty())
+                        message = "Farmer Edit Failed";
+                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
                 }
                 Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
-
-                loadingFinished();
-                popToSignupsFragment();
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.i("LP", t.getMessage().toString());
-                Toast.makeText(getContext(), "Farmer Edit Failed!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Farmer Edit Failed: " + t.getMessage(), Toast.LENGTH_LONG).show();
 
-                updateFarm(farm, false);
+//                updateFarm(farm, false);
                 loadingFinished();
-                popToSignupsFragment();
+//                popToSignupsFragment();
             }
         });
     }
@@ -584,6 +648,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         newFarmMap.put("Tree__c", treeSpecies);
         newFarmMap.put("Status__c", farmerStatus);
         newFarmMap.put("Facilitator__c", PreferenceHelper.getInstance().readFacilitatorId());
+        newFarmMap.put("Is_Farmer_Home__c", txtFarmerHomeYes.isSelected()? true : false);
 
 
         return newFarmMap;
@@ -890,29 +955,46 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                     editFarmWithFarmId(newFarm, farmer.farmId);
 
                 } else {
-                    Toast.makeText(getContext(), "Farmer Edit Failed!", Toast.LENGTH_SHORT).show();
-                    updateFarmer(farmer, false);
-                    Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
-                    newFarm.farmId = farmer.farmId;
-                    updateFarm(newFarm, false);
+
+                    String message = "";
+                    try {
+                        String error = response.errorBody().string();
+                        JSONArray arr = new JSONArray(error);
+                        JSONObject obj = arr.getJSONObject(0);
+                        message = obj.getString("message");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    catch (ArrayIndexOutOfBoundsException e) {
+                        e.printStackTrace();
+                    }
+
+                    if(message.isEmpty())
+                        message = "Farmer Edit Failed";
+                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+//                    updateFarmer(farmer, false);
+//                    Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
+//                    newFarm.farmId = farmer.farmId;
+//                    updateFarm(newFarm, false);
 
                     loadingFinished();
-                    popToSignupsFragment();
+//                    popToSignupsFragment();
                 }
-
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.i("LP", t.getMessage().toString());
-                Toast.makeText(getContext(), "Farmer Edit Failed!", Toast.LENGTH_SHORT).show();
-
-                updateFarmer(farmer, false);
-                Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
-                newFarm.farmId = farmer.farmId;
-                updateFarm(newFarm, false);
+                String message = t.getMessage();
+                Toast.makeText(getContext(), "Farmer Edit Failed: " + message, Toast.LENGTH_SHORT).show();
+//                updateFarmer(farmer, false);
+//                Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
+//                newFarm.farmId = farmer.farmId;
+//                updateFarm(newFarm, false);
                 loadingFinished();
-                popToSignupsFragment();
+//                popToSignupsFragment();
             }
         });
 
@@ -936,13 +1018,33 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
                 } else {
 
-                    addFarmerToDB(newFarmer, null, false);
-                    Farm newFarm = createFarmWithFarmerId(null);
-                    addFarmToDB(newFarm, null, false);
-                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
+//                    addFarmerToDB(newFarmer, null, false);
+//                    Farm newFarm = createFarmWithFarmerId(null);
+//                    addFarmToDB(newFarm, null, false);
+//                    Toast.makeText(getContext(), "Farmer Enrollment Failed", Toast.LENGTH_SHORT).show();
 
                     loadingFinished();
-                    popToSignupsFragment();
+//                    popToSignupsFragment();
+
+                    String message = "";
+                    try {
+                        String error = response.errorBody().string();
+                        JSONArray arr = new JSONArray(error);
+                        JSONObject obj = arr.getJSONObject(0);
+                        message = obj.getString("message");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    catch (ArrayIndexOutOfBoundsException e) {
+                        e.printStackTrace();
+                    }
+
+                    if(message.isEmpty())
+                        message = "Farmer Enrollment Failed";
+                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+
                 }
                 Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
             }
@@ -950,15 +1052,15 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             @Override
             public void onFailure(Call<ResponseModel> call, Throwable t) {
                 Log.i("LP", t.getMessage().toString());
-                Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Farmer Enrollment Failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
 
-                Farmer newFarmer = getFarmer();
-                addFarmerToDB(newFarmer, null, false);
-                Farm newFarm = createFarmWithFarmerId(null);
-                addFarmToDB(newFarm, null, false);
+//                Farmer newFarmer = getFarmer();
+//                addFarmerToDB(newFarmer, null, false);
+//                Farm newFarm = createFarmWithFarmerId(null);
+//                addFarmToDB(newFarm, null, false);
 
                 loadingFinished();
-                popToSignupsFragment();
+//                popToSignupsFragment();
             }
         });
     }
