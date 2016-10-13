@@ -233,31 +233,49 @@ public class Login extends BaseFragment implements Callback<Auth> {
 
         if (arrRecords.length() > 0) {
             JSONObject objRecord = arrRecords.getJSONObject(0);
-            String id = objRecord.getString("Id");
+//            String id = objRecord.getString("Id");
 
-            JSONObject objFacilitator = objRecord.getJSONObject("Facilitator__r");
-            String name = objFacilitator.getString("Name");
-            if (name == null || name.equalsIgnoreCase("null")) name = "";
-            String secondName = objFacilitator.getString("Second_Name__c");
-            if (secondName == null || secondName.equalsIgnoreCase("null")) secondName = "";
-            String surname = objFacilitator.getString("Surname__c");
-            if (surname == null || surname.equalsIgnoreCase("null")) surname = "";
+            JSONObject objFacilitator = objRecord.optJSONObject("Facilitators__r");
 
-            JSONObject objFieldOffice = objFacilitator.getJSONObject("Field_Officer__r");
-            String fo_name = objFieldOffice.getString("Name");
-            if (fo_name == null || fo_name.equalsIgnoreCase("null")) fo_name = "";
+            JSONObject objFieldOffice = objRecord.optJSONObject("Field_Officers__r");
 
-            JSONObject objFieldManager = objFieldOffice.getJSONObject("Field_Manager__r");
-            String fm_name = objFieldManager.getString("Name");
-            if (fm_name == null || fm_name.equalsIgnoreCase("null")) fm_name = "";
+            JSONObject objFieldManager = objRecord.optJSONObject("Field_Managers__r");
 
-            String facId = objFacilitator.getString("Id");
-
-            startActivity(new Intent(getActivity(), MainActivity.class));
-            getActivity().finish();
-
+            if(objFacilitator != null)
+            {
+                getAndSaveId(objFacilitator);
+            }
+            else if(objFieldOffice != null)
+            {
+                getAndSaveId(objFieldOffice);
+            }
+            else if(objFieldManager != null)
+            {
+                getAndSaveId(objFieldManager);
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "Invalid user", Toast.LENGTH_SHORT).show();
+            }
         } else {
             Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void getAndSaveId(JSONObject jsonObject) throws JSONException {
+        JSONArray arrRec = jsonObject.getJSONArray("records");
+        if(arrRec.length() > 0)
+        {
+            JSONObject obj1 = arrRec.getJSONObject(0);
+            String idFac = obj1.getString("Id");
+            PreferenceHelper.getInstance().writeFacilitatorId(idFac);
+            proceedToMainScreen();
+        }
+    }
+
+    private void proceedToMainScreen()
+    {
+        startActivity(new Intent(getActivity(), MainActivity.class));
+        getActivity().finish();
     }
 }
