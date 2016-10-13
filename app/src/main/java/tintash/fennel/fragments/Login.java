@@ -121,7 +121,7 @@ public class Login extends BaseFragment implements Callback<Auth> {
 //            }
 
             if (username.length() > 0) {
-                String loginQuery = String.format(NetworkHelper.QUERY_LOGIN, username, password);
+                String loginQuery = String.format(NetworkHelper.QUERY_LOGIN_1, username, password);
                 Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, loginQuery);
                 apiCall.enqueue(loginCallback);
             }
@@ -146,7 +146,6 @@ public class Login extends BaseFragment implements Callback<Auth> {
     private Callback<ResponseBody> loginCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            loadingFinished();
             if (response.code() == 200) {
                 String responseStr = "";
 
@@ -161,6 +160,7 @@ public class Login extends BaseFragment implements Callback<Auth> {
             }
             else
             {
+                loadingFinished();
                 Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
             }
         }
@@ -179,20 +179,85 @@ public class Login extends BaseFragment implements Callback<Auth> {
         if(arrRecords.length() > 0)
         {
             JSONObject objRecord = arrRecords.getJSONObject(0);
-            String id = objRecord.getString("Id");
 
-            JSONObject objFacilitator = objRecord.getJSONObject("Facilitator__r");
-            String facilitatorId = objFacilitator.getString("Id");
+            String username = objRecord.getString("Name");
+            String password = objRecord.getString("Password__c");
+            PreferenceHelper.getInstance().writeUserId(username);
+            PreferenceHelper.getInstance().writePassword(password);
 
-            PreferenceHelper.getInstance().writeFacilitatorId(facilitatorId);
-            PreferenceHelper.getInstance().writeUserId(etId.getText().toString().trim());
-            PreferenceHelper.getInstance().writePassword(etPassword.getText().toString().trim());
-            startActivity(new Intent(getActivity(), MainActivity.class));
-            getActivity().finish();
+            getAboutMeInfo();
         }
         else
         {
+            loadingFinished();
             Toast.makeText(getActivity(), "Login failed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void getAboutMeInfo() {
+        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_1, PreferenceHelper.getInstance().readUserId());
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        apiCall.enqueue(aboutMeCallback);
+    }
+
+    private Callback<ResponseBody> aboutMeCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            loadingFinished();
+            if (response.code() == 200) {
+                String responseStr = "";
+
+                try {
+                    responseStr = response.body().string();
+                    parseAboutMeData(responseStr);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
+    private void parseAboutMeData(String data) throws JSONException {
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if (arrRecords.length() > 0) {
+            JSONObject objRecord = arrRecords.getJSONObject(0);
+            String id = objRecord.getString("Id");
+
+            JSONObject objFacilitator = objRecord.getJSONObject("Facilitator__r");
+            String name = objFacilitator.getString("Name");
+            if (name == null || name.equalsIgnoreCase("null")) name = "";
+            String secondName = objFacilitator.getString("Second_Name__c");
+            if (secondName == null || secondName.equalsIgnoreCase("null")) secondName = "";
+            String surname = objFacilitator.getString("Surname__c");
+            if (surname == null || surname.equalsIgnoreCase("null")) surname = "";
+
+            JSONObject objFieldOffice = objFacilitator.getJSONObject("Field_Officer__r");
+            String fo_name = objFieldOffice.getString("Name");
+            if (fo_name == null || fo_name.equalsIgnoreCase("null")) fo_name = "";
+
+            JSONObject objFieldManager = objFieldOffice.getJSONObject("Field_Manager__r");
+            String fm_name = objFieldManager.getString("Name");
+            if (fm_name == null || fm_name.equalsIgnoreCase("null")) fm_name = "";
+
+            String facId = objFacilitator.getString("Id");
+
+            startActivity(new Intent(getActivity(), MainActivity.class));
+            getActivity().finish();
+
+        } else {
+            Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
         }
     }
 }

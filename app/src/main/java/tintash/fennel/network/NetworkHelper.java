@@ -11,11 +11,14 @@ public class NetworkHelper {
     public static final String API_VERSION = "v36.0";
     public static final String URL_ATTACHMENTS = "%s/services/data/" + API_VERSION + "/sobjects/Attachment/%s/body";
 
-    public static final String QUERY_LOGIN = "SELECT Id, Name, Facilitator__r.Id FROM Mobile_Users__c WHERE Name = '%s' AND Password__c = '%s'";
+    public static final String QUERY_LOGIN_1 = "Select m.Password__c, m.Name, m.Last_Sync__c, m.Active__c From Mobile_Users__c m WHERE m.Name = '%s' AND Password__c = '%s' AND Active__c = true";
+//    public static final String QUERY_LOGIN = "SELECT Id, Name, Facilitator__r.Id FROM Mobile_Users__c WHERE Name = '%s' AND Password__c = '%s'";
+    public static final String QUERY_ABOUT_ME_1 = "Select e.Id, e.Name, e.Active_Employee__c, (Select Id, Name, Phone__c, Field_Office__c, Field_Office_GPS__Latitude__s, Field_Office_GPS__Longitude__s, Field_Office_GPS__c, Account__c From Field_Officers__r), (Select Id, Name, Contact__c From Field_Managers__r ), (Select Id,Phone__c, Second_Name__c, Surname__c From Facilitators__r) From Employee__c e WHERE Name = '%s' AND Active_Employee__c = true";
     public static final String QUERY_ABOUT_ME = "SELECT Id, Facilitator__r.Id, Facilitator__r.Name, Facilitator__r.Second_Name__c, Facilitator__r.Surname__c, Facilitator__r.Field_Officer__r.Id, Facilitator__r.Field_Officer__r.Name, Facilitator__r.Field_Officer__r.Field_Manager__r.Id, Facilitator__r.Field_Officer__r.Field_Manager__r.Name FROM Mobile_Users__c WHERE Name = '%s' AND Password__c = '%s'";
     public static final String QUERY_ABOUT_ME_ATTACHMENT = "SELECT Id, Name, (SELECT Id, ParentId, Name FROM Attachments) FROM Facilitator__c WHERE Id = '%s'";
 
-    public static final String QUERY_MY_SIGNUPS = "SELECT Id, Farmers__r.Id, Farmers__r.FullName__c, Farmers__r.First_Name__c, Farmers__r.Middle_Name__c, Farmers__r.Last_Name__c, Farmers__r.Name, Farmers__r.Gender__c, Farmers__r.Leader__c, Farmers__r.Mobile_Number__c, Status__c, Is_Farmer_Home__c, Location__r.Name, Sub_Location__r.Name, Tree__r.Name, Village__r.Name FROM Farm__c WHERE Facilitator__c = '%s' Order By Status__c";
+    public static final String QUERY_MY_SIGNUPS_1 = "SELECT Id, Farmers__r.Id, Farmers__r.FullName__c, Farmers__r.First_Name__c, Farmers__r.Middle_Name__c, Farmers__r.Last_Name__c, Farmers__r.Name, Farmers__r.Gender__c, Farmers__r.Leader__c, Farmers__r.Mobile_Number__c, Status__c, Is_Farmer_Home__c, Location__r.Name, Sub_Location__r.Name, Tree__r.Name, Village__r.Name FROM Farm__c WHERE SignedUpById__c = '%s' Order By Status__c";
+//    public static final String QUERY_MY_SIGNUPS = "SELECT Id, Farmers__r.Id, Farmers__r.FullName__c, Farmers__r.First_Name__c, Farmers__r.Middle_Name__c, Farmers__r.Last_Name__c, Farmers__r.Name, Farmers__r.Gender__c, Farmers__r.Leader__c, Farmers__r.Mobile_Number__c, Status__c, Is_Farmer_Home__c, Location__r.Name, Sub_Location__r.Name, Tree__r.Name, Village__r.Name FROM Farm__c WHERE Facilitator__c = '%s' Order By Status__c";
     public static final String FARMER_QUERY = "SELECT Id, Name, (SELECT Id, ParentId, Name FROM Attachments) FROM Farmer__c";
 
     public static final String GET_LOCATIONS = "SELECT Id, Name FROM Location__c";

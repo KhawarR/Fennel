@@ -1,5 +1,6 @@
 package tintash.fennel.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -29,6 +30,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import tintash.fennel.R;
+import tintash.fennel.activities.LoginActivity;
 import tintash.fennel.adapters.MySignupsAdapter;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.common.database.DatabaseHelper;
@@ -146,7 +148,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     private void getMySignups()
     {
         if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
-        String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS, PreferenceHelper.getInstance().readFacilitatorId());
+        String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS_1, PreferenceHelper.getInstance().readFacilitatorId());
         loadingStarted();
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         apiCall.enqueue(mySignupsCallback);
@@ -230,6 +232,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             }
             else
             {
+                PreferenceHelper.getInstance().clearSession();
+                startActivity(new Intent(getActivity(), LoginActivity.class));
+                getActivity().finish();
                 Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
             }
         }
