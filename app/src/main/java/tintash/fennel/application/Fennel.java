@@ -3,14 +3,14 @@ package tintash.fennel.application;
 import android.app.Application;
 import android.graphics.Bitmap;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
-import com.instabug.library.IBGInvocationEvent;
-import com.instabug.library.Instabug;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
+import io.fabric.sdk.android.Fabric;
 import tintash.fennel.R;
 import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.network.RestClient;
@@ -42,18 +42,12 @@ public class Fennel extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
         restClient = new RestClient();
         initImageLoader();
-        initInstaBug();
 
         PreferenceHelper.initializeInstance(getApplicationContext());
         DatabaseHelper.initializeInstance(this);
-    }
-
-    public void initInstaBug() {
-        new Instabug.Builder(this, "6e99244a66b36936b653a4e8dd22a96c")
-                .setInvocationEvent(IBGInvocationEvent.IBGInvocationEventShake)
-                .build();
     }
 
     public void initImageLoader() {
