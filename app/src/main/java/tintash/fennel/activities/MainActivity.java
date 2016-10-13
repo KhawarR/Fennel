@@ -26,6 +26,7 @@ import tintash.fennel.fragments.MyLogbookContainerFragment;
 import tintash.fennel.fragments.MySignUps;
 import tintash.fennel.fragments.MySignUpsContainerFragment;
 import tintash.fennel.utils.CustomImageDownloader;
+import tintash.fennel.utils.PreferenceHelper;
 
 public class MainActivity extends BaseActivity {
 
@@ -60,6 +61,8 @@ public class MainActivity extends BaseActivity {
         mTabHost.addTab(
                 mTabHost.newTabSpec(TAB_4_TAG).setIndicator("", ContextCompat.getDrawable(this, R.drawable.selector_mylogbook)),
                 MyLogbookContainerFragment.class, null);
+
+        PreferenceHelper.getInstance().writeToken("sdsds");
     }
 
     @Override

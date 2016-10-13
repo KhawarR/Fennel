@@ -119,19 +119,29 @@ public class AboutMe extends BaseFragment {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
-            if (response.code() == 200) {
-                String responseStr = "";
+            if(isValid())
+            {
+                if (response.code() == 200) {
+                    String responseStr = "";
 
-                try {
-                    responseStr = response.body().string();
-                    parseData(responseStr);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    try {
+                        responseStr = response.body().string();
+                        parseData(responseStr);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
-            } else {
-                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                else if(response.code() == 401)
+                {
+                    PreferenceHelper.getInstance().clearSession();
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    getActivity().finish();
+                }
+                else {
+                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
             }
         }
 
@@ -191,24 +201,34 @@ public class AboutMe extends BaseFragment {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
-            if (response.code() == 200) {
-                String responseStr = "";
+            if(isValid())
+            {
+                if (response.code() == 200) {
+                    String responseStr = "";
 
-                try {
-                    responseStr = response.body().string();
-                    String attId = parseDataAttachment(responseStr);
-                    if(!attId.isEmpty())
-                    {
-                        String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
-                        picasso.load(thumbUrl).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+                    try {
+                        responseStr = response.body().string();
+                        String attId = parseDataAttachment(responseStr);
+                        if(!attId.isEmpty())
+                        {
+                            String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
+                            picasso.load(thumbUrl).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
-            } else {
-                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                else if(response.code() == 401)
+                {
+                    PreferenceHelper.getInstance().clearSession();
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    getActivity().finish();
+                }
+                else {
+                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
             }
         }
 

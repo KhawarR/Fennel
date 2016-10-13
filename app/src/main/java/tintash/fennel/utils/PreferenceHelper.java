@@ -56,7 +56,7 @@ public class PreferenceHelper {
     }
 
     public String readInstanceUrl() {
-        String url = mPref.getString(KEY_INSTANCE_URL, null);
+        String url = mPref.getString(KEY_INSTANCE_URL, "");
         return url;
     }
 
@@ -67,7 +67,7 @@ public class PreferenceHelper {
     }
 
     public String readUserId() {
-        String userId = mPref.getString(KEY_USER_ID, null);
+        String userId = mPref.getString(KEY_USER_ID, "");
         return userId;
     }
 
@@ -78,7 +78,7 @@ public class PreferenceHelper {
     }
 
     public String readPassword() {
-        String password = mPref.getString(KEY_PASSWORD, null);
+        String password = mPref.getString(KEY_PASSWORD, "");
         return password;
     }
 
@@ -89,7 +89,7 @@ public class PreferenceHelper {
     }
 
     public String readFacilitatorId() {
-        String id = mPref.getString(KEY_FACILITATOR_ID, null);
+        String id = mPref.getString(KEY_FACILITATOR_ID, "");
         return id;
     }
 

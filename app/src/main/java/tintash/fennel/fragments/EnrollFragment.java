@@ -18,6 +18,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -76,6 +78,8 @@ import tintash.fennel.views.TitleBarLayout;
  */
 public class EnrollFragment extends BaseContainerFragment implements AdapterView.OnItemSelectedListener {
 
+    @Bind(R.id.scrollView)
+    ScrollView scrollView;
 
     @Bind(R.id.spLocation)
     Spinner spLocation;
@@ -121,6 +125,15 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     @Bind(R.id.lblGender)
     TextView lblGender;
+
+    @Bind(R.id.llGenderContainer)
+    LinearLayout llGenderContainer;
+
+    @Bind(R.id.llLeaderContainer)
+    LinearLayout llLeaderContainer;
+
+    @Bind(R.id.llFarmerHomeContainer)
+    LinearLayout llFarmerHomeContainer;
 
     @Bind(R.id.lblLeader)
     TextView lblLeader;
@@ -479,10 +492,12 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         boolean goodToGo = true;
         String missingData = "";
+        View scrollToView = null;
         if (etFirstName.getText() == null || etFirstName.getText().toString().isEmpty()) {
             goodToGo = false;
             missingData += "\n- First Name";
             lblFirstName.setTextColor(getResources().getColor(R.color.dark_red));
+            scrollToView = lblFirstName;
         }
         else
         {
@@ -492,6 +507,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             goodToGo = false;
             missingData += "\n- Surname";
             lblSurname.setTextColor(getResources().getColor(R.color.dark_red));
+            if(scrollToView == null) scrollToView = lblSurname;
         }
         else
         {
@@ -502,6 +518,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             goodToGo = false;
             missingData += "\n- Gender";
             lblGender.setTextColor(getResources().getColor(R.color.dark_red));
+            if(scrollToView == null) scrollToView = llGenderContainer;
         }
         else
         {
@@ -512,6 +529,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             goodToGo = false;
             missingData += "\n- Leader?";
             lblLeader.setTextColor(getResources().getColor(R.color.dark_red));
+            if(scrollToView == null) scrollToView = llLeaderContainer;
         }
         else
         {
@@ -521,6 +539,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             goodToGo = false;
             missingData += "\n- Location";
             spLocation.setBackgroundResource(R.drawable.spinner_bg_error);
+            if(scrollToView == null) scrollToView = spLocation;
         }
         else
         {
@@ -530,6 +549,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             goodToGo = false;
             missingData += "\n- Sub location";
             spSubLocation.setBackgroundResource(R.drawable.spinner_bg_error);
+            if(scrollToView == null) scrollToView = spSubLocation;
         }
         else
         {
@@ -539,6 +559,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             goodToGo = false;
             missingData += "\n- Village";
             spVillage.setBackgroundResource(R.drawable.spinner_bg_error);
+            if(scrollToView == null) scrollToView = spVillage;
         }
         else
         {
@@ -548,6 +569,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             goodToGo = false;
             missingData += "\n- Tree";
             spTree.setBackgroundResource(R.drawable.spinner_bg_error);
+            if(scrollToView == null) scrollToView = spTree;
         }
         else
         {
@@ -558,6 +580,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             goodToGo = false;
             missingData += "\n- Farmer Home?";
             lblFarmerHome.setTextColor(getResources().getColor(R.color.dark_red));
+            if(scrollToView == null) scrollToView = llFarmerHomeContainer;
         }
         else
         {
@@ -565,6 +588,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         }
 
         if (!goodToGo) {
+            scrollView.smoothScrollTo(0, scrollToView.getTop());
             Toast.makeText(getActivity(), "Please fill the following fields: " + missingData, Toast.LENGTH_LONG).show();
         }
 

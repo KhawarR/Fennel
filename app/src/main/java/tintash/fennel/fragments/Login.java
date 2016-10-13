@@ -34,6 +34,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import tintash.fennel.R;
+import tintash.fennel.activities.LoginActivity;
 import tintash.fennel.activities.MainActivity;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.datamodels.Auth;
@@ -69,7 +70,7 @@ public class Login extends BaseFragment implements Callback<Auth> {
         etId.setText("khawar");
         etPassword.setText("khawar");
 
-        if(!PreferenceHelper.getInstance().readToken().isEmpty())
+        if(!PreferenceHelper.getInstance().readToken().isEmpty() && !PreferenceHelper.getInstance().readFacilitatorId().isEmpty())
         {
             Fennel.restClient.setApiBaseUrl(PreferenceHelper.getInstance().readInstanceUrl());
             startActivity(new Intent(getActivity(), MainActivity.class));
@@ -140,7 +141,7 @@ public class Login extends BaseFragment implements Callback<Auth> {
     public void onFailure(Call<Auth> call, Throwable t) {
         loadingFinished();
         t.printStackTrace();
-        Toast.makeText(getActivity(), "SalesForce Authentication failed", Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), "Authentication failed: " + t.getMessage(), Toast.LENGTH_LONG).show();
     }
 
     private Callback<ResponseBody> loginCallback = new Callback<ResponseBody>() {
@@ -158,6 +159,12 @@ public class Login extends BaseFragment implements Callback<Auth> {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+            }
+            else if(response.code() == 401)
+            {
+                PreferenceHelper.getInstance().clearSession();
+                startActivity(new Intent(getActivity(), LoginActivity.class));
+                getActivity().finish();
             }
             else
             {
@@ -192,7 +199,7 @@ public class Login extends BaseFragment implements Callback<Auth> {
         }
         else
         {
-            Toast.makeText(getActivity(), "Login failed", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Login failed: Please check username/password", Toast.LENGTH_LONG).show();
         }
     }
 }

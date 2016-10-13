@@ -1,5 +1,6 @@
 package tintash.fennel.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -29,6 +30,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import tintash.fennel.R;
+import tintash.fennel.activities.LoginActivity;
 import tintash.fennel.adapters.MySignupsAdapter;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.common.database.DatabaseHelper;
@@ -186,21 +188,30 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
-            if (response.code() == 200) {
-                String responseStr = "";
-
-                try {
-                    responseStr = response.body().string();
-                    parseFarmerAttachmentData(responseStr);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-            else
+            if(isValid())
             {
-                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                if (response.code() == 200) {
+                    String responseStr = "";
+
+                    try {
+                        responseStr = response.body().string();
+                        parseFarmerAttachmentData(responseStr);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if(response.code() == 401)
+                {
+                    PreferenceHelper.getInstance().clearSession();
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    getActivity().finish();
+                }
+                else
+                {
+                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
             }
         }
 
@@ -215,22 +226,31 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
-            if (response.code() == 200) {
-                String responseStr = "";
-
-                try {
-                    responseStr = response.body().string();
-                    parseData(responseStr);
-                    getMyFarmerAttachments();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-            else
+            if(isValid())
             {
-                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                if (response.code() == 200) {
+                    String responseStr = "";
+
+                    try {
+                        responseStr = response.body().string();
+                        parseData(responseStr);
+                        getMyFarmerAttachments();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if(response.code() == 401)
+                {
+                    PreferenceHelper.getInstance().clearSession();
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    getActivity().finish();
+                }
+                else
+                {
+                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
             }
         }
 
@@ -578,19 +598,27 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             locationsResponseCounter++;
 //            if (locationsResponseCounter == 4)
 //                loadingFinished();
-
-            if (response.code() == 200) {
-                try {
-                    parseLocations(response.body().string());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            else
+            if(isValid())
             {
-                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                if (response.code() == 200) {
+                    try {
+                        parseLocations(response.body().string());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if(response.code() == 401)
+                {
+                    PreferenceHelper.getInstance().clearSession();
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    getActivity().finish();
+                }
+                else
+                {
+                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
             }
         }
 
@@ -609,18 +637,27 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             locationsResponseCounter++;
 //            if (locationsResponseCounter == 4)
 //                loadingFinished();
-            if (response.code() == 200) {
-                try {
-                    parseSubLocations(response.body().string());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            else
+            if(isValid())
             {
-                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                if (response.code() == 200) {
+                    try {
+                        parseSubLocations(response.body().string());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if(response.code() == 401)
+                {
+                    PreferenceHelper.getInstance().clearSession();
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    getActivity().finish();
+                }
+                else
+                {
+                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
             }
         }
 
@@ -639,18 +676,27 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             locationsResponseCounter++;
 //            if (locationsResponseCounter == 4)
 //                loadingFinished();
-            if (response.code() == 200) {
-                try {
-                    parseVillages(response.body().string());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            else
+            if(isValid())
             {
-                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                if (response.code() == 200) {
+                    try {
+                        parseVillages(response.body().string());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if(response.code() == 401)
+                {
+                    PreferenceHelper.getInstance().clearSession();
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    getActivity().finish();
+                }
+                else
+                {
+                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
             }
         }
 
@@ -669,18 +715,27 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             locationsResponseCounter++;
 //            if (locationsResponseCounter == 4)
 //                loadingFinished();
-            if (response.code() == 200) {
-                try {
-                    parseTrees(response.body().string());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            else
+            if(isValid())
             {
-                Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                if (response.code() == 200) {
+                    try {
+                        parseTrees(response.body().string());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if(response.code() == 401)
+                {
+                    PreferenceHelper.getInstance().clearSession();
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    getActivity().finish();
+                }
+                else
+                {
+                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
             }
         }
 
