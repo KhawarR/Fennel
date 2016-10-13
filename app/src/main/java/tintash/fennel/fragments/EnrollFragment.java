@@ -22,6 +22,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jakewharton.picasso.OkHttp3Downloader;
 import com.kbeanie.multipicker.api.CameraImagePicker;
 import com.kbeanie.multipicker.api.ImagePicker;
 import com.kbeanie.multipicker.api.Picker;
@@ -30,6 +31,8 @@ import com.kbeanie.multipicker.api.entity.ChosenImage;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,6 +46,9 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -61,6 +67,7 @@ import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
 import tintash.fennel.utils.Constants;
 import tintash.fennel.utils.PreferenceHelper;
+import tintash.fennel.utils.RoundedCornersTransformation;
 import tintash.fennel.views.NothingSelectedSpinnerAdapter;
 import tintash.fennel.views.TitleBarLayout;
 
@@ -160,6 +167,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private ArrayList<String> strArrVillages = new ArrayList<>();
     private ArrayList<Tree> arrTrees = new ArrayList<>();
     private ArrayList<String> strArrTrees = new ArrayList<>();
+    private Picasso picasso;
+    private Transformation transformation;
 
     public static EnrollFragment newInstance(String title, Farmer farmer) {
         EnrollFragment fragment = new EnrollFragment();
@@ -184,6 +193,24 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         imagePicker = new ImagePicker(EnrollFragment.this);
         cameraImagePicker = new CameraImagePicker(EnrollFragment.this);
+
+        transformation = new RoundedCornersTransformation();
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new Interceptor() {
+                    @Override
+                    public okhttp3.Response intercept(Interceptor.Chain chain) throws IOException {
+                        Request newRequest = chain.request().newBuilder()
+                                .addHeader("Authorization", Session.getAuthToken())
+                                .build();
+                        return chain.proceed(newRequest);
+                    }
+                })
+                .build();
+
+        picasso = new Picasso.Builder(getActivity())
+                .downloader(new OkHttp3Downloader(client))
+                .build();
 
         return view;
     }
@@ -360,14 +387,16 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getThumbUrl());
 //                String thumbUrl = "https://cs25.salesforce.com/services/data/v36.0/sobjects/Attachment/%s/body";
 //                thumbUrl = String.format(thumbUrl, farmer.getThumbUrl());
-                ImageLoader.getInstance().displayImage(thumbUrl, imgFarmerPhoto, options);
+//                ImageLoader.getInstance().displayImage(thumbUrl, imgFarmerPhoto, options);
+                picasso.load(thumbUrl).transform(transformation).into(imgFarmerPhoto);
             }
             if (farmer.getFarmerIdPhotoUrl() != null && !farmer.getFarmerIdPhotoUrl().isEmpty())
             {
                 String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getFarmerIdPhotoUrl());
 //                String thumbUrl = "https://cs25.salesforce.com/services/data/v36.0/sobjects/Attachment/%s/body";
 //                thumbUrl = String.format(thumbUrl, farmer.getFarmerIdPhotoUrl());
-                ImageLoader.getInstance().displayImage(thumbUrl, imgNationalID, options);
+//                ImageLoader.getInstance().displayImage(thumbUrl, imgNationalID, options);
+                picasso.load(thumbUrl).transform(transformation).into(imgNationalID);
             }
         }
     }
@@ -753,7 +782,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             @Override
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
-                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgFarmerPhoto, options);
+                picasso.load(images.get(0).getQueryUri()).transform(transformation).into(imgFarmerPhoto);
+//                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgFarmerPhoto, options);
                 isFarmerPhotoSet = true;
                 checkEnableSubmit();
             }
@@ -777,7 +807,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             @Override
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
-                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgNationalID, options);
+//                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgNationalID, options);
+                picasso.load(images.get(0).getQueryUri()).transform(transformation).into(imgNationalID);
                 isNationalIdPhotoSet = true;
                 checkEnableSubmit();
             }

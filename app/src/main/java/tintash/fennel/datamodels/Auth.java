@@ -11,4 +11,5 @@ public class Auth {
     public String token_type;
     public String issued_at;
     public String signature;
+    public String refresh_token;
 }
