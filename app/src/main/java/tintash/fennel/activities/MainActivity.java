@@ -61,8 +61,6 @@ public class MainActivity extends BaseActivity {
         mTabHost.addTab(
                 mTabHost.newTabSpec(TAB_4_TAG).setIndicator("", ContextCompat.getDrawable(this, R.drawable.selector_mylogbook)),
                 MyLogbookContainerFragment.class, null);
-
-        PreferenceHelper.getInstance().writeToken("sdsds");
     }
 
     @Override
