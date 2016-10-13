@@ -804,14 +804,14 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     @OnClick(R.id.imgFarmerPhoto)
     void onClickFarmerPhoto(View view) {
-//        showPickerDialog(true);
-        pickFarmerImage(true);
+        showPickerDialog(true);
+//        pickFarmerImage(true);
     }
 
     @OnClick(R.id.imgNationalID)
     void onClickNationalID(View view) {
-//        showPickerDialog(false);
-        pickNationalIdImage(true);
+        showPickerDialog(false);
+//        pickNationalIdImage(true);
     }
 
     @Override
