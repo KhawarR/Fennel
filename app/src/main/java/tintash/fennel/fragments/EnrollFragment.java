@@ -123,6 +123,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     @Bind(R.id.lblSurname)
     TextView lblSurname;
 
+    @Bind(R.id.lblIdNumber)
+    TextView lblIdNumber;
+
     @Bind(R.id.lblGender)
     TextView lblGender;
 
@@ -514,6 +517,16 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         else
         {
             lblSurname.setTextColor(getResources().getColor(R.color.black));
+        }
+        if (etIdNumber.getText() == null || etIdNumber.getText().toString().isEmpty()) {
+            goodToGo = false;
+            missingData += "\n- ID Number";
+            lblIdNumber.setTextColor(getResources().getColor(R.color.dark_red));
+            if(scrollToView == null) scrollToView = lblIdNumber;
+        }
+        else
+        {
+            lblIdNumber.setTextColor(getResources().getColor(R.color.black));
         }
         if(!tvMale.isSelected() && !tvFemale.isSelected())
         {

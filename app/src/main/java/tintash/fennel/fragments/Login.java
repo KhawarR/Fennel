@@ -199,7 +199,7 @@ public class Login extends BaseFragment implements Callback<Auth> {
         }
         else
         {
-            Toast.makeText(getActivity(), "Login failed: Please check Employee ID number/Password", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), "Login Error: Check network connection or verify login credentials", Toast.LENGTH_LONG).show();
         }
     }
 }
