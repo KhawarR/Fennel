@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -39,6 +41,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -192,6 +195,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private String farmerStatus = null;
 
     private String farmerImageUri = null;
+    private String farmerIdImageUri = null;
 
     //    private int PICKER_REQUEST_FARMER_DEVICE = 12001;
 //    private int PICKER_REQUEST_FARMER_CAMERA = 12002;
@@ -932,6 +936,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 // Display images
 //                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgNationalID, options);
                 imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                farmerIdImageUri = images.get(0).getOriginalPath();
                 picasso.load(images.get(0).getQueryUri()).transform(transformation).into(imgNationalID);
                 isNationalIdPhotoSet = true;
                 checkEnableSubmit();
@@ -1101,12 +1106,15 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         apiCall.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                     Log.i("LP", "Farmer Edited!");
                     updateFarmer(farmer, true);
                     Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
                     newFarm.farmId = farmer.farmId;
                     editFarmWithFarmId(newFarm, farmer.farmId);
+
+                    attachFarmerImageToFarmerObject(farmer, true);
+                    attachFarmerIDImageToFarmerObject(farmer, true);
 
                 } else {
 
@@ -1163,14 +1171,15 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             @Override
             public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
                 Farmer newFarmer = getFarmer();
-                if (response.body() != null && response.body().success == true) {
+                if ((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().success == true) {
                     Log.i("LP", "Farmer Added To Server");
                     newFarmer.farmerId = response.body().id;
                     addFarmerToDB(newFarmer, response.body().id, true);
                     Farm newFarm = createFarmWithFarmerId(response.body().id);
                     addFarmWithFarmerId(newFarm, response.body().id);
 
-                    attachImagesToFarmerObject(newFarmer);
+                    attachFarmerImageToFarmerObject(newFarmer, false);
+                    attachFarmerIDImageToFarmerObject(newFarmer, false);
 
                 } else {
 
@@ -1221,50 +1230,143 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         });
     }
 
-    private void attachImagesToFarmerObject(Farmer farmer) {
+    private void attachFarmerImageToFarmerObject(Farmer farmer, boolean isEdit) {
+
+        if (farmerImageUri == null && !isFarmerPhotoSet)
+            return;
 
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "picture");
-        attachmentMap.put("ParentId", farmer.farmerId);
         attachmentMap.put("Name", "profile_picture.png");
+        if (!isEdit)
+            attachmentMap.put("ParentId", farmer.farmerId);
 
         JSONObject json = new JSONObject(attachmentMap);
 
-        String boundaryString = "boundary_string_1414605653846";
+//        File f = new File(farmerImageUri);
+//        byte[] byteArrayImage = getByteArrayFromFile(f);
 
-        File f = new File(farmerImageUri);
+        Bitmap bmp = BitmapFactory.decodeFile(farmerImageUri);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.JPEG, 40, bos);
+
+        byte[] byteArrayImage = bos.toByteArray();
+
+        RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
+        RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
+
+        if (!isEdit) {
+
+            Call<ResponseBody> attachmentApi = Fennel.getWebService().addAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, entityBody, imageBody);
+            attachmentApi.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                        Log.i("Fennel", "farmer profile picture uploaded successfully!");
+                    } else {
+                        Log.i("Fennel", "farmer profile picture upload failed!");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Log.i("Fennel", "farmer profile picture upload failed!");
+                }
+            });
+        } else {
+            Call<ResponseBody> attachmentApi = Fennel.getWebService().editAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, farmer.getThumbUrl(), entityBody, imageBody);
+            attachmentApi.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                        Log.i("Fennel", "farmer profile picture uploaded successfully!");
+                    } else {
+                        Log.i("Fennel", "farmer profile picture upload failed!");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Log.i("Fennel", "farmer profile picture upload failed!");
+                }
+            });
+        }
+    }
+
+    private void attachFarmerIDImageToFarmerObject(Farmer farmer, boolean isEdit) {
+
+        if (farmerIdImageUri == null && !isNationalIdPhotoSet)
+            return;
+
+        HashMap<String, Object> attachmentMap = new HashMap<>();
+        attachmentMap.put("Description", "ID");
+        attachmentMap.put("Name", "national_id.png");
+        if(!isEdit)
+            attachmentMap.put("ParentId", farmer.farmerId);
+
+        JSONObject json = new JSONObject(attachmentMap);
+
+        File f = new File(farmerIdImageUri);
+        byte[] byteArrayImage = getByteArrayFromFile(f);
+
+        RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
+        RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
+
+        if (!isEdit) {
+
+            Call<ResponseBody> attachmentApi = Fennel.getWebService().addAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, entityBody, imageBody);
+            attachmentApi.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.code() == Constants.RESPONSE_SUCCESS) {
+                        //Save id with attachment
+                        Log.i("Fennel", "farmer ID picture uploaded successfully!");
+                    } else {
+                        Log.i("Fennel", "farmer ID picture upload failed!");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Log.i("Fennel", "farmer ID picture upload failed!");
+                }
+            });
+        } else {
+
+            Call<ResponseBody> attachmentApi = Fennel.getWebService().editAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, farmer.getFarmerIdPhotoUrl(), entityBody, imageBody);
+            attachmentApi.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                        Log.i("Fennel", "farmer ID picture edited successfully!");
+                    } else {
+                        Log.i("Fennel", "farmer ID picture edit failed!");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Log.i("Fennel", "farmer profile picture upload failed!");
+                }
+            });
+        }
+    }
+
+    private byte[] getByteArrayFromFile(File f) {
         InputStream is = null;
         try {
             is = new FileInputStream(f);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            return null;
         }
         byte[] byteArrayImage = new byte[(int)f.length()];
         try {
             is.read(byteArrayImage);
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
-
-//        String encodedImage = Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
-//        byte[] byteArr = Base64.decode(encodedImage, Base64.DEFAULT);
-//        byte[] byteArr = Base64.encode(byteArrayImage, Base64.DEFAULT);
-
-//        String bodyData = "--" + boundaryString + "\nContent-Disposition: form-data; name=\"entity_document\";\nContent-Type: application/json\n\n" + json.toString() +"\n\n--" + boundaryString + "\nContent-Type: image/png\nContent-Disposition: form-data; name=\"Body\"; filename=\"image.png\"\n\n" + byteArr + "\n\n--" + boundaryString + "--";
-        RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
-        RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
-
-        Call<ResponseBody> attachmentApi = Fennel.getWebService().addAttachments(Session.getAuthToken(), NetworkHelper.API_VERSION ,entityBody, imageBody);
-        attachmentApi.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Log.i("Fennel", "Success!");
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.i("Fennel", "Fail");
-            }
-        });
+        return byteArrayImage;
     }
 }

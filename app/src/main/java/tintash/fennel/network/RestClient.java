@@ -8,12 +8,14 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.X509TrustManager;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import tintash.fennel.utils.Constants;
 import tintash.fennel.utils.FarmerFieldsExclusion;
 
 
@@ -73,6 +75,9 @@ public class RestClient {
             };
             try {
                 okHttpBuilder = new OkHttpClient.Builder().sslSocketFactory(new TLSSocketFactory(), tm);
+                okHttpBuilder.connectTimeout(Constants.TIMEOUT, TimeUnit.SECONDS);
+                okHttpBuilder.writeTimeout(Constants.TIMEOUT, TimeUnit.SECONDS);
+                okHttpBuilder.readTimeout(Constants.TIMEOUT, TimeUnit.SECONDS);
                 Retrofit retrofit = new Retrofit.Builder()
                         .baseUrl(baseUrl)
                         .addConverterFactory(GsonConverterFactory.create(gson))

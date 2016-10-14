@@ -39,5 +39,9 @@ public interface WebService {
 
     @Multipart
     @POST ("/services/data/{apiVersion}/sobjects/Attachment/")
-    Call<ResponseBody> addAttachments(@Header("Authorization") String token, @Path("apiVersion") String apiVersion, @Part("entity_document") RequestBody postBody, @Part("Body\"; filename=\"profile.png\" ") RequestBody imageBody);
+    Call<ResponseBody> addAttachment(@Header("Authorization") String token, @Path("apiVersion") String apiVersion, @Part("entity_document") RequestBody postBody, @Part("Body\"; filename=\"image.png\" ") RequestBody imageBody);
+
+    @Multipart
+    @PATCH ("/services/data/{apiVersion}/sobjects/Attachment/{attachmentId}")
+    Call<ResponseBody> editAttachment(@Header("Authorization") String token, @Path("apiVersion") String apiVersion, @Path("attachmentId") String attachmentId, @Part("entity_document") RequestBody postBody, @Part("Body\"; filename=\"image.png\" ") RequestBody imageBody);
 }

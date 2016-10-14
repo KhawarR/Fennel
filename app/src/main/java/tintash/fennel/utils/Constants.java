@@ -27,4 +27,6 @@ public class Constants {
     public static final int RESPONSE_SUCCESS_NO_CONTENT = 204;
 
     public static final int CORNER_RADIUS = 20;
+
+    public static final int TIMEOUT = 30;
 }
