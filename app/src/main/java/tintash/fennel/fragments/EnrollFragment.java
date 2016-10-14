@@ -18,6 +18,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -76,6 +78,8 @@ import tintash.fennel.views.TitleBarLayout;
  */
 public class EnrollFragment extends BaseContainerFragment implements AdapterView.OnItemSelectedListener {
 
+    @Bind(R.id.scrollView)
+    ScrollView scrollView;
 
     @Bind(R.id.spLocation)
     Spinner spLocation;
@@ -112,6 +116,30 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     @Bind(R.id.txtSubmitApproval)
     TextView txtSubmitApproval;
+
+    @Bind(R.id.lblFirstName)
+    TextView lblFirstName;
+
+    @Bind(R.id.lblSurname)
+    TextView lblSurname;
+
+    @Bind(R.id.lblGender)
+    TextView lblGender;
+
+    @Bind(R.id.llGenderContainer)
+    LinearLayout llGenderContainer;
+
+    @Bind(R.id.llLeaderContainer)
+    LinearLayout llLeaderContainer;
+
+    @Bind(R.id.llFarmerHomeContainer)
+    LinearLayout llFarmerHomeContainer;
+
+    @Bind(R.id.lblLeader)
+    TextView lblLeader;
+
+    @Bind(R.id.lblFarmerHome)
+    TextView lblFarmerHome;
 
     @Bind(R.id.et_first_name)
     EditText etFirstName;
@@ -222,13 +250,13 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         titleBarLayout.setOnIconClickListener(this);
 
-        tvMale.setSelected(true);
+        tvMale.setSelected(false);
         tvFemale.setSelected(false);
 
-        tvLeaderNo.setSelected(true);
+        tvLeaderNo.setSelected(false);
         tvLeaderYes.setSelected(false);
 
-        txtFarmerHomeNo.setSelected(true);
+        txtFarmerHomeNo.setSelected(false);
         txtFarmerHomeYes.setSelected(false);
 
         arrLocations = DatabaseHelper.getInstance().getAllLocations();
@@ -388,6 +416,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                String thumbUrl = "https://cs25.salesforce.com/services/data/v36.0/sobjects/Attachment/%s/body";
 //                thumbUrl = String.format(thumbUrl, farmer.getThumbUrl());
 //                ImageLoader.getInstance().displayImage(thumbUrl, imgFarmerPhoto, options);
+                imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 picasso.load(thumbUrl).transform(transformation).into(imgFarmerPhoto);
             }
             if (farmer.getFarmerIdPhotoUrl() != null && !farmer.getFarmerIdPhotoUrl().isEmpty())
@@ -396,6 +425,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                String thumbUrl = "https://cs25.salesforce.com/services/data/v36.0/sobjects/Attachment/%s/body";
 //                thumbUrl = String.format(thumbUrl, farmer.getFarmerIdPhotoUrl());
 //                ImageLoader.getInstance().displayImage(thumbUrl, imgNationalID, options);
+                imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 picasso.load(thumbUrl).transform(transformation).into(imgNationalID);
             }
         }
@@ -464,32 +494,103 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         boolean goodToGo = true;
         String missingData = "";
+        View scrollToView = null;
         if (etFirstName.getText() == null || etFirstName.getText().toString().isEmpty()) {
             goodToGo = false;
             missingData += "\n- First Name";
+            lblFirstName.setTextColor(getResources().getColor(R.color.dark_red));
+            scrollToView = lblFirstName;
+        }
+        else
+        {
+            lblFirstName.setTextColor(getResources().getColor(R.color.black));
         }
         if (etSurname.getText() == null || etSurname.getText().toString().isEmpty()) {
             goodToGo = false;
             missingData += "\n- Surname";
+            lblSurname.setTextColor(getResources().getColor(R.color.dark_red));
+            if(scrollToView == null) scrollToView = lblSurname;
+        }
+        else
+        {
+            lblSurname.setTextColor(getResources().getColor(R.color.black));
+        }
+        if(!tvMale.isSelected() && !tvFemale.isSelected())
+        {
+            goodToGo = false;
+            missingData += "\n- Gender";
+            lblGender.setTextColor(getResources().getColor(R.color.dark_red));
+            if(scrollToView == null) scrollToView = llGenderContainer;
+        }
+        else
+        {
+            lblGender.setTextColor(getResources().getColor(R.color.black));
+        }
+        if(!tvLeaderNo.isSelected() && !tvLeaderYes.isSelected())
+        {
+            goodToGo = false;
+            missingData += "\n- Leader?";
+            lblLeader.setTextColor(getResources().getColor(R.color.dark_red));
+            if(scrollToView == null) scrollToView = llLeaderContainer;
+        }
+        else
+        {
+            lblLeader.setTextColor(getResources().getColor(R.color.black));
         }
         if (spLocation.getSelectedItem() == null) {
             goodToGo = false;
             missingData += "\n- Location";
+            spLocation.setBackgroundResource(R.drawable.spinner_bg_error);
+            if(scrollToView == null) scrollToView = spLocation;
+        }
+        else
+        {
+            spLocation.setBackgroundResource(R.drawable.spinner_bg);
         }
         if (spSubLocation.getSelectedItem() == null) {
             goodToGo = false;
             missingData += "\n- Sub location";
+            spSubLocation.setBackgroundResource(R.drawable.spinner_bg_error);
+            if(scrollToView == null) scrollToView = spSubLocation;
+        }
+        else
+        {
+            spSubLocation.setBackgroundResource(R.drawable.spinner_bg);
         }
         if (spVillage.getSelectedItem() == null) {
             goodToGo = false;
             missingData += "\n- Village";
+            spVillage.setBackgroundResource(R.drawable.spinner_bg_error);
+            if(scrollToView == null) scrollToView = spVillage;
+        }
+        else
+        {
+            spVillage.setBackgroundResource(R.drawable.spinner_bg);
         }
         if (spTree.getSelectedItem() == null) {
             goodToGo = false;
             missingData += "\n- Tree";
+            spTree.setBackgroundResource(R.drawable.spinner_bg_error);
+            if(scrollToView == null) scrollToView = spTree;
+        }
+        else
+        {
+            spTree.setBackgroundResource(R.drawable.spinner_bg);
+        }
+        if(!txtFarmerHomeNo.isSelected() && !txtFarmerHomeYes.isSelected())
+        {
+            goodToGo = false;
+            missingData += "\n- Farmer Home?";
+            lblFarmerHome.setTextColor(getResources().getColor(R.color.dark_red));
+            if(scrollToView == null) scrollToView = llFarmerHomeContainer;
+        }
+        else
+        {
+            lblFarmerHome.setTextColor(getResources().getColor(R.color.black));
         }
 
         if (!goodToGo) {
+            scrollView.smoothScrollTo(0, scrollToView.getTop());
             Toast.makeText(getActivity(), "Please fill the following fields: " + missingData, Toast.LENGTH_LONG).show();
         }
 
@@ -729,14 +830,14 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     @OnClick(R.id.imgFarmerPhoto)
     void onClickFarmerPhoto(View view) {
-//        showPickerDialog(true);
-        pickFarmerImage(true);
+        showPickerDialog(true);
+//        pickFarmerImage(true);
     }
 
     @OnClick(R.id.imgNationalID)
     void onClickNationalID(View view) {
-//        showPickerDialog(false);
-        pickNationalIdImage(true);
+        showPickerDialog(false);
+//        pickNationalIdImage(true);
     }
 
     @Override
@@ -782,6 +883,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             @Override
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
+                imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 picasso.load(images.get(0).getQueryUri()).transform(transformation).into(imgFarmerPhoto);
 //                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgFarmerPhoto, options);
                 isFarmerPhotoSet = true;
@@ -808,6 +910,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
 //                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgNationalID, options);
+                imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 picasso.load(images.get(0).getQueryUri()).transform(transformation).into(imgNationalID);
                 isNationalIdPhotoSet = true;
                 checkEnableSubmit();
@@ -823,8 +926,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             imagePicker.pickImage();
         } else {
             cameraImagePicker.setImagePickerCallback(imagePickerCallback);
-            String pickedImage = cameraImagePicker.pickImage();
-            pickedImage = "";
+            cameraImagePicker.pickImage();
         }
     }
 

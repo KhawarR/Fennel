@@ -26,6 +26,7 @@ import tintash.fennel.fragments.MyLogbookContainerFragment;
 import tintash.fennel.fragments.MySignUps;
 import tintash.fennel.fragments.MySignUpsContainerFragment;
 import tintash.fennel.utils.CustomImageDownloader;
+import tintash.fennel.utils.PreferenceHelper;
 
 public class MainActivity extends BaseActivity {
 

@@ -13,7 +13,7 @@ public class Session {
 
     public static void saveAuth(Auth auth) {
 
-        PreferenceHelper.getInstance().writeToken(auth.access_token);
+        PreferenceHelper.getInstance().writeToken((auth.access_token));
         PreferenceHelper.getInstance().writeInstanceUrl(auth.instance_url);
 
     }
