@@ -50,26 +50,27 @@ import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
 import tintash.fennel.utils.CircleViewTransformation;
 import tintash.fennel.utils.PreferenceHelper;
+import tintash.fennel.views.FontTextView;
 
 /**
  * Created by Faizan on 9/27/2016.
  */
 public class AboutMe extends BaseFragment {
 
-    @Bind(R.id.et_first_name)
-    EditText etFirstName;
+    @Bind(R.id.tv_first_name)
+    FontTextView tvFirstName;
 
-    @Bind(R.id.et_second_name)
-    EditText etSecondName;
+    @Bind(R.id.tv_second_name)
+    FontTextView tvSecondName;
 
-    @Bind(R.id.et_sur_name)
-    EditText etSurname;
+    @Bind(R.id.tv_sur_name)
+    FontTextView tvSurname;
 
-    @Bind(R.id.et_field_officer)
-    EditText etFieldOfficer;
+    @Bind(R.id.tv_field_officer)
+    FontTextView tvFieldOfficer;
 
-    @Bind(R.id.et_field_manager)
-    EditText etFieldManager;
+    @Bind(R.id.tv_field_manager)
+    FontTextView tvFieldManager;
 
     @Bind(R.id.profile_image)
     CircleImageView cIvProfileMain;
@@ -189,11 +190,11 @@ public class AboutMe extends BaseFragment {
 
             String facId = objFacilitator.getString("Id");
 
-            etFirstName.setText(name);
-            etSecondName.setText(secondName);
-            etSurname.setText(surname);
-            etFieldOfficer.setText(fo_name);
-            etFieldManager.setText(fm_name);
+            tvFirstName.setText(name);
+            tvSecondName.setText(secondName);
+            tvSurname.setText(surname);
+            tvFieldOfficer.setText(fo_name);
+            tvFieldManager.setText(fm_name);
 
             getAboutMeAttachment(facId);
 
