@@ -13,8 +13,9 @@ public class PreferenceHelper {
     private static final String KEY_INSTANCE_URL = "_instance_url";
     private static final String KEY_USER_ID = "_user_id";
     private static final String KEY_PASSWORD = "_password";
-    private static final String KEY_FACILITATOR_ID = "_fac_id";
+    private static final String KEY_LOGIN_USER_ID = "_log_user_id";
     private static final String KEY_FIRST_RUN = "_first_run";
+    private static final String KEY_LOGIN_USER_TYPE = "_login_user_type";
 
 
     private static PreferenceHelper sInstance;
@@ -82,14 +83,25 @@ public class PreferenceHelper {
         return password;
     }
 
-    public void writeFacilitatorId(String id) {
+    public void writeLoginUserType(String type) {
         SharedPreferences.Editor editor = mPref.edit();
-        editor.putString(KEY_FACILITATOR_ID, id);
+        editor.putString(KEY_LOGIN_USER_TYPE, type);
         editor.commit();
     }
 
-    public String readFacilitatorId() {
-        String id = mPref.getString(KEY_FACILITATOR_ID, "");
+    public String readLoginUserType() {
+        String value = mPref.getString(KEY_LOGIN_USER_TYPE, "");
+        return value;
+    }
+
+    public void writeLoginUserId(String id) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putString(KEY_LOGIN_USER_ID, id);
+        editor.commit();
+    }
+
+    public String readLoginUserId() {
+        String id = mPref.getString(KEY_LOGIN_USER_ID, "");
         return id;
     }
 
@@ -107,7 +119,7 @@ public class PreferenceHelper {
     public void clearSession() {
         writeToken("");
         writeInstanceUrl("");
-        writeFacilitatorId("");
+        writeLoginUserId("");
         writeUserId("");
         writePassword("");
     }

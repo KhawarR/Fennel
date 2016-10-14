@@ -31,7 +31,6 @@ import com.kbeanie.multipicker.api.Picker;
 import com.kbeanie.multipicker.api.callbacks.ImagePickerCallback;
 import com.kbeanie.multipicker.api.entity.ChosenImage;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
@@ -730,7 +729,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         if (farmerId != null)
             newFarm.setFarmerId(farmerId);
 
-        newFarm.setFacilitatorId(PreferenceHelper.getInstance().readFacilitatorId());
+        newFarm.setFacilitatorId(PreferenceHelper.getInstance().readLoginUserId());
         newFarm.setFarmerStatus(farmerStatus);
         newFarm.setLocation("");//location != null ? location : "");
         newFarm.setSubLocation("");//subLocation != null ? subLocation : "");
@@ -777,9 +776,21 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         newFarmMap.put("Village__c", village);
         newFarmMap.put("Tree__c", treeSpecies);
         newFarmMap.put("Status__c", farmerStatus);
-        newFarmMap.put("Facilitator__c", PreferenceHelper.getInstance().readFacilitatorId());
         newFarmMap.put("Is_Farmer_Home__c", txtFarmerHomeYes.isSelected()? true : false);
 
+        if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FACILITATOR))
+        {
+            newFarmMap.put("Facilitator__c", PreferenceHelper.getInstance().readLoginUserId());
+            newFarmMap.put("Signup_By_Facilitator__c", PreferenceHelper.getInstance().readLoginUserId());
+        }
+        else if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FIELD_OFFICER))
+        {
+            newFarmMap.put("Signup_By_FieldOfficer__c", PreferenceHelper.getInstance().readLoginUserId());
+        }
+        else if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FIELD_MANAGER))
+        {
+            newFarmMap.put("Signup_By_FieldManager__c", PreferenceHelper.getInstance().readLoginUserId());
+        }
 
         return newFarmMap;
     }

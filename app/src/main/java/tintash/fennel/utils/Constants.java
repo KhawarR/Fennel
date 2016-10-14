@@ -27,4 +27,9 @@ public class Constants {
     public static final int RESPONSE_SUCCESS_NO_CONTENT = 204;
 
     public static final int CORNER_RADIUS = 20;
+
+    public static final String STR_FACILITATOR = "fac";
+    public static final String STR_FIELD_OFFICER = "fo";
+    public static final String STR_FIELD_MANAGER = "fm";
+
 }

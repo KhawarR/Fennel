@@ -16,15 +16,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.CookieStore;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -40,6 +31,7 @@ import tintash.fennel.application.Fennel;
 import tintash.fennel.datamodels.Auth;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
+import tintash.fennel.utils.Constants;
 import tintash.fennel.utils.PreferenceHelper;
 
 public class Login extends BaseFragment implements Callback<Auth> {
@@ -70,7 +62,7 @@ public class Login extends BaseFragment implements Callback<Auth> {
         etId.setText("khawar");
         etPassword.setText("khawar");
 
-        if(!PreferenceHelper.getInstance().readToken().isEmpty() && !PreferenceHelper.getInstance().readFacilitatorId().isEmpty())
+        if(!PreferenceHelper.getInstance().readToken().isEmpty() && !PreferenceHelper.getInstance().readLoginUserId().isEmpty())
         {
             Fennel.restClient.setApiBaseUrl(PreferenceHelper.getInstance().readInstanceUrl());
             startActivity(new Intent(getActivity(), MainActivity.class));
@@ -250,15 +242,15 @@ public class Login extends BaseFragment implements Callback<Auth> {
 
             if(objFacilitator != null)
             {
-                getAndSaveId(objFacilitator);
+                getAndSaveId(objFacilitator, Constants.STR_FACILITATOR);
             }
             else if(objFieldOffice != null)
             {
-                getAndSaveId(objFieldOffice);
+                getAndSaveId(objFieldOffice, Constants.STR_FIELD_OFFICER);
             }
             else if(objFieldManager != null)
             {
-                getAndSaveId(objFieldManager);
+                getAndSaveId(objFieldManager, Constants.STR_FIELD_MANAGER);
             }
             else
             {
@@ -269,13 +261,14 @@ public class Login extends BaseFragment implements Callback<Auth> {
         }
     }
 
-    private void getAndSaveId(JSONObject jsonObject) throws JSONException {
+    private void getAndSaveId(JSONObject jsonObject, String type) throws JSONException {
         JSONArray arrRec = jsonObject.getJSONArray("records");
         if(arrRec.length() > 0)
         {
             JSONObject obj1 = arrRec.getJSONObject(0);
             String idFac = obj1.getString("Id");
-            PreferenceHelper.getInstance().writeFacilitatorId(idFac);
+            PreferenceHelper.getInstance().writeLoginUserType(type);
+            PreferenceHelper.getInstance().writeLoginUserId(idFac);
             proceedToMainScreen();
         }
     }
