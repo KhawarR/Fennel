@@ -78,6 +78,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
                 android:editable="false"
+                android:layout_marginLeft="@dimen/margin_left_adjustment"
                 android:focusable="false"/>
 
             <tintash.fennel.views.FontTextView
@@ -94,7 +95,8 @@
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
                 android:editable="false"
-                android:focusable="false" />
+                android:focusable="false"
+                android:layout_marginLeft="@dimen/margin_left_adjustment" />
 
             <tintash.fennel.views.FontTextView
                 android:layout_width="wrap_content"
@@ -110,7 +112,8 @@
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
                 android:editable="false"
-                android:focusable="false" />
+                android:focusable="false"
+                android:layout_marginLeft="@dimen/margin_left_adjustment" />
 
             <tintash.fennel.views.FontTextView
                 android:layout_width="wrap_content"
@@ -126,7 +129,8 @@
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
                 android:editable="false"
-                android:focusable="false" />
+                android:focusable="false"
+                android:layout_marginLeft="@dimen/margin_left_adjustment" />
 
             <tintash.fennel.views.FontTextView
                 android:layout_width="wrap_content"
@@ -142,7 +146,8 @@
                 android:layout_height="wrap_content"
                 android:inputType="textPersonName"
                 android:editable="false"
-                android:focusable="false" />
+                android:focusable="false"
+                android:layout_marginLeft="@dimen/margin_left_adjustment" />
 
             <tintash.fennel.views.FontTextView
                 android:id="@+id/txtSignOut"

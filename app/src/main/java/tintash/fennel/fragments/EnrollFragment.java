@@ -416,6 +416,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                String thumbUrl = "https://cs25.salesforce.com/services/data/v36.0/sobjects/Attachment/%s/body";
 //                thumbUrl = String.format(thumbUrl, farmer.getThumbUrl());
 //                ImageLoader.getInstance().displayImage(thumbUrl, imgFarmerPhoto, options);
+                imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 picasso.load(thumbUrl).transform(transformation).into(imgFarmerPhoto);
             }
             if (farmer.getFarmerIdPhotoUrl() != null && !farmer.getFarmerIdPhotoUrl().isEmpty())
@@ -424,6 +425,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                String thumbUrl = "https://cs25.salesforce.com/services/data/v36.0/sobjects/Attachment/%s/body";
 //                thumbUrl = String.format(thumbUrl, farmer.getFarmerIdPhotoUrl());
 //                ImageLoader.getInstance().displayImage(thumbUrl, imgNationalID, options);
+                imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 picasso.load(thumbUrl).transform(transformation).into(imgNationalID);
             }
         }
@@ -881,6 +883,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             @Override
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
+                imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 picasso.load(images.get(0).getQueryUri()).transform(transformation).into(imgFarmerPhoto);
 //                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgFarmerPhoto, options);
                 isFarmerPhotoSet = true;
@@ -907,6 +910,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
 //                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgNationalID, options);
+                imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 picasso.load(images.get(0).getQueryUri()).transform(transformation).into(imgNationalID);
                 isNationalIdPhotoSet = true;
                 checkEnableSubmit();
@@ -922,8 +926,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             imagePicker.pickImage();
         } else {
             cameraImagePicker.setImagePickerCallback(imagePickerCallback);
-            String pickedImage = cameraImagePicker.pickImage();
-            pickedImage = "";
+            cameraImagePicker.pickImage();
         }
     }
 

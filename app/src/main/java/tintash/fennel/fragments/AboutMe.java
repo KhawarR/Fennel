@@ -1,16 +1,20 @@
 package tintash.fennel.fragments;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.jakewharton.picasso.OkHttp3Downloader;
+import com.kbeanie.multipicker.api.CameraImagePicker;
 import com.kbeanie.multipicker.api.ImagePicker;
 import com.kbeanie.multipicker.api.Picker;
 import com.kbeanie.multipicker.api.callbacks.ImagePickerCallback;
@@ -44,6 +48,7 @@ import tintash.fennel.datamodels.SFResponse;
 import tintash.fennel.models.Farmer;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
+import tintash.fennel.utils.CircleViewTransformation;
 import tintash.fennel.utils.PreferenceHelper;
 
 /**
@@ -71,6 +76,7 @@ public class AboutMe extends BaseFragment {
 
     private ImagePicker imagePicker;
     private ImagePickerCallback imagePickerCallback;
+    private CameraImagePicker cameraImagePicker;
 
     private Picasso picasso;
 
@@ -80,6 +86,9 @@ public class AboutMe extends BaseFragment {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_about_me, null);
         ButterKnife.bind(this, view);
+
+        imagePicker = new ImagePicker(AboutMe.this);
+        cameraImagePicker = new CameraImagePicker(AboutMe.this);
 
         OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(new Interceptor() {
@@ -103,6 +112,8 @@ public class AboutMe extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        picasso.load(R.drawable.dummy_profile).transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
 
         getAboutMeInfo();
 
@@ -212,7 +223,7 @@ public class AboutMe extends BaseFragment {
                         if(!attId.isEmpty())
                         {
                             String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
-                            picasso.load(thumbUrl).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+                            picasso.load(thumbUrl).transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -270,7 +281,7 @@ public class AboutMe extends BaseFragment {
 
     @Override
     public void onTitleBarRightIconClicked(View view) {
-        pickImage();
+        showPickerDialog();
     }
 
     @OnClick(R.id.txtSignOut)
@@ -282,18 +293,38 @@ public class AboutMe extends BaseFragment {
 
     @OnClick(R.id.rl_pick_image)
     void onClickPickImage(View view) {
-        pickImage();
+        showPickerDialog();
     }
 
-    private void pickImage() {
-        imagePicker = new ImagePicker(AboutMe.this);
+    private void showPickerDialog() {
+        AlertDialog.Builder pickerDialog = new AlertDialog.Builder(getActivity());
+        pickerDialog.setTitle("Choose image from?");
+        pickerDialog.setPositiveButton("Gallery",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        pickImage(true);
+                        dialog.dismiss();
+                    }
+                });
+        pickerDialog.setNegativeButton("Camera",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        pickImage(false);
+                        dialog.dismiss();
+                    }
+                });
+        pickerDialog.show();
+    }
+
+    private void pickImage(boolean isGallery) {
+
         imagePickerCallback = new ImagePickerCallback() {
             @Override
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
 //                Toast.makeText(getActivity(), images.size() + "", Toast.LENGTH_SHORT).show();
 //                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), cIvProfileMain);
-                picasso.load(images.get(0).getQueryUri()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+                picasso.load(images.get(0).getQueryUri()).transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
             }
 
             @Override
@@ -301,23 +332,29 @@ public class AboutMe extends BaseFragment {
                 // Do error handling
             }
         };
-        imagePicker.setImagePickerCallback(imagePickerCallback);
-        // imagePicker.allowMultiple(); // Default is false
-        // imagePicker.shouldGenerateMetadata(false); // Default is true
-        // imagePicker.shouldGenerateThumbnails(false); // Default is true
-        imagePicker.pickImage();
+
+        if (isGallery) {
+            imagePicker.setImagePickerCallback(imagePickerCallback);
+            imagePicker.pickImage();
+        } else {
+            cameraImagePicker.setImagePickerCallback(imagePickerCallback);
+            cameraImagePicker.pickImage();
+        }
+
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == Activity.RESULT_OK) {
-            if(requestCode == Picker.PICK_IMAGE_DEVICE) {
-                if(imagePicker == null) {
-                    imagePicker = new ImagePicker(getActivity());
-                    imagePicker.setImagePickerCallback(imagePickerCallback);
-                }
+            if (requestCode == Picker.PICK_IMAGE_DEVICE) {
+//                if(imagePicker == null) {
+//                    imagePicker = new ImagePicker(getActivity());
+//                    imagePicker.setImagePickerCallback(farmerPhotoPickerCallback);
+//                }
                 imagePicker.submit(data);
+            } else if (requestCode == Picker.PICK_IMAGE_CAMERA) {
+                cameraImagePicker.submit(data);
             }
         }
     }

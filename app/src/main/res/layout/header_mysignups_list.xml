@@ -46,6 +46,9 @@
         android:hint="Search for Farmer..."
         android:gravity="center"
         android:padding="10dp"
+        android:maxLines="1"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
         />
 
 </LinearLayout>
