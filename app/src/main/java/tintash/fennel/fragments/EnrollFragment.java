@@ -31,7 +31,6 @@ import com.kbeanie.multipicker.api.Picker;
 import com.kbeanie.multipicker.api.callbacks.ImagePickerCallback;
 import com.kbeanie.multipicker.api.entity.ChosenImage;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
@@ -40,7 +39,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,8 +52,10 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import okhttp3.Interceptor;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -182,6 +187,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private boolean isNationalIdPhotoSet = false;
 
     private String farmerStatus = null;
+
+    private String farmerImageUri = null;
 
     //    private int PICKER_REQUEST_FARMER_DEVICE = 12001;
 //    private int PICKER_REQUEST_FARMER_CAMERA = 12002;
@@ -886,6 +893,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 picasso.load(images.get(0).getQueryUri()).transform(transformation).into(imgFarmerPhoto);
 //                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgFarmerPhoto, options);
+                farmerImageUri = images.get(0).getOriginalPath();
                 isFarmerPhotoSet = true;
                 checkEnableSubmit();
             }
@@ -1149,6 +1157,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                     Farm newFarm = createFarmWithFarmerId(response.body().id);
                     addFarmWithFarmerId(newFarm, response.body().id);
 
+                    attachImagesToFarmerObject(newFarmer);
+
                 } else {
 
 //                    addFarmerToDB(newFarmer, null, false);
@@ -1194,6 +1204,53 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
                 loadingFinished();
 //                popToSignupsFragment();
+            }
+        });
+    }
+
+    private void attachImagesToFarmerObject(Farmer farmer) {
+
+        HashMap<String, Object> attachmentMap = new HashMap<>();
+        attachmentMap.put("Description", "picture");
+        attachmentMap.put("ParentId", farmer.farmerId);
+        attachmentMap.put("Name", "profile_picture.png");
+
+        JSONObject json = new JSONObject(attachmentMap);
+
+        String boundaryString = "boundary_string_1414605653846";
+
+        File f = new File(farmerImageUri);
+        InputStream is = null;
+        try {
+            is = new FileInputStream(f);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        byte[] byteArrayImage = new byte[(int)f.length()];
+        try {
+            is.read(byteArrayImage);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+//        String encodedImage = Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
+//        byte[] byteArr = Base64.decode(encodedImage, Base64.DEFAULT);
+//        byte[] byteArr = Base64.encode(byteArrayImage, Base64.DEFAULT);
+
+//        String bodyData = "--" + boundaryString + "\nContent-Disposition: form-data; name=\"entity_document\";\nContent-Type: application/json\n\n" + json.toString() +"\n\n--" + boundaryString + "\nContent-Type: image/png\nContent-Disposition: form-data; name=\"Body\"; filename=\"image.png\"\n\n" + byteArr + "\n\n--" + boundaryString + "--";
+        RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
+        RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
+
+        Call<ResponseBody> attachmentApi = Fennel.getWebService().addAttachments(Session.getAuthToken(), NetworkHelper.API_VERSION ,entityBody, imageBody);
+        attachmentApi.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Log.i("Fennel", "Success!");
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.i("Fennel", "Fail");
             }
         });
     }
