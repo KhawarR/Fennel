@@ -1279,15 +1279,15 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                        Log.i("Fennel", "farmer profile picture uploaded successfully!");
+                        Log.i("Fennel", "farmer profile picture edited successfully!");
                     } else {
-                        Log.i("Fennel", "farmer profile picture upload failed!");
+                        Log.i("Fennel", "farmer profile picture edit failed!");
                     }
                 }
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.i("Fennel", "farmer profile picture upload failed!");
+                    Log.i("Fennel", "farmer profile picture edit failed!");
                 }
             });
         }
@@ -1346,7 +1346,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.i("Fennel", "farmer profile picture upload failed!");
+                    Log.i("Fennel", "farmer ID picture edit failed!");
                 }
             });
         }
