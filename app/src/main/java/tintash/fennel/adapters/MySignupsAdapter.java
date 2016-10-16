@@ -1,23 +1,19 @@
 package tintash.fennel.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.jakewharton.picasso.OkHttp3Downloader;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.FailReason;
-import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Interceptor;
@@ -57,6 +53,9 @@ public class MySignupsAdapter extends BaseAdapter {
         mFarmersList.addAll(list);
 
         OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
+                .writeTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
                 .addInterceptor(new Interceptor() {
                     @Override
                     public Response intercept(Interceptor.Chain chain) throws IOException {

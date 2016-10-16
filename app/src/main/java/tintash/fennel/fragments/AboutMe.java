@@ -30,6 +30,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -97,6 +98,9 @@ public class AboutMe extends BaseFragment {
         cameraImagePicker = new CameraImagePicker(AboutMe.this);
 
         OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
+                .writeTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
                 .addInterceptor(new Interceptor() {
                     @Override
                     public okhttp3.Response intercept(Interceptor.Chain chain) throws IOException {
