@@ -3,14 +3,15 @@ package tintash.fennel.fragments;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.jakewharton.picasso.OkHttp3Downloader;
@@ -19,14 +20,15 @@ import com.kbeanie.multipicker.api.ImagePicker;
 import com.kbeanie.multipicker.api.Picker;
 import com.kbeanie.multipicker.api.callbacks.ImagePickerCallback;
 import com.kbeanie.multipicker.api.entity.ChosenImage;
-import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 import butterknife.Bind;
@@ -34,42 +36,43 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Interceptor;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import tintash.fennel.R;
 import tintash.fennel.activities.LoginActivity;
-import tintash.fennel.activities.MainActivity;
 import tintash.fennel.application.Fennel;
-import tintash.fennel.datamodels.SFResponse;
-import tintash.fennel.models.Farmer;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
 import tintash.fennel.utils.CircleViewTransformation;
+import tintash.fennel.utils.Constants;
 import tintash.fennel.utils.PreferenceHelper;
+import tintash.fennel.views.FontTextView;
 
 /**
  * Created by Faizan on 9/27/2016.
  */
 public class AboutMe extends BaseFragment {
 
-    @Bind(R.id.et_first_name)
-    EditText etFirstName;
+    @Bind(R.id.tv_first_name)
+    FontTextView tvFirstName;
 
-    @Bind(R.id.et_second_name)
-    EditText etSecondName;
+    @Bind(R.id.tv_second_name)
+    FontTextView tvSecondName;
 
-    @Bind(R.id.et_sur_name)
-    EditText etSurname;
+    @Bind(R.id.tv_sur_name)
+    FontTextView tvSurname;
 
-    @Bind(R.id.et_field_officer)
-    EditText etFieldOfficer;
+    @Bind(R.id.tv_field_officer)
+    FontTextView tvFieldOfficer;
 
-    @Bind(R.id.et_field_manager)
-    EditText etFieldManager;
+    @Bind(R.id.tv_field_manager)
+    FontTextView tvFieldManager;
 
     @Bind(R.id.profile_image)
     CircleImageView cIvProfileMain;
@@ -77,6 +80,9 @@ public class AboutMe extends BaseFragment {
     private ImagePicker imagePicker;
     private ImagePickerCallback imagePickerCallback;
     private CameraImagePicker cameraImagePicker;
+
+    private String pictureAttachmentId = null;
+    private String facilitatorId = null;
 
     private Picasso picasso;
 
@@ -188,12 +194,13 @@ public class AboutMe extends BaseFragment {
             if (fm_name == null || fm_name.equalsIgnoreCase("null")) fm_name = "";
 
             String facId = objFacilitator.getString("Id");
+            facilitatorId = facId;
 
-            etFirstName.setText(name);
-            etSecondName.setText(secondName);
-            etSurname.setText(surname);
-            etFieldOfficer.setText(fo_name);
-            etFieldManager.setText(fm_name);
+            tvFirstName.setText(name);
+            tvSecondName.setText(secondName);
+            tvSurname.setText(surname);
+            tvFieldOfficer.setText(fo_name);
+            tvFieldManager.setText(fm_name);
 
             getAboutMeAttachment(facId);
 
@@ -222,6 +229,7 @@ public class AboutMe extends BaseFragment {
                         String attId = parseDataAttachment(responseStr);
                         if(!attId.isEmpty())
                         {
+                            pictureAttachmentId = attId;
                             String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
                             picasso.load(thumbUrl).transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
                         }
@@ -324,6 +332,7 @@ public class AboutMe extends BaseFragment {
                 // Display images
 //                Toast.makeText(getActivity(), images.size() + "", Toast.LENGTH_SHORT).show();
 //                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), cIvProfileMain);
+                addPictureAttachment(images.get(0).getOriginalPath());
                 picasso.load(images.get(0).getQueryUri()).transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
             }
 
@@ -357,5 +366,86 @@ public class AboutMe extends BaseFragment {
                 cameraImagePicker.submit(data);
             }
         }
+    }
+
+    public void addPictureAttachment(String imageUri) {
+
+        HashMap<String, Object> attachmentMap = new HashMap<>();
+        attachmentMap.put("Description", "picture");
+        attachmentMap.put("Name", "profile_picture.png");
+        if (pictureAttachmentId == null)
+            attachmentMap.put("ParentId", facilitatorId);
+
+        JSONObject json = new JSONObject(attachmentMap);
+
+//        File f = new File(farmerImageUri);
+//        byte[] byteArrayImage = getByteArrayFromFile(f);
+
+        Bitmap bmp = BitmapFactory.decodeFile(imageUri);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.JPEG, 40, bos);
+
+        byte[] byteArrayImage = bos.toByteArray();
+
+        RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
+        RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
+
+        if (pictureAttachmentId == null) {
+
+            Call<ResponseBody> attachmentApi = Fennel.getWebService().addAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, entityBody, imageBody);
+            attachmentApi.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                        Log.i("Fennel", "facilitator profile picture uploaded successfully!");
+                        String responseStr = null;
+
+                        try {
+                            responseStr = response.body().string();
+                            pictureAttachmentId = getAttachmentIdFromUploadSuccess(responseStr);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        Log.i("Fennel", "facilitator profile picture upload failed!");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Log.i("Fennel", "facilitator profile picture upload failed!");
+                }
+            });
+        } else {
+            Call<ResponseBody> attachmentApi = Fennel.getWebService().editAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, pictureAttachmentId, entityBody, imageBody);
+            attachmentApi.enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                        Log.i("Fennel", "facilitator profile picture edited successfully!");
+                    } else {
+                        Log.i("Fennel", "facilitator profile picture edit failed!");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Log.i("Fennel", "facilitator profile picture edit failed!");
+                }
+            });
+        }
+    }
+
+    private String getAttachmentIdFromUploadSuccess(String data) {
+        JSONObject responseJson = null;
+        String attachmentId = null;
+        try {
+            responseJson = new JSONObject(data);
+            attachmentId = responseJson.getString("id");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return attachmentId;
+
     }
 }

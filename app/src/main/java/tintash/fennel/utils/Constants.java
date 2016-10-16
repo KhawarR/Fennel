@@ -32,4 +32,5 @@ public class Constants {
     public static final String STR_FIELD_OFFICER = "fo";
     public static final String STR_FIELD_MANAGER = "fm";
 
+    public static final int TIMEOUT = 30;
 }
