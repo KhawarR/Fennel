@@ -432,6 +432,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                ImageLoader.getInstance().displayImage(thumbUrl, imgFarmerPhoto, options);
                 imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 picasso.load(thumbUrl).transform(transformation).into(imgFarmerPhoto);
+                isFarmerPhotoSet = true;
             }
             if (farmer.getFarmerIdPhotoUrl() != null && !farmer.getFarmerIdPhotoUrl().isEmpty())
             {
@@ -441,6 +442,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                ImageLoader.getInstance().displayImage(thumbUrl, imgNationalID, options);
                 imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 picasso.load(thumbUrl).transform(transformation).into(imgNationalID);
+                isNationalIdPhotoSet = true;
             }
         }
     }
