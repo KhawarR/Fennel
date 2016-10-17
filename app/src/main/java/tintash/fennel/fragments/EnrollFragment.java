@@ -50,6 +50,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -239,6 +240,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         transformation = new RoundedCornersTransformation();
 
         OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
+                .writeTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
                 .addInterceptor(new Interceptor() {
                     @Override
                     public okhttp3.Response intercept(Interceptor.Chain chain) throws IOException {
@@ -432,6 +436,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                ImageLoader.getInstance().displayImage(thumbUrl, imgFarmerPhoto, options);
                 imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 picasso.load(thumbUrl).transform(transformation).into(imgFarmerPhoto);
+                isFarmerPhotoSet = true;
             }
             if (farmer.getFarmerIdPhotoUrl() != null && !farmer.getFarmerIdPhotoUrl().isEmpty())
             {
@@ -441,6 +446,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                ImageLoader.getInstance().displayImage(thumbUrl, imgNationalID, options);
                 imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 picasso.load(thumbUrl).transform(transformation).into(imgNationalID);
+                isNationalIdPhotoSet = true;
             }
         }
     }
@@ -1250,7 +1256,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "picture");
         attachmentMap.put("Name", "profile_picture.png");
-        if (!isEdit)
+        if (farmer.getThumbUrl() == null || farmer.getThumbUrl().isEmpty())
             attachmentMap.put("ParentId", farmer.farmerId);
 
         JSONObject json = new JSONObject(attachmentMap);
@@ -1267,7 +1273,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
         RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
-        if (!isEdit) {
+        if (farmer.getThumbUrl() == null || farmer.getThumbUrl().isEmpty()) {
 
             Call<ResponseBody> attachmentApi = Fennel.getWebService().addAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, entityBody, imageBody);
             attachmentApi.enqueue(new Callback<ResponseBody>() {
@@ -1313,7 +1319,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "ID");
         attachmentMap.put("Name", "national_id.png");
-        if(!isEdit)
+        if(farmer.getThumbUrl() == null || farmer.getThumbUrl().isEmpty())
             attachmentMap.put("ParentId", farmer.farmerId);
 
         JSONObject json = new JSONObject(attachmentMap);
@@ -1324,14 +1330,15 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
         RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
-        if (!isEdit) {
+        if (farmer.getFarmerIdPhotoUrl() == null || farmer.getFarmerIdPhotoUrl().isEmpty()) {
 
             Call<ResponseBody> attachmentApi = Fennel.getWebService().addAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, entityBody, imageBody);
             attachmentApi.enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    if (response.code() == Constants.RESPONSE_SUCCESS) {
-                        //Save id with attachment
+                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                        //Save id with attac
+                        // hment
                         Log.i("Fennel", "farmer ID picture uploaded successfully!");
                     } else {
                         Log.i("Fennel", "farmer ID picture upload failed!");
