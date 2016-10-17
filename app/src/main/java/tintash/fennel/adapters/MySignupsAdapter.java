@@ -1,6 +1,7 @@
 package tintash.fennel.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,22 +9,27 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
 import com.jakewharton.picasso.OkHttp3Downloader;
+import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.Cache;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import tintash.fennel.BuildConfig;
 import tintash.fennel.R;
 import tintash.fennel.models.Farmer;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
+import tintash.fennel.utils.CacheUtils;
 import tintash.fennel.utils.Constants;
 import tintash.fennel.utils.PreferenceHelper;
 import tintash.fennel.views.FontTextView;
@@ -52,7 +58,9 @@ public class MySignupsAdapter extends BaseAdapter {
         mList.addAll(list);
         mFarmersList.addAll(list);
 
+        File cache = CacheUtils.createDefaultCacheDir(mContext);
         OkHttpClient client = new OkHttpClient.Builder()
+                .cache(new Cache(cache, CacheUtils.calculateDiskCacheSize(cache)))
                 .connectTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
                 .writeTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
@@ -68,6 +76,8 @@ public class MySignupsAdapter extends BaseAdapter {
                 .build();
 
         picasso = new Picasso.Builder(context)
+                .defaultBitmapConfig(Bitmap.Config.RGB_565)
+                .indicatorsEnabled(BuildConfig.DEBUG)
                 .downloader(new OkHttp3Downloader(client))
                 .build();
     }
@@ -181,7 +191,7 @@ public class MySignupsAdapter extends BaseAdapter {
             if(farmer.getThumbUrl() != null && !farmer.getThumbUrl().isEmpty())
             {
                 String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getThumbUrl());
-                picasso.load(thumbUrl).into(thumb);
+                picasso.load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(thumb);
             }
             else
             {

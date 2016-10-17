@@ -1,32 +1,17 @@
 package tintash.fennel.activities;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.support.v4.app.Fragment;
+import android.os.Bundle;
 import android.support.v4.app.FragmentTabHost;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.WindowManager;
-import android.widget.ImageView;
-
-import com.kbeanie.multipicker.api.ImagePicker;
-import com.kbeanie.multipicker.api.Picker;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import tintash.fennel.R;
 import tintash.fennel.fragments.BaseContainerFragment;
-import tintash.fennel.fragments.MyDashboard;
 import tintash.fennel.fragments.MyDashboardContainerFragment;
 import tintash.fennel.fragments.MyFarmerContainerFragment;
-import tintash.fennel.fragments.MyFarmers;
-import tintash.fennel.fragments.MyLogbook;
 import tintash.fennel.fragments.MyLogbookContainerFragment;
-import tintash.fennel.fragments.MySignUps;
 import tintash.fennel.fragments.MySignUpsContainerFragment;
-import tintash.fennel.utils.CustomImageDownloader;
-import tintash.fennel.utils.PreferenceHelper;
 
 public class MainActivity extends BaseActivity {
 

@@ -27,6 +27,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +37,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.Cache;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -45,11 +47,13 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import tintash.fennel.BuildConfig;
 import tintash.fennel.R;
 import tintash.fennel.activities.LoginActivity;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
+import tintash.fennel.utils.CacheUtils;
 import tintash.fennel.utils.CircleViewTransformation;
 import tintash.fennel.utils.Constants;
 import tintash.fennel.utils.PreferenceHelper;
@@ -97,7 +101,9 @@ public class AboutMe extends BaseFragment {
         imagePicker = new ImagePicker(AboutMe.this);
         cameraImagePicker = new CameraImagePicker(AboutMe.this);
 
+        File cache = CacheUtils.createDefaultCacheDir(getActivity());
         OkHttpClient client = new OkHttpClient.Builder()
+                .cache(new Cache(cache, CacheUtils.calculateDiskCacheSize(cache)))
                 .connectTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
                 .writeTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
@@ -113,6 +119,8 @@ public class AboutMe extends BaseFragment {
                 .build();
 
         picasso = new Picasso.Builder(getActivity())
+                .defaultBitmapConfig(Bitmap.Config.RGB_565)
+                .indicatorsEnabled(BuildConfig.DEBUG)
                 .downloader(new OkHttp3Downloader(client))
                 .build();
 
@@ -171,7 +179,7 @@ public class AboutMe extends BaseFragment {
                         {
                             pictureAttachmentId = attId;
                             String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
-                            picasso.load(thumbUrl).transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+                            picasso.load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -273,7 +281,7 @@ public class AboutMe extends BaseFragment {
 //                Toast.makeText(getActivity(), images.size() + "", Toast.LENGTH_SHORT).show();
 //                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), cIvProfileMain);
                 addPictureAttachment(images.get(0).getOriginalPath());
-                picasso.load(images.get(0).getQueryUri()).transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+                picasso.load(images.get(0).getQueryUri()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
             }
 
             @Override

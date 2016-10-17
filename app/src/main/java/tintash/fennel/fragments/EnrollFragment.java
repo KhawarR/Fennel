@@ -55,6 +55,7 @@ import java.util.concurrent.TimeUnit;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import okhttp3.Cache;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -64,6 +65,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import tintash.fennel.BuildConfig;
 import tintash.fennel.R;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.common.database.DatabaseHelper;
@@ -76,6 +78,7 @@ import tintash.fennel.models.Tree;
 import tintash.fennel.models.Village;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
+import tintash.fennel.utils.CacheUtils;
 import tintash.fennel.utils.Constants;
 import tintash.fennel.utils.PreferenceHelper;
 import tintash.fennel.utils.RoundedCornersTransformation;
@@ -211,7 +214,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private ArrayList<Tree> arrTrees = new ArrayList<>();
     private ArrayList<String> strArrTrees = new ArrayList<>();
     private Picasso picasso;
-    private Transformation transformation;
+//    private Transformation transformation;
 
     public static EnrollFragment newInstance(String title, Farmer farmer) {
         EnrollFragment fragment = new EnrollFragment();
@@ -237,9 +240,11 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         imagePicker = new ImagePicker(EnrollFragment.this);
         cameraImagePicker = new CameraImagePicker(EnrollFragment.this);
 
-        transformation = new RoundedCornersTransformation();
+//        transformation = new RoundedCornersTransformation();
 
+        File cache = CacheUtils.createDefaultCacheDir(getActivity());
         OkHttpClient client = new OkHttpClient.Builder()
+                .cache(new Cache(cache, CacheUtils.calculateDiskCacheSize(cache)))
                 .connectTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
                 .writeTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
@@ -255,6 +260,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 .build();
 
         picasso = new Picasso.Builder(getActivity())
+                .defaultBitmapConfig(Bitmap.Config.RGB_565)
+                .indicatorsEnabled(BuildConfig.DEBUG)
                 .downloader(new OkHttp3Downloader(client))
                 .build();
 
@@ -435,7 +442,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                thumbUrl = String.format(thumbUrl, farmer.getThumbUrl());
 //                ImageLoader.getInstance().displayImage(thumbUrl, imgFarmerPhoto, options);
                 imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                picasso.load(thumbUrl).transform(transformation).into(imgFarmerPhoto);
+//                picasso.load(thumbUrl).transform(transformation).into(imgFarmerPhoto);
+                picasso.load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgFarmerPhoto);
                 isFarmerPhotoSet = true;
             }
             if (farmer.getFarmerIdPhotoUrl() != null && !farmer.getFarmerIdPhotoUrl().isEmpty())
@@ -445,7 +453,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                thumbUrl = String.format(thumbUrl, farmer.getFarmerIdPhotoUrl());
 //                ImageLoader.getInstance().displayImage(thumbUrl, imgNationalID, options);
                 imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                picasso.load(thumbUrl).transform(transformation).into(imgNationalID);
+//                picasso.load(thumbUrl).transform(transformation).into(imgNationalID);
+                picasso.load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgNationalID);
                 isNationalIdPhotoSet = true;
             }
         }
@@ -927,7 +936,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
                 imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                picasso.load(images.get(0).getQueryUri()).transform(transformation).into(imgFarmerPhoto);
+//                picasso.load(images.get(0).getQueryUri()).transform(transformation).into(imgFarmerPhoto);
+                picasso.load(images.get(0).getQueryUri()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgFarmerPhoto);
 //                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgFarmerPhoto, options);
                 farmerImageUri = images.get(0).getOriginalPath();
                 isFarmerPhotoSet = true;
@@ -956,7 +966,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgNationalID, options);
                 imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 farmerIdImageUri = images.get(0).getOriginalPath();
-                picasso.load(images.get(0).getQueryUri()).transform(transformation).into(imgNationalID);
+//                picasso.load(images.get(0).getQueryUri()).transform(transformation).into(imgNationalID);
+                picasso.load(images.get(0).getQueryUri()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgNationalID);
                 isNationalIdPhotoSet = true;
                 checkEnableSubmit();
             }
@@ -1251,7 +1262,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     private void attachFarmerImageToFarmerObject(Farmer farmer, boolean isEdit) {
 
-        if (farmerImageUri == null && !isFarmerPhotoSet)
+        if (farmerImageUri == null)
             return;
 
         HashMap<String, Object> attachmentMap = new HashMap<>();
@@ -1265,11 +1276,18 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //        File f = new File(farmerImageUri);
 //        byte[] byteArrayImage = getByteArrayFromFile(f);
 
-        Bitmap bmp = BitmapFactory.decodeFile(farmerImageUri);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bmp.compress(Bitmap.CompressFormat.JPEG, 40, bos);
+        byte[] byteArrayImage;
 
-        byte[] byteArrayImage = bos.toByteArray();
+        Bitmap bmp = BitmapFactory.decodeFile(farmerImageUri);
+        if (bmp == null) {
+
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.JPEG, 40, bos);
+            byteArrayImage = bos.toByteArray();
+        } else {
+            File f = new File(farmerImageUri);
+            byteArrayImage = getByteArrayFromFile(f);
+        }
 
         RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
         RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
@@ -1314,7 +1332,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     private void attachFarmerIDImageToFarmerObject(Farmer farmer, boolean isEdit) {
 
-        if (farmerIdImageUri == null && !isNationalIdPhotoSet)
+        if (farmerIdImageUri == null)
             return;
 
         HashMap<String, Object> attachmentMap = new HashMap<>();
