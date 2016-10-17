@@ -17,6 +17,12 @@ public class PreferenceHelper {
     private static final String KEY_FIRST_RUN = "_first_run";
     private static final String KEY_LOGIN_USER_TYPE = "_login_user_type";
 
+    private static final String KEY_ABOUT_ME_FN = "_about_fn";
+    private static final String KEY_ABOUT_ME_MN = "_about_mn";
+    private static final String KEY_ABOUT_ME_LN = "_about_ln";
+    private static final String KEY_ABOUT_ME_FO_NAME = "_about_fo_name";
+    private static final String KEY_ABOUT_ME_FM_NAME = "_about_fm_name";
+
 
     private static PreferenceHelper sInstance;
     private final SharedPreferences mPref;
@@ -105,6 +111,61 @@ public class PreferenceHelper {
         return id;
     }
 
+    public void writeAboutFN(String value) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putString(KEY_ABOUT_ME_FN, value);
+        editor.commit();
+    }
+
+    public String readAboutFN() {
+        String value = mPref.getString(KEY_ABOUT_ME_FN, "");
+        return value;
+    }
+
+    public void writeAboutMN(String value) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putString(KEY_ABOUT_ME_MN, value);
+        editor.commit();
+    }
+
+    public String readAboutMN() {
+        String value = mPref.getString(KEY_ABOUT_ME_MN, "");
+        return value;
+    }
+
+    public void writeAboutLN(String value) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putString(KEY_ABOUT_ME_LN, value);
+        editor.commit();
+    }
+
+    public String readAboutLN() {
+        String value = mPref.getString(KEY_ABOUT_ME_LN, "");
+        return value;
+    }
+
+    public void writeAboutFOname(String value) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putString(KEY_ABOUT_ME_FO_NAME, value);
+        editor.commit();
+    }
+
+    public String readAboutFOname() {
+        String value = mPref.getString(KEY_ABOUT_ME_FO_NAME, "");
+        return value;
+    }
+
+    public void writeAboutFMname(String value) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putString(KEY_ABOUT_ME_FM_NAME, value);
+        editor.commit();
+    }
+
+    public String readAboutFMname() {
+        String value = mPref.getString(KEY_ABOUT_ME_FM_NAME, "");
+        return value;
+    }
+
     public void writeFirstRun(boolean fRun) {
         SharedPreferences.Editor editor = mPref.edit();
         editor.putBoolean(KEY_FIRST_RUN, fRun);
@@ -122,5 +183,12 @@ public class PreferenceHelper {
         writeLoginUserId("");
         writeUserId("");
         writePassword("");
+        writeLoginUserType("");
+
+        writeAboutFN("");
+        writeAboutMN("");
+        writeAboutLN("");
+        writeAboutFOname("");
+        writeAboutFMname("");
     }
 }

@@ -183,7 +183,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     private void getMySignups()
     {
         if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
-        String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS_1, PreferenceHelper.getInstance().readLoginUserId());
+        String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS_1, PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId());
         loadingStarted();
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         apiCall.enqueue(mySignupsCallback);
@@ -313,18 +313,31 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 JSONObject attachmentObj = farmerObj.optJSONObject("Attachments");
                 if(attachmentObj != null)
                 {
-                    JSONArray attRecords = attachmentObj.getJSONArray("records");
-                    if(attRecords.length() > 0)
-                    {
-                        JSONObject objFarmerPhoto = attRecords.getJSONObject(0);
-                        farmerPicId = objFarmerPhoto.getString("Id");
-                    }
 
-                    if(attRecords.length() > 1)
-                    {
-                        JSONObject objFarmerPhoto = attRecords.getJSONObject(1);
-                        farmerNatId = objFarmerPhoto.getString("Id");
+                    JSONArray attRecords = attachmentObj.getJSONArray("records");
+                    for (int j = 0; j < attRecords.length(); j++) {
+                        JSONObject objAttachment = attRecords.getJSONObject(j);
+                        String description = objAttachment.getString("Description").toLowerCase().trim();
+                        if(description.contains("pic") || description.contains("photo"))
+                        {
+                            farmerPicId = objAttachment.getString("Id");
+                        }
+                        else if(description.contains("id"))
+                        {
+                            farmerNatId = objAttachment.getString("Id");
+                        }
                     }
+//                    if(attRecords.length() > 0)
+//                    {
+//                        JSONObject objFarmerPhoto = attRecords.getJSONObject(0);
+//                        farmerPicId = objFarmerPhoto.getString("Id");
+//                    }
+//
+//                    if(attRecords.length() > 1)
+//                    {
+//                        JSONObject objFarmerPhoto = attRecords.getJSONObject(1);
+//                        farmerNatId = objFarmerPhoto.getString("Id");
+//                    }
                 }
 
                 for (int j = 0; j < myFarmers.size(); j++) {

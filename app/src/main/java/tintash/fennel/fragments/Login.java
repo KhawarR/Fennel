@@ -59,8 +59,8 @@ public class Login extends BaseFragment implements Callback<Auth> {
         super.onViewCreated(view, savedInstanceState);
 
         // TODO Remove on release
-        etId.setText("khawar");
-        etPassword.setText("khawar");
+        etId.setText("1114");
+        etPassword.setText("pass");
 
         if(!PreferenceHelper.getInstance().readToken().isEmpty() && !PreferenceHelper.getInstance().readLoginUserId().isEmpty())
         {
@@ -125,6 +125,11 @@ public class Login extends BaseFragment implements Callback<Auth> {
         }
         else
         {
+            try {
+                Toast.makeText(getActivity(), "Authentication failed: " + response.errorBody().string(), Toast.LENGTH_LONG).show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             loadingFinished();
         }
     }
@@ -234,23 +239,68 @@ public class Login extends BaseFragment implements Callback<Auth> {
             JSONObject objRecord = arrRecords.getJSONObject(0);
 //            String id = objRecord.getString("Id");
 
+            String fn = objRecord.getString("First_Name__c");
+            String mn = objRecord.getString("Middle_Name__c");
+            String ln = objRecord.getString("Last_Name__c");
+            String fo_name = "";
+            String fm_name = "";
+
             JSONObject objFacilitator = objRecord.optJSONObject("Facilitators__r");
-
             JSONObject objFieldOffice = objRecord.optJSONObject("Field_Officers__r");
-
             JSONObject objFieldManager = objRecord.optJSONObject("Field_Managers__r");
 
             if(objFacilitator != null)
             {
                 getAndSaveId(objFacilitator, Constants.STR_FACILITATOR);
+                JSONArray arrRec = objFacilitator.getJSONArray("records");
+                if(arrRec.length() > 0)
+                {
+                    JSONObject obj1 = arrRec.getJSONObject(0);
+                    JSONObject objFO = obj1.optJSONObject("Field_Officer__r");
+                    if(objFO != null)
+                    {
+                        JSONObject objFOEmployee = objFO.optJSONObject("Employee__r");
+                        if(objFOEmployee != null)
+                        {
+                            fo_name = objFOEmployee.getString("Full_Name__c");
+                        }
+
+                        JSONObject objFO_FM = objFO.optJSONObject("Field_Manager__r");
+                        if(objFO_FM != null)
+                        {
+                            JSONObject objFO_FMEmployee = objFO_FM.optJSONObject("Employee__r");
+                            if(objFO_FMEmployee != null)
+                            {
+                                fm_name = objFO_FMEmployee.getString("Full_Name__c");
+                            }
+                        }
+                    }
+                }
+                saveAboutMeInfo(fn, mn, ln, fo_name, fm_name);
             }
             else if(objFieldOffice != null)
             {
                 getAndSaveId(objFieldOffice, Constants.STR_FIELD_OFFICER);
+                JSONArray arrRec = objFieldOffice.getJSONArray("records");
+                if(arrRec.length() > 0)
+                {
+                    JSONObject obj1 = arrRec.getJSONObject(0);
+                    JSONObject objFM = obj1.optJSONObject("Field_Manager__r");
+                    if(objFM != null)
+                    {
+                        JSONObject objFO_FMEmployee = objFM.optJSONObject("Employee__r");
+                        if(objFO_FMEmployee != null)
+                        {
+                            fm_name = objFO_FMEmployee.getString("Full_Name__c");
+                        }
+                    }
+                }
+                saveAboutMeInfo(fn, mn, ln, fo_name, fm_name);
             }
             else if(objFieldManager != null)
             {
                 getAndSaveId(objFieldManager, Constants.STR_FIELD_MANAGER);
+                saveAboutMeInfo(fn, mn, ln, fo_name, fm_name);
             }
             else
             {
@@ -259,6 +309,15 @@ public class Login extends BaseFragment implements Callback<Auth> {
         } else {
             Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void saveAboutMeInfo(String fn, String mn, String ln, String fo_name, String fm_name)
+    {
+        PreferenceHelper.getInstance().writeAboutFN(fn);
+        PreferenceHelper.getInstance().writeAboutMN(mn);
+        PreferenceHelper.getInstance().writeAboutLN(ln);
+        PreferenceHelper.getInstance().writeAboutFOname(fo_name);
+        PreferenceHelper.getInstance().writeAboutFMname(fm_name);
     }
 
     private void getAndSaveId(JSONObject jsonObject, String type) throws JSONException {

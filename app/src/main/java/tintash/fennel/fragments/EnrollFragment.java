@@ -855,7 +855,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 || spLocation.getSelectedItem() == null
                 || spSubLocation.getSelectedItem() == null
                 || spVillage.getSelectedItem() == null
-                || spTree.getSelectedItem() == null) {
+                || spTree.getSelectedItem() == null
+                || !isEdit) {
             txtSubmitApproval.setEnabled(false);
         } else {
             txtSubmitApproval.setEnabled(true);
