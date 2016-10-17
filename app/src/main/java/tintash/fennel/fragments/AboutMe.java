@@ -83,7 +83,7 @@ public class AboutMe extends BaseFragment {
     private CameraImagePicker cameraImagePicker;
 
     private String pictureAttachmentId = null;
-    private String facilitatorId = null;
+    private String loggedInUserId = null;
 
     private Picasso picasso;
 
@@ -126,6 +126,7 @@ public class AboutMe extends BaseFragment {
         picasso.load(R.drawable.dummy_profile).transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
 
         populateView();
+        loggedInUserId = PreferenceHelper.getInstance().readLoginUserId();
     }
 
     private void populateView()
@@ -313,7 +314,7 @@ public class AboutMe extends BaseFragment {
         attachmentMap.put("Description", "picture");
         attachmentMap.put("Name", "profile_picture.png");
         if (pictureAttachmentId == null)
-            attachmentMap.put("ParentId", facilitatorId);
+            attachmentMap.put("ParentId", loggedInUserId);
 
         JSONObject json = new JSONObject(attachmentMap);
 

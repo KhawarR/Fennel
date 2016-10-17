@@ -59,8 +59,8 @@ public class Login extends BaseFragment implements Callback<Auth> {
         super.onViewCreated(view, savedInstanceState);
 
         // TODO Remove on release
-        etId.setText("1114");
-        etPassword.setText("pass");
+//        etId.setText("1114");
+//        etPassword.setText("pass");
 
         if(!PreferenceHelper.getInstance().readToken().isEmpty() && !PreferenceHelper.getInstance().readLoginUserId().isEmpty())
         {
@@ -239,9 +239,9 @@ public class Login extends BaseFragment implements Callback<Auth> {
             JSONObject objRecord = arrRecords.getJSONObject(0);
 //            String id = objRecord.getString("Id");
 
-            String fn = objRecord.getString("First_Name__c");
-            String mn = objRecord.getString("Middle_Name__c");
-            String ln = objRecord.getString("Last_Name__c");
+            String fn = (!(objRecord.getString("First_Name__c").equals("null"))) ? (objRecord.getString("First_Name__c")) : "";
+            String mn = (!(objRecord.getString("Middle_Name__c").equals("null"))) ? (objRecord.getString("Middle_Name__c")) : "";
+            String ln = (!(objRecord.getString("Last_Name__c").equals("null"))) ? (objRecord.getString("Last_Name__c")) : "";
             String fo_name = "";
             String fm_name = "";
 

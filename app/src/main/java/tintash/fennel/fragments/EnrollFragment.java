@@ -812,15 +812,15 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FACILITATOR))
         {
             newFarmMap.put("Facilitator__c", PreferenceHelper.getInstance().readLoginUserId());
-            newFarmMap.put("Signup_By_Facilitator__c", PreferenceHelper.getInstance().readLoginUserId());
+            newFarmMap.put("Signup_by_Facilitator__c", PreferenceHelper.getInstance().readLoginUserId());
         }
         else if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FIELD_OFFICER))
         {
-            newFarmMap.put("Signup_By_FieldOfficer__c", PreferenceHelper.getInstance().readLoginUserId());
+            newFarmMap.put("Signup_by_Field_Officer__c", PreferenceHelper.getInstance().readLoginUserId());
         }
         else if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FIELD_MANAGER))
         {
-            newFarmMap.put("Signup_By_FieldManager__c", PreferenceHelper.getInstance().readLoginUserId());
+            newFarmMap.put("Signup_by_Field_Manager__c", PreferenceHelper.getInstance().readLoginUserId());
         }
 
         return newFarmMap;
