@@ -11,6 +11,7 @@ import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.network.RestClient;
 import tintash.fennel.network.WebService;
 import tintash.fennel.network.WebServiceAuth;
+import tintash.fennel.utils.MyPicassoInstance;
 import tintash.fennel.utils.PreferenceHelper;
 
 /**
@@ -40,6 +41,7 @@ public class Fennel extends Application {
         restClient = new RestClient();
 //        initImageLoader();
 
+        MyPicassoInstance.initializeInstance(getApplicationContext());
         PreferenceHelper.initializeInstance(getApplicationContext());
         DatabaseHelper.initializeInstance(this);
     }

@@ -31,6 +31,7 @@ import java.util.Locale;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -47,7 +48,9 @@ import tintash.fennel.models.Tree;
 import tintash.fennel.models.Village;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
+import tintash.fennel.utils.CircleViewTransformation;
 import tintash.fennel.utils.Constants;
+import tintash.fennel.utils.MyPicassoInstance;
 import tintash.fennel.utils.PreferenceHelper;
 import tintash.fennel.views.TitleBarLayout;
 
@@ -65,6 +68,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     EditText etSearch;
 
     RelativeLayout rlAdd;
+
+    CircleImageView cIvIconRight;
 
     ArrayList<Farmer> myFarmers = new ArrayList<>();
 
@@ -91,6 +96,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         super.onViewCreated(view, savedInstanceState);
 
         titleBarLayout.setOnIconClickListener(this);
+        cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
+
+        String aboutMeAttId = PreferenceHelper.getInstance().readAboutAttId();
+        if(!aboutMeAttId.isEmpty())
+        {
+            String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), aboutMeAttId);
+            MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+        }
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(onRefreshListener);
@@ -171,6 +184,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 //            PreferenceHelper.getInstance().writeFirstRun(false);
             getLocationsData();
 //        }
+
+        getAboutMeAttachment();
     }
 
     private SwipeRefreshLayout.OnRefreshListener onRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
@@ -617,7 +632,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
     }
 
-
     @Override
     protected String getTrackerScreenName() {
         return null;
@@ -625,7 +639,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     @Override
     public void onTitleBarRightIconClicked(View view) {
-        ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
+        ((BaseContainerFragment) getParentFragment()).replaceFragment(new AboutMe(), true);
     }
 
     @Override
@@ -795,5 +809,72 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             t.printStackTrace();
         }
     };
+
+    private void getAboutMeAttachment() {
+        String queryTable = "Facilitator__c";
+        String userType = PreferenceHelper.getInstance().readLoginUserType();
+        if(userType.equalsIgnoreCase(Constants.STR_FACILITATOR))
+            queryTable = "Facilitator__c";
+        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_OFFICER))
+            queryTable = "Field_Officer__c";
+        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_MANAGER))
+            queryTable = "Field_Manager__c";
+
+        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readLoginUserId());
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        apiCall.enqueue(aboutMeAttachmentCallback);
+    }
+
+    private Callback<ResponseBody> aboutMeAttachmentCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            if (response.code() == 200) {
+                String responseStr = "";
+
+                try {
+                    responseStr = response.body().string();
+                    String attId = parseAboutMeDataAttachment(responseStr);
+                    PreferenceHelper.getInstance().writeAboutAttId(attId);
+                    if(!attId.isEmpty())
+                    {
+                        String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
+                        MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            t.printStackTrace();
+        }
+    };
+
+    private String parseAboutMeDataAttachment(String data) throws JSONException {
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if(arrRecords.length() > 0)
+        {
+            JSONObject facObj = arrRecords.getJSONObject(0);
+
+            JSONObject attachmentObj = facObj.optJSONObject("Attachments");
+            if(attachmentObj != null)
+            {
+                JSONArray attRecords = attachmentObj.getJSONArray("records");
+                if(attRecords.length() > 0)
+                {
+                    JSONObject objFarmerPhoto = attRecords.getJSONObject(0);
+                    String idAttachment = objFarmerPhoto.getString("Id");
+                    return idAttachment;
+                }
+            }
+        }
+        return "";
+    }
 
 }

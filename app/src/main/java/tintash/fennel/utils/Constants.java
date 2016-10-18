@@ -34,5 +34,5 @@ public class Constants {
 
     public static final int TIMEOUT = 30;
 
-    public static final int IMAGE_MAX_DIM = 1500;
+    public static final int IMAGE_MAX_DIM = 500;
 }

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -26,7 +25,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.jakewharton.picasso.OkHttp3Downloader;
 import com.kbeanie.multipicker.api.CameraImagePicker;
 import com.kbeanie.multipicker.api.ImagePicker;
 import com.kbeanie.multipicker.api.Picker;
@@ -34,7 +32,6 @@ import com.kbeanie.multipicker.api.callbacks.ImagePickerCallback;
 import com.kbeanie.multipicker.api.entity.ChosenImage;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
-import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 
 import org.json.JSONArray;
@@ -50,22 +47,17 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import okhttp3.Cache;
-import okhttp3.Interceptor;
+import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import tintash.fennel.BuildConfig;
 import tintash.fennel.R;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.common.database.DatabaseHelper;
@@ -78,10 +70,13 @@ import tintash.fennel.models.Tree;
 import tintash.fennel.models.Village;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
-import tintash.fennel.utils.CacheUtils;
+import tintash.fennel.utils.CircleViewTransformation;
 import tintash.fennel.utils.Constants;
+import tintash.fennel.utils.MyPicassoInstance;
+import tintash.fennel.utils.PhotoUtils;
 import tintash.fennel.utils.PreferenceHelper;
 import tintash.fennel.utils.RoundedCornersTransformation;
+import tintash.fennel.utils.Singleton;
 import tintash.fennel.views.NothingSelectedSpinnerAdapter;
 import tintash.fennel.views.TitleBarLayout;
 
@@ -180,6 +175,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     @Bind(R.id.imgNationalID)
     ImageView imgNationalID;
 
+    CircleImageView cIvIconRight;
+
     private String title;
     private Farmer farmer;
     boolean isEdit = false;
@@ -213,8 +210,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private ArrayList<String> strArrVillages = new ArrayList<>();
     private ArrayList<Tree> arrTrees = new ArrayList<>();
     private ArrayList<String> strArrTrees = new ArrayList<>();
-    private Picasso picasso;
-//    private Transformation transformation;
+    private Transformation transformation;
 
     public static EnrollFragment newInstance(String title, Farmer farmer) {
         EnrollFragment fragment = new EnrollFragment();
@@ -240,30 +236,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         imagePicker = new ImagePicker(EnrollFragment.this);
         cameraImagePicker = new CameraImagePicker(EnrollFragment.this);
 
-//        transformation = new RoundedCornersTransformation();
-
-        File cache = CacheUtils.createDefaultCacheDir(getActivity());
-        OkHttpClient client = new OkHttpClient.Builder()
-                .cache(new Cache(cache, CacheUtils.calculateDiskCacheSize(cache)))
-                .connectTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
-                .writeTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
-                .readTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public okhttp3.Response intercept(Interceptor.Chain chain) throws IOException {
-                        Request newRequest = chain.request().newBuilder()
-                                .addHeader("Authorization", Session.getAuthToken())
-                                .build();
-                        return chain.proceed(newRequest);
-                    }
-                })
-                .build();
-
-        picasso = new Picasso.Builder(getActivity())
-                .defaultBitmapConfig(Bitmap.Config.RGB_565)
-                .indicatorsEnabled(BuildConfig.DEBUG)
-                .downloader(new OkHttp3Downloader(client))
-                .build();
+        transformation = new RoundedCornersTransformation();
 
         return view;
     }
@@ -274,6 +247,14 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         System.out.println("ViewCreated Enroll ");
 
         titleBarLayout.setOnIconClickListener(this);
+        cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
+
+        String aboutMeAttId = PreferenceHelper.getInstance().readAboutAttId();
+        if(!aboutMeAttId.isEmpty())
+        {
+            String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), aboutMeAttId);
+            MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+        }
 
         tvMale.setSelected(false);
         tvFemale.setSelected(false);
@@ -442,8 +423,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                thumbUrl = String.format(thumbUrl, farmer.getThumbUrl());
 //                ImageLoader.getInstance().displayImage(thumbUrl, imgFarmerPhoto, options);
                 imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
-//                picasso.load(thumbUrl).transform(transformation).into(imgFarmerPhoto);
-                picasso.load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgFarmerPhoto);
+                MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgFarmerPhoto);
                 isFarmerPhotoSet = true;
             }
             if (farmer.getFarmerIdPhotoUrl() != null && !farmer.getFarmerIdPhotoUrl().isEmpty())
@@ -453,8 +433,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                thumbUrl = String.format(thumbUrl, farmer.getFarmerIdPhotoUrl());
 //                ImageLoader.getInstance().displayImage(thumbUrl, imgNationalID, options);
                 imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
-//                picasso.load(thumbUrl).transform(transformation).into(imgNationalID);
-                picasso.load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgNationalID);
+                MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgNationalID);
                 isNationalIdPhotoSet = true;
             }
         }
@@ -936,8 +915,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
                 imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
-//                picasso.load(images.get(0).getQueryUri()).transform(transformation).into(imgFarmerPhoto);
-                picasso.load(images.get(0).getQueryUri()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgFarmerPhoto);
+                MyPicassoInstance.getInstance().load(images.get(0).getQueryUri()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgFarmerPhoto);
 //                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgFarmerPhoto, options);
                 farmerImageUri = images.get(0).getOriginalPath();
                 isFarmerPhotoSet = true;
@@ -966,8 +944,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgNationalID, options);
                 imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 farmerIdImageUri = images.get(0).getOriginalPath();
-//                picasso.load(images.get(0).getQueryUri()).transform(transformation).into(imgNationalID);
-                picasso.load(images.get(0).getQueryUri()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgNationalID);
+                MyPicassoInstance.getInstance().load(images.get(0).getQueryUri()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgNationalID);
                 isNationalIdPhotoSet = true;
                 checkEnableSubmit();
             }
@@ -1260,7 +1237,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         });
     }
 
-    private void attachFarmerImageToFarmerObject(Farmer farmer, boolean isEdit) {
+    private void attachFarmerImageToFarmerObject(final Farmer farmer, boolean isEdit) {
 
         if (farmerImageUri == null)
             return;
@@ -1268,26 +1245,56 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "picture");
         attachmentMap.put("Name", "profile_picture.png");
-        if (farmer.getThumbUrl() == null || farmer.getThumbUrl().isEmpty())
+        if (farmer.getThumbUrl() == null || farmer.getThumbUrl().isEmpty()) {
             attachmentMap.put("ParentId", farmer.farmerId);
+        }
+        else
+        {
+            String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getThumbUrl());
+            MyPicassoInstance.getInstance().invalidate(thumbUrl);
+        }
 
         JSONObject json = new JSONObject(attachmentMap);
 
 //        File f = new File(farmerImageUri);
 //        byte[] byteArrayImage = getByteArrayFromFile(f);
 
-        byte[] byteArrayImage;
+        byte[] byteArrayImage = null;
+        Bitmap bmp = null;
 
-        Bitmap bmp = BitmapFactory.decodeFile(farmerImageUri);
-        if (bmp == null) {
+        bmp = PhotoUtils.decodeSampledBitmapFromResource(farmerImageUri);
 
+        if(bmp != null)
+        {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.JPEG, 40, bos);
+            bmp.compress(Bitmap.CompressFormat.JPEG, 100, bos);
             byteArrayImage = bos.toByteArray();
-        } else {
-            File f = new File(farmerImageUri);
-            byteArrayImage = getByteArrayFromFile(f);
+            try {
+                bos.close();
+                bmp.recycle();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+        else
+        {
+            byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(farmerImageUri));
+        }
+
+//        bmp = BitmapFactory.decodeFile(farmerImageUri);
+//        if (bmp == null) {
+//            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//            bmp.compress(Bitmap.CompressFormat.JPEG, 40, bos);
+//            byteArrayImage = bos.toByteArray();
+//            try {
+//                bos.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        } else {
+//            File f = new File(farmerImageUri);
+//            byteArrayImage = getByteArrayFromFile(f);
+//        }
 
         RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
         RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
@@ -1300,6 +1307,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                         Log.i("Fennel", "farmer profile picture uploaded successfully!");
+                        Singleton.getInstance().farmerIdtoInvalidate = farmer.farmerId;
                     } else {
                         Log.i("Fennel", "farmer profile picture upload failed!");
                     }
@@ -1317,6 +1325,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                         Log.i("Fennel", "farmer profile picture edited successfully!");
+                        Singleton.getInstance().farmerIdtoInvalidate = farmer.farmerId;
                     } else {
                         Log.i("Fennel", "farmer profile picture edit failed!");
                     }
@@ -1338,13 +1347,41 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "ID");
         attachmentMap.put("Name", "national_id.png");
-        if(farmer.getThumbUrl() == null || farmer.getThumbUrl().isEmpty())
+        if(farmer.getFarmerIdPhotoUrl() == null || farmer.getFarmerIdPhotoUrl().isEmpty()) {
             attachmentMap.put("ParentId", farmer.farmerId);
+        }
+        else
+        {
+            String idPhotoUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getFarmerIdPhotoUrl());
+            MyPicassoInstance.getInstance().invalidate(idPhotoUrl);
+        }
 
         JSONObject json = new JSONObject(attachmentMap);
 
-        File f = new File(farmerIdImageUri);
-        byte[] byteArrayImage = getByteArrayFromFile(f);
+//        File f = new File(farmerIdImageUri);
+//        byte[] byteArrayImage = getByteArrayFromFile(f);
+
+        byte[] byteArrayImage = null;
+        Bitmap bmp = null;
+
+        bmp = PhotoUtils.decodeSampledBitmapFromResource(farmerIdImageUri);
+
+        if(bmp != null)
+        {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+            byteArrayImage = bos.toByteArray();
+            try {
+                bos.close();
+                bmp.recycle();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else
+        {
+            byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(farmerIdImageUri));
+        }
 
         RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
         RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
@@ -1388,23 +1425,5 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 }
             });
         }
-    }
-
-    private byte[] getByteArrayFromFile(File f) {
-        InputStream is = null;
-        try {
-            is = new FileInputStream(f);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
-        byte[] byteArrayImage = new byte[(int)f.length()];
-        try {
-            is.read(byteArrayImage);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-        return byteArrayImage;
     }
 }

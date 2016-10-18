@@ -14,13 +14,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.jakewharton.picasso.OkHttp3Downloader;
 import com.kbeanie.multipicker.api.CameraImagePicker;
 import com.kbeanie.multipicker.api.ImagePicker;
 import com.kbeanie.multipicker.api.Picker;
 import com.kbeanie.multipicker.api.callbacks.ImagePickerCallback;
 import com.kbeanie.multipicker.api.entity.ChosenImage;
-import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,38 +29,37 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
-import okhttp3.Cache;
-import okhttp3.Interceptor;
 import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import tintash.fennel.BuildConfig;
 import tintash.fennel.R;
 import tintash.fennel.activities.LoginActivity;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
-import tintash.fennel.utils.CacheUtils;
 import tintash.fennel.utils.CircleViewTransformation;
 import tintash.fennel.utils.Constants;
+import tintash.fennel.utils.MyPicassoInstance;
+import tintash.fennel.utils.PhotoUtils;
 import tintash.fennel.utils.PreferenceHelper;
 import tintash.fennel.views.FontTextView;
+import tintash.fennel.views.TitleBarLayout;
 
 /**
  * Created by Faizan on 9/27/2016.
  */
 public class AboutMe extends BaseFragment {
+
+    @Bind(R.id.titleBar)
+    TitleBarLayout titleBarLayout;
 
     @Bind(R.id.tv_first_name)
     FontTextView tvFirstName;
@@ -82,14 +79,14 @@ public class AboutMe extends BaseFragment {
     @Bind(R.id.profile_image)
     CircleImageView cIvProfileMain;
 
+    CircleImageView cIvIconRight;
+
     private ImagePicker imagePicker;
     private ImagePickerCallback imagePickerCallback;
     private CameraImagePicker cameraImagePicker;
 
     private String pictureAttachmentId = null;
     private String loggedInUserId = null;
-
-    private Picasso picasso;
 
     @Nullable
     @Override
@@ -101,29 +98,6 @@ public class AboutMe extends BaseFragment {
         imagePicker = new ImagePicker(AboutMe.this);
         cameraImagePicker = new CameraImagePicker(AboutMe.this);
 
-        File cache = CacheUtils.createDefaultCacheDir(getActivity());
-        OkHttpClient client = new OkHttpClient.Builder()
-                .cache(new Cache(cache, CacheUtils.calculateDiskCacheSize(cache)))
-                .connectTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
-                .writeTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
-                .readTimeout(Constants.TIMEOUT, TimeUnit.SECONDS)
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public okhttp3.Response intercept(Interceptor.Chain chain) throws IOException {
-                        Request newRequest = chain.request().newBuilder()
-                                .addHeader("Authorization", Session.getAuthToken())
-                                .build();
-                        return chain.proceed(newRequest);
-                    }
-                })
-                .build();
-
-        picasso = new Picasso.Builder(getActivity())
-                .defaultBitmapConfig(Bitmap.Config.RGB_565)
-                .indicatorsEnabled(BuildConfig.DEBUG)
-                .downloader(new OkHttp3Downloader(client))
-                .build();
-
         return view;
     }
 
@@ -131,10 +105,19 @@ public class AboutMe extends BaseFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        picasso.load(R.drawable.dummy_profile).transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+        MyPicassoInstance.getInstance().load(R.drawable.dummy_profile).transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+        loggedInUserId = PreferenceHelper.getInstance().readLoginUserId();
+
+        cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
 
         populateView();
-        loggedInUserId = PreferenceHelper.getInstance().readLoginUserId();
+        if(!PreferenceHelper.getInstance().readAboutAttId().isEmpty())
+        {
+            String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), PreferenceHelper.getInstance().readAboutAttId());
+            MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+            MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+        }
+        getAboutMeInfo();
     }
 
     private void populateView()
@@ -144,8 +127,6 @@ public class AboutMe extends BaseFragment {
         tvSurname.setText(PreferenceHelper.getInstance().readAboutLN());
         tvFieldOfficer.setText(PreferenceHelper.getInstance().readAboutFOname());
         tvFieldManager.setText(PreferenceHelper.getInstance().readAboutFMname());
-
-        getAboutMeAttachment();
     }
 
     private void getAboutMeAttachment() {
@@ -175,11 +156,12 @@ public class AboutMe extends BaseFragment {
                     try {
                         responseStr = response.body().string();
                         String attId = parseDataAttachment(responseStr);
-                        if(!attId.isEmpty())
+                        pictureAttachmentId = attId;
+                        if(!attId.isEmpty() && !attId.equalsIgnoreCase(PreferenceHelper.getInstance().readAboutAttId()))
                         {
-                            pictureAttachmentId = attId;
                             String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
-                            picasso.load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+                            MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+                            MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -242,14 +224,33 @@ public class AboutMe extends BaseFragment {
 
     @OnClick(R.id.txtSignOut)
     void onClickSignOut(View view) {
-        PreferenceHelper.getInstance().clearSession();
-        startActivity(new Intent(getActivity(), LoginActivity.class));
-        getActivity().finish();
+        showLogoutDialog();
     }
 
     @OnClick(R.id.rl_pick_image)
     void onClickPickImage(View view) {
         showPickerDialog();
+    }
+
+    private void showLogoutDialog() {
+        AlertDialog.Builder pickerDialog = new AlertDialog.Builder(getActivity());
+        pickerDialog.setTitle("Do you want to sign out?");
+        pickerDialog.setPositiveButton("Yes",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        PreferenceHelper.getInstance().clearSession();
+                        startActivity(new Intent(getActivity(), LoginActivity.class));
+                        getActivity().finish();
+                        dialog.dismiss();
+                    }
+                });
+        pickerDialog.setNegativeButton("I'm staying",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        pickerDialog.show();
     }
 
     private void showPickerDialog() {
@@ -278,10 +279,9 @@ public class AboutMe extends BaseFragment {
             @Override
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
-//                Toast.makeText(getActivity(), images.size() + "", Toast.LENGTH_SHORT).show();
-//                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), cIvProfileMain);
                 addPictureAttachment(images.get(0).getOriginalPath());
-                picasso.load(images.get(0).getQueryUri()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+                MyPicassoInstance.getInstance().load(images.get(0).getQueryUri()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+                MyPicassoInstance.getInstance().load(images.get(0).getQueryUri()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
             }
 
             @Override
@@ -305,10 +305,6 @@ public class AboutMe extends BaseFragment {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == Activity.RESULT_OK) {
             if (requestCode == Picker.PICK_IMAGE_DEVICE) {
-//                if(imagePicker == null) {
-//                    imagePicker = new ImagePicker(getActivity());
-//                    imagePicker.setImagePickerCallback(farmerPhotoPickerCallback);
-//                }
                 imagePicker.submit(data);
             } else if (requestCode == Picker.PICK_IMAGE_CAMERA) {
                 cameraImagePicker.submit(data);
@@ -321,24 +317,40 @@ public class AboutMe extends BaseFragment {
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "picture");
         attachmentMap.put("Name", "profile_picture.png");
-        if (pictureAttachmentId == null)
+        if (pictureAttachmentId == null || pictureAttachmentId.isEmpty()) {
             attachmentMap.put("ParentId", loggedInUserId);
+        }
+        String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), PreferenceHelper.getInstance().readAboutAttId());
+        MyPicassoInstance.getInstance().invalidate(thumbUrl);
 
         JSONObject json = new JSONObject(attachmentMap);
 
-//        File f = new File(farmerImageUri);
-//        byte[] byteArrayImage = getByteArrayFromFile(f);
+        byte[] byteArrayImage = null;
+        Bitmap bmp = null;
 
-        Bitmap bmp = BitmapFactory.decodeFile(imageUri);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bmp.compress(Bitmap.CompressFormat.JPEG, 40, bos);
+        bmp = PhotoUtils.decodeSampledBitmapFromResource(imageUri);
 
-        byte[] byteArrayImage = bos.toByteArray();
+        if(bmp != null)
+        {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+            byteArrayImage = bos.toByteArray();
+            try {
+                bos.close();
+                bmp.recycle();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else
+        {
+            byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(imageUri));
+        }
 
         RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
         RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
-        if (pictureAttachmentId == null) {
+        if (pictureAttachmentId == null || pictureAttachmentId.isEmpty()) {
 
             Call<ResponseBody> attachmentApi = Fennel.getWebService().addAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, entityBody, imageBody);
             attachmentApi.enqueue(new Callback<ResponseBody>() {
@@ -394,6 +406,131 @@ public class AboutMe extends BaseFragment {
             e.printStackTrace();
         }
         return attachmentId;
+    }
 
+    private void getAboutMeInfo() {
+        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_1, PreferenceHelper.getInstance().readUserId());
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        apiCall.enqueue(aboutMeCallback);
+    }
+
+    private Callback<ResponseBody> aboutMeCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            if (response.code() == 200) {
+                String responseStr = "";
+
+                try {
+                    responseStr = response.body().string();
+                    parseAboutMeData(responseStr);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            t.printStackTrace();
+        }
+    };
+
+    private void parseAboutMeData(String data) throws JSONException {
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if (arrRecords.length() > 0) {
+            JSONObject objRecord = arrRecords.getJSONObject(0);
+
+            String fn = (!(objRecord.getString("First_Name__c").equals("null"))) ? (objRecord.getString("First_Name__c")) : "";
+            String mn = (!(objRecord.getString("Middle_Name__c").equals("null"))) ? (objRecord.getString("Middle_Name__c")) : "";
+            String ln = (!(objRecord.getString("Last_Name__c").equals("null"))) ? (objRecord.getString("Last_Name__c")) : "";
+            String fo_name = "";
+            String fm_name = "";
+
+            JSONObject objFacilitator = objRecord.optJSONObject("Facilitators__r");
+            JSONObject objFieldOffice = objRecord.optJSONObject("Field_Officers__r");
+            JSONObject objFieldManager = objRecord.optJSONObject("Field_Managers__r");
+
+            if(objFacilitator != null)
+            {
+                getAndSaveId(objFacilitator, Constants.STR_FACILITATOR);
+                JSONArray arrRec = objFacilitator.getJSONArray("records");
+                if(arrRec.length() > 0)
+                {
+                    JSONObject obj1 = arrRec.getJSONObject(0);
+                    JSONObject objFO = obj1.optJSONObject("Field_Officer__r");
+                    if(objFO != null)
+                    {
+                        JSONObject objFOEmployee = objFO.optJSONObject("Employee__r");
+                        if(objFOEmployee != null)
+                        {
+                            fo_name = objFOEmployee.getString("Full_Name__c");
+                        }
+
+                        JSONObject objFO_FM = objFO.optJSONObject("Field_Manager__r");
+                        if(objFO_FM != null)
+                        {
+                            JSONObject objFO_FMEmployee = objFO_FM.optJSONObject("Employee__r");
+                            if(objFO_FMEmployee != null)
+                            {
+                                fm_name = objFO_FMEmployee.getString("Full_Name__c");
+                            }
+                        }
+                    }
+                }
+                saveAboutMeInfo(fn, mn, ln, fo_name, fm_name);
+            }
+            else if(objFieldOffice != null)
+            {
+                getAndSaveId(objFieldOffice, Constants.STR_FIELD_OFFICER);
+                JSONArray arrRec = objFieldOffice.getJSONArray("records");
+                if(arrRec.length() > 0)
+                {
+                    JSONObject obj1 = arrRec.getJSONObject(0);
+                    JSONObject objFM = obj1.optJSONObject("Field_Manager__r");
+                    if(objFM != null)
+                    {
+                        JSONObject objFO_FMEmployee = objFM.optJSONObject("Employee__r");
+                        if(objFO_FMEmployee != null)
+                        {
+                            fm_name = objFO_FMEmployee.getString("Full_Name__c");
+                        }
+                    }
+                }
+                saveAboutMeInfo(fn, mn, ln, fo_name, fm_name);
+            }
+            else if(objFieldManager != null)
+            {
+                getAndSaveId(objFieldManager, Constants.STR_FIELD_MANAGER);
+                saveAboutMeInfo(fn, mn, ln, fo_name, fm_name);
+            }
+        }
+    }
+
+    private void saveAboutMeInfo(String fn, String mn, String ln, String fo_name, String fm_name)
+    {
+        PreferenceHelper.getInstance().writeAboutFN(fn);
+        PreferenceHelper.getInstance().writeAboutMN(mn);
+        PreferenceHelper.getInstance().writeAboutLN(ln);
+        PreferenceHelper.getInstance().writeAboutFOname(fo_name);
+        PreferenceHelper.getInstance().writeAboutFMname(fm_name);
+
+        populateView();
+    }
+
+    private void getAndSaveId(JSONObject jsonObject, String type) throws JSONException {
+        JSONArray arrRec = jsonObject.getJSONArray("records");
+        if(arrRec.length() > 0)
+        {
+            JSONObject obj1 = arrRec.getJSONObject(0);
+            String idFac = obj1.getString("Id");
+            PreferenceHelper.getInstance().writeLoginUserType(type);
+            PreferenceHelper.getInstance().writeLoginUserId(idFac);
+
+            getAboutMeAttachment();
+        }
     }
 }
