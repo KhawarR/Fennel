@@ -2,14 +2,21 @@ package tintash.fennel.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ListView;
+
+import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import tintash.fennel.R;
+import tintash.fennel.adapters.MySignupsAdapter;
+import tintash.fennel.models.Farmer;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.utils.CircleViewTransformation;
 import tintash.fennel.utils.Constants;
@@ -20,10 +27,23 @@ import tintash.fennel.views.TitleBarLayout;
 
 public class MyFarmers extends BaseFragment {
 
+    //region Class variables & UI
     @Bind(R.id.titleBar)
     TitleBarLayout titleBarLayout;
 
-    CircleImageView cIvIconRight;
+    @Bind(R.id.lv_farmers)
+    ListView mLvFarmers;
+
+    EditText etSearch;
+
+    CircleImageView cIvIconRight;ArrayList<Farmer> myFarmers = new ArrayList<>();
+
+    MySignupsAdapter adapter;
+
+    int locationsResponseCounter = 0;
+
+    SwipeRefreshLayout mSwipeRefreshLayout;
+    //endregion
 
     @Nullable
     @Override
