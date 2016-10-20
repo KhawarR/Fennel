@@ -77,14 +77,19 @@ public class Login extends BaseFragment implements Callback<Auth> {
 
     @OnClick(R.id.txtLogin)
     void onClickLogin(View view) {
-        if (etId.getText().toString().isEmpty() || etPassword.getText().toString().isEmpty()) {
-            Toast.makeText(getActivity(), "Please put username & password", Toast.LENGTH_SHORT).show();
-        } else {
-            String username = "waajay@westagilelabs.com.waldev";
-            String password = "walshamba123";
-            loadingStarted();
-            Call<Auth> call = Fennel.getAuthWebService().postSFLogin(NetworkHelper.GRANT, NetworkHelper.CLIENT_ID, NetworkHelper.CLIENT_SECRET, username, password, NetworkHelper.REDIRECT_URI);
-            call.enqueue(this);
+        if(NetworkHelper.isNetworkAvailable(getActivity().getApplicationContext())) {
+            if (etId.getText().toString().isEmpty() || etPassword.getText().toString().isEmpty()) {
+                Toast.makeText(getActivity(), "Please put username & password", Toast.LENGTH_SHORT).show();
+            } else {
+                String username = "waajay@westagilelabs.com.waldev";
+                String password = "walshamba123";
+                loadingStarted();
+                Call<Auth> call = Fennel.getAuthWebService().postSFLogin(NetworkHelper.GRANT, NetworkHelper.CLIENT_ID, NetworkHelper.CLIENT_SECRET, username, password, NetworkHelper.REDIRECT_URI);
+                call.enqueue(this);
+            }
+        }
+        else {
+            Toast.makeText(getActivity(), Constants.TOAST_NO_INTERNET, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -125,7 +130,7 @@ public class Login extends BaseFragment implements Callback<Auth> {
         }
         else
         {
-            Toast.makeText(getActivity(), "Login Error: Check network connection or verify login credentials", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), Constants.TOAST_LOGIN_ERROR, Toast.LENGTH_LONG).show();
 //            try {
 //                Toast.makeText(getActivity(), "Authentication failed: " + response.errorBody().string(), Toast.LENGTH_LONG).show();
 //            } catch (IOException e) {
@@ -140,7 +145,7 @@ public class Login extends BaseFragment implements Callback<Auth> {
         loadingFinished();
         t.printStackTrace();
 //        Toast.makeText(getActivity(), "Authentication failed: " + t.getMessage(), Toast.LENGTH_LONG).show();
-        Toast.makeText(getActivity(), "Login Error: Check network connection or verify login credentials", Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), Constants.TOAST_LOGIN_ERROR, Toast.LENGTH_LONG).show();
     }
 
     private Callback<ResponseBody> loginCallback = new Callback<ResponseBody>() {
@@ -196,7 +201,7 @@ public class Login extends BaseFragment implements Callback<Auth> {
         else
         {
             loadingFinished();
-            Toast.makeText(getActivity(), "Login Error: Check network connection or verify login credentials", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), Constants.TOAST_LOGIN_ERROR, Toast.LENGTH_LONG).show();
         }
     }
 

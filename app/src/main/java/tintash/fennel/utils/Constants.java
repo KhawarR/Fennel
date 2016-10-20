@@ -18,21 +18,18 @@ public class Constants {
     public static final String STR_INCOMPLETE = "INCOMPLETE";
     public static final String STR_PENDING = "PENDING";
     public static final String STR_APPROVED = "APPROVED";
-
     public static final String STR_ENROLL_FARMER = "ENROLL FARMER";
     public static final String STR_EDIT_FARMER = "EDIT FARMER";
-
-    public static final int RESPONSE_SUCCESS = 200;
-    public static final int RESPONSE_SUCCESS_ADDED = 201;
-    public static final int RESPONSE_SUCCESS_NO_CONTENT = 204;
-
-    public static final int CORNER_RADIUS = 20;
-
     public static final String STR_FACILITATOR = "fac";
     public static final String STR_FIELD_OFFICER = "fo";
     public static final String STR_FIELD_MANAGER = "fm";
+    public static final String TOAST_NO_INTERNET = "Network not available, please check your connection";
+    public static final String TOAST_LOGIN_ERROR = "Login Error: Check network connection or verify login credentials";
 
     public static final int TIMEOUT = 30;
-
     public static final int IMAGE_MAX_DIM = 500;
+    public static final int RESPONSE_SUCCESS = 200;
+    public static final int RESPONSE_SUCCESS_ADDED = 201;
+    public static final int RESPONSE_SUCCESS_NO_CONTENT = 204;
+    public static final int CORNER_RADIUS = 20;
 }

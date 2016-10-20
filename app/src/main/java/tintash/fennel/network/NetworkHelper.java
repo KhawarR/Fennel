@@ -1,9 +1,14 @@
 package tintash.fennel.network;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 /**
  * Created by Faizan on 9/30/2016.
  */
 public class NetworkHelper {
+
     public static final String GRANT = "password";
     public static final String CLIENT_ID = "3MVG9eYfd1zvW1E6CGmr.WMml7GUxIj_4B4n2IGfk693m6sEsdV7Eni_5Kgts.uwmLbU03gHKPPrjYN5dcTxr";
     public static final String CLIENT_SECRET = "1367114753175275829";
@@ -23,4 +28,23 @@ public static final String QUERY_ABOUT_ME_1 = "Select e.Id, e.Name, e.Active_Emp
     public static final String GET_SUB_LOCATIONS = "SELECT Id, Name, Location__c FROM Sub_Location__c";
     public static final String GET_VILLAGES = "SELECT Id, Name, Sub_Location__c FROM Village__c";
     public static final String GET_TREES = "SELECT Id, Name, Sub_Location__c FROM Tree__c";
+
+    //    private static NetworkHelper instance;
+//    private NetworkHelper(){}
+//    public synchronized static NetworkHelper getInstance() {
+//        if(instance == null)
+//            instance = new NetworkHelper();
+//        return instance;
+//    }
+
+    public static boolean isNetworkAvailable(Context context){
+        ConnectivityManager cm =
+                (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        return isConnected;
+    }
 }
