@@ -119,7 +119,7 @@ public class Login extends BaseFragment implements Callback<Auth> {
 //            }
 
             if (username.length() > 0) {
-                String loginQuery = String.format(NetworkHelper.QUERY_LOGIN_1, username, password);
+                String loginQuery = String.format(NetworkHelper.QUERY_LOGIN, username, password);
                 Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, loginQuery);
                 apiCall.enqueue(loginCallback);
             }
@@ -206,7 +206,7 @@ public class Login extends BaseFragment implements Callback<Auth> {
     }
 
     private void getAboutMeInfo() {
-        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_1, PreferenceHelper.getInstance().readUserId());
+        String query = String.format(NetworkHelper.QUERY_ABOUT_ME, PreferenceHelper.getInstance().readUserId());
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         apiCall.enqueue(aboutMeCallback);
     }

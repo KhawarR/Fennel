@@ -195,7 +195,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     //region Netwrok calls, callbacks & parsers
     private void getMySignups(){
         if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
-        String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS_1, PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId());
+        String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS, PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId());
         loadingStarted();
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         apiCall.enqueue(mySignupsCallback);
