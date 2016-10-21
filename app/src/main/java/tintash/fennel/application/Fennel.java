@@ -7,6 +7,7 @@ import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
 
 import io.fabric.sdk.android.Fabric;
+import io.realm.Realm;
 import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.network.RestClient;
 import tintash.fennel.network.WebService;
@@ -40,6 +41,8 @@ public class Fennel extends Application {
         Fabric.with(this, new Crashlytics());
         restClient = new RestClient();
 //        initImageLoader();
+
+        Realm.init(getApplicationContext());
 
         MyPicassoInstance.initializeInstance(getApplicationContext());
         PreferenceHelper.initializeInstance(getApplicationContext());

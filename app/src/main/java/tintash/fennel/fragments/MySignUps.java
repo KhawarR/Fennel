@@ -2,6 +2,7 @@ package tintash.fennel.fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.NetworkRequest;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -32,6 +33,9 @@ import java.util.Locale;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.realm.Realm;
+import io.realm.RealmList;
+import io.realm.RealmResults;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -176,12 +180,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             }
         });
 
-//        boolean isFirstRun = PreferenceHelper.getInstance().readFirstRun();
-//        if (isFirstRun) {
-//            PreferenceHelper.getInstance().writeFirstRun(false);
         getLocationsData();
-//        }
-
         getAboutMeAttachment();
     }
 
@@ -194,9 +193,76 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     //region Netwrok calls, callbacks & parsers
     private void getMySignups(){
+
+        if(NetworkHelper.isNetworkAvailable(getActivity()))
+        {
+            getMySignupsFromServer();
+        }
+        else
+        {
+            getMySignupsFromDB();
+        }
+    }
+
+    private void getMySignupsFromDB()
+    {
+        myFarmers.clear();
+
         if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
-        String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS, PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId());
         loadingStarted();
+
+        RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).findAll();
+
+        ArrayList<Farmer> incompleteFarmersList = new ArrayList<>();
+        ArrayList<Farmer> pendingFarmersList = new ArrayList<>();
+        ArrayList<Farmer> approvedFarmersList = new ArrayList<>();
+
+        for (int i = 0; i < farmerDbList.size(); i++) {
+            Farmer farmer = farmerDbList.get(i);
+
+            if(farmer.signupStatus.equalsIgnoreCase(Constants.STR_INCOMPLETE))
+            {
+                incompleteFarmersList.add(farmer);
+            }
+            else if(farmer.signupStatus.equalsIgnoreCase(Constants.STR_PENDING))
+            {
+                pendingFarmersList.add(farmer);
+            }
+            else if(farmer.signupStatus.equalsIgnoreCase(Constants.STR_APPROVED))
+            {
+                approvedFarmersList.add(farmer);
+            }
+        }
+
+        if(incompleteFarmersList.size() > 0)
+        {
+            myFarmers.add(new Farmer("", "", Constants.STR_INCOMPLETE, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", "", true));
+            myFarmers.addAll(incompleteFarmersList);
+        }
+        if(pendingFarmersList.size() > 0)
+        {
+            myFarmers.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", "", true));
+            myFarmers.addAll(pendingFarmersList);
+        }
+        if(approvedFarmersList.size() > 0)
+        {
+            myFarmers.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", "", true));
+            myFarmers.addAll(approvedFarmersList);
+        }
+
+        // Creating our custom adapter
+        adapter = new MySignupsAdapter(getActivity(), myFarmers);
+        // Create the list view and bind the adapter
+        mLvFarmers.setAdapter(adapter);
+
+        loadingFinished();
+    }
+
+    private void getMySignupsFromServer()
+    {
+        if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
+        loadingStarted();
+        String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS, PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId());
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         apiCall.enqueue(mySignupsCallback);
     }
@@ -243,6 +309,11 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     private void parseData(String data) throws JSONException {
 
         myFarmers.clear();
+
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.delete(Farmer.class);
+        realm.commitTransaction();
 
         ArrayList<Farmer> incompleteFarmersList = new ArrayList<>();
         ArrayList<Farmer> pendingFarmersList = new ArrayList<>();
@@ -325,18 +396,26 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                 String status = farmObj.getString("Status__c");
 
+                Farmer farmer = new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false);
+
                 if(status.equalsIgnoreCase(Constants.STR_INCOMPLETE))
                 {
-                    incompleteFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false));
+                    incompleteFarmersList.add(farmer);
                 }
                 else if(status.equalsIgnoreCase(Constants.STR_PENDING))
                 {
-                    pendingFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false));
+                    pendingFarmersList.add(farmer);
                 }
                 else if(status.equalsIgnoreCase(Constants.STR_APPROVED))
                 {
-                    approvedFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false));
+                    approvedFarmersList.add(farmer);
                 }
+
+                // Save to DB
+                realm.beginTransaction();
+                final Farmer farmerDbObj = realm.createObject(Farmer.class);
+                farmerDbObj.setAllValues(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false);
+                realm.commitTransaction();
             }
         }
         else
@@ -414,6 +493,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
+        Realm realm = Realm.getDefaultInstance();
+
         if(arrRecords.length() > 0)
         {
             for (int i = 0; i < arrRecords.length(); i++) {
@@ -460,6 +541,16 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     {
                         farmer.setThumbUrl(farmerPicId);
                         farmer.setFarmerIdPhotoUrl(farmerNatId);
+
+                        Farmer farmerDb = realm.where(Farmer.class).equalTo("farmerId", id).findFirst();
+                        if(farmerDb != null)
+                        {
+                            realm.beginTransaction();
+                            farmerDb.setThumbUrl(farmerPicId);
+                            farmerDb.setFarmerIdPhotoUrl(farmerNatId);
+                            realm.commitTransaction();
+                        }
+
                         break;
                     }
                 }

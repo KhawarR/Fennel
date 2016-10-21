@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
+import com.squareup.picasso.NetworkPolicy;
+
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -156,7 +158,10 @@ public class MySignupsAdapter extends BaseAdapter {
                     MyPicassoInstance.getInstance().invalidate(thumbUrl);
                     Singleton.getInstance().farmerIdtoInvalidate = "";
                 }
-                MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(thumb);
+                if(NetworkHelper.isNetworkAvailable(mContext))
+                    MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(thumb);
+                else
+                    MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(thumb);
             }
             else
             {

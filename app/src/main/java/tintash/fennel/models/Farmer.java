@@ -4,10 +4,12 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
+import io.realm.RealmObject;
+
 /**
  * Created by Khawar on 30/9/2016.
  */
-public class Farmer implements Serializable{
+public class Farmer extends RealmObject implements Serializable{
 
     public String farmerId = null;
     public String farmId = null;
@@ -82,6 +84,33 @@ public class Farmer implements Serializable{
                   String subLocation, String villageName, String treeSpecies, boolean farmerHome,
                   String mobileNumber, String farmerIdPhotoUrl, String thumbUrl, String address,
                   String signupStatus, boolean isHeader) {
+        this.farmerId = farmerId;
+        this.farmId = farmId;
+        this.fullName = fullName;
+        this.firstName = firstName;
+        this.secondName = secondName;
+        this.surname = surname;
+        this.idNumber = idNumber;
+        this.gender = gender;
+        this.isLeader = isLeader;
+        this.location = location;
+        this.subLocation = subLocation;
+        this.villageName = villageName;
+        this.treeSpecies = treeSpecies;
+        this.farmerHome = farmerHome;
+        this.mobileNumber = mobileNumber;
+        this.thumbUrl = thumbUrl;
+        this.farmerIdPhotoUrl = farmerIdPhotoUrl;
+        this.address = address;
+        this.signupStatus = signupStatus;
+        this.isHeader = isHeader;
+    }
+
+    public void setAllValues(String farmerId, String farmId, String fullName, String firstName, String secondName, String surname,
+                       String idNumber, String gender, boolean isLeader, String location,
+                       String subLocation, String villageName, String treeSpecies, boolean farmerHome,
+                       String mobileNumber, String farmerIdPhotoUrl, String thumbUrl, String address,
+                       String signupStatus, boolean isHeader) {
         this.farmerId = farmerId;
         this.farmId = farmId;
         this.fullName = fullName;
