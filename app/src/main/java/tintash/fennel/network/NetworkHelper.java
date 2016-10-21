@@ -21,7 +21,7 @@ public class NetworkHelper {
     public static final String QUERY_ABOUT_ME_ATTACHMENT = "SELECT Id, Name, (SELECT Id, ParentId, Name FROM Attachments) FROM %s WHERE Id = '%s'";
 
     public static final String QUERY_MY_SIGNUPS = "SELECT Id, Farmers__r.Id, Farmers__r.FullName__c, Farmers__r.First_Name__c, Farmers__r.Middle_Name__c, Farmers__r.Last_Name__c, Farmers__r.Name, Farmers__r.Gender__c, Farmers__r.Leader__c, Farmers__r.Mobile_Number__c, Status__c, Is_Farmer_Home__c, Location__r.Name, Sub_Location__r.Name, Tree__r.Name, Village__r.Name FROM Farm__c WHERE Signup_by_Facilitator__c = '%s' OR Signup_by_Field_Manager__c = '%s'  OR Signup_by_Field_Officer__c = '%s'  Order By Status__c";
-    public static final String FARMER_QUERY = "SELECT Id, Name, (SELECT Id, ParentId, Name, Description FROM Attachments) FROM Farmer__c";
+    public static final String QUERY_MY_SIGNUPS_ATTACHMENTS = "SELECT Id, Name, (SELECT Id, ParentId, Name, Description FROM Attachments) FROM Farmer__c";
 
     public static final String GET_LOCATIONS = "SELECT Id, Name FROM Location__c";
     public static final String GET_SUB_LOCATIONS = "SELECT Id, Name, Location__c FROM Sub_Location__c";

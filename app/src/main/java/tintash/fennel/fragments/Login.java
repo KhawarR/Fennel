@@ -31,10 +31,11 @@ import tintash.fennel.application.Fennel;
 import tintash.fennel.datamodels.Auth;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
+import tintash.fennel.network.WebApi;
 import tintash.fennel.utils.Constants;
 import tintash.fennel.utils.PreferenceHelper;
 
-public class Login extends BaseFragment implements Callback<Auth> {
+public class Login extends BaseFragment{
 
     @Bind(R.id.txtLogin)
     TextView txtLogin;
@@ -84,8 +85,7 @@ public class Login extends BaseFragment implements Callback<Auth> {
                 String username = "waajay@westagilelabs.com.waldev";
                 String password = "walshamba123";
                 loadingStarted();
-                Call<Auth> call = Fennel.getAuthWebService().postSFLogin(NetworkHelper.GRANT, NetworkHelper.CLIENT_ID, NetworkHelper.CLIENT_SECRET, username, password, NetworkHelper.REDIRECT_URI);
-                call.enqueue(this);
+                WebApi.salesForceAuth(authCallback, username, password);
             }
         }
         else {
@@ -93,60 +93,44 @@ public class Login extends BaseFragment implements Callback<Auth> {
         }
     }
 
-    @Override
-    public void onResponse(Call<Auth> call, Response<Auth> response) {
+    Callback<Auth> authCallback = new Callback<Auth>() {
+        @Override
+        public void onResponse(Call<Auth> call, Response<Auth> response) {
+            Auth auth = response.body();
+            if (getActivity() != null && isAdded() && !isDetached() && auth != null) {
+                Session.saveAuth(auth);
+                Fennel.restClient.setApiBaseUrl(auth.instance_url);
+                String username = etId.getText().toString().trim();
+                String password = etPassword.getText().toString().trim();
 
-        Auth auth = response.body();
-        if (getActivity() != null && isAdded() && !isDetached() && auth != null) {
-            Session.saveAuth(auth);
-            Fennel.restClient.setApiBaseUrl(auth.instance_url);
-            String username = etId.getText().toString().trim();
-            String password = etPassword.getText().toString().trim();
-
-//            CookieManager.setDefault(new CookieManager());
-//
-//            CookieHandler cookieManager = CookieManager.getDefault();
-//            try {
-//                Map<String,List<String>> map = new HashMap<>();
-//                List<String> l = new ArrayList<>();
-//                l.add(auth.access_token);
-//                map.put("sid",l);
-//                cookieManager.put(new URI("https://c.cs25.content.force.com/"),map);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            } catch (URISyntaxException e) {
-//                e.printStackTrace();
-//            }
-
-            if (username.length() > 0) {
-                String loginQuery = String.format(NetworkHelper.QUERY_LOGIN, username, password);
-                Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, loginQuery);
-                apiCall.enqueue(loginCallback);
+                if (username.length() > 0) {
+                    WebApi.login(loginCallback, username, password);
+                }
+                else
+                {
+                    loadingFinished();
+                }
             }
             else
             {
-                loadingFinished();
-            }
-        }
-        else
-        {
-            Toast.makeText(getActivity(), Constants.TOAST_LOGIN_ERROR, Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity(), Constants.TOAST_LOGIN_ERROR, Toast.LENGTH_LONG).show();
 //            try {
 //                Toast.makeText(getActivity(), "Authentication failed: " + response.errorBody().string(), Toast.LENGTH_LONG).show();
 //            } catch (IOException e) {
 //                e.printStackTrace();
 //            }
-            loadingFinished();
+                loadingFinished();
+            }
         }
-    }
 
-    @Override
-    public void onFailure(Call<Auth> call, Throwable t) {
-        loadingFinished();
-        t.printStackTrace();
+        @Override
+        public void onFailure(Call<Auth> call, Throwable t) {
+            loadingFinished();
+            t.printStackTrace();
 //        Toast.makeText(getActivity(), "Authentication failed: " + t.getMessage(), Toast.LENGTH_LONG).show();
-        Toast.makeText(getActivity(), Constants.TOAST_LOGIN_ERROR, Toast.LENGTH_LONG).show();
-    }
+            Toast.makeText(getActivity(), Constants.TOAST_LOGIN_ERROR, Toast.LENGTH_LONG).show();
+        }
+    };
 
     private Callback<ResponseBody> loginCallback = new Callback<ResponseBody>() {
         @Override
@@ -196,19 +180,13 @@ public class Login extends BaseFragment implements Callback<Auth> {
             PreferenceHelper.getInstance().writeUserId(username);
             PreferenceHelper.getInstance().writePassword(password);
 
-            getAboutMeInfo();
+            WebApi.getAboutMeInfo(aboutMeCallback);
         }
         else
         {
             loadingFinished();
             Toast.makeText(getActivity(), Constants.TOAST_LOGIN_ERROR, Toast.LENGTH_LONG).show();
         }
-    }
-
-    private void getAboutMeInfo() {
-        String query = String.format(NetworkHelper.QUERY_ABOUT_ME, PreferenceHelper.getInstance().readUserId());
-        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
-        apiCall.enqueue(aboutMeCallback);
     }
 
     private Callback<ResponseBody> aboutMeCallback = new Callback<ResponseBody>() {

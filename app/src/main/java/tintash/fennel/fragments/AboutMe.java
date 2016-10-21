@@ -44,6 +44,7 @@ import tintash.fennel.activities.LoginActivity;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
+import tintash.fennel.network.WebApi;
 import tintash.fennel.utils.CircleViewTransformation;
 import tintash.fennel.utils.Constants;
 import tintash.fennel.utils.MyPicassoInstance;
@@ -116,7 +117,7 @@ public class AboutMe extends BaseFragment {
             MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
             MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
         }
-        getAboutMeInfo();
+        WebApi.getAboutMeInfo(aboutMeCallback);
     }
 
     private void populateView()
@@ -126,21 +127,6 @@ public class AboutMe extends BaseFragment {
         tvSurname.setText(PreferenceHelper.getInstance().readAboutLN());
         tvFieldOfficer.setText(PreferenceHelper.getInstance().readAboutFOname());
         tvFieldManager.setText(PreferenceHelper.getInstance().readAboutFMname());
-    }
-
-    private void getAboutMeAttachment() {
-        String queryTable = "Facilitator__c";
-        String userType = PreferenceHelper.getInstance().readLoginUserType();
-        if(userType.equalsIgnoreCase(Constants.STR_FACILITATOR))
-            queryTable = "Facilitator__c";
-        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_OFFICER))
-            queryTable = "Field_Officer__c";
-        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_MANAGER))
-            queryTable = "Field_Manager__c";
-
-        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readLoginUserId());
-        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
-        apiCall.enqueue(aboutMeAttachmentCallback);
     }
 
     private Callback<ResponseBody> aboutMeAttachmentCallback = new Callback<ResponseBody>() {
@@ -351,49 +337,64 @@ public class AboutMe extends BaseFragment {
 
         if (pictureAttachmentId == null || pictureAttachmentId.isEmpty()) {
 
-            Call<ResponseBody> attachmentApi = Fennel.getWebService().addAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, entityBody, imageBody);
-            attachmentApi.enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                        Log.i("Fennel", "facilitator profile picture uploaded successfully!");
-                        String responseStr = null;
+            WebApi.addAttachment(addAttachmentCallback, entityBody, imageBody);
 
-                        try {
-                            responseStr = response.body().string();
-                            pictureAttachmentId = getAttachmentIdFromUploadSuccess(responseStr);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        Log.i("Fennel", "facilitator profile picture upload failed!");
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.i("Fennel", "facilitator profile picture upload failed!");
-                }
-            });
         } else {
-            Call<ResponseBody> attachmentApi = Fennel.getWebService().editAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, pictureAttachmentId, entityBody, imageBody);
-            attachmentApi.enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                        Log.i("Fennel", "facilitator profile picture edited successfully!");
-                    } else {
-                        Log.i("Fennel", "facilitator profile picture edit failed!");
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.i("Fennel", "facilitator profile picture edit failed!");
-                }
-            });
+            WebApi.editAttachment(editAttachmentCallback, pictureAttachmentId, entityBody, imageBody);
         }
     }
+
+    Callback<ResponseBody> addAttachmentCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                Log.i("Fennel", "facilitator profile picture uploaded successfully!");
+                String responseStr = null;
+
+                try {
+                    responseStr = response.body().string();
+                    pictureAttachmentId = getAttachmentIdFromUploadSuccess(responseStr);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else if(response.code() == 401)
+            {
+                PreferenceHelper.getInstance().clearSession();
+                startActivity(new Intent(getActivity(), LoginActivity.class));
+                getActivity().finish();
+            } else {
+                Log.i("Fennel", "facilitator profile picture upload failed!");
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            Log.i("Fennel", "facilitator profile picture upload failed!");
+        }
+    };
+
+    Callback<ResponseBody> editAttachmentCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                Log.i("Fennel", "facilitator profile picture edited successfully!");
+            }
+            else if(response.code() == 401)
+            {
+                PreferenceHelper.getInstance().clearSession();
+                startActivity(new Intent(getActivity(), LoginActivity.class));
+                getActivity().finish();
+            } else {
+                Log.i("Fennel", "facilitator profile picture edit failed!");
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            Log.i("Fennel", "facilitator profile picture edit failed!");
+        }
+    };
 
     private String getAttachmentIdFromUploadSuccess(String data) {
         JSONObject responseJson = null;
@@ -405,12 +406,6 @@ public class AboutMe extends BaseFragment {
             e.printStackTrace();
         }
         return attachmentId;
-    }
-
-    private void getAboutMeInfo() {
-        String query = String.format(NetworkHelper.QUERY_ABOUT_ME, PreferenceHelper.getInstance().readUserId());
-        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
-        apiCall.enqueue(aboutMeCallback);
     }
 
     private Callback<ResponseBody> aboutMeCallback = new Callback<ResponseBody>() {
@@ -529,7 +524,7 @@ public class AboutMe extends BaseFragment {
             PreferenceHelper.getInstance().writeLoginUserType(type);
             PreferenceHelper.getInstance().writeLoginUserId(idFac);
 
-            getAboutMeAttachment();
+            WebApi.getAboutMeAttachment(aboutMeAttachmentCallback);
         }
     }
 }

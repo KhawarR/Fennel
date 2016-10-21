@@ -24,6 +24,8 @@ public class PreferenceHelper {
     private static final String KEY_ABOUT_ME_FM_NAME = "_about_fm_name";
     private static final String KEY_ABOUT_ME_ATT_ID = "_about_att_id";
 
+    private static final String KEY_IS_SYNC_REQUIRED = "_is_sync_req";
+
 
     private static PreferenceHelper sInstance;
     private final SharedPreferences mPref;
@@ -187,6 +189,17 @@ public class PreferenceHelper {
     public boolean readFirstRun() {
         boolean firstRun = mPref.getBoolean(KEY_FIRST_RUN, true);
         return firstRun;
+    }
+
+    public void writeIsSyncRequired(boolean value) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putBoolean(KEY_IS_SYNC_REQUIRED, value);
+        editor.commit();
+    }
+
+    public boolean readIsSyncRequired() {
+        boolean value = mPref.getBoolean(KEY_IS_SYNC_REQUIRED, false);
+        return value;
     }
 
     public void clearSession() {

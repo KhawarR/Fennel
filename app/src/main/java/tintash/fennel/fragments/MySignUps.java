@@ -2,12 +2,12 @@ package tintash.fennel.fragments;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.NetworkRequest;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -34,7 +34,6 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
-import io.realm.RealmList;
 import io.realm.RealmResults;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -43,7 +42,6 @@ import retrofit2.Response;
 import tintash.fennel.R;
 import tintash.fennel.activities.LoginActivity;
 import tintash.fennel.adapters.MySignupsAdapter;
-import tintash.fennel.application.Fennel;
 import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.models.Farmer;
 import tintash.fennel.models.Location;
@@ -51,11 +49,12 @@ import tintash.fennel.models.SubLocation;
 import tintash.fennel.models.Tree;
 import tintash.fennel.models.Village;
 import tintash.fennel.network.NetworkHelper;
-import tintash.fennel.network.Session;
+import tintash.fennel.network.WebApi;
 import tintash.fennel.utils.CircleViewTransformation;
 import tintash.fennel.utils.Constants;
 import tintash.fennel.utils.MyPicassoInstance;
 import tintash.fennel.utils.PreferenceHelper;
+import tintash.fennel.utils.Singleton;
 import tintash.fennel.views.TitleBarLayout;
 
 /**
@@ -180,8 +179,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             }
         });
 
-        getLocationsData();
-        getAboutMeAttachment();
+        getDropDownsData();
+        WebApi.getAboutMeAttachment(aboutMeAttachmentCallback);
     }
 
     private SwipeRefreshLayout.OnRefreshListener onRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
@@ -262,9 +261,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     {
         if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         loadingStarted();
-        String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS, PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId());
-        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
-        apiCall.enqueue(mySignupsCallback);
+        WebApi.getMySignUps(mySignupsCallback);
     }
 
     private Callback<ResponseBody> mySignupsCallback = new Callback<ResponseBody>() {
@@ -279,7 +276,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     try {
                         responseStr = response.body().string();
                         parseData(responseStr);
-                        getMyFarmerAttachments();
+                        WebApi.getMyFarmerAttachments(myFarmersAttachments);
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (JSONException e) {
@@ -445,12 +442,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         mLvFarmers.setAdapter(adapter);
     }
 
-    private void getMyFarmerAttachments(){
-        String query = NetworkHelper.FARMER_QUERY;
-        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
-        apiCall.enqueue(myFarmersAttachments);
-    }
-
     private Callback<ResponseBody> myFarmersAttachments = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -522,21 +513,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                             farmerNatId = objAttachment.getString("Id");
                         }
                     }
-//                    if(attRecords.length() > 0)
-//                    {
-//                        JSONObject objFarmerPhoto = attRecords.getJSONObject(0);
-//                        farmerPicId = objFarmerPhoto.getString("Id");
-//                    }
-//
-//                    if(attRecords.length() > 1)
-//                    {
-//                        JSONObject objFarmerPhoto = attRecords.getJSONObject(1);
-//                        farmerNatId = objFarmerPhoto.getString("Id");
-//                    }
                 }
 
                 for (int j = 0; j < myFarmers.size(); j++) {
-                    Farmer farmer = myFarmers.get(j);
+                    final Farmer farmer = myFarmers.get(j);
                     if(farmer.getFarmerId().equalsIgnoreCase(id))
                     {
                         farmer.setThumbUrl(farmerPicId);
@@ -551,6 +531,32 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                             realm.commitTransaction();
                         }
 
+                        String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getThumbUrl());
+                        MyPicassoInstance.getInstance().load(thumbUrl).fetch(new com.squareup.picasso.Callback() {
+                            @Override
+                            public void onSuccess() {
+                                Log.i("Fetch success", "Farmer Pic: " + farmer.getFarmerIdPhotoUrl());
+                            }
+
+                            @Override
+                            public void onError() {
+                                Log.i("Fetch failed", "Farmer Pic: " + farmer.getFarmerIdPhotoUrl());
+                            }
+                        });
+
+                        String natIdUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getFarmerIdPhotoUrl());
+                        MyPicassoInstance.getInstance().load(natIdUrl).fetch(new com.squareup.picasso.Callback() {
+                            @Override
+                            public void onSuccess() {
+                                Log.i("Fetch success", "NAT ID: " + farmer.getFarmerIdPhotoUrl());
+                            }
+
+                            @Override
+                            public void onError() {
+                                Log.i("Fetch failed", "NAT ID: " + farmer.getFarmerIdPhotoUrl());
+                            }
+                        });
+
                         break;
                     }
                 }
@@ -558,21 +564,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
             adapter.notifyDataSetChanged();
         }
-    }
-
-    private void getAboutMeAttachment() {
-        String queryTable = "Facilitator__c";
-        String userType = PreferenceHelper.getInstance().readLoginUserType();
-        if(userType.equalsIgnoreCase(Constants.STR_FACILITATOR))
-            queryTable = "Facilitator__c";
-        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_OFFICER))
-            queryTable = "Field_Officer__c";
-        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_MANAGER))
-            queryTable = "Field_Manager__c";
-
-        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readLoginUserId());
-        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
-        apiCall.enqueue(aboutMeAttachmentCallback);
     }
 
     private Callback<ResponseBody> aboutMeAttachmentCallback = new Callback<ResponseBody>() {
@@ -627,27 +618,11 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         return "";
     }
 
-    private void getLocationsData() {
-
-//        mProgressDialog.setMessage("Initializing!");
-//        loadingStarted();
-
-        String locationsQuery = NetworkHelper.GET_LOCATIONS;
-        Call<ResponseBody> locationsApi = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, locationsQuery);
-        locationsApi.enqueue(getLocationsCallback);
-
-        String subLocationsQuery = NetworkHelper.GET_SUB_LOCATIONS;
-        Call<ResponseBody> subLocationsApi = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, subLocationsQuery);
-        subLocationsApi.enqueue(getSubLocationsCallback);
-
-        String villagesQuery = NetworkHelper.GET_VILLAGES;
-        Call<ResponseBody> villagesApi = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, villagesQuery);
-        villagesApi.enqueue(getVillagesCallback);
-
-        String treesQuery = NetworkHelper.GET_TREES;
-        Call<ResponseBody> treesApi = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, treesQuery);
-        treesApi.enqueue(getTreesCallback);
-
+    private void getDropDownsData() {
+        WebApi.getLocations(getLocationsCallback);
+        WebApi.getSubLocations(getSubLocationsCallback);
+        WebApi.getVillages(getVillagesCallback);
+        WebApi.getTrees(getTreesCallback);
     }
 
     private Callback<ResponseBody> getLocationsCallback = new Callback<ResponseBody>() {
