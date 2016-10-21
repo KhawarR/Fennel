@@ -78,7 +78,7 @@ public class Login extends BaseFragment{
 
     @OnClick(R.id.txtLogin)
     void onClickLogin(View view) {
-        if(NetworkHelper.isNetworkAvailable(getActivity().getApplicationContext())) {
+        if(NetworkHelper.isNetAvailableAndCommAllowed(getActivity().getApplicationContext())) {
             if (etId.getText().toString().isEmpty() || etPassword.getText().toString().isEmpty()) {
                 Toast.makeText(getActivity(), "Please put username & password", Toast.LENGTH_SHORT).show();
             } else {

@@ -42,9 +42,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import tintash.fennel.R;
 import tintash.fennel.activities.LoginActivity;
-import tintash.fennel.application.Fennel;
 import tintash.fennel.network.NetworkHelper;
-import tintash.fennel.network.Session;
 import tintash.fennel.network.WebApi;
 import tintash.fennel.utils.CircleViewTransformation;
 import tintash.fennel.utils.Constants;
@@ -115,7 +113,7 @@ public class AboutMe extends BaseFragment {
         if(!PreferenceHelper.getInstance().readAboutAttId().isEmpty())
         {
             String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), PreferenceHelper.getInstance().readAboutAttId());
-            if(NetworkHelper.isNetworkAvailable(getActivity()))
+            if(NetworkHelper.isNetAvailableAndCommAllowed(getActivity()))
             {
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
@@ -154,7 +152,7 @@ public class AboutMe extends BaseFragment {
                         if(!attId.isEmpty() && !attId.equalsIgnoreCase(PreferenceHelper.getInstance().readAboutAttId()))
                         {
                             String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
-                            if(NetworkHelper.isNetworkAvailable(getActivity()))
+                            if(NetworkHelper.isNetAvailableAndCommAllowed(getActivity()))
                             {
                                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
                                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);

@@ -56,7 +56,6 @@ import tintash.fennel.utils.CircleViewTransformation;
 import tintash.fennel.utils.Constants;
 import tintash.fennel.utils.MyPicassoInstance;
 import tintash.fennel.utils.PreferenceHelper;
-import tintash.fennel.utils.Singleton;
 import tintash.fennel.views.TitleBarLayout;
 
 /**
@@ -104,7 +103,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         if(!aboutMeAttId.isEmpty())
         {
             String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), aboutMeAttId);
-            if(NetworkHelper.isNetworkAvailable(getActivity()))
+            if(NetworkHelper.isNetAvailableAndCommAllowed(getActivity()))
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
             else
                 MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
@@ -198,7 +197,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     //region Netwrok calls, callbacks & parsers
     private void getMySignups(){
 
-        if(NetworkHelper.isNetworkAvailable(getActivity()))
+        if(NetworkHelper.isNetAvailableAndCommAllowed(getActivity()))
         {
             getMySignupsFromServer();
         }
@@ -584,7 +583,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     if(!attId.isEmpty())
                     {
                         String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
-                        if(NetworkHelper.isNetworkAvailable(getActivity()))
+                        if(NetworkHelper.isNetAvailableAndCommAllowed(getActivity()))
                             MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
                         else
                             MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);

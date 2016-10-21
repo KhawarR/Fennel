@@ -4,6 +4,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import tintash.fennel.utils.PreferenceHelper;
+
 /**
  * Created by Faizan on 9/30/2016.
  */
@@ -36,7 +38,7 @@ public class NetworkHelper {
 //        return instance;
 //    }
 
-    public static boolean isNetworkAvailable(Context context){
+    public static boolean isNetAvailable(Context context){
         ConnectivityManager cm =
                 (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -45,5 +47,21 @@ public class NetworkHelper {
                 activeNetwork.isConnectedOrConnecting();
 
         return isConnected;
+    }
+
+    public static boolean isNetAvailableAndCommAllowed(Context context){
+        ConnectivityManager cm =
+                (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        return isConnected && isCommunicationAllowed();
+    }
+
+    public static boolean isCommunicationAllowed()
+    {
+        return !PreferenceHelper.getInstance().readIsSyncRequired();
     }
 }
