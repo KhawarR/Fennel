@@ -10,6 +10,7 @@ import io.fabric.sdk.android.Fabric;
 import io.realm.Realm;
 import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.network.RestClient;
+import tintash.fennel.network.WebApi;
 import tintash.fennel.network.WebService;
 import tintash.fennel.network.WebServiceAuth;
 import tintash.fennel.utils.MyPicassoInstance;
@@ -19,6 +20,13 @@ import tintash.fennel.utils.PreferenceHelper;
  * Created by Faizan on 9/27/2016.
  */
 public class Fennel extends Application {
+
+    private static Fennel instance;
+    public static synchronized Fennel getInstance(){
+        return instance;
+    }
+
+
     public static RestClient restClient;
     private Tracker mTracker;
 
@@ -34,7 +42,6 @@ public class Fennel extends Application {
         return restClient.getAuthService();
     }
 
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -43,24 +50,15 @@ public class Fennel extends Application {
 //        initImageLoader();
 
         Realm.init(getApplicationContext());
-
+        WebApi.initializeInstance(getApplicationContext());
         MyPicassoInstance.initializeInstance(getApplicationContext());
         PreferenceHelper.initializeInstance(getApplicationContext());
         DatabaseHelper.initializeInstance(this);
     }
 
-//    public void initImageLoader() {
-//
-//        DisplayImageOptions options = new DisplayImageOptions.Builder()
-//                .showImageOnLoading(R.drawable.dummy_profile)
-//                .showImageForEmptyUri(R.drawable.dummy_profile)
-//                .showImageOnFail(R.drawable.dummy_profile)
-//                .cacheInMemory(true)
-//                .cacheOnDisk(true)
-//                .bitmapConfig(Bitmap.Config.RGB_565).build();
-//        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext()).imageDownloader(new CustomImageDownloader()).defaultDisplayImageOptions(options).build();
-//        ImageLoader.getInstance().init(config);
-//    }
+    public static void initWebApi(){
+        WebApi.initializeInstance(getInstance().getApplicationContext());
+    }
 
     synchronized public Tracker getDefaultTracker() {
         if (mTracker == null) {
@@ -74,7 +72,5 @@ public class Fennel extends Application {
         }
         return mTracker;
     }
-
-
 }
 

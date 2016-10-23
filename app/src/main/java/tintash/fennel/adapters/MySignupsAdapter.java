@@ -158,7 +158,7 @@ public class MySignupsAdapter extends BaseAdapter {
                     MyPicassoInstance.getInstance().invalidate(thumbUrl);
                     Singleton.getInstance().farmerIdtoInvalidate = "";
                 }
-                if(NetworkHelper.isNetAvailableAndCommAllowed(mContext))
+                if(NetworkHelper.isNetAvailable(mContext))
                     MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(thumb);
                 else
                     MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(thumb);

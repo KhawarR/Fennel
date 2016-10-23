@@ -55,7 +55,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import tintash.fennel.R;
-import tintash.fennel.application.Fennel;
 import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.models.Farm;
 import tintash.fennel.models.Farmer;
@@ -65,7 +64,6 @@ import tintash.fennel.models.SubLocation;
 import tintash.fennel.models.Tree;
 import tintash.fennel.models.Village;
 import tintash.fennel.network.NetworkHelper;
-import tintash.fennel.network.Session;
 import tintash.fennel.network.WebApi;
 import tintash.fennel.utils.CircleViewTransformation;
 import tintash.fennel.utils.Constants;
@@ -243,7 +241,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         if(!aboutMeAttId.isEmpty())
         {
             String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), aboutMeAttId);
-            if(NetworkHelper.isNetAvailableAndCommAllowed(getActivity()))
+            if(NetworkHelper.isNetAvailable(getActivity()))
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
             else
                 MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
@@ -413,7 +411,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             if (farmer.getThumbUrl() != null && !farmer.getThumbUrl().isEmpty()) {
                 String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getThumbUrl());
                 imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                if(NetworkHelper.isNetAvailableAndCommAllowed(getActivity()))
+                if(NetworkHelper.isNetAvailable(getActivity()))
                     MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgFarmerPhoto);
                 else
                     MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgFarmerPhoto);
@@ -423,7 +421,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             {
                 String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getFarmerIdPhotoUrl());
                 imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                if(NetworkHelper.isNetAvailableAndCommAllowed(getActivity()))
+                if(NetworkHelper.isNetAvailable(getActivity()))
                     MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgNationalID);
                 else
                     MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgNationalID);

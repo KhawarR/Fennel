@@ -78,18 +78,18 @@ public class Login extends BaseFragment{
 
     @OnClick(R.id.txtLogin)
     void onClickLogin(View view) {
-        if(NetworkHelper.isNetAvailableAndCommAllowed(getActivity().getApplicationContext())) {
-            if (etId.getText().toString().isEmpty() || etPassword.getText().toString().isEmpty()) {
-                Toast.makeText(getActivity(), "Please put username & password", Toast.LENGTH_SHORT).show();
-            } else {
-                String username = "waajay@westagilelabs.com.waldev";
-                String password = "walshamba123";
-                loadingStarted();
-                WebApi.salesForceAuth(authCallback, username, password);
+        if (etId.getText().toString().isEmpty() || etPassword.getText().toString().isEmpty()) {
+            Toast.makeText(getActivity(), "Please put username & password", Toast.LENGTH_SHORT).show();
+        } else {
+            String username = "waajay@westagilelabs.com.waldev";
+            String password = "walshamba123";
+            loadingStarted();
+            boolean isCallProcessed = WebApi.salesForceAuth(authCallback, username, password);
+            if(!isCallProcessed)
+            {
+                loadingFinished();
+                Toast.makeText(getActivity(), Constants.TOAST_NO_INTERNET, Toast.LENGTH_LONG).show();
             }
-        }
-        else {
-            Toast.makeText(getActivity(), Constants.TOAST_NO_INTERNET, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -104,7 +104,12 @@ public class Login extends BaseFragment{
                 String password = etPassword.getText().toString().trim();
 
                 if (username.length() > 0) {
-                    WebApi.login(loginCallback, username, password);
+                    boolean isCallProcessed = WebApi.login(loginCallback, username, password);
+                    if(!isCallProcessed)
+                    {
+                        loadingFinished();
+                        Toast.makeText(getActivity(), Constants.TOAST_NO_INTERNET, Toast.LENGTH_LONG).show();
+                    }
                 }
                 else
                 {

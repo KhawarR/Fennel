@@ -49,17 +49,6 @@ public class NetworkHelper {
         return isConnected;
     }
 
-    public static boolean isNetAvailableAndCommAllowed(Context context){
-        ConnectivityManager cm =
-                (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
-
-        return isConnected && isCommunicationAllowed();
-    }
-
     public static boolean isCommunicationAllowed()
     {
         return !PreferenceHelper.getInstance().readIsSyncRequired();

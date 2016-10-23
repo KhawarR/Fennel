@@ -23,7 +23,7 @@ public class Constants {
     public static final String STR_FACILITATOR = "fac";
     public static final String STR_FIELD_OFFICER = "fo";
     public static final String STR_FIELD_MANAGER = "fm";
-    public static final String TOAST_NO_INTERNET = "Network not available, please check your connection";
+    public static final String TOAST_NO_INTERNET = "Network problem, please check your connection & try again";
     public static final String TOAST_LOGIN_ERROR = "Login Error: Check network connection or verify login credentials";
 
     public static final int TIMEOUT = 30;

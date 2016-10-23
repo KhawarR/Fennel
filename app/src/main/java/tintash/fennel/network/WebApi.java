@@ -1,5 +1,7 @@
 package tintash.fennel.network;
 
+import android.content.Context;
+
 import java.util.HashMap;
 
 import okhttp3.RequestBody;
@@ -17,37 +19,56 @@ import tintash.fennel.utils.PreferenceHelper;
  */
 public class WebApi {
 
-    public static void salesForceAuth(Callback<Auth> authCallback, String username, String password) {
-        Call<Auth> call = Fennel.getAuthWebService().postSFLogin(NetworkHelper.GRANT, NetworkHelper.CLIENT_ID, NetworkHelper.CLIENT_SECRET, username, password, NetworkHelper.REDIRECT_URI);
-        call.enqueue(authCallback);
+    private static Context mContext = null;
+    private static WebApi sInstance = null;
+    private WebApi(Context context){
+        mContext = context;
     }
 
-    public static void login(Callback<ResponseBody> loginCallback, String username, String password) {
+    public static synchronized void initializeInstance(Context context) {
+        if (sInstance == null) {
+            sInstance = new WebApi(context);
+        }
+    }
+
+    public static synchronized WebApi getInstance() {
+        if (sInstance == null) {
+            throw new IllegalStateException(WebApi.class.getSimpleName() +
+                    " is not initialized, call initializeInstance(..) method first.");
+        }
+        return sInstance;
+    }
+
+    public static boolean salesForceAuth(Callback<Auth> callback, String username, String password) {
+        Call<Auth> apiCall = Fennel.getAuthWebService().postSFLogin(NetworkHelper.GRANT, NetworkHelper.CLIENT_ID, NetworkHelper.CLIENT_SECRET, username, password, NetworkHelper.REDIRECT_URI);
+        return processCall(apiCall, callback);
+    }
+
+    public static boolean login(Callback<ResponseBody> callback, String username, String password) {
         String loginQuery = String.format(NetworkHelper.QUERY_LOGIN, username, password);
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, loginQuery);
-        apiCall.enqueue(loginCallback);
+        return processCall(apiCall, callback);
     }
 
-    public static void getAboutMeInfo(Callback<ResponseBody> aboutMeCallback) {
+    public static boolean getAboutMeInfo(Callback<ResponseBody> callback) {
         String query = String.format(NetworkHelper.QUERY_ABOUT_ME, PreferenceHelper.getInstance().readUserId());
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
-        apiCall.enqueue(aboutMeCallback);
+        return processCall(apiCall, callback);
     }
 
-    public static void getMySignUps(Callback<ResponseBody> mySignUpsCallback)
-    {
+    public static boolean getMySignUps(Callback<ResponseBody> callback){
         String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS, PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId());
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
-        apiCall.enqueue(mySignUpsCallback);
+        return processCall(apiCall, callback);
     }
 
-    public static void getMyFarmerAttachments(Callback<ResponseBody> myFarmersAttachments){
+    public static boolean getMyFarmerAttachments(Callback<ResponseBody> callback){
         String query = NetworkHelper.QUERY_MY_SIGNUPS_ATTACHMENTS;
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
-        apiCall.enqueue(myFarmersAttachments);
+        return processCall(apiCall, callback);
     }
 
-    public static void getAboutMeAttachment(Callback<ResponseBody> aboutMeAttachmentCallback){
+    public static boolean getAboutMeAttachment(Callback<ResponseBody> callback){
         String queryTable = "Facilitator__c";
         String userType = PreferenceHelper.getInstance().readLoginUserType();
         if(userType.equalsIgnoreCase(Constants.STR_FACILITATOR))
@@ -59,61 +80,75 @@ public class WebApi {
 
         String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readLoginUserId());
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
-        apiCall.enqueue(aboutMeAttachmentCallback);
+        return processCall(apiCall, callback);
     }
 
-    public static void getLocations(Callback<ResponseBody> getLocationsCallback){
+    public static boolean getLocations(Callback<ResponseBody> callback){
         String locationsQuery = NetworkHelper.GET_LOCATIONS;
-        Call<ResponseBody> locationsApi = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, locationsQuery);
-        locationsApi.enqueue(getLocationsCallback);
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, locationsQuery);
+        return processCall(apiCall, callback);
     }
 
-    public static void getSubLocations(Callback<ResponseBody> getSubLocationsCallback){
+    public static boolean getSubLocations(Callback<ResponseBody> callback){
         String subLocationsQuery = NetworkHelper.GET_SUB_LOCATIONS;
-        Call<ResponseBody> subLocationsApi = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, subLocationsQuery);
-        subLocationsApi.enqueue(getSubLocationsCallback);
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, subLocationsQuery);
+        return processCall(apiCall, callback);
     }
 
-    public static void getVillages(Callback<ResponseBody> getVillagesCallback){
+    public static boolean getVillages(Callback<ResponseBody> callback){
         String villagesQuery = NetworkHelper.GET_VILLAGES;
-        Call<ResponseBody> villagesApi = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, villagesQuery);
-        villagesApi.enqueue(getVillagesCallback);
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, villagesQuery);
+        return processCall(apiCall, callback);
     }
 
-    public static void getTrees(Callback<ResponseBody> getTreesCallback){
+    public static boolean getTrees(Callback<ResponseBody> callback){
         String treesQuery = NetworkHelper.GET_TREES;
-        Call<ResponseBody> treesApi = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, treesQuery);
-        treesApi.enqueue(getTreesCallback);
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, treesQuery);
+        return processCall(apiCall, callback);
     }
 
-    public static void addAttachment(Callback<ResponseBody> addAttachmentCallback, RequestBody entityBody, RequestBody imageBody){
-        Call<ResponseBody> attachmentApi = Fennel.getWebService().addAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, entityBody, imageBody);
-        attachmentApi.enqueue(addAttachmentCallback);
+    public static boolean addAttachment(Callback<ResponseBody> callback, RequestBody entityBody, RequestBody imageBody){
+        Call<ResponseBody> apiCall = Fennel.getWebService().addAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, entityBody, imageBody);
+        return processCall(apiCall, callback);
     }
 
-    public static void editAttachment(Callback<ResponseBody> editAttachmentCallback, String attachmentId, RequestBody entityBody, RequestBody imageBody){
-        Call<ResponseBody> attachmentApi = Fennel.getWebService().editAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, attachmentId, entityBody, imageBody);
-        attachmentApi.enqueue(editAttachmentCallback);
+    public static boolean editAttachment(Callback<ResponseBody> callback, String attachmentId, RequestBody entityBody, RequestBody imageBody){
+        Call<ResponseBody> apiCall = Fennel.getWebService().editAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, attachmentId, entityBody, imageBody);
+        return processCall(apiCall, callback);
     }
 
-    public static void createFarmer(Callback<ResponseModel> createFarmerCallback, HashMap<String, Object> farmerMap) {
+    public static boolean createFarmer(Callback<ResponseModel> callback, HashMap<String, Object> farmerMap) {
         Call<ResponseModel> apiCall = Fennel.getWebService().addFarmer(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmerMap);
-        apiCall.enqueue(createFarmerCallback);
+        return processCall(apiCall, callback);
     }
 
-    public static void editFarmer(Callback<ResponseBody> editFarmerCallback, String farmerId, HashMap<String, Object> farmerMap){
+    public static boolean editFarmer(Callback<ResponseBody> callback, String farmerId, HashMap<String, Object> farmerMap){
         Call<ResponseBody> apiCall = Fennel.getWebService().editFarmer(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmerId, farmerMap);
-        apiCall.enqueue(editFarmerCallback);
+        return processCall(apiCall, callback);
     }
 
-    public static void createFarm(Callback<ResponseModel> createFarmCallback, HashMap<String, Object> farmMap){
+    public static boolean createFarm(Callback<ResponseModel> callback, HashMap<String, Object> farmMap){
         Call<ResponseModel> apiCall = Fennel.getWebService().addFarm(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmMap);
-        apiCall.enqueue(createFarmCallback);
+        return processCall(apiCall, callback);
     }
 
-    public static void editFarm(Callback<ResponseBody> editFarmCallback, String farmId, HashMap<String, Object> farmMap){
+    public static boolean editFarm(Callback<ResponseBody> callback, String farmId, HashMap<String, Object> farmMap){
         Call<ResponseBody> apiCall = Fennel.getWebService().editFarm(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmId, farmMap);
-        apiCall.enqueue(editFarmCallback);
+        return processCall(apiCall, callback);
     }
 
+    private static <T> boolean processCall(Call<T> call, Callback<T> callback){
+        try {
+            if(mContext == null)
+                Fennel.initWebApi();
+            if(NetworkHelper.isNetAvailable(mContext)){
+                call.enqueue(callback);
+                return true;
+            }
+        }
+        catch (NullPointerException e){
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

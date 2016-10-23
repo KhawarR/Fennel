@@ -113,7 +113,7 @@ public class AboutMe extends BaseFragment {
         if(!PreferenceHelper.getInstance().readAboutAttId().isEmpty())
         {
             String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), PreferenceHelper.getInstance().readAboutAttId());
-            if(NetworkHelper.isNetAvailableAndCommAllowed(getActivity()))
+            if(NetworkHelper.isNetAvailable(getActivity()))
             {
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
@@ -152,7 +152,7 @@ public class AboutMe extends BaseFragment {
                         if(!attId.isEmpty() && !attId.equalsIgnoreCase(PreferenceHelper.getInstance().readAboutAttId()))
                         {
                             String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
-                            if(NetworkHelper.isNetAvailableAndCommAllowed(getActivity()))
+                            if(NetworkHelper.isNetAvailable(getActivity()))
                             {
                                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
                                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
