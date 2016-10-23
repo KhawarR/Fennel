@@ -1,11 +1,14 @@
 package tintash.fennel.network;
 
+import java.util.HashMap;
+
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.datamodels.Auth;
+import tintash.fennel.models.ResponseModel;
 import tintash.fennel.utils.Constants;
 import tintash.fennel.utils.PreferenceHelper;
 
@@ -91,6 +94,26 @@ public class WebApi {
     public static void editAttachment(Callback<ResponseBody> editAttachmentCallback, String attachmentId, RequestBody entityBody, RequestBody imageBody){
         Call<ResponseBody> attachmentApi = Fennel.getWebService().editAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, attachmentId, entityBody, imageBody);
         attachmentApi.enqueue(editAttachmentCallback);
+    }
+
+    public static void createFarmer(Callback<ResponseModel> createFarmerCallback, HashMap<String, Object> farmerMap) {
+        Call<ResponseModel> apiCall = Fennel.getWebService().addFarmer(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmerMap);
+        apiCall.enqueue(createFarmerCallback);
+    }
+
+    public static void editFarmer(Callback<ResponseBody> editFarmerCallback, String farmerId, HashMap<String, Object> farmerMap){
+        Call<ResponseBody> apiCall = Fennel.getWebService().editFarmer(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmerId, farmerMap);
+        apiCall.enqueue(editFarmerCallback);
+    }
+
+    public static void createFarm(Callback<ResponseModel> createFarmCallback, HashMap<String, Object> farmMap){
+        Call<ResponseModel> apiCall = Fennel.getWebService().addFarm(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmMap);
+        apiCall.enqueue(createFarmCallback);
+    }
+
+    public static void editFarm(Callback<ResponseBody> editFarmCallback, String farmId, HashMap<String, Object> farmMap){
+        Call<ResponseBody> apiCall = Fennel.getWebService().editFarm(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmId, farmMap);
+        apiCall.enqueue(editFarmCallback);
     }
 
 }

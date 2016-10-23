@@ -30,8 +30,6 @@ import com.kbeanie.multipicker.api.ImagePicker;
 import com.kbeanie.multipicker.api.Picker;
 import com.kbeanie.multipicker.api.callbacks.ImagePickerCallback;
 import com.kbeanie.multipicker.api.entity.ChosenImage;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Transformation;
 
@@ -68,6 +66,7 @@ import tintash.fennel.models.Tree;
 import tintash.fennel.models.Village;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
+import tintash.fennel.network.WebApi;
 import tintash.fennel.utils.CircleViewTransformation;
 import tintash.fennel.utils.Constants;
 import tintash.fennel.utils.MyPicassoInstance;
@@ -179,8 +178,6 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private Farmer farmer;
     boolean isEdit = false;
 
-    private DisplayImageOptions options;
-
     private CameraImagePicker cameraImagePicker;
     private ImagePicker imagePicker;
     private String location;
@@ -225,11 +222,6 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_enroll, null);
         ButterKnife.bind(this, view);
-
-        float density = getActivity().getResources().getDisplayMetrics().density;
-        float px = 10 * density;
-        options = new DisplayImageOptions.Builder()
-                .displayer(new RoundedBitmapDisplayer((int) px)).build(); // default
 
         imagePicker = new ImagePicker(EnrollFragment.this);
         cameraImagePicker = new CameraImagePicker(EnrollFragment.this);
@@ -621,127 +613,126 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         ((BaseContainerFragment) (getParentFragment())).popFragment();
     }
 
-    private void addFarmerToDB(Farmer newFarmer, String id, boolean synced) {
+//    private void addFarmerToDB(Farmer newFarmer, String id, boolean synced) {
+//
+//        DatabaseHelper.getInstance().insertFarmer(newFarmer, id, synced);
+//    }
 
-        DatabaseHelper.getInstance().insertFarmer(newFarmer, id, synced);
-    }
+//    private void updateFarmer(Farmer newFarmer, boolean synced) {
+//        DatabaseHelper.getInstance().updateFarmer(newFarmer, synced);
+//    }
 
-    private void updateFarmer(Farmer newFarmer, boolean synced) {
-        DatabaseHelper.getInstance().updateFarmer(newFarmer, synced);
-    }
+//    private void addFarmToDB(Farm newFarm, String id, boolean synced) {
+//        DatabaseHelper.getInstance().insertFarm(newFarm, id, synced);
+//    }
 
-    private void addFarmToDB(Farm newFarm, String id, boolean synced) {
-        DatabaseHelper.getInstance().insertFarm(newFarm, id, synced);
-    }
+//    private void updateFarm(Farm newFarm, boolean synced) {
+//        DatabaseHelper.getInstance().updateFarm(newFarm, synced);
+//    }
 
-    private void updateFarm(Farm newFarm, boolean synced) {
-        DatabaseHelper.getInstance().updateFarm(newFarm, synced);
-    }
-
-    private void addFarmWithFarmerId(final Farm farm, String id) {
-
+    private void addFarmWithFarmerId(String id) {
         HashMap<String, Object> farmMap = getFarmMap();
         farmMap.put("Farmers__c", id);
-
-        Call<ResponseModel> apiCall = Fennel.getWebService().addFarm(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmMap);
-        apiCall.enqueue(new Callback<ResponseModel>() {
-            @Override
-            public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
-                loadingFinished();
-                if (response.body() != null && response.body().success == true) {
-                    Log.i("LP", "Farm Added To Server");
-                    Toast.makeText(getContext(), "Farmer Enrolled Successfully", Toast.LENGTH_SHORT).show();
-
-                    addFarmToDB(farm, response.body().id, true);
-                    popToSignupsFragment();
-                } else {
-//                    addFarmToDB(farm, null, false);
-//                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
-                    String message = "";
-                    try {
-                        String error = response.errorBody().string();
-                        JSONArray arr = new JSONArray(error);
-                        JSONObject obj = arr.getJSONObject(0);
-                        message = obj.getString("message");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    catch (ArrayIndexOutOfBoundsException e) {
-                        e.printStackTrace();
-                    }
-
-                    if(message.isEmpty())
-                        message = "Farmer Enrollment Failed";
-                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
-                }
-                Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
-            }
-
-            @Override
-            public void onFailure(Call<ResponseModel> call, Throwable t) {
-                Log.i("LP", t.getMessage().toString());
-                Toast.makeText(getContext(), "Farmer Enrollment Failed", Toast.LENGTH_SHORT).show();
-//                addFarmToDB(farm, null, false);
-                loadingFinished();
-//                popToSignupsFragment();
-            }
-        });
+        WebApi.createFarm(createFarmCallback, farmMap);
     }
 
-    private void editFarmWithFarmId(final Farm farm, String farmId) {
+    Callback<ResponseModel> createFarmCallback = new Callback<ResponseModel>() {
+        @Override
+        public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
+            loadingFinished();
+            if (response.body() != null && response.body().success == true) {
+                Log.i("LP", "Farm Added To Server");
+                Toast.makeText(getContext(), "Farmer Enrolled Successfully", Toast.LENGTH_SHORT).show();
+
+//                    addFarmToDB(farm, response.body().id, true);
+                popToSignupsFragment();
+            } else {
+//                    addFarmToDB(farm, null, false);
+//                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
+                String message = "";
+                try {
+                    String error = response.errorBody().string();
+                    JSONArray arr = new JSONArray(error);
+                    JSONObject obj = arr.getJSONObject(0);
+                    message = obj.getString("message");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                catch (ArrayIndexOutOfBoundsException e) {
+                    e.printStackTrace();
+                }
+
+                if(message.isEmpty())
+                    message = "Farmer Enrollment Failed";
+                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+            }
+            Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
+        }
+
+        @Override
+        public void onFailure(Call<ResponseModel> call, Throwable t) {
+            Log.i("LP", t.getMessage().toString());
+            Toast.makeText(getContext(), "Farmer Enrollment Failed", Toast.LENGTH_SHORT).show();
+//                addFarmToDB(farm, null, false);
+            loadingFinished();
+//                popToSignupsFragment();
+        }
+    };
+
+    private void editFarmWithFarmId(String farmId) {
 
         HashMap<String, Object> farmMap = getFarmMap();
         farmMap.put("Farmers__c", farmer.farmerId);
+        WebApi.editFarm(editFarmCallback, farmId, farmMap);
+    }
 
-        Call<ResponseBody> apiCall = Fennel.getWebService().editFarm(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmId, farmMap);
-        apiCall.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                loadingFinished();
-                if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                    Log.i("LP", "Farmer Edited Successfully");
-                    Toast.makeText(getContext(), "Farmer Edited Successfully", Toast.LENGTH_SHORT).show();
-                    updateFarm(farm, true);
-                    popToSignupsFragment();
+    Callback<ResponseBody> editFarmCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            loadingFinished();
+            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                Log.i("LP", "Farmer Edited Successfully");
+                Toast.makeText(getContext(), "Farmer Edited Successfully", Toast.LENGTH_SHORT).show();
+//                    updateFarm(farm, true);
+                popToSignupsFragment();
 
-                } else {
+            } else {
 //                    updateFarm(farm, false);
 //                    Toast.makeText(getContext(), "Farmer Edit Failed", Toast.LENGTH_SHORT).show();
-                    String message = "";
-                    try {
-                        String error = response.errorBody().string();
-                        JSONArray arr = new JSONArray(error);
-                        JSONObject obj = arr.getJSONObject(0);
-                        message = obj.getString("message");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    catch (ArrayIndexOutOfBoundsException e) {
-                        e.printStackTrace();
-                    }
-
-                    if(message.isEmpty())
-                        message = "Farmer Edit Failed";
-                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                String message = "";
+                try {
+                    String error = response.errorBody().string();
+                    JSONArray arr = new JSONArray(error);
+                    JSONObject obj = arr.getJSONObject(0);
+                    message = obj.getString("message");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-                Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
-            }
+                catch (ArrayIndexOutOfBoundsException e) {
+                    e.printStackTrace();
+                }
 
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.i("LP", t.getMessage().toString());
-                Toast.makeText(getContext(), "Farmer Edit Failed: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                if(message.isEmpty())
+                    message = "Farmer Edit Failed";
+                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+            }
+            Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            Log.i("LP", t.getMessage().toString());
+            Toast.makeText(getContext(), "Farmer Edit Failed: " + t.getMessage(), Toast.LENGTH_LONG).show();
 
 //                updateFarm(farm, false);
-                loadingFinished();
+            loadingFinished();
 //                popToSignupsFragment();
-            }
-        });
-    }
+        }
+    };
 
     private Farm createFarmWithFarmerId(String farmerId) {
 
@@ -1107,138 +1098,137 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     }
 
     private void editFarmer() {
-
         final HashMap<String, Object> farmerMap = getFarmerMap();
+        WebApi.editFarmer(editFarmerCallback, farmer.farmerId, farmerMap);
+    }
 
-        Call<ResponseBody> apiCall = Fennel.getWebService().editFarmer(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmer.farmerId, farmerMap);
-        apiCall.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                    Log.i("LP", "Farmer Edited!");
-                    updateFarmer(farmer, true);
-                    Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
-                    newFarm.farmId = farmer.farmId;
-                    editFarmWithFarmId(newFarm, farmer.farmId);
+    Callback<ResponseBody> editFarmerCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                Log.i("LP", "Farmer Edited!");
+//                    updateFarmer(farmer, true);
+                Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
+                newFarm.farmId = farmer.farmId;
+//                    editFarmWithFarmId(newFarm, farmer.farmId);
+                editFarmWithFarmId(farmer.farmId);
 
-                    attachFarmerImageToFarmerObject(farmer, true);
-                    attachFarmerIDImageToFarmerObject(farmer, true);
+                attachFarmerImageToFarmerObject(farmer);
+                attachFarmerIDImageToFarmerObject(farmer);
 
-                } else {
+            } else {
 
-                    String message = "";
-                    try {
-                        String error = response.errorBody().string();
-                        JSONArray arr = new JSONArray(error);
-                        JSONObject obj = arr.getJSONObject(0);
-                        message = obj.getString("message");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    catch (ArrayIndexOutOfBoundsException e) {
-                        e.printStackTrace();
-                    }
+                String message = "";
+                try {
+                    String error = response.errorBody().string();
+                    JSONArray arr = new JSONArray(error);
+                    JSONObject obj = arr.getJSONObject(0);
+                    message = obj.getString("message");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                catch (ArrayIndexOutOfBoundsException e) {
+                    e.printStackTrace();
+                }
 
-                    if(message.isEmpty())
-                        message = "Farmer Edit Failed";
-                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                if(message.isEmpty())
+                    message = "Farmer Edit Failed";
+                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
 //                    updateFarmer(farmer, false);
 //                    Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
 //                    newFarm.farmId = farmer.farmId;
 //                    updateFarm(newFarm, false);
 
-                    loadingFinished();
+                loadingFinished();
 //                    popToSignupsFragment();
-                }
             }
+        }
 
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.i("LP", t.getMessage().toString());
-                String message = t.getMessage();
-                Toast.makeText(getContext(), "Farmer Edit Failed: " + message, Toast.LENGTH_SHORT).show();
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            Log.i("LP", t.getMessage().toString());
+            String message = t.getMessage();
+            Toast.makeText(getContext(), "Farmer Edit Failed: " + message, Toast.LENGTH_SHORT).show();
 //                updateFarmer(farmer, false);
 //                Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
 //                newFarm.farmId = farmer.farmId;
 //                updateFarm(newFarm, false);
-                loadingFinished();
+            loadingFinished();
 //                popToSignupsFragment();
-            }
-        });
-
-    }
+        }
+    };
 
     private void createFarmer() {
-
         final HashMap<String, Object> farmerMap = getFarmerMap();
+        WebApi.createFarmer(createFarmerCallback, farmerMap);
+    }
 
-        Call<ResponseModel> apiCall = Fennel.getWebService().addFarmer(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmerMap);
-        apiCall.enqueue(new Callback<ResponseModel>() {
-            @Override
-            public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
-                Farmer newFarmer = getFarmer();
-                if ((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().success == true) {
-                    Log.i("LP", "Farmer Added To Server");
-                    newFarmer.farmerId = response.body().id;
-                    addFarmerToDB(newFarmer, response.body().id, true);
-                    Farm newFarm = createFarmWithFarmerId(response.body().id);
-                    addFarmWithFarmerId(newFarm, response.body().id);
+    Callback<ResponseModel> createFarmerCallback = new Callback<ResponseModel>() {
+        @Override
+        public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
+            Farmer newFarmer = getFarmer();
+            if ((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().success == true) {
+                Log.i("LP", "Farmer Added To Server");
+                newFarmer.farmerId = response.body().id;
+//                    addFarmerToDB(newFarmer, response.body().id, true);
+//                Farm newFarm = createFarmWithFarmerId(response.body().id);
+//                    addFarmWithFarmerId(newFarm, response.body().id);
+                addFarmWithFarmerId(response.body().id);
 
-                    attachFarmerImageToFarmerObject(newFarmer, false);
-                    attachFarmerIDImageToFarmerObject(newFarmer, false);
+                attachFarmerImageToFarmerObject(newFarmer);
+                attachFarmerIDImageToFarmerObject(newFarmer);
 
-                } else {
+            } else {
 
 //                    addFarmerToDB(newFarmer, null, false);
 //                    Farm newFarm = createFarmWithFarmerId(null);
 //                    addFarmToDB(newFarm, null, false);
 //                    Toast.makeText(getContext(), "Farmer Enrollment Failed", Toast.LENGTH_SHORT).show();
 
-                    loadingFinished();
+                loadingFinished();
 //                    popToSignupsFragment();
 
-                    String message = "";
-                    try {
-                        String error = response.errorBody().string();
-                        JSONArray arr = new JSONArray(error);
-                        JSONObject obj = arr.getJSONObject(0);
-                        message = obj.getString("message");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    catch (ArrayIndexOutOfBoundsException e) {
-                        e.printStackTrace();
-                    }
-
-                    if(message.isEmpty())
-                        message = "Farmer Enrollment Failed";
-                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
-
+                String message = "";
+                try {
+                    String error = response.errorBody().string();
+                    JSONArray arr = new JSONArray(error);
+                    JSONObject obj = arr.getJSONObject(0);
+                    message = obj.getString("message");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-                Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
-            }
+                catch (ArrayIndexOutOfBoundsException e) {
+                    e.printStackTrace();
+                }
 
-            @Override
-            public void onFailure(Call<ResponseModel> call, Throwable t) {
-                Log.i("LP", t.getMessage().toString());
-                Toast.makeText(getContext(), "Farmer Enrollment Failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                if(message.isEmpty())
+                    message = "Farmer Enrollment Failed";
+                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+
+            }
+            Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
+        }
+
+        @Override
+        public void onFailure(Call<ResponseModel> call, Throwable t) {
+            Log.i("LP", t.getMessage().toString());
+            Toast.makeText(getContext(), "Farmer Enrollment Failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
 
 //                Farmer newFarmer = getFarmer();
 //                addFarmerToDB(newFarmer, null, false);
 //                Farm newFarm = createFarmWithFarmerId(null);
 //                addFarmToDB(newFarm, null, false);
 
-                loadingFinished();
+            loadingFinished();
 //                popToSignupsFragment();
-            }
-        });
-    }
+        }
+    };
 
-    private void attachFarmerImageToFarmerObject(final Farmer farmer, boolean isEdit) {
+    private void attachFarmerImageToFarmerObject(final Farmer farmer) {
 
         if (farmerImageUri == null)
             return;
@@ -1301,46 +1291,47 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
         if (farmer.getThumbUrl() == null || farmer.getThumbUrl().isEmpty()) {
-
-            Call<ResponseBody> attachmentApi = Fennel.getWebService().addAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, entityBody, imageBody);
-            attachmentApi.enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                        Log.i("Fennel", "farmer profile picture uploaded successfully!");
-                        Singleton.getInstance().farmerIdtoInvalidate = farmer.farmerId;
-                    } else {
-                        Log.i("Fennel", "farmer profile picture upload failed!");
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.i("Fennel", "farmer profile picture upload failed!");
-                }
-            });
+            WebApi.addAttachment(addFarmerPicCallback, entityBody, imageBody);
         } else {
-            Call<ResponseBody> attachmentApi = Fennel.getWebService().editAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, farmer.getThumbUrl(), entityBody, imageBody);
-            attachmentApi.enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                        Log.i("Fennel", "farmer profile picture edited successfully!");
-                        Singleton.getInstance().farmerIdtoInvalidate = farmer.farmerId;
-                    } else {
-                        Log.i("Fennel", "farmer profile picture edit failed!");
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.i("Fennel", "farmer profile picture edit failed!");
-                }
-            });
+            WebApi.editAttachment(editFarmerPicCallback, farmer.getThumbUrl(), entityBody, imageBody);
         }
     }
 
-    private void attachFarmerIDImageToFarmerObject(Farmer farmer, boolean isEdit) {
+    Callback<ResponseBody> addFarmerPicCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                Log.i("Fennel", "farmer profile picture uploaded successfully!");
+                Singleton.getInstance().farmerIdtoInvalidate = farmer.farmerId;
+            } else {
+                Log.i("Fennel", "farmer profile picture upload failed!");
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            Log.i("Fennel", "farmer profile picture upload failed!");
+        }
+    };
+
+    Callback<ResponseBody> editFarmerPicCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                Log.i("Fennel", "farmer profile picture edited successfully!");
+                Singleton.getInstance().farmerIdtoInvalidate = farmer.farmerId;
+            } else {
+                Log.i("Fennel", "farmer profile picture edit failed!");
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            Log.i("Fennel", "farmer profile picture edit failed!");
+        }
+    };
+
+    private void attachFarmerIDImageToFarmerObject(Farmer farmer) {
 
         if (farmerIdImageUri == null)
             return;
@@ -1388,43 +1379,43 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
         if (farmer.getFarmerIdPhotoUrl() == null || farmer.getFarmerIdPhotoUrl().isEmpty()) {
-
-            Call<ResponseBody> attachmentApi = Fennel.getWebService().addAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, entityBody, imageBody);
-            attachmentApi.enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                        //Save id with attac
-                        // hment
-                        Log.i("Fennel", "farmer ID picture uploaded successfully!");
-                    } else {
-                        Log.i("Fennel", "farmer ID picture upload failed!");
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.i("Fennel", "farmer ID picture upload failed!");
-                }
-            });
+            WebApi.addAttachment(addFarmerIdPicCallback, entityBody, imageBody);
         } else {
-
-            Call<ResponseBody> attachmentApi = Fennel.getWebService().editAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, farmer.getFarmerIdPhotoUrl(), entityBody, imageBody);
-            attachmentApi.enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                        Log.i("Fennel", "farmer ID picture edited successfully!");
-                    } else {
-                        Log.i("Fennel", "farmer ID picture edit failed!");
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.i("Fennel", "farmer ID picture edit failed!");
-                }
-            });
+            WebApi.editAttachment(editFarmerIdPicCallback, farmer.getFarmerIdPhotoUrl(), entityBody, imageBody);
         }
     }
+
+    Callback<ResponseBody> addFarmerIdPicCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                //Save id with attac
+                // hment
+                Log.i("Fennel", "farmer ID picture uploaded successfully!");
+            } else {
+                Log.i("Fennel", "farmer ID picture upload failed!");
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            Log.i("Fennel", "farmer ID picture upload failed!");
+        }
+    };
+
+    Callback<ResponseBody> editFarmerIdPicCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                Log.i("Fennel", "farmer ID picture edited successfully!");
+            } else {
+                Log.i("Fennel", "farmer ID picture edit failed!");
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            Log.i("Fennel", "farmer ID picture edit failed!");
+        }
+    };
 }

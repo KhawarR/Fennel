@@ -841,7 +841,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                 Village village = new Village(id, name, subLocationId);
                 allVillages.add(village);
-                DatabaseHelper.getInstance().inserVillage(village);
+                DatabaseHelper.getInstance().insertVillage(village);
             }
         }
         else
