@@ -526,10 +526,16 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         farmer.setNationalCardAttachmentId(farmerNatId);
 
                         String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getThumbAttachmentId());
-                        farmer.setThumbUrl(thumbUrl);
+                        if(!farmerPicId.isEmpty())
+                        {
+                            farmer.setThumbUrl(thumbUrl);
+                        }
 
                         String natIdUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getNationalCardAttachmentId());
-                        farmer.setNationalCardUrl(natIdUrl);
+                        if(!farmerNatId.isEmpty())
+                        {
+                            farmer.setNationalCardUrl(natIdUrl);
+                        }
 
                         Farmer farmerDb = realm.where(Farmer.class).equalTo("farmerId", id).findFirst();
                         if(farmerDb != null)
@@ -537,8 +543,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                             realm.beginTransaction();
                             farmerDb.setThumbAttachmentId(farmerPicId);
                             farmerDb.setNationalCardAttachmentId(farmerNatId);
-                            farmerDb.setThumbUrl(thumbUrl);
-                            farmerDb.setNationalCardUrl(natIdUrl);
+                            if(!farmerPicId.isEmpty())
+                            {
+                                farmerDb.setThumbUrl(thumbUrl);
+                            }
+                            if(!farmerNatId.isEmpty())
+                            {
+                                farmerDb.setNationalCardUrl(natIdUrl);
+                            }
                             realm.commitTransaction();
                         }
 
