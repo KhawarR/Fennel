@@ -9,9 +9,10 @@ import android.view.View;
 
 import tintash.fennel.R;
 import tintash.fennel.fragments.Login;
+import tintash.fennel.fragments.SplashFragment;
 
 
-public class LoginActivity extends BaseActivity {
+public class LoginActivity extends BaseActivity implements SplashFragment.CountDownListener {
 
     private final int permsRequestCode = 200;
 
@@ -23,7 +24,7 @@ public class LoginActivity extends BaseActivity {
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         if (savedInstanceState == null)
-            replaceFragment(new Login(), false);
+            replaceFragment(new SplashFragment(), false);
 
         checkPermissions();
     }
@@ -81,5 +82,9 @@ public class LoginActivity extends BaseActivity {
             // other 'case' lines to check for other
             // permissions this app might request
         }
+    }
+
+    public void callLoginFragment() {
+        replaceFragment(new Login(), false);
     }
 }
