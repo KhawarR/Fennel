@@ -1,6 +1,7 @@
 package tintash.fennel.activities;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -8,8 +9,10 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 
 import tintash.fennel.R;
+import tintash.fennel.application.Fennel;
 import tintash.fennel.fragments.Login;
 import tintash.fennel.fragments.SplashFragment;
+import tintash.fennel.utils.PreferenceHelper;
 
 
 public class LoginActivity extends BaseActivity implements SplashFragment.CountDownListener {
@@ -26,7 +29,6 @@ public class LoginActivity extends BaseActivity implements SplashFragment.CountD
         if (savedInstanceState == null)
             replaceFragment(new SplashFragment(), false);
 
-        checkPermissions();
     }
 
     private void checkPermissions() {
@@ -85,6 +87,14 @@ public class LoginActivity extends BaseActivity implements SplashFragment.CountD
     }
 
     public void callLoginFragment() {
-        replaceFragment(new Login(), false);
+        if(!PreferenceHelper.getInstance().readToken().isEmpty() && !PreferenceHelper.getInstance().readLoginUserId().isEmpty())
+        {
+            Fennel.restClient.setApiBaseUrl(PreferenceHelper.getInstance().readInstanceUrl());
+            startActivity(new Intent(this, MainActivity.class));
+            this.finish();
+        } else {
+            replaceFragment(new Login(), false);
+            checkPermissions();
+        }
     }
 }
