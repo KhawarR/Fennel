@@ -37,6 +37,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import tintash.fennel.R;
+import tintash.fennel.activities.AboutMe;
 import tintash.fennel.activities.LoginActivity;
 import tintash.fennel.adapters.MySignupsAdapter;
 import tintash.fennel.application.Fennel;
@@ -639,7 +640,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     @Override
     public void onTitleBarRightIconClicked(View view) {
-        ((BaseContainerFragment) getParentFragment()).replaceFragment(new AboutMe(), true);
+//        ((BaseContainerFragment) getParentFragment()).replaceFragment(new AboutMe(), true);
+        startActivity(new Intent(getActivity(), AboutMe.class));
+
     }
 
     @Override

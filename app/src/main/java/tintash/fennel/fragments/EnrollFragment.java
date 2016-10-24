@@ -41,10 +41,7 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,6 +57,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import tintash.fennel.R;
+import tintash.fennel.activities.AboutMe;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.common.database.DatabaseHelper;
 import tintash.fennel.models.Farm;
@@ -893,7 +891,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     @Override
     public void onTitleBarRightIconClicked(View view) {
         hideKeyboard();
-        ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
+//        ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
+        startActivity(new Intent(getActivity(), AboutMe.class));
     }
 
     private void showPickerDialog(final boolean isFarmer) {

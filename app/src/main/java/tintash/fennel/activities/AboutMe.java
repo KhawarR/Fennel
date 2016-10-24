@@ -1,17 +1,14 @@
-package tintash.fennel.fragments;
+package tintash.fennel.activities;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.kbeanie.multipicker.api.CameraImagePicker;
@@ -41,7 +38,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import tintash.fennel.R;
-import tintash.fennel.activities.LoginActivity;
 import tintash.fennel.application.Fennel;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.Session;
@@ -56,7 +52,7 @@ import tintash.fennel.views.TitleBarLayout;
 /**
  * Created by Faizan on 9/27/2016.
  */
-public class AboutMe extends BaseFragment {
+public class AboutMe extends Activity {
 
     @Bind(R.id.titleBar)
     TitleBarLayout titleBarLayout;
@@ -88,22 +84,21 @@ public class AboutMe extends BaseFragment {
     private String pictureAttachmentId = null;
     private String loggedInUserId = null;
 
-    @Nullable
+    private ProgressDialog mProgressDialog;
+
+
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-        View view = inflater.inflate(R.layout.fragment_about_me, null);
-        ButterKnife.bind(this, view);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.fragment_about_me);
+        ButterKnife.bind(this);
+
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.setMessage(getString(R.string.loading));
 
         imagePicker = new ImagePicker(AboutMe.this);
         cameraImagePicker = new CameraImagePicker(AboutMe.this);
-
-        return view;
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
 
         MyPicassoInstance.getInstance().load(R.drawable.dummy_profile).transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
         loggedInUserId = PreferenceHelper.getInstance().readLoginUserId();
@@ -148,7 +143,7 @@ public class AboutMe extends BaseFragment {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
-            if(isValid())
+
             {
                 if (response.code() == 200) {
                     String responseStr = "";
@@ -172,11 +167,11 @@ public class AboutMe extends BaseFragment {
                 else if(response.code() == 401)
                 {
                     PreferenceHelper.getInstance().clearSession();
-                    startActivity(new Intent(getActivity(), LoginActivity.class));
-                    getActivity().finish();
+                    startActivity(new Intent(AboutMe.this, LoginActivity.class));
+                    finish();
                 }
                 else {
-                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AboutMe.this, "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
         }
@@ -212,15 +207,15 @@ public class AboutMe extends BaseFragment {
         return "";
     }
 
-    @Override
-    protected String getTrackerScreenName() {
-        return null;
-    }
-
-    @Override
-    public void onTitleBarRightIconClicked(View view) {
-        showPickerDialog();
-    }
+//    @Override
+//    protected String getTrackerScreenName() {
+//        return null;
+//    }
+//
+//    @Override
+//    public void onTitleBarRightIconClicked(View view) {
+//        showPickerDialog();
+//    }
 
     @OnClick(R.id.txtSignOut)
     void onClickSignOut(View view) {
@@ -233,14 +228,14 @@ public class AboutMe extends BaseFragment {
     }
 
     private void showLogoutDialog() {
-        AlertDialog.Builder pickerDialog = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder pickerDialog = new AlertDialog.Builder(AboutMe.this);
         pickerDialog.setTitle("Do you want to sign out?");
         pickerDialog.setPositiveButton("Yes",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         PreferenceHelper.getInstance().clearSession();
-                        startActivity(new Intent(getActivity(), LoginActivity.class));
-                        getActivity().finish();
+                        startActivity(new Intent(AboutMe.this, LoginActivity.class));
+                        finish();
                         dialog.dismiss();
                     }
                 });
@@ -254,7 +249,7 @@ public class AboutMe extends BaseFragment {
     }
 
     private void showPickerDialog() {
-        AlertDialog.Builder pickerDialog = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder pickerDialog = new AlertDialog.Builder(AboutMe.this);
         pickerDialog.setTitle("Choose image from?");
         pickerDialog.setPositiveButton("Gallery",
                 new DialogInterface.OnClickListener() {
@@ -531,6 +526,21 @@ public class AboutMe extends BaseFragment {
             PreferenceHelper.getInstance().writeLoginUserId(idFac);
 
             getAboutMeAttachment();
+        }
+    }
+
+    public void loadingStarted() {
+        if (mProgressDialog != null && !mProgressDialog.isShowing()) {
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.show();
+        }
+    }
+
+    public void loadingFinished() {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.dismiss();
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.setMessage(getString(R.string.loading));
         }
     }
 }
