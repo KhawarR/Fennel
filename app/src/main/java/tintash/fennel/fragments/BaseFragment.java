@@ -87,6 +87,8 @@ public abstract class BaseFragment extends Fragment implements TitleBarLayout.Ti
 //        getActivity().onBackPressed();
 //    }
 
+
+
     //determines if fragment is viable for use or a candidate for deletion
     public Boolean isValid()
     {
@@ -101,7 +103,7 @@ public abstract class BaseFragment extends Fragment implements TitleBarLayout.Ti
     }
 
     public void loadingFinished() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+        if (getActivity() != null && mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.dismiss();
             mProgressDialog.setCancelable(false);
             mProgressDialog.setMessage(getString(R.string.loading));

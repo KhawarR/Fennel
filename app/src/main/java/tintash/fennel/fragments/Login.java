@@ -59,8 +59,8 @@ public class Login extends BaseFragment implements Callback<Auth> {
         super.onViewCreated(view, savedInstanceState);
 
         // TODO Remove on release
-//        etId.setText("1114");
-//        etPassword.setText("pass");
+        etId.setText("1114");
+        etPassword.setText("pass");
 
         if(!PreferenceHelper.getInstance().readToken().isEmpty() && !PreferenceHelper.getInstance().readLoginUserId().isEmpty())
         {
@@ -125,11 +125,12 @@ public class Login extends BaseFragment implements Callback<Auth> {
         }
         else
         {
-            try {
-                Toast.makeText(getActivity(), "Authentication failed: " + response.errorBody().string(), Toast.LENGTH_LONG).show();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            Toast.makeText(getActivity(), "Login Error: Check network connection or verify login credentials", Toast.LENGTH_LONG).show();
+//            try {
+//                Toast.makeText(getActivity(), "Authentication failed: " + response.errorBody().string(), Toast.LENGTH_LONG).show();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
             loadingFinished();
         }
     }
@@ -138,7 +139,8 @@ public class Login extends BaseFragment implements Callback<Auth> {
     public void onFailure(Call<Auth> call, Throwable t) {
         loadingFinished();
         t.printStackTrace();
-        Toast.makeText(getActivity(), "Authentication failed: " + t.getMessage(), Toast.LENGTH_LONG).show();
+//        Toast.makeText(getActivity(), "Authentication failed: " + t.getMessage(), Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), "Login Error: Check network connection or verify login credentials", Toast.LENGTH_LONG).show();
     }
 
     private Callback<ResponseBody> loginCallback = new Callback<ResponseBody>() {

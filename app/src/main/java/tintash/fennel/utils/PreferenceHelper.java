@@ -22,6 +22,7 @@ public class PreferenceHelper {
     private static final String KEY_ABOUT_ME_LN = "_about_ln";
     private static final String KEY_ABOUT_ME_FO_NAME = "_about_fo_name";
     private static final String KEY_ABOUT_ME_FM_NAME = "_about_fm_name";
+    private static final String KEY_ABOUT_ME_ATT_ID = "_about_att_id";
 
 
     private static PreferenceHelper sInstance;
@@ -166,6 +167,17 @@ public class PreferenceHelper {
         return value;
     }
 
+    public void writeAboutAttId(String value) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putString(KEY_ABOUT_ME_ATT_ID, value);
+        editor.commit();
+    }
+
+    public String readAboutAttId() {
+        String value = mPref.getString(KEY_ABOUT_ME_ATT_ID, "");
+        return value;
+    }
+
     public void writeFirstRun(boolean fRun) {
         SharedPreferences.Editor editor = mPref.edit();
         editor.putBoolean(KEY_FIRST_RUN, fRun);
@@ -190,5 +202,6 @@ public class PreferenceHelper {
         writeAboutLN("");
         writeAboutFOname("");
         writeAboutFMname("");
+        writeAboutAttId("");
     }
 }
