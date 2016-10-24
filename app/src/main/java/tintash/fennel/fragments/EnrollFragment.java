@@ -13,6 +13,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -82,10 +83,11 @@ import tintash.fennel.utils.RoundedCornersTransformation;
 import tintash.fennel.views.NothingSelectedSpinnerAdapter;
 import tintash.fennel.views.TitleBarLayout;
 
+
 /**
  * Created by Faizan on 9/27/2016.
  */
-public class EnrollFragment extends BaseContainerFragment implements AdapterView.OnItemSelectedListener {
+public class EnrollFragment extends BaseContainerFragment implements AdapterView.OnItemSelectedListener, View.OnTouchListener {
 
     @Bind(R.id.scrollView)
     ScrollView scrollView;
@@ -309,24 +311,29 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         ArrayAdapter<String> arrayAdapterLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrLocations);
         spLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterLoc, R.layout.spinner_nothing_selected, getContext(), "LOCATION"));
         spLocation.setOnItemSelectedListener(this);
+        spLocation.setOnTouchListener(this);
 
         spSubLocation.setTag(true);
 //        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsSubLocation, R.layout.simple_spinner_item);
         ArrayAdapter<String> arrayAdapterSubLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrSubLocations);
         spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterSubLoc, R.layout.spinner_nothing_selected, getContext(), "SUB LOCATION"));
         spSubLocation.setOnItemSelectedListener(this);
+        spSubLocation.setOnTouchListener(this);
+
 
         spVillage.setTag(true);
 //        arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsVillage, R.layout.simple_spinner_item);
         ArrayAdapter<String> arrayAdapterVillage = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrVillages);
         spVillage.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterVillage, R.layout.spinner_nothing_selected, getContext(), "VILLAGE"));
         spVillage.setOnItemSelectedListener(this);
+        spVillage.setOnTouchListener(this);
 
         spTree.setTag(true);
 //        arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsTree, R.layout.simple_spinner_item);
         ArrayAdapter<String> arrayAdapterTree = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrTrees);
         spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterTree, R.layout.spinner_nothing_selected, getContext(), "TREE SPECIES"));
         spTree.setOnItemSelectedListener(this);
+        spTree.setOnTouchListener(this);
 
         title = getArguments().getString("title");
         if (title.equalsIgnoreCase(Constants.STR_EDIT_FARMER)) {
@@ -466,6 +473,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         tvMale.setSelected(false);
         view.setSelected(true);
 
+        hideKeyboard();
+
     }
 
     @OnClick({R.id.tvLeaderNo, R.id.tvLeaderYes})
@@ -473,6 +482,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         tvLeaderNo.setSelected(false);
         tvLeaderYes.setSelected(false);
         view.setSelected(true);
+
+        hideKeyboard();
 
     }
 
@@ -483,13 +494,13 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         txtFarmerHomeYes.setSelected(false);
         view.setSelected(true);
 
+        hideKeyboard();
+
     }
 
     @OnClick(R.id.txtCreateFarmer)
     void onClickCreateFarmer(View view) {
-
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        hideKeyboard();
 
         if (!isFormFilled()) {
             return;
@@ -865,6 +876,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     @OnClick(R.id.txtSubmitApproval)
     void onClickSubmitForApproval(View view) {
+        hideKeyboard();
         loadingStarted();
 
         farmerStatus = "Pending";
@@ -873,12 +885,14 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     @OnClick(R.id.imgFarmerPhoto)
     void onClickFarmerPhoto(View view) {
+        hideKeyboard();
         showPickerDialog(true);
 //        pickFarmerImage(true);
     }
 
     @OnClick(R.id.imgNationalID)
     void onClickNationalID(View view) {
+        hideKeyboard();
         showPickerDialog(false);
 //        pickNationalIdImage(true);
     }
@@ -890,6 +904,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     @Override
     public void onTitleBarRightIconClicked(View view) {
+        hideKeyboard();
         ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
     }
 
@@ -1044,6 +1059,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+
+        hideKeyboard();
         Spinner spinnerView = (Spinner) parent;
         int position = pos - 1;
         switch (spinnerView.getId()) {
@@ -1265,11 +1282,19 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //        File f = new File(farmerImageUri);
 //        byte[] byteArrayImage = getByteArrayFromFile(f);
 
-        Bitmap bmp = BitmapFactory.decodeFile(farmerImageUri);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bmp.compress(Bitmap.CompressFormat.JPEG, 40, bos);
+        byte[] byteArrayImage;
 
-        byte[] byteArrayImage = bos.toByteArray();
+        Bitmap bmp = BitmapFactory.decodeFile(farmerImageUri);
+        if (bmp == null) {
+
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.JPEG, 40, bos);
+            byteArrayImage = bos.toByteArray();
+        } else {
+
+            File f = new File(farmerIdImageUri);
+            byteArrayImage = getByteArrayFromFile(f);
+        }
 
         RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
         RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
@@ -1388,5 +1413,23 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             return null;
         }
         return byteArrayImage;
+    }
+
+    private void hideKeyboard() {
+
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            view.clearFocus();
+        }
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            hideKeyboard();
+        }
+        return false;
     }
 }
