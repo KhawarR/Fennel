@@ -23,6 +23,7 @@ public class PreferenceHelper {
     private static final String KEY_ABOUT_ME_FO_NAME = "_about_fo_name";
     private static final String KEY_ABOUT_ME_FM_NAME = "_about_fm_name";
     private static final String KEY_ABOUT_ME_ATT_ID = "_about_att_id";
+    private static final String KEY_ABOUT_ME_ATT_URL = "_about_att_url";
 
     private static final String KEY_IS_SYNC_REQUIRED = "_is_sync_req";
 
@@ -177,6 +178,17 @@ public class PreferenceHelper {
 
     public String readAboutAttId() {
         String value = mPref.getString(KEY_ABOUT_ME_ATT_ID, "");
+        return value;
+    }
+
+    public void writeAboutAttUrl(String value) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putString(KEY_ABOUT_ME_ATT_URL, value);
+        editor.commit();
+    }
+
+    public String readAboutAttUrl() {
+        String value = mPref.getString(KEY_ABOUT_ME_ATT_URL, "");
         return value;
     }
 

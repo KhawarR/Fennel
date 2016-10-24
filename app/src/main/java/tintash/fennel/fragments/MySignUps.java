@@ -99,10 +99,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         titleBarLayout.setOnIconClickListener(this);
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
 
-        String aboutMeAttId = PreferenceHelper.getInstance().readAboutAttId();
-        if(!aboutMeAttId.isEmpty())
+        String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
+        if(!thumbUrl.isEmpty())
         {
-            String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), aboutMeAttId);
             if(NetworkHelper.isNetAvailable(getActivity()))
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
             else
@@ -523,41 +522,47 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     final Farmer farmer = myFarmers.get(j);
                     if(farmer.getFarmerId().equalsIgnoreCase(id))
                     {
-                        farmer.setThumbUrl(farmerPicId);
-                        farmer.setFarmerIdPhotoUrl(farmerNatId);
+                        farmer.setThumbAttachmentId(farmerPicId);
+                        farmer.setNationalCardAttachmentId(farmerNatId);
+
+                        String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getThumbAttachmentId());
+                        farmer.setThumbUrl(thumbUrl);
+
+                        String natIdUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getNationalCardAttachmentId());
+                        farmer.setNationalCardUrl(natIdUrl);
 
                         Farmer farmerDb = realm.where(Farmer.class).equalTo("farmerId", id).findFirst();
                         if(farmerDb != null)
                         {
                             realm.beginTransaction();
-                            farmerDb.setThumbUrl(farmerPicId);
-                            farmerDb.setFarmerIdPhotoUrl(farmerNatId);
+                            farmerDb.setThumbAttachmentId(farmerPicId);
+                            farmerDb.setNationalCardAttachmentId(farmerNatId);
+                            farmerDb.setThumbUrl(thumbUrl);
+                            farmerDb.setNationalCardUrl(natIdUrl);
                             realm.commitTransaction();
                         }
 
-                        String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getThumbUrl());
                         MyPicassoInstance.getInstance().load(thumbUrl).fetch(new com.squareup.picasso.Callback() {
                             @Override
                             public void onSuccess() {
-                                Log.i("Fetch success", "Farmer Pic: " + farmer.getFarmerIdPhotoUrl());
+                                Log.i("Fetch success", "Farmer Pic: " + farmer.getThumbUrl());
                             }
 
                             @Override
                             public void onError() {
-                                Log.i("Fetch failed", "Farmer Pic: " + farmer.getFarmerIdPhotoUrl());
+                                Log.i("Fetch failed", "Farmer Pic: " + farmer.getThumbUrl());
                             }
                         });
 
-                        String natIdUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getFarmerIdPhotoUrl());
                         MyPicassoInstance.getInstance().load(natIdUrl).fetch(new com.squareup.picasso.Callback() {
                             @Override
                             public void onSuccess() {
-                                Log.i("Fetch success", "NAT ID: " + farmer.getFarmerIdPhotoUrl());
+                                Log.i("Fetch success", "NAT ID: " + farmer.getNationalCardUrl());
                             }
 
                             @Override
                             public void onError() {
-                                Log.i("Fetch failed", "NAT ID: " + farmer.getFarmerIdPhotoUrl());
+                                Log.i("Fetch failed", "NAT ID: " + farmer.getNationalCardUrl());
                             }
                         });
 
@@ -583,6 +588,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     if(!attId.isEmpty())
                     {
                         String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
+                        PreferenceHelper.getInstance().writeAboutAttUrl(thumbUrl);
                         if(NetworkHelper.isNetAvailable(getActivity()))
                             MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
                         else

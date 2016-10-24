@@ -151,9 +151,9 @@ public class MySignupsAdapter extends BaseAdapter {
                 village.setText("");
 
             CircleImageView thumb = (CircleImageView) view.findViewById(R.id.profile_image);
-            if(farmer.getThumbUrl() != null && !farmer.getThumbUrl().isEmpty())
+            String thumbUrl = farmer.getThumbUrl();
+            if(thumbUrl != null && !thumbUrl.isEmpty())
             {
-                String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getThumbUrl());
                 if(Singleton.getInstance().farmerIdtoInvalidate.equalsIgnoreCase(farmer.farmerId)) {
                     MyPicassoInstance.getInstance().invalidate(thumbUrl);
                     Singleton.getInstance().farmerIdtoInvalidate = "";

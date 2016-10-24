@@ -76,8 +76,8 @@ public class FarmerTable {
         values.put(COLUMN_TREE_SPECIES, farmer.treeSpecies);
         values.put(COLUMN_FARMER_HOME, farmer.farmerHome);
         values.put(COLUMN_MOBILE_NUMBER, farmer.mobileNumber);
-        values.put(COLUMN_FARMER_PHOTO, farmer.thumbUrl);
-        values.put(COLUMN_FARMER_ID_PHOTO, farmer.farmerIdPhotoUrl);
+        values.put(COLUMN_FARMER_PHOTO, farmer.thumbAttachmentId);
+        values.put(COLUMN_FARMER_ID_PHOTO, farmer.nationalCardAttachmentId);
         values.put(COLUMN_SYNCED, synced);
 
         // Insert the new row, returning the primary key value of the new row
@@ -125,8 +125,8 @@ public class FarmerTable {
         values.put(COLUMN_TREE_SPECIES, farmer.treeSpecies);
         values.put(COLUMN_FARMER_HOME, farmer.farmerHome);
         values.put(COLUMN_MOBILE_NUMBER, farmer.mobileNumber);
-        values.put(COLUMN_FARMER_PHOTO, farmer.thumbUrl);
-        values.put(COLUMN_FARMER_ID_PHOTO, farmer.farmerIdPhotoUrl);
+        values.put(COLUMN_FARMER_PHOTO, farmer.thumbAttachmentId);
+        values.put(COLUMN_FARMER_ID_PHOTO, farmer.nationalCardAttachmentId);
         values.put(COLUMN_SYNCED, synced);
 
         // Which row to update, based on the email

@@ -110,9 +110,9 @@ public class AboutMe extends BaseFragment {
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
 
         populateView();
-        if(!PreferenceHelper.getInstance().readAboutAttId().isEmpty())
+        String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
+        if(!thumbUrl.isEmpty())
         {
-            String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), PreferenceHelper.getInstance().readAboutAttId());
             if(NetworkHelper.isNetAvailable(getActivity()))
             {
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
@@ -152,6 +152,7 @@ public class AboutMe extends BaseFragment {
                         if(!attId.isEmpty() && !attId.equalsIgnoreCase(PreferenceHelper.getInstance().readAboutAttId()))
                         {
                             String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
+                            PreferenceHelper.getInstance().writeAboutAttUrl(thumbUrl);
                             if(NetworkHelper.isNetAvailable(getActivity()))
                             {
                                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
@@ -320,7 +321,7 @@ public class AboutMe extends BaseFragment {
         if (pictureAttachmentId == null || pictureAttachmentId.isEmpty()) {
             attachmentMap.put("ParentId", loggedInUserId);
         }
-        String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), PreferenceHelper.getInstance().readAboutAttId());
+        String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
         MyPicassoInstance.getInstance().invalidate(thumbUrl);
 
         JSONObject json = new JSONObject(attachmentMap);

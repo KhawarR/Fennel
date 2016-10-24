@@ -237,10 +237,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         titleBarLayout.setOnIconClickListener(this);
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
 
-        String aboutMeAttId = PreferenceHelper.getInstance().readAboutAttId();
-        if(!aboutMeAttId.isEmpty())
+        String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
+        if(!thumbUrl.isEmpty())
         {
-            String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), aboutMeAttId);
             if(NetworkHelper.isNetAvailable(getActivity()))
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
             else
@@ -408,8 +407,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
             etMobileNumber.setText(farmer.getMobileNumber());
 
-            if (farmer.getThumbUrl() != null && !farmer.getThumbUrl().isEmpty()) {
-                String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getThumbUrl());
+            String thumbUrl = farmer.getThumbUrl();
+            if (thumbUrl != null && !thumbUrl.isEmpty()) {
                 imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 if(NetworkHelper.isNetAvailable(getActivity()))
                     MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgFarmerPhoto);
@@ -417,14 +416,15 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                     MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgFarmerPhoto);
                 isFarmerPhotoSet = true;
             }
-            if (farmer.getFarmerIdPhotoUrl() != null && !farmer.getFarmerIdPhotoUrl().isEmpty())
+
+            String natCardUrl = farmer.getNationalCardUrl();
+            if (natCardUrl != null && !natCardUrl.isEmpty())
             {
-                String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getFarmerIdPhotoUrl());
                 imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 if(NetworkHelper.isNetAvailable(getActivity()))
-                    MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgNationalID);
+                    MyPicassoInstance.getInstance().load(natCardUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgNationalID);
                 else
-                    MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgNationalID);
+                    MyPicassoInstance.getInstance().load(natCardUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgNationalID);
                 isNationalIdPhotoSet = true;
             }
         }
@@ -1234,13 +1234,12 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "picture");
         attachmentMap.put("Name", "profile_picture.png");
-        if (farmer.getThumbUrl() == null || farmer.getThumbUrl().isEmpty()) {
+        if (farmer.getThumbAttachmentId() == null || farmer.getThumbAttachmentId().isEmpty()) {
             attachmentMap.put("ParentId", farmer.farmerId);
         }
         else
         {
-            String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getThumbUrl());
-            MyPicassoInstance.getInstance().invalidate(thumbUrl);
+            MyPicassoInstance.getInstance().invalidate(farmer.getThumbUrl());
         }
 
         JSONObject json = new JSONObject(attachmentMap);
@@ -1288,10 +1287,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
         RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
-        if (farmer.getThumbUrl() == null || farmer.getThumbUrl().isEmpty()) {
+        if (farmer.getThumbAttachmentId() == null || farmer.getThumbAttachmentId().isEmpty()) {
             WebApi.addAttachment(addFarmerPicCallback, entityBody, imageBody);
         } else {
-            WebApi.editAttachment(editFarmerPicCallback, farmer.getThumbUrl(), entityBody, imageBody);
+            WebApi.editAttachment(editFarmerPicCallback, farmer.getThumbAttachmentId(), entityBody, imageBody);
         }
     }
 
@@ -1337,19 +1336,15 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "ID");
         attachmentMap.put("Name", "national_id.png");
-        if(farmer.getFarmerIdPhotoUrl() == null || farmer.getFarmerIdPhotoUrl().isEmpty()) {
+        if(farmer.getNationalCardAttachmentId() == null || farmer.getNationalCardAttachmentId().isEmpty()) {
             attachmentMap.put("ParentId", farmer.farmerId);
         }
         else
         {
-            String idPhotoUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getFarmerIdPhotoUrl());
-            MyPicassoInstance.getInstance().invalidate(idPhotoUrl);
+            MyPicassoInstance.getInstance().invalidate(farmer.getNationalCardUrl());
         }
 
         JSONObject json = new JSONObject(attachmentMap);
-
-//        File f = new File(farmerIdImageUri);
-//        byte[] byteArrayImage = getByteArrayFromFile(f);
 
         byte[] byteArrayImage = null;
         Bitmap bmp = null;
@@ -1376,10 +1371,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
         RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
-        if (farmer.getFarmerIdPhotoUrl() == null || farmer.getFarmerIdPhotoUrl().isEmpty()) {
+        if (farmer.getNationalCardAttachmentId() == null || farmer.getNationalCardAttachmentId().isEmpty()) {
             WebApi.addAttachment(addFarmerIdPicCallback, entityBody, imageBody);
         } else {
-            WebApi.editAttachment(editFarmerIdPicCallback, farmer.getFarmerIdPhotoUrl(), entityBody, imageBody);
+            WebApi.editAttachment(editFarmerIdPicCallback, farmer.getNationalCardAttachmentId(), entityBody, imageBody);
         }
     }
 
