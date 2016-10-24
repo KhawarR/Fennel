@@ -1,10 +1,14 @@
 package tintash.fennel.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTabHost;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.TabHost;
 
 import tintash.fennel.R;
 import tintash.fennel.fragments.BaseContainerFragment;
@@ -13,7 +17,7 @@ import tintash.fennel.fragments.MyFarmerContainerFragment;
 import tintash.fennel.fragments.MyLogbookContainerFragment;
 import tintash.fennel.fragments.MySignUpsContainerFragment;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity implements TabHost.OnTabChangeListener {
 
     private static final String TAB_1_TAG = "tab_1";
     private static final String TAB_2_TAG = "tab_2";
@@ -46,6 +50,8 @@ public class MainActivity extends BaseActivity {
         mTabHost.addTab(
                 mTabHost.newTabSpec(TAB_4_TAG).setIndicator("", ContextCompat.getDrawable(this, R.drawable.selector_mylogbook)),
                 MyLogbookContainerFragment.class, null);
+
+        mTabHost.setOnTabChangedListener(this);
     }
 
     @Override
@@ -69,5 +75,15 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onTabChanged(String tabId) {
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            view.clearFocus();
+        }
     }
 }
