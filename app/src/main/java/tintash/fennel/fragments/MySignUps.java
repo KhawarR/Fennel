@@ -454,8 +454,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                 isFarmerHome = farmObj.optBoolean("Is_Farmer_Home__c");
 
-                String status = farmObj.getString("Status__c");
-
+//                String status = farmObj.getString("Status__c");
+                String status = farmObj.getString("Sign_Up_Status__c");
                 if(status.equalsIgnoreCase(Constants.STR_INCOMPLETE))
                 {
                     incompleteFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false));
@@ -464,9 +464,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 {
                     pendingFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false));
                 }
-                else// if(status.equalsIgnoreCase(Constants.STR_APPROVED))
+                else if(status.equalsIgnoreCase(Constants.STR_APPROVED))
                 {
-                    incompleteFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false));
+                    approvedFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false));
                 }
             }
         }
