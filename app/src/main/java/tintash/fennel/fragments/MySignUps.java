@@ -430,11 +430,12 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     village = objVillage.getString("Name");
                 }
 
-                JSONObject objFarmer = farmObj.optJSONObject("Farmers__r");
+                id = farmObj.optString("Farmer__c");
+                if(id != null && id.equalsIgnoreCase("null")) id = "";
+
+                JSONObject objFarmer = farmObj.optJSONObject("Farmer__r");
                 if(objFarmer != null)
                 {
-                    id = objFarmer.getString("Id");
-                    if(id.equalsIgnoreCase("null")) id = "";
                     fullName = objFarmer.getString("FullName__c");
                     if(fullName.equalsIgnoreCase("null")) fullName = "";
                     firstName = objFarmer.getString("First_Name__c");
@@ -452,10 +453,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     leader = objFarmer.getBoolean("Leader__c");
                 }
 
-                isFarmerHome = farmObj.getBoolean("Is_Farmer_Home__c");
+                isFarmerHome = farmObj.optBoolean("Is_Farmer_Home__c");
 
-                String status = farmObj.getString("Status__c");
-
+//                String status = farmObj.getString("Status__c");
+                String status = farmObj.getString("Sign_Up_Status__c");
                 if(status.equalsIgnoreCase(Constants.STR_INCOMPLETE))
                 {
                     incompleteFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false));
@@ -814,16 +815,16 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     };
 
     private void getAboutMeAttachment() {
-        String queryTable = "Facilitator__c";
-        String userType = PreferenceHelper.getInstance().readLoginUserType();
-        if(userType.equalsIgnoreCase(Constants.STR_FACILITATOR))
-            queryTable = "Facilitator__c";
-        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_OFFICER))
-            queryTable = "Field_Officer__c";
-        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_MANAGER))
-            queryTable = "Field_Manager__c";
+        String queryTable = "Employee__c";
+//        String userType = PreferenceHelper.getInstance().readLoginUserType();
+//        if(userType.equalsIgnoreCase(Constants.STR_FACILITATOR))
+//            queryTable = "Facilitator__c";
+//        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_OFFICER))
+//            queryTable = "Field_Officer__c";
+//        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_MANAGER))
+//            queryTable = "Field_Manager__c";
 
-        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readLoginUserId());
+        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readUserEmployeeId());
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         apiCall.enqueue(aboutMeAttachmentCallback);
     }

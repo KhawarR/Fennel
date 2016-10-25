@@ -326,11 +326,12 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             farmer = (Farmer) getArguments().getSerializable("farmer");
             txtCreateFarmer.setText("SAVE");
 
-            if (!farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_INCOMPLETE)) {
-                disableForm();
-            } else {
-                isEdit = true;
-            }
+//            if (!farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_INCOMPLETE)) {
+//                disableForm();
+//            } else {
+//                isEdit = true;
+//            }
+            isEdit = true;
 
             populateFarmer();
         }
