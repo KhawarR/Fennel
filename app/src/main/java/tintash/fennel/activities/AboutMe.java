@@ -234,7 +234,9 @@ public class AboutMe extends Activity {
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         PreferenceHelper.getInstance().clearSession();
-                        startActivity(new Intent(AboutMe.this, LoginActivity.class));
+                        Intent intent = new Intent(AboutMe.this, LoginActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
                         finish();
                         dialog.dismiss();
                     }
