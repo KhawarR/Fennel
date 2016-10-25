@@ -812,16 +812,16 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     };
 
     private void getAboutMeAttachment() {
-        String queryTable = "Facilitator__c";
-        String userType = PreferenceHelper.getInstance().readLoginUserType();
-        if(userType.equalsIgnoreCase(Constants.STR_FACILITATOR))
-            queryTable = "Facilitator__c";
-        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_OFFICER))
-            queryTable = "Field_Officer__c";
-        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_MANAGER))
-            queryTable = "Field_Manager__c";
+        String queryTable = "Employee__c";
+//        String userType = PreferenceHelper.getInstance().readLoginUserType();
+//        if(userType.equalsIgnoreCase(Constants.STR_FACILITATOR))
+//            queryTable = "Facilitator__c";
+//        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_OFFICER))
+//            queryTable = "Field_Officer__c";
+//        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_MANAGER))
+//            queryTable = "Field_Manager__c";
 
-        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readUserId());
+        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readUserEmployeeId());
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         apiCall.enqueue(aboutMeAttachmentCallback);
     }

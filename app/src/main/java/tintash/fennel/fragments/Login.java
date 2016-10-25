@@ -188,8 +188,10 @@ public class Login extends BaseFragment implements Callback<Auth> {
             JSONObject userObj = objRecord.getJSONObject("User_ID__r");
             String username = userObj.getString("Name");
             String password = objRecord.getString("Password__c");
+            String userEmpId = objRecord.getString("User_ID__c");
             PreferenceHelper.getInstance().writeUserId(username);
             PreferenceHelper.getInstance().writePassword(password);
+            PreferenceHelper.getInstance().writeUserEmployeeId(userEmpId);
 
             getAboutMeInfo();
         }
