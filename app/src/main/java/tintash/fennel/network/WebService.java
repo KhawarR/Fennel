@@ -31,10 +31,10 @@ public interface WebService {
     @PATCH("/services/data/{apiVersion}/sobjects/Farmer__c/{farmerId}")
     Call<ResponseBody> editFarmer(@Header("Authorization") String token, @Header("Content-Type") String contentType, @Path("apiVersion") String apiVersion, @Path("farmerId") String farmerId, @Body HashMap<String, Object> farmer);
 
-    @POST ("/services/data/{apiVersion}/sobjects/Farm__c/")
+    @POST ("/services/data/{apiVersion}/sobjects/Shamba__c/")
     Call<ResponseModel> addFarm(@Header("Authorization") String token, @Header("Content-Type") String contentType, @Path("apiVersion") String apiVersion, @Body HashMap<String, Object> farm);
 
-    @PATCH ("/services/data/{apiVersion}/sobjects/Farm__c/{farmId}")
+    @PATCH ("/services/data/{apiVersion}/sobjects/Shamba__c/{farmId}")
     Call<ResponseBody> editFarm(@Header("Authorization") String token, @Header("Content-Type") String contentType, @Path("apiVersion") String apiVersion, @Path("farmId") String farmId,  @Body HashMap<String, Object> farm);
 
     @Multipart
