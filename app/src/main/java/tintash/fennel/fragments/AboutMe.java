@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -139,7 +138,7 @@ public class AboutMe extends BaseFragment {
         else if(userType.equalsIgnoreCase(Constants.STR_FIELD_MANAGER))
             queryTable = "Field_Manager__c";
 
-        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readLoginUserId());
+        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readUserId());
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         apiCall.enqueue(aboutMeAttachmentCallback);
     }
@@ -318,7 +317,7 @@ public class AboutMe extends BaseFragment {
         attachmentMap.put("Description", "picture");
         attachmentMap.put("Name", "profile_picture.png");
         if (pictureAttachmentId == null || pictureAttachmentId.isEmpty()) {
-            attachmentMap.put("ParentId", loggedInUserId);
+            attachmentMap.put("ParentId", PreferenceHelper.getInstance().readUserId());
         }
         String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), PreferenceHelper.getInstance().readAboutAttId());
         MyPicassoInstance.getInstance().invalidate(thumbUrl);

@@ -429,11 +429,12 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     village = objVillage.getString("Name");
                 }
 
-                JSONObject objFarmer = farmObj.optJSONObject("Farmers__r");
+                id = farmObj.optString("Farmer__c");
+                if(id != null && id.equalsIgnoreCase("null")) id = "";
+
+                JSONObject objFarmer = farmObj.optJSONObject("Farmer__r");
                 if(objFarmer != null)
                 {
-                    id = objFarmer.getString("Id");
-                    if(id.equalsIgnoreCase("null")) id = "";
                     fullName = objFarmer.getString("FullName__c");
                     if(fullName.equalsIgnoreCase("null")) fullName = "";
                     firstName = objFarmer.getString("First_Name__c");
@@ -451,7 +452,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     leader = objFarmer.getBoolean("Leader__c");
                 }
 
-                isFarmerHome = farmObj.getBoolean("Is_Farmer_Home__c");
+                isFarmerHome = farmObj.optBoolean("Is_Farmer_Home__c");
 
                 String status = farmObj.getString("Status__c");
 
@@ -463,9 +464,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 {
                     pendingFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false));
                 }
-                else if(status.equalsIgnoreCase(Constants.STR_APPROVED))
+                else// if(status.equalsIgnoreCase(Constants.STR_APPROVED))
                 {
-                    approvedFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false));
+                    incompleteFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false));
                 }
             }
         }
@@ -820,7 +821,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         else if(userType.equalsIgnoreCase(Constants.STR_FIELD_MANAGER))
             queryTable = "Field_Manager__c";
 
-        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readLoginUserId());
+        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readUserId());
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         apiCall.enqueue(aboutMeAttachmentCallback);
     }
