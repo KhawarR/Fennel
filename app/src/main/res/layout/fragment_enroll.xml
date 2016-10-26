@@ -277,6 +277,7 @@
                 </LinearLayout>
 
                 <wal.fennel.views.FontTextView
+                    android:id="@+id/lblMobileNumber"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/padding_10"
