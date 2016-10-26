@@ -405,29 +405,29 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 boolean leader = false;
 
                 farmId = farmObj.getString("Id");
-
-                JSONObject objLocation = farmObj.optJSONObject("Location__r");
+                JSONObject objLocation = farmObj.optJSONObject("LocationLookup__r");
                 if(objLocation != null)
                 {
                     location = objLocation.getString("Name");
                 }
 
-                JSONObject objSubLocation = farmObj.optJSONObject("Sub_Location__r");
+                JSONObject objSubLocation = farmObj.optJSONObject("Sub_LocationLookup__r");
                 if(objSubLocation != null)
                 {
                     subLocation = objSubLocation.getString("Name");
-                }
-
-                JSONObject objTree = farmObj.optJSONObject("Tree__r");
-                if(objTree != null)
-                {
-                    tree = objTree.getString("Name");
                 }
 
                 JSONObject objVillage = farmObj.optJSONObject("Village__r");
                 if(objVillage != null)
                 {
                     village = objVillage.getString("Name");
+                }
+
+
+                JSONObject objTree = farmObj.optJSONObject("Tree_Specie__r");
+                if(objTree != null)
+                {
+                    tree = objTree.getString("Name");
                 }
 
                 id = farmObj.optString("Farmer__c");
@@ -457,9 +457,16 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
 //                String status = farmObj.getString("Status__c");
                 String status = farmObj.getString("Sign_Up_Status__c");
+
+                String locationName = DatabaseHelper.getInstance().getLocationNameForId(location);
+                String subLocationName = DatabaseHelper.getInstance().getSubLocationNameForId(subLocation);
+                String villageName = DatabaseHelper.getInstance().getVillageNameForId(village);
+                String treeName = DatabaseHelper.getInstance().getTreeNameForId(tree);
+
+
                 if(status.equalsIgnoreCase(Constants.STR_INCOMPLETE))
                 {
-                    incompleteFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false));
+                    incompleteFarmersList.add(new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, subLocationName, villageName, treeName, isFarmerHome, mobileNumber, "", "", "", status, false));
                 }
                 else if(status.equalsIgnoreCase(Constants.STR_PENDING))
                 {
