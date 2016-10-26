@@ -14,6 +14,7 @@
         android:id="@+id/titleBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        fennel:txtLeft="@string/cancel_txt"
         fennel:drawableRight="@drawable/dummy_profile" />
 
 
@@ -46,7 +47,10 @@
                     android:id="@+id/et_first_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:inputType="textCapSentences"
+                    android:singleLine="true"
                     android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
+                    android:nextFocusDown="@+id/et_second_name"
                     android:layout_marginLeft="@dimen/margin_left_adjustment" />
 
                 <tintash.fennel.views.FontTextView
@@ -61,6 +65,9 @@
                     android:id="@+id/et_second_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:inputType="textCapSentences"
+                    android:singleLine="true"
+                    android:nextFocusDown="@+id/et_sur_name"
                     android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
                     android:layout_marginLeft="@dimen/margin_left_adjustment" />
 
@@ -78,6 +85,9 @@
                     android:id="@+id/et_sur_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:inputType="textCapSentences"
+                    android:singleLine="true"
+                    android:nextFocusDown="@+id/et_id_number"
                     android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
                     android:layout_marginLeft="@dimen/margin_left_adjustment" />
 
@@ -96,6 +106,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="number"
+                    android:imeOptions="actionDone"
                     android:layout_marginLeft="@dimen/margin_left_adjustment" />
 
 

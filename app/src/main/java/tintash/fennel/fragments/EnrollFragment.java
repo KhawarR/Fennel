@@ -247,6 +247,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         System.out.println("ViewCreated Enroll ");
 
         titleBarLayout.setOnIconClickListener(this);
+
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
 
         String aboutMeAttId = PreferenceHelper.getInstance().readAboutAttId();
@@ -494,7 +495,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         loadingStarted();
 
-        farmerStatus = "Incomplete";
+        farmerStatus = Constants.STR_INCOMPLETE;
         createOrEditFarmer();
     }
 
@@ -614,6 +615,16 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         else
         {
             lblFarmerHome.setTextColor(getResources().getColor(R.color.black));
+        }
+        if (etMobileNumber.getText() == null || etMobileNumber.getText().toString().isEmpty()) {
+            goodToGo = false;
+            missingData += "\n- Mobile Number";
+            etMobileNumber.setTextColor(getResources().getColor(R.color.dark_red));
+            if(scrollToView == null) scrollToView = lblSurname;
+        }
+        else
+        {
+            etMobileNumber.setTextColor(getResources().getColor(R.color.black));
         }
 
         if (!goodToGo) {
@@ -865,7 +876,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         hideKeyboard();
         loadingStarted();
 
-        farmerStatus = "Pending";
+        farmerStatus = Constants.STR_PENDING;
         createOrEditFarmer();
     }
 
@@ -893,6 +904,11 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         hideKeyboard();
 //        ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
         startActivity(new Intent(getActivity(), AboutMe.class));
+    }
+
+    @Override
+    public void onTitleBarLeftIconClicked(View view) {
+        ((BaseContainerFragment) getParentFragment()).popFragment();
     }
 
     private void showPickerDialog(final boolean isFarmer) {
