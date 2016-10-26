@@ -8,6 +8,7 @@
         <attr name="titleText" format="reference" />
         <attr name="drawableRight" format="reference" />
         <attr name="drawableLeft" format="reference" />
+        <attr name="txtLeft" format="reference"/>
     </declare-styleable>
 
 </resources>

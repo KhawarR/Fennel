@@ -13,7 +13,7 @@
         android:layout_centerVertical="true"
         android:layout_gravity="center_horizontal"
         android:textColor="@color/black_txt_color"
-        android:textSize="22sp"
+        android:textSize="18sp"
         fennel:fontName="Avenir-Black.ttf"
         tools:text="SCREEN TITLE" />
 
@@ -32,7 +32,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
+        android:visibility="gone"
         android:layout_centerVertical="true" />
+
+    <wal.fennel.views.FontTextView
+        android:id="@+id/txtLeft"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:textColor="@color/app_green"
+        android:textSize="12sp"
+        fennel:fontName="Avenir-Black.ttf" />
+
 
     <!--<View-->
         <!--android:layout_height="1dp"-->

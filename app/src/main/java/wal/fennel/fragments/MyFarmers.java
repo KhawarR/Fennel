@@ -65,4 +65,5 @@ public class MyFarmers extends BaseFragment {
 //        ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
         startActivity(new Intent(getActivity(), AboutMe.class));
     }
+
 }

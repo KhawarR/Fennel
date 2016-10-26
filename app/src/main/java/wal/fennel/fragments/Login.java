@@ -59,7 +59,7 @@ public class Login extends BaseFragment{
         super.onViewCreated(view, savedInstanceState);
 
         // TODO Remove on release
-        etId.setText("1114");
+        etId.setText("2211");
         etPassword.setText("pass");
 
         if(!PreferenceHelper.getInstance().readToken().isEmpty() && !PreferenceHelper.getInstance().readLoginUserId().isEmpty())
@@ -178,11 +178,13 @@ public class Login extends BaseFragment{
         if(arrRecords.length() > 0)
         {
             JSONObject objRecord = arrRecords.getJSONObject(0);
-
-            String username = objRecord.getString("Name");
+            JSONObject userObj = objRecord.getJSONObject("User_ID__r");
+            String username = userObj.getString("Name");
             String password = objRecord.getString("Password__c");
+            String userEmpId = objRecord.getString("User_ID__c");
             PreferenceHelper.getInstance().writeUserId(username);
             PreferenceHelper.getInstance().writePassword(password);
+            PreferenceHelper.getInstance().writeUserEmployeeId(userEmpId);
 
             WebApi.getAboutMeInfo(aboutMeCallback);
         }

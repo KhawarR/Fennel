@@ -134,6 +134,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     @Bind(R.id.lblGender)
     TextView lblGender;
 
+    @Bind(R.id.lblMobileNumber)
+    TextView lblMobileNumber;
+
     @Bind(R.id.llGenderContainer)
     LinearLayout llGenderContainer;
 
@@ -238,6 +241,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         System.out.println("ViewCreated Enroll ");
 
         titleBarLayout.setOnIconClickListener(this);
+
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
 
         String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
@@ -324,7 +328,6 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             } else {
                 isEdit = true;
             }
-
             populateFarmer();
         }
 
@@ -488,7 +491,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         loadingStarted();
 
-        farmerStatus = "Incomplete";
+        farmerStatus = "Interested";
         createOrEditFarmer();
     }
 
@@ -609,6 +612,16 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         {
             lblFarmerHome.setTextColor(getResources().getColor(R.color.black));
         }
+        if (etMobileNumber.getText() == null || etMobileNumber.getText().toString().isEmpty()) {
+            goodToGo = false;
+            missingData += "\n- Mobile Number";
+            lblMobileNumber.setTextColor(getResources().getColor(R.color.dark_red));
+            if(scrollToView == null) scrollToView = lblMobileNumber;
+        }
+        else
+        {
+            lblMobileNumber.setTextColor(getResources().getColor(R.color.black));
+        }
 
         if (!goodToGo) {
             scrollView.smoothScrollTo(0, scrollToView.getTop());
@@ -642,7 +655,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     private void addFarmWithFarmerId(String id) {
         HashMap<String, Object> farmMap = getFarmMap();
-        farmMap.put("Farmers__c", id);
+        farmMap.put("Farmer__c", id);
         WebApi.createFarm(createFarmCallback, farmMap);
     }
 
@@ -694,7 +707,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private void editFarmWithFarmId(String farmId) {
 
         HashMap<String, Object> farmMap = getFarmMap();
-        farmMap.put("Farmers__c", farmer.farmerId);
+        farmMap.put("Farmer__c", farmer.farmerId);
         WebApi.editFarm(editFarmCallback, farmId, farmMap);
     }
 
@@ -792,25 +805,28 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private HashMap<String, Object> getFarmMap() {
 
         final HashMap<String, Object> newFarmMap = new HashMap<>();
-        newFarmMap.put("Location__c", location);
-        newFarmMap.put("Sub_Location__c", subLocation);
+        newFarmMap.put("LocationLookup__c", location);
+        newFarmMap.put("Sub_LocationLookup__c", subLocation);
         newFarmMap.put("Village__c", village);
-        newFarmMap.put("Tree__c", treeSpecies);
-        newFarmMap.put("Status__c", farmerStatus);
+        newFarmMap.put("Tree_Specie__c", treeSpecies);
         newFarmMap.put("Is_Farmer_Home__c", txtFarmerHomeYes.isSelected()? true : false);
 
         if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FACILITATOR))
         {
             newFarmMap.put("Facilitator__c", PreferenceHelper.getInstance().readLoginUserId());
-            newFarmMap.put("Signup_by_Facilitator__c", PreferenceHelper.getInstance().readLoginUserId());
+            newFarmMap.put("Facilitator_Signup__c", PreferenceHelper.getInstance().readLoginUserId());
         }
         else if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FIELD_OFFICER))
         {
-            newFarmMap.put("Signup_by_Field_Officer__c", PreferenceHelper.getInstance().readLoginUserId());
+            newFarmMap.put("Field_Officer_Signup__c", PreferenceHelper.getInstance().readLoginUserId());
         }
         else if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FIELD_MANAGER))
         {
-            newFarmMap.put("Signup_by_Field_Manager__c", PreferenceHelper.getInstance().readLoginUserId());
+            newFarmMap.put("Field_Manager_Signup__c", PreferenceHelper.getInstance().readLoginUserId());
+        }
+
+        if (farmerStatus != null && !farmerStatus.isEmpty()) {
+            newFarmMap.put("Sign_Up_Status__c", farmerStatus);
         }
 
         return newFarmMap;
@@ -886,6 +902,11 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         hideKeyboard();
 //        ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
         startActivity(new Intent(getActivity(), AboutMe.class));
+    }
+
+    @Override
+    public void onTitleBarLeftIconClicked(View view) {
+        ((BaseContainerFragment) getParentFragment()).popFragment();
     }
 
     private void showPickerDialog(final boolean isFarmer) {

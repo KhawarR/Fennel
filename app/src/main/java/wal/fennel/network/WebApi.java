@@ -45,19 +45,19 @@ public class WebApi {
     }
 
     public static boolean login(Callback<ResponseBody> callback, String username, String password) {
-        String loginQuery = String.format(NetworkHelper.QUERY_LOGIN, username, password);
+        String loginQuery = String.format(NetworkHelper.QUERY_LOGIN_1, username, password);
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, loginQuery);
         return processCall(apiCall, callback);
     }
 
     public static boolean getAboutMeInfo(Callback<ResponseBody> callback) {
-        String query = String.format(NetworkHelper.QUERY_ABOUT_ME, PreferenceHelper.getInstance().readUserId());
+        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_1, PreferenceHelper.getInstance().readUserId());
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         return processCall(apiCall, callback);
     }
 
     public static boolean getMySignUps(Callback<ResponseBody> callback){
-        String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS, PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId());
+        String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS_1, PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId());
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         return processCall(apiCall, callback);
     }
@@ -69,16 +69,16 @@ public class WebApi {
     }
 
     public static boolean getAboutMeAttachment(Callback<ResponseBody> callback){
-        String queryTable = "Facilitator__c";
-        String userType = PreferenceHelper.getInstance().readLoginUserType();
-        if(userType.equalsIgnoreCase(Constants.STR_FACILITATOR))
-            queryTable = "Facilitator__c";
-        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_OFFICER))
-            queryTable = "Field_Officer__c";
-        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_MANAGER))
-            queryTable = "Field_Manager__c";
+        String queryTable = "Employee__c";
+//        String userType = PreferenceHelper.getInstance().readLoginUserType();
+//        if(userType.equalsIgnoreCase(Constants.STR_FACILITATOR))
+//            queryTable = "Facilitator__c";
+//        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_OFFICER))
+//            queryTable = "Field_Officer__c";
+//        else if(userType.equalsIgnoreCase(Constants.STR_FIELD_MANAGER))
+//            queryTable = "Field_Manager__c";
 
-        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readLoginUserId());
+        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readUserEmployeeId());
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         return processCall(apiCall, callback);
     }

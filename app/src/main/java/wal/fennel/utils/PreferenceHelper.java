@@ -16,6 +16,7 @@ public class PreferenceHelper {
     private static final String KEY_LOGIN_USER_ID = "_log_user_id";
     private static final String KEY_FIRST_RUN = "_first_run";
     private static final String KEY_LOGIN_USER_TYPE = "_login_user_type";
+    private static final String KEY_USER_EMP_ID = "_user_emp_id";
 
     private static final String KEY_ABOUT_ME_FN = "_about_fn";
     private static final String KEY_ABOUT_ME_MN = "_about_mn";
@@ -240,5 +241,16 @@ public class PreferenceHelper {
         writeAboutFOname("");
         writeAboutFMname("");
         writeAboutAttId("");
+    }
+
+    public void writeUserEmployeeId(String userEmpId) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putString(KEY_USER_EMP_ID, userEmpId);
+        editor.commit();
+    }
+
+    public String readUserEmployeeId() {
+        String value = mPref.getString(KEY_USER_EMP_ID, "");
+        return value;
     }
 }

@@ -346,23 +346,16 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 boolean leader = false;
 
                 farmId = farmObj.getString("Id");
-
-                JSONObject objLocation = farmObj.optJSONObject("Location__r");
+                JSONObject objLocation = farmObj.optJSONObject("LocationLookup__r");
                 if(objLocation != null)
                 {
                     location = objLocation.getString("Name");
                 }
 
-                JSONObject objSubLocation = farmObj.optJSONObject("Sub_Location__r");
+                JSONObject objSubLocation = farmObj.optJSONObject("Sub_LocationLookup__r");
                 if(objSubLocation != null)
                 {
                     subLocation = objSubLocation.getString("Name");
-                }
-
-                JSONObject objTree = farmObj.optJSONObject("Tree__r");
-                if(objTree != null)
-                {
-                    tree = objTree.getString("Name");
                 }
 
                 JSONObject objVillage = farmObj.optJSONObject("Village__r");
@@ -371,11 +364,19 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     village = objVillage.getString("Name");
                 }
 
-                JSONObject objFarmer = farmObj.optJSONObject("Farmers__r");
+
+                JSONObject objTree = farmObj.optJSONObject("Tree_Specie__r");
+                if(objTree != null)
+                {
+                    tree = objTree.getString("Name");
+                }
+
+                id = farmObj.optString("Farmer__c");
+                if(id != null && id.equalsIgnoreCase("null")) id = "";
+
+                JSONObject objFarmer = farmObj.optJSONObject("Farmer__r");
                 if(objFarmer != null)
                 {
-                    id = objFarmer.getString("Id");
-                    if(id.equalsIgnoreCase("null")) id = "";
                     fullName = objFarmer.getString("FullName__c");
                     if(fullName.equalsIgnoreCase("null")) fullName = "";
                     firstName = objFarmer.getString("First_Name__c");
@@ -393,9 +394,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     leader = objFarmer.getBoolean("Leader__c");
                 }
 
-                isFarmerHome = farmObj.getBoolean("Is_Farmer_Home__c");
+                isFarmerHome = farmObj.optBoolean("Is_Farmer_Home__c");
 
-                String status = farmObj.getString("Status__c");
+//                String status = farmObj.getString("Status__c");
+                String status = farmObj.getString("Sign_Up_Status__c");
 
                 Farmer farmer = new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", "", status, false);
 

@@ -39,7 +39,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import wal.fennel.R;
+import wal.fennel.application.Fennel;
 import wal.fennel.network.NetworkHelper;
+import wal.fennel.network.Session;
 import wal.fennel.network.WebApi;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
@@ -320,7 +322,7 @@ public class AboutMe extends Activity {
         attachmentMap.put("Description", "picture");
         attachmentMap.put("Name", "profile_picture.png");
         if (pictureAttachmentId == null || pictureAttachmentId.isEmpty()) {
-            attachmentMap.put("ParentId", loggedInUserId);
+            attachmentMap.put("ParentId", PreferenceHelper.getInstance().readUserEmployeeId());
         }
         String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
         MyPicassoInstance.getInstance().invalidate(thumbUrl);

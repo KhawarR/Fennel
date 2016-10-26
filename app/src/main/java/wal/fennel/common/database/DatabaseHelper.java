@@ -173,5 +173,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.i("FENNEL", "Tree inserted!");
         }
     }
+
     //endregion
 }
