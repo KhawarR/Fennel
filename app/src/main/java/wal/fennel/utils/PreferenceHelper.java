@@ -26,6 +26,7 @@ public class PreferenceHelper {
     private static final String KEY_ABOUT_ME_ATT_URL = "_about_att_url";
 
     private static final String KEY_IS_SYNC_REQUIRED = "_is_sync_req";
+    private static final String KEY_IS_SYNC_STARTED = "_is_sync_started";
 
 
     private static PreferenceHelper sInstance;
@@ -211,6 +212,17 @@ public class PreferenceHelper {
 
     public boolean readIsSyncRequired() {
         boolean value = mPref.getBoolean(KEY_IS_SYNC_REQUIRED, false);
+        return value;
+    }
+
+    public void writeIsSyncstarted(boolean value) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putBoolean(KEY_IS_SYNC_STARTED, value);
+        editor.commit();
+    }
+
+    public boolean readIsSyncStarted() {
+        boolean value = mPref.getBoolean(KEY_IS_SYNC_STARTED, false);
         return value;
     }
 

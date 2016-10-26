@@ -46,11 +46,11 @@ public class NetworkHelper {
         boolean isConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
 
-        return isConnected;
+        return isConnected && isCommunicationAllowed();
     }
 
     public static boolean isCommunicationAllowed()
     {
-        return !PreferenceHelper.getInstance().readIsSyncRequired();
+        return !PreferenceHelper.getInstance().readIsSyncStarted();
     }
 }
