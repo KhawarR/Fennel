@@ -136,6 +136,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     @Bind(R.id.lblGender)
     TextView lblGender;
 
+    @Bind(R.id.lblMobileNumber)
+    TextView lblMobileNumber;
+
     @Bind(R.id.llGenderContainer)
     LinearLayout llGenderContainer;
 
@@ -496,7 +499,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         loadingStarted();
 
-        farmerStatus = Constants.STR_INCOMPLETE;
+        farmerStatus = "Interested";
         createOrEditFarmer();
     }
 
@@ -620,12 +623,12 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         if (etMobileNumber.getText() == null || etMobileNumber.getText().toString().isEmpty()) {
             goodToGo = false;
             missingData += "\n- Mobile Number";
-            etMobileNumber.setTextColor(getResources().getColor(R.color.dark_red));
-            if(scrollToView == null) scrollToView = lblSurname;
+            lblMobileNumber.setTextColor(getResources().getColor(R.color.dark_red));
+            if(scrollToView == null) scrollToView = lblMobileNumber;
         }
         else
         {
-            etMobileNumber.setTextColor(getResources().getColor(R.color.black));
+            lblMobileNumber.setTextColor(getResources().getColor(R.color.black));
         }
 
         if (!goodToGo) {
@@ -880,7 +883,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         hideKeyboard();
         loadingStarted();
 
-        farmerStatus = Constants.STR_PENDING;
+        farmerStatus = "Pending";
         createOrEditFarmer();
     }
 
