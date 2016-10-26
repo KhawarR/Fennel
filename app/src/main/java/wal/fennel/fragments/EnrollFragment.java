@@ -498,7 +498,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         loadingStarted();
 
-        farmerStatus = Constants.STR_INCOMPLETE;
+        farmerStatus = "Interested";
         createOrEditFarmer();
     }
 
@@ -879,7 +879,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         hideKeyboard();
         loadingStarted();
 
-        farmerStatus = Constants.STR_PENDING;
+        farmerStatus = "Pending";
         createOrEditFarmer();
     }
 
