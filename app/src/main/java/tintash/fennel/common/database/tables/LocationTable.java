@@ -85,4 +85,18 @@ public class LocationTable {
 
         return allLocations;
     }
+
+    public static String getNameForId(DatabaseHelper dpHelper, String locId) {
+
+        String name = null;
+
+        SQLiteDatabase db = dpHelper.getReadableDatabase();
+        String query = "SELECT " + COLUMN_NAME + " FROM " + TABLE_LOCATION + " WHERE " + COLUMN_SFDC_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{locId});
+        if (cursor.getCount() > 0 && cursor.moveToFirst()) {
+            name = cursor.getString(0);
+        }
+        cursor.close();
+        return name;
+    }
 }

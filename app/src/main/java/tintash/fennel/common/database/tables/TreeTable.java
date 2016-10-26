@@ -8,9 +8,7 @@ import android.util.Log;
 import java.util.ArrayList;
 
 import tintash.fennel.common.database.DatabaseHelper;
-import tintash.fennel.models.Location;
 import tintash.fennel.models.Tree;
-import tintash.fennel.models.Village;
 
 /**
  * Created by irfanayaz on 10/7/16.
@@ -112,5 +110,19 @@ public class TreeTable {
         c.close();
 
         return allLocations;
+    }
+
+    public static String getNameForId(DatabaseHelper dpHelper, String treeId) {
+
+        String name = null;
+
+        SQLiteDatabase db = dpHelper.getReadableDatabase();
+        String query = "SELECT " + COLUMN_NAME + " FROM " + TABLE_TREE + " WHERE " + COLUMN_SFDC_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{treeId});
+        if (cursor.getCount() > 0 && cursor.moveToFirst()) {
+            name = cursor.getString(0);
+        }
+        cursor.close();
+        return name;
     }
 }

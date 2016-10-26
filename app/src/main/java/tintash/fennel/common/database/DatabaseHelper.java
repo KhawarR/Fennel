@@ -173,5 +173,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.i("FENNEL", "Tree inserted!");
         }
     }
+
+    public String getLocationNameForId(String locationId) {
+        return LocationTable.getNameForId(this, locationId);
+    }
+
+    public String getSubLocationNameForId(String locationId) {
+        return SubLocationTable.getNameForId(this, locationId);
+    }
+
+    public String getVillageNameForId(String locationId) {
+        return VillageTable.getNameForId(this, locationId);
+    }
+
+    public String getTreeNameForId(String locationId) {
+        return TreeTable.getNameForId(this, locationId);
+    }
+
     //endregion
 }
