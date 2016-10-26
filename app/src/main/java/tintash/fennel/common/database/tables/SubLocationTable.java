@@ -1,3 +1,4 @@
+
 package tintash.fennel.common.database.tables;
 
 import android.content.ContentValues;
@@ -110,19 +111,5 @@ public class SubLocationTable {
         c.close();
 
         return allLocations;
-    }
-
-    public static String getNameForId(DatabaseHelper dpHelper, String sublocId) {
-
-        String name = null;
-
-        SQLiteDatabase db = dpHelper.getReadableDatabase();
-        String query = "SELECT " + COLUMN_NAME + " FROM " + TABLE_SUB_LOCATION + " WHERE " + COLUMN_SFDC_ID + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{sublocId});
-        if (cursor.getCount() > 0 && cursor.moveToFirst()) {
-            name = cursor.getString(0);
-        }
-        cursor.close();
-        return name;
     }
 }
