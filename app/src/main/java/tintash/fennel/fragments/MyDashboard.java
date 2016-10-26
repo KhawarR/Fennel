@@ -1,5 +1,6 @@
 package tintash.fennel.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import tintash.fennel.R;
+import tintash.fennel.activities.AboutMe;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.utils.CircleViewTransformation;
 import tintash.fennel.utils.Constants;
@@ -61,6 +63,7 @@ public class MyDashboard extends BaseFragment {
 
     @Override
     public void onTitleBarRightIconClicked(View view) {
-        ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
+//        ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
+        startActivity(new Intent(getActivity(), AboutMe.class));
     }
 }
