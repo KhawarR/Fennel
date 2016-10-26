@@ -39,8 +39,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import tintash.fennel.R;
-import tintash.fennel.activities.LoginActivity;
-import tintash.fennel.application.Fennel;
 import tintash.fennel.network.NetworkHelper;
 import tintash.fennel.network.WebApi;
 import tintash.fennel.utils.CircleViewTransformation;
@@ -111,7 +109,7 @@ public class AboutMe extends Activity {
         String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
         if(!thumbUrl.isEmpty())
         {
-            if(NetworkHelper.isNetAvailable(getActivity()))
+            if(NetworkHelper.isNetAvailable(AboutMe.this))
             {
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
@@ -151,7 +149,7 @@ public class AboutMe extends Activity {
                         {
                             String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
                             PreferenceHelper.getInstance().writeAboutAttUrl(thumbUrl);
-                            if(NetworkHelper.isNetAvailable(getActivity()))
+                            if(NetworkHelper.isNetAvailable(AboutMe.this))
                             {
                                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
                                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
@@ -171,7 +169,9 @@ public class AboutMe extends Activity {
                 else if(response.code() == 401)
                 {
                     PreferenceHelper.getInstance().clearSession();
-                    startActivity(new Intent(AboutMe.this, LoginActivity.class));
+                    Intent intent = new Intent(AboutMe.this, LoginActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
                     finish();
                 }
                 else {
@@ -378,8 +378,10 @@ public class AboutMe extends Activity {
             else if(response.code() == 401)
             {
                 PreferenceHelper.getInstance().clearSession();
-                startActivity(new Intent(getActivity(), LoginActivity.class));
-                getActivity().finish();
+                Intent intent = new Intent(AboutMe.this, LoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
             } else {
                 Log.i("Fennel", "facilitator profile picture upload failed!");
             }
@@ -400,8 +402,10 @@ public class AboutMe extends Activity {
             else if(response.code() == 401)
             {
                 PreferenceHelper.getInstance().clearSession();
-                startActivity(new Intent(getActivity(), LoginActivity.class));
-                getActivity().finish();
+                Intent intent = new Intent(AboutMe.this, LoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
             } else {
                 Log.i("Fennel", "facilitator profile picture edit failed!");
             }
