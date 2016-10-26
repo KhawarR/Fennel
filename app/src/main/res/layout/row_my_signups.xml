@@ -21,7 +21,7 @@
         android:orientation="vertical"
         android:layout_marginLeft="10dp">
 
-        <tintash.fennel.views.FontTextView
+        <wal.fennel.views.FontTextView
             android:id="@+id/tv_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -37,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
-            <tintash.fennel.views.FontTextView
+            <wal.fennel.views.FontTextView
                 android:id="@+id/tv_village"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -48,7 +48,7 @@
                 fennel:fontName="Avenir-Book.ttf"
                 android:textSize="14sp"
                 android:layout_marginTop="5dp"/>
-            <tintash.fennel.views.FontTextView
+            <wal.fennel.views.FontTextView
                 android:id="@+id/tv_sublocation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

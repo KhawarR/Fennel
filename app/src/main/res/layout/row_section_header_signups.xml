@@ -12,7 +12,7 @@
         android:background="@color/cell_separator_color"
         />
 
-    <tintash.fennel.views.FontTextView
+    <wal.fennel.views.FontTextView
         android:id="@+id/tv_header"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
