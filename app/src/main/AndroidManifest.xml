@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="tintash.fennel">
+    package="wal.fennel">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
-        android:name=".application.Fennel"
+        android:name="wal.fennel.application.Fennel"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -14,7 +14,7 @@
         android:theme="@style/AppTheme"
         android:largeHeap="true">
         <activity
-            android:name=".activities.LoginActivity"
+            android:name="wal.fennel.activities.LoginActivity"
             android:theme="@style/AppTheme.TranslucentStatusBar"
             android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait">
@@ -24,16 +24,17 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.MainActivity"
+            android:name="wal.fennel.activities.MainActivity"
             android:theme="@style/AppTheme"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan|adjustResize"/>
         <activity
-            android:name=".activities.AboutMe"
+            android:name="wal.fennel.activities.AboutMe"
             android:theme="@style/AppTheme"
             android:screenOrientation="portrait"/>
         <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="65bb35e73e592b91cec78c15700939372709cc1d" />
+            android:value="d3e227cb7f57d1985242cf57557781227233f3fb" />
     </application>
 
 </manifest>

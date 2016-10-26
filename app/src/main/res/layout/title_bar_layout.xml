@@ -5,7 +5,7 @@
 
     >
 
-    <tintash.fennel.views.FontTextView
+    <wal.fennel.views.FontTextView
         android:id="@+id/txtTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

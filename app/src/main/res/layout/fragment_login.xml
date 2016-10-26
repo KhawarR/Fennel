@@ -69,7 +69,7 @@
             android:inputType="textPassword"
             android:padding="@dimen/padding_15" />
 
-        <tintash.fennel.views.FontTextView
+        <wal.fennel.views.FontTextView
             android:id="@+id/txtLogin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

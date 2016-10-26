@@ -7,7 +7,7 @@
     android:background="@color/white">
 
 
-    <tintash.fennel.views.TitleBarLayout
+    <wal.fennel.views.TitleBarLayout
         android:id="@+id/titleBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
