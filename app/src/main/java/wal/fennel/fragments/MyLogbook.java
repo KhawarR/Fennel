@@ -62,4 +62,5 @@ public class MyLogbook extends BaseFragment {
 //        ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
         startActivity(new Intent(getActivity(), AboutMe.class));
     }
+
 }
