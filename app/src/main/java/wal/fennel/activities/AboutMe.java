@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -77,9 +78,6 @@ public class AboutMe extends Activity {
 
     @Bind(R.id.profile_image)
     CircleImageView cIvProfileMain;
-
-    @Bind(R.id.pbImage)
-    ProgressBar pbImage;
 
     CircleImageView cIvIconRight;
 
@@ -288,17 +286,19 @@ public class AboutMe extends Activity {
             @Override
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
-                String localUri = images.get(0).getOriginalPath();
+                String originalPath = images.get(0).getOriginalPath();
+                String uri = Uri.parse("file://" + originalPath).toString();
+                addPictureAttachment(originalPath);
                 if(NetworkHelper.isNetAvailable(AboutMe.this))
                 {
-                    addPictureAttachment(localUri);
+                    addPictureAttachment(originalPath);
                 }
                 else
                 {
-                    PreferenceHelper.getInstance().writeAboutAttUrl(localUri);
+                    PreferenceHelper.getInstance().writeAboutAttUrl(uri);
                 }
-                MyPicassoInstance.getInstance().load(localUri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
-                MyPicassoInstance.getInstance().load(localUri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+                MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+                MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
             }
 
             @Override
@@ -330,8 +330,6 @@ public class AboutMe extends Activity {
     }
 
     public void addPictureAttachment(String imageUri) {
-
-        pbImage.setVisibility(View.VISIBLE);
 
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "picture");
@@ -379,7 +377,6 @@ public class AboutMe extends Activity {
     Callback<ResponseBody> addAttachmentCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            pbImage.setVisibility(View.GONE);
             if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                 Log.i("Fennel", "facilitator profile picture uploaded successfully!");
                 String responseStr = null;
@@ -418,14 +415,12 @@ public class AboutMe extends Activity {
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
             Log.i("Fennel", "facilitator profile picture upload failed!");
-            pbImage.setVisibility(View.GONE);
         }
     };
 
     Callback<ResponseBody> editAttachmentCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            pbImage.setVisibility(View.GONE);
             if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                 Log.i("Fennel", "facilitator profile picture edited successfully!");
 
@@ -455,7 +450,6 @@ public class AboutMe extends Activity {
 
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
-            pbImage.setVisibility(View.GONE);
             Log.i("Fennel", "facilitator profile picture edit failed!");
         }
     };
