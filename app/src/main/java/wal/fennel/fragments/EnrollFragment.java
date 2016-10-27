@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -49,6 +50,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.realm.Realm;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -188,6 +190,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private String subLocation;
     private String village;
     private String treeSpecies;
+    private String locationName;
+    private String subLocationName;
+    private String villageName;
+    private String treeSpeciesName;
 
     private boolean isFarmerPhotoSet = false;
     private boolean isNationalIdPhotoSet = false;
@@ -943,10 +949,17 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
                 imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                MyPicassoInstance.getInstance().load(images.get(0).getQueryUri()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgFarmerPhoto);
-//                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgFarmerPhoto, options);
-                farmerImageUri = images.get(0).getOriginalPath();
+
+                String originalPath = images.get(0).getOriginalPath();
+                String uri = Uri.parse("file://" + originalPath).toString();
+
+                MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgFarmerPhoto);
+                farmerImageUri = originalPath;
                 isFarmerPhotoSet = true;
+                if(farmer == null)
+                    farmer = new Farmer();
+                farmer.thumbUrl = uri;
+
                 checkEnableSubmit();
             }
 
@@ -969,11 +982,18 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             @Override
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
-//                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgNationalID, options);
                 imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                farmerIdImageUri = images.get(0).getOriginalPath();
-                MyPicassoInstance.getInstance().load(images.get(0).getQueryUri()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgNationalID);
+
+                String originalPath = images.get(0).getOriginalPath();
+                String uri = Uri.parse("file://" + originalPath).toString();
+
+                MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgNationalID);
+                farmerIdImageUri = originalPath;
                 isNationalIdPhotoSet = true;
+                if(farmer == null)
+                    farmer = new Farmer();
+                farmer.nationalCardUrl = uri;
+
                 checkEnableSubmit();
             }
 
@@ -1067,10 +1087,14 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         switch (spinnerView.getId()) {
             case R.id.spLocation:
             {
-                if (position < 0)
+                if (position < 0) {
                     location = "";
-                else
+                    locationName = "";
+                }
+                else {
                     location = arrLocations.get(position).id;
+                    locationName = arrLocations.get(position).name;
+                }
                 if((boolean)spLocation.getTag())
                 {
                     updateSubLocFromLocation(location);
@@ -1094,10 +1118,14 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 break;
             case R.id.spSubLocation:
             {
-                if (position < 0)
+                if (position < 0) {
                     subLocation = "";
-                else
+                    subLocationName = "";
+                }
+                else {
                     subLocation = arrSubLocations.get(position).id;
+                    subLocationName = arrSubLocations.get(position).name;
+                }
                 if((boolean)spSubLocation.getTag())
                 {
                     updateVillageAndTreeFromSubLocation(subLocation);
@@ -1115,16 +1143,24 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             }
                 break;
             case R.id.spVillage:
-                if (position < 0)
+                if (position < 0) {
                     village = "";
-                else
+                    villageName = "";
+                }
+                else {
                     village = arrVillages.get(position).id;
+                    villageName = arrVillages.get(position).name;
+                }
                 break;
             case R.id.spTree:
-                if (position < 0)
+                if (position < 0) {
                     treeSpecies = "";
-                else
+                    treeSpeciesName = "";
+                }
+                else {
                     treeSpecies = arrTrees.get(position).id;
+                    treeSpeciesName = arrTrees.get(position).name;
+                }
                 break;
         }
         checkEnableSubmit();
@@ -1135,9 +1171,43 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     }
 
+    private void editFarmerInDB() {
+        // Save to DB
+        String firstName = etFirstName.getText().toString();
+        String secondName = etSecondName.getText().toString();
+        String surname = etSurname.getText().toString();
+        String idNumber = etIdNumber.getText().toString();
+        String gender = (tvFemale.isSelected() == true) ? "Female" : "Male";
+        boolean leader = tvLeaderYes.isSelected();
+        String mobileNumber = etMobileNumber.getText().toString();
+        boolean isFarmerHome = txtFarmerHomeYes.isSelected();
+
+        String fullName = (firstName + " " + secondName).trim();
+        fullName = (fullName + " " + surname).trim();
+
+        final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+        Realm.getDefaultInstance().beginTransaction();
+        farmerDbObj.setAllValues(farmer.farmerId, farmer.farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, subLocationName, villageName, treeSpeciesName, isFarmerHome, mobileNumber, farmer.thumbAttachmentId, farmer.nationalCardAttachmentId, "", farmerStatus, false);
+        if (farmerImageUri != null && !farmerImageUri.isEmpty())
+            farmerDbObj.thumbUrl = farmer.thumbUrl;
+        if (farmerIdImageUri != null && !farmerIdImageUri.isEmpty())
+            farmerDbObj.nationalCardUrl = farmer.nationalCardUrl;
+        Realm.getDefaultInstance().commitTransaction();
+
+        loadingFinished();
+        Log.i("LP", "Farmer Edited Successfully");
+        Toast.makeText(getContext(), "Farmer Edited Successfully", Toast.LENGTH_SHORT).show();
+        popToSignupsFragment();
+    }
+
     private void editFarmer() {
-        final HashMap<String, Object> farmerMap = getFarmerMap();
-        WebApi.editFarmer(editFarmerCallback, farmer.farmerId, farmerMap);
+        if(NetworkHelper.isNetAvailable(getActivity())){
+            final HashMap<String, Object> farmerMap = getFarmerMap();
+            WebApi.editFarmer(editFarmerCallback, farmer.farmerId, farmerMap);
+        }
+        else {
+            editFarmerInDB();
+        }
     }
 
     Callback<ResponseBody> editFarmerCallback = new Callback<ResponseBody>() {
@@ -1198,9 +1268,44 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         }
     };
 
+    private void createFarmerInDB() {
+        // Save to DB
+        String id = String.valueOf(System.currentTimeMillis());
+        String firstName = etFirstName.getText().toString();
+        String secondName = etSecondName.getText().toString();
+        String surname = etSurname.getText().toString();
+        String idNumber = etIdNumber.getText().toString();
+        String gender = (tvFemale.isSelected() == true) ? "Female" : "Male";
+        boolean leader = tvLeaderYes.isSelected();
+        String mobileNumber = etMobileNumber.getText().toString();
+        boolean isFarmerHome = txtFarmerHomeYes.isSelected();
+
+        String fullName = (firstName + " " + secondName).trim();
+        fullName = (fullName + " " + surname).trim();
+
+        Realm.getDefaultInstance().beginTransaction();
+        final Farmer farmerDbObj = Realm.getDefaultInstance().createObject(Farmer.class);
+        farmerDbObj.setAllValues(id, id, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, subLocationName, villageName, treeSpeciesName, isFarmerHome, mobileNumber, id, id, "", farmerStatus, false);
+        if(farmerImageUri != null && !farmerImageUri.isEmpty())
+            farmerDbObj.thumbUrl = farmer.thumbUrl;
+        if(farmerIdImageUri != null && !farmerIdImageUri.isEmpty())
+            farmerDbObj.nationalCardUrl = farmer.nationalCardUrl;
+        Realm.getDefaultInstance().commitTransaction();
+
+        loadingFinished();
+        Log.i("LP", "Farm Added To DB");
+        Toast.makeText(getContext(), "Farmer Enrolled Successfully", Toast.LENGTH_SHORT).show();
+        popToSignupsFragment();
+    }
+
     private void createFarmer() {
-        final HashMap<String, Object> farmerMap = getFarmerMap();
-        WebApi.createFarmer(createFarmerCallback, farmerMap);
+        if(NetworkHelper.isNetAvailable(getActivity())) {
+            final HashMap<String, Object> farmerMap = getFarmerMap();
+            WebApi.createFarmer(createFarmerCallback, farmerMap);
+        }
+        else {
+            createFarmerInDB();
+        }
     }
 
     Callback<ResponseModel> createFarmerCallback = new Callback<ResponseModel>() {
