@@ -44,4 +44,8 @@ public class NetworkHelper {
     {
         return !PreferenceHelper.getInstance().readIsSyncStarted();
     }
+
+    public static String makeAttachmentUrlFromId(String attId) {
+        return String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
+    }
 }

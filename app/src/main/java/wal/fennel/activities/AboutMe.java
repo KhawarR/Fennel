@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.kbeanie.multipicker.api.CameraImagePicker;
@@ -77,6 +78,9 @@ public class AboutMe extends Activity {
     @Bind(R.id.profile_image)
     CircleImageView cIvProfileMain;
 
+    @Bind(R.id.pbImage)
+    ProgressBar pbImage;
+
     CircleImageView cIvIconRight;
 
     private ImagePicker imagePicker;
@@ -108,6 +112,18 @@ public class AboutMe extends Activity {
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
 
         populateView();
+
+        WebApi.getAboutMeInfo(aboutMeCallback);
+    }
+
+    private void populateView()
+    {
+        tvFirstName.setText(PreferenceHelper.getInstance().readAboutFN());
+        tvSecondName.setText(PreferenceHelper.getInstance().readAboutMN());
+        tvSurname.setText(PreferenceHelper.getInstance().readAboutLN());
+        tvFieldOfficer.setText(PreferenceHelper.getInstance().readAboutFOname());
+        tvFieldManager.setText(PreferenceHelper.getInstance().readAboutFMname());
+
         String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
         if(!thumbUrl.isEmpty())
         {
@@ -122,16 +138,6 @@ public class AboutMe extends Activity {
                 MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
             }
         }
-        WebApi.getAboutMeInfo(aboutMeCallback);
-    }
-
-    private void populateView()
-    {
-        tvFirstName.setText(PreferenceHelper.getInstance().readAboutFN());
-        tvSecondName.setText(PreferenceHelper.getInstance().readAboutMN());
-        tvSurname.setText(PreferenceHelper.getInstance().readAboutLN());
-        tvFieldOfficer.setText(PreferenceHelper.getInstance().readAboutFOname());
-        tvFieldManager.setText(PreferenceHelper.getInstance().readAboutFMname());
     }
 
     private Callback<ResponseBody> aboutMeAttachmentCallback = new Callback<ResponseBody>() {
@@ -149,7 +155,7 @@ public class AboutMe extends Activity {
                         pictureAttachmentId = attId;
                         if(!attId.isEmpty() && !attId.equalsIgnoreCase(PreferenceHelper.getInstance().readAboutAttId()))
                         {
-                            String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
+                            String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(attId);
                             PreferenceHelper.getInstance().writeAboutAttUrl(thumbUrl);
                             if(NetworkHelper.isNetAvailable(AboutMe.this))
                             {
@@ -283,7 +289,14 @@ public class AboutMe extends Activity {
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
                 String localUri = images.get(0).getOriginalPath();
-                addPictureAttachment(localUri);
+                if(NetworkHelper.isNetAvailable(AboutMe.this))
+                {
+                    addPictureAttachment(localUri);
+                }
+                else
+                {
+                    PreferenceHelper.getInstance().writeAboutAttUrl(localUri);
+                }
                 MyPicassoInstance.getInstance().load(localUri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
                 MyPicassoInstance.getInstance().load(localUri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
             }
@@ -317,6 +330,8 @@ public class AboutMe extends Activity {
     }
 
     public void addPictureAttachment(String imageUri) {
+
+        pbImage.setVisibility(View.VISIBLE);
 
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "picture");
@@ -355,9 +370,7 @@ public class AboutMe extends Activity {
         RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
         if (pictureAttachmentId == null || pictureAttachmentId.isEmpty()) {
-
             WebApi.addAttachment(addAttachmentCallback, entityBody, imageBody);
-
         } else {
             WebApi.editAttachment(editAttachmentCallback, pictureAttachmentId, entityBody, imageBody);
         }
@@ -366,6 +379,7 @@ public class AboutMe extends Activity {
     Callback<ResponseBody> addAttachmentCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            pbImage.setVisibility(View.GONE);
             if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                 Log.i("Fennel", "facilitator profile picture uploaded successfully!");
                 String responseStr = null;
@@ -373,6 +387,18 @@ public class AboutMe extends Activity {
                 try {
                     responseStr = response.body().string();
                     pictureAttachmentId = getAttachmentIdFromUploadSuccess(responseStr);
+                    String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(pictureAttachmentId);
+                    PreferenceHelper.getInstance().writeAboutAttUrl(thumbUrl);
+                    if(NetworkHelper.isNetAvailable(AboutMe.this))
+                    {
+                        MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+                        MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+                    }
+                    else
+                    {
+                        MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+                        MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -392,14 +418,28 @@ public class AboutMe extends Activity {
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
             Log.i("Fennel", "facilitator profile picture upload failed!");
+            pbImage.setVisibility(View.GONE);
         }
     };
 
     Callback<ResponseBody> editAttachmentCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            pbImage.setVisibility(View.GONE);
             if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                 Log.i("Fennel", "facilitator profile picture edited successfully!");
+
+                String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
+                if(NetworkHelper.isNetAvailable(AboutMe.this))
+                {
+                    MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+                    MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+                }
+                else
+                {
+                    MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+                    MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+                }
             }
             else if(response.code() == 401)
             {
@@ -415,6 +455,7 @@ public class AboutMe extends Activity {
 
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
+            pbImage.setVisibility(View.GONE);
             Log.i("Fennel", "facilitator profile picture edit failed!");
         }
     };

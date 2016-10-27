@@ -100,15 +100,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         titleBarLayout.setOnIconClickListener(this);
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
 
-        String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
-        if(!thumbUrl.isEmpty())
-        {
-            if(NetworkHelper.isNetAvailable(getActivity()))
-                MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
-            else
-                MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
-        }
-
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(onRefreshListener);
 
@@ -185,6 +176,19 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         getDropDownsData();
         WebApi.getAboutMeAttachment(aboutMeAttachmentCallback);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
+        if(!thumbUrl.isEmpty())
+        {
+            if(NetworkHelper.isNetAvailable(getActivity()))
+                MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+            else
+                MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+        }
     }
 
     private SwipeRefreshLayout.OnRefreshListener onRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
@@ -528,13 +532,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         farmer.setThumbAttachmentId(farmerPicId);
                         farmer.setNationalCardAttachmentId(farmerNatId);
 
-                        String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getThumbAttachmentId());
+                        String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(farmer.getThumbAttachmentId());
                         if(!farmerPicId.isEmpty())
                         {
                             farmer.setThumbUrl(thumbUrl);
                         }
 
-                        String natIdUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getNationalCardAttachmentId());
+                        String natIdUrl = NetworkHelper.makeAttachmentUrlFromId(farmer.getNationalCardAttachmentId());
                         if(!farmerNatId.isEmpty())
                         {
                             farmer.setNationalCardUrl(natIdUrl);
@@ -602,7 +606,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     PreferenceHelper.getInstance().writeAboutAttId(attId);
                     if(!attId.isEmpty())
                     {
-                        String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
+                        String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(attId);
                         PreferenceHelper.getInstance().writeAboutAttUrl(thumbUrl);
                         if(NetworkHelper.isNetAvailable(getActivity()))
                             MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
