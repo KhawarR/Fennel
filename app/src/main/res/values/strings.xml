@@ -32,6 +32,7 @@
     <string name="sign_in">SIGN IN</string>
     <string name="cancel_txt">CANCEL</string>
     <string name="done_txt">DONE</string>
+    <string name="back_txt">BACK</string>
 
     <string-array name="optionsLocation">
         <item>LOCATION 1</item>
