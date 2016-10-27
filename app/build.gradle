@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         applicationId "wal.fennel"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 23
         versionCode 17
         versionName "0.1.7"
@@ -53,4 +53,6 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.6.5@aar') {
         transitive = true;
     }
+    compile 'com.makeramen:roundedimageview:2.2.1'
+
 }

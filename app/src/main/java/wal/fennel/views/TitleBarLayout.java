@@ -128,7 +128,4 @@ public class TitleBarLayout extends RelativeLayout implements View.OnClickListen
         public void onTitleBarLeftIconClicked(View view);
     }
 
-    public void setTitleBarLeftButtonText(String text) {
-        txtLeft.setText(text);
-    }
 }

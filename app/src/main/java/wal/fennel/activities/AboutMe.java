@@ -52,7 +52,7 @@ import wal.fennel.views.TitleBarLayout;
 /**
  * Created by Faizan on 9/27/2016.
  */
-public class AboutMe extends Activity {
+public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClickListener {
 
     @Bind(R.id.titleBar)
     TitleBarLayout titleBarLayout;
@@ -104,6 +104,7 @@ public class AboutMe extends Activity {
         loggedInUserId = PreferenceHelper.getInstance().readLoginUserId();
 
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
+        titleBarLayout.setOnIconClickListener(this);
 
         populateView();
         if(!PreferenceHelper.getInstance().readAboutAttId().isEmpty())
@@ -154,6 +155,7 @@ public class AboutMe extends Activity {
                         pictureAttachmentId = attId;
                         if(!attId.isEmpty() && !attId.equalsIgnoreCase(PreferenceHelper.getInstance().readAboutAttId()))
                         {
+                            PreferenceHelper.getInstance().writeAboutAttId(attId);
                             String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
                             MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
                             MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
@@ -544,5 +546,15 @@ public class AboutMe extends Activity {
             mProgressDialog.setCancelable(false);
             mProgressDialog.setMessage(getString(R.string.loading));
         }
+    }
+
+    @Override
+    public void onTitleBarRightIconClicked(View view) {
+
+    }
+
+    @Override
+    public void onTitleBarLeftIconClicked(View view) {
+        finish();
     }
 }

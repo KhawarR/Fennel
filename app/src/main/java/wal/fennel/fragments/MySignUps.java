@@ -173,11 +173,11 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             }
         });
 
-//        boolean isFirstRun = PreferenceHelper.getInstance().readFirstRun();
-//        if (isFirstRun) {
-//            PreferenceHelper.getInstance().writeFirstRun(false);
+        boolean isFirstRun = PreferenceHelper.getInstance().readFirstRun();
+        if (isFirstRun) {
+            PreferenceHelper.getInstance().writeFirstRun(false);
             getLocationsData();
-//        }
+        }
 
         getAboutMeAttachment();
     }
@@ -185,6 +185,11 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     @Override
     public void onResume(){
         super.onResume();
+        loadAttachment();
+        getAboutMeAttachment();
+    }
+
+    private void loadAttachment() {
         String aboutMeAttId = PreferenceHelper.getInstance().readAboutAttId();
         if(!aboutMeAttId.isEmpty())
         {

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -336,6 +337,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 isEdit = true;
             }
             populateFarmer();
+            setSpinnerBackgroundEnabled();
+        } else {
+            setSpinnerBackgroundDisbaled();
         }
 
         titleBarLayout.setTitleText(title);
@@ -346,6 +350,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         etIdNumber.addTextChangedListener(watcher);
         etMobileNumber.addTextChangedListener(watcher);
     }
+
 
     private void populateFarmer() {
         if (farmer != null) {
@@ -431,7 +436,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                thumbUrl = String.format(thumbUrl, farmer.getThumbUrl());
 //                ImageLoader.getInstance().displayImage(thumbUrl, imgFarmerPhoto, options);
                 imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgFarmerPhoto);
+                MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop()/*.transform(transformation)*/.into(imgFarmerPhoto);
                 isFarmerPhotoSet = true;
             }
             if (farmer.getFarmerIdPhotoUrl() != null && !farmer.getFarmerIdPhotoUrl().isEmpty())
@@ -441,7 +446,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                thumbUrl = String.format(thumbUrl, farmer.getFarmerIdPhotoUrl());
 //                ImageLoader.getInstance().displayImage(thumbUrl, imgNationalID, options);
                 imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgNationalID);
+                MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop()/*.transform(transformation)*/.into(imgNationalID);
                 isNationalIdPhotoSet = true;
             }
         }
@@ -913,6 +918,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     @Override
     public void onTitleBarLeftIconClicked(View view) {
+        hideKeyboard();
         ((BaseContainerFragment) getParentFragment()).popFragment();
     }
 
@@ -950,10 +956,13 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
                 imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                MyPicassoInstance.getInstance().load(images.get(0).getQueryUri()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgFarmerPhoto);
+                MyPicassoInstance.getInstance().load(images.get(0).getQueryUri()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop()/*.transform(transformation)*/.into(imgFarmerPhoto);
 //                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgFarmerPhoto, options);
                 farmerImageUri = images.get(0).getOriginalPath();
                 isFarmerPhotoSet = true;
+                if (isEdit) {
+                    attachFarmerImageToFarmerObject(farmer, true);
+                }
                 checkEnableSubmit();
             }
 
@@ -979,8 +988,11 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgNationalID, options);
                 imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 farmerIdImageUri = images.get(0).getOriginalPath();
-                MyPicassoInstance.getInstance().load(images.get(0).getQueryUri()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgNationalID);
+                MyPicassoInstance.getInstance().load(images.get(0).getQueryUri()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop()/*.transform(transformation)*/.into(imgNationalID);
                 isNationalIdPhotoSet = true;
+                if (isEdit) {
+                    attachFarmerIDImageToFarmerObject(farmer, true);
+                }
                 checkEnableSubmit();
             }
 
@@ -1071,13 +1083,20 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         hideKeyboard();
         Spinner spinnerView = (Spinner) parent;
         int position = pos - 1;
+
         switch (spinnerView.getId()) {
             case R.id.spLocation:
             {
-                if (position < 0)
+                if (position < 0) {
                     location = "";
-                else
+                }
+                else {
                     location = arrLocations.get(position).id;
+
+                    spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
+                    spVillage.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+                    spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+                }
                 if((boolean)spLocation.getTag())
                 {
                     updateSubLocFromLocation(location);
@@ -1101,10 +1120,14 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 break;
             case R.id.spSubLocation:
             {
-                if (position < 0)
+                if (position < 0) {
                     subLocation = "";
-                else
+                }
+                else {
                     subLocation = arrSubLocations.get(position).id;
+                    spVillage.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
+                    spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+                }
                 if((boolean)spSubLocation.getTag())
                 {
                     updateVillageAndTreeFromSubLocation(subLocation);
@@ -1122,16 +1145,22 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             }
                 break;
             case R.id.spVillage:
-                if (position < 0)
+                if (position < 0) {
                     village = "";
-                else
+                }
+                else {
                     village = arrVillages.get(position).id;
+                    spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
+                }
+
                 break;
             case R.id.spTree:
-                if (position < 0)
+                if (position < 0) {
                     treeSpecies = "";
-                else
+                }
+                else {
                     treeSpecies = arrTrees.get(position).id;
+                }
                 break;
         }
         checkEnableSubmit();
@@ -1157,8 +1186,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                     newFarm.farmId = farmer.farmId;
                     editFarmWithFarmId(newFarm, farmer.farmId);
 
-                    attachFarmerImageToFarmerObject(farmer, true);
-                    attachFarmerIDImageToFarmerObject(farmer, true);
+//                    attachFarmerImageToFarmerObject(farmer, true);
+//                    attachFarmerIDImageToFarmerObject(farmer, true);
 
                 } else {
 
@@ -1274,7 +1303,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         });
     }
 
-    private void attachFarmerImageToFarmerObject(final Farmer farmer, boolean isEdit) {
+    private void attachFarmerImageToFarmerObject(final Farmer newFarmer, boolean isEdit) {
 
         if (farmerImageUri == null)
             return;
@@ -1282,7 +1311,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "picture");
         attachmentMap.put("Name", "profile_picture.png");
-        if (farmer.getThumbUrl() == null || farmer.getThumbUrl().isEmpty()) {
+        if (newFarmer.getThumbUrl() == null || newFarmer.getThumbUrl().isEmpty()) {
             attachmentMap.put("ParentId", farmer.farmerId);
         }
         else
@@ -1480,5 +1509,17 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             hideKeyboard();
         }
         return false;
+    }
+
+    private void setSpinnerBackgroundDisbaled() {
+        spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+        spVillage.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+        spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+    }
+
+    private void setSpinnerBackgroundEnabled() {
+        spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
+        spVillage.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
+        spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
     }
 }
