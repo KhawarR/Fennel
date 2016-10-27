@@ -235,7 +235,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     }
 
-    private Callback<ResponseBody> myFarmersAttachments = new Callback<ResponseBody>() {
+    private Callback<ResponseBody>  myFarmersAttachments = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
@@ -261,6 +261,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
                 else
                 {
+                    updateMysignupsList();
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -273,10 +274,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
     };
 
+    private void updateMysignupsList()
+    {
+        // Creating our custom adapter
+        adapter = new MySignupsAdapter(getActivity(), myFarmers);
+        // Create the list view and bind the adapter
+        mLvFarmers.setAdapter(adapter);
+    }
+
     private Callback<ResponseBody> mySignupsCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            loadingFinished();
             if(isValid())
             {
                 if (response.code() == 200) {
@@ -294,12 +302,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
                 else if(response.code() == 401)
                 {
+                    loadingFinished();
                     PreferenceHelper.getInstance().clearSession();
                     startActivity(new Intent(getActivity(), LoginActivity.class));
                     getActivity().finish();
                 }
                 else
                 {
+                    loadingFinished();
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -367,7 +377,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
 
+            updateMysignupsList();
+
             adapter.notifyDataSetChanged();
+        }
+        else
+        {
+            updateMysignupsList();
         }
     }
 
@@ -493,10 +509,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             myFarmers.addAll(approvedFarmersList);
         }
 
-        // Creating our custom adapter
-        adapter = new MySignupsAdapter(getActivity(), myFarmers);
-        // Create the list view and bind the adapter
-        mLvFarmers.setAdapter(adapter);
+//        // Creating our custom adapter
+//        adapter = new MySignupsAdapter(getActivity(), myFarmers);
+//        // Create the list view and bind the adapter
+//        mLvFarmers.setAdapter(adapter);
     }
 
     private void parseLocations(String data) throws JSONException {
