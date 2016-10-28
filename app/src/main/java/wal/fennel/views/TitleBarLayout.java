@@ -82,7 +82,7 @@ public class TitleBarLayout extends RelativeLayout implements View.OnClickListen
         {
             setBackgroundResource(R.drawable.title_divider);
         }
-        int pad = (int) getResources().getDimension(R.dimen.padding_15);
+        int pad = (int)getResources().getDimension(R.dimen.padding_10);
         setPadding(pad, pad, pad, pad);
     }
 
