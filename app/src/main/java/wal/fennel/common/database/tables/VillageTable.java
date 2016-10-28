@@ -70,7 +70,7 @@ public class VillageTable {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         ArrayList<Village> allLocations = new ArrayList<>();
 
-        String query = "SELECT * FROM " + TABLE_VILLAGE + " WHERE " + COLUMN_SUB_LOCATION_ID + " = ?";
+        String query = "SELECT * FROM " + TABLE_VILLAGE + " WHERE " + COLUMN_SUB_LOCATION_ID + " = ? OR " + COLUMN_SUB_LOCATION_ID + " = ''";
         Cursor c = db.rawQuery(query, new String[]{id});
 
         if (c.moveToFirst()) {

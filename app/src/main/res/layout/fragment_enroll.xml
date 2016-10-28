@@ -345,15 +345,28 @@
                     fennel:fontName="Avenir-Black.ttf" />
 
 
-                <ImageView
+                <!--<ImageView-->
+                    <!--android:id="@+id/imgFarmerPhoto"-->
+                    <!--android:layout_width="@dimen/enroll_pic_size"-->
+                    <!--android:layout_height="@dimen/enroll_pic_size"-->
+                    <!--android:layout_alignParentRight="true"-->
+                    <!--android:layout_marginRight="@dimen/padding_10"-->
+                    <!--android:scaleType="centerInside"-->
+                    <!--android:background="@drawable/green_rounded_rect"-->
+                    <!--android:src="@drawable/ic_camera_white"/>-->
+
+                <com.makeramen.roundedimageview.RoundedImageView
+                    xmlns:app="http://schemas.android.com/apk/res-auto"
                     android:id="@+id/imgFarmerPhoto"
+                    android:src="@drawable/ic_camera_white"
                     android:layout_width="@dimen/enroll_pic_size"
                     android:layout_height="@dimen/enroll_pic_size"
                     android:layout_alignParentRight="true"
                     android:layout_marginRight="@dimen/padding_10"
                     android:scaleType="centerInside"
+                    app:riv_corner_radius="10dip"
                     android:background="@drawable/green_rounded_rect"
-                    android:src="@drawable/ic_camera_white"/>
+                    app:riv_border_color="@color/app_green" />
 
 
                 <wal.fennel.views.FontTextView
@@ -371,34 +384,49 @@
                     />
 
 
-                <ImageView
+                <!--<ImageView-->
+                    <!--android:id="@+id/imgNationalID"-->
+                    <!--android:layout_width="@dimen/enroll_pic_size"-->
+                    <!--android:layout_height="@dimen/enroll_pic_size"-->
+                    <!--android:layout_alignLeft="@+id/imgFarmerPhoto"-->
+                    <!--android:layout_alignTop="@+id/lblNationalID"-->
+                    <!--android:scaleType="centerInside"-->
+                    <!--android:background="@drawable/green_rounded_rect"-->
+                    <!--android:src="@drawable/ic_camera_white"/>-->
+
+                <com.makeramen.roundedimageview.RoundedImageView
+                    xmlns:app="http://schemas.android.com/apk/res-auto"
                     android:id="@+id/imgNationalID"
+                    android:src="@drawable/ic_camera_white"
                     android:layout_width="@dimen/enroll_pic_size"
                     android:layout_height="@dimen/enroll_pic_size"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="@dimen/padding_10"
+                    android:scaleType="centerInside"
+                    app:riv_corner_radius="10dip"
                     android:layout_alignLeft="@+id/imgFarmerPhoto"
                     android:layout_alignTop="@+id/lblNationalID"
-                    android:scaleType="centerInside"
                     android:background="@drawable/green_rounded_rect"
-                    android:src="@drawable/ic_camera_white"/>
+                    app:riv_border_color="@color/app_green" />
 
-            </RelativeLayout>
+        </RelativeLayout>
 
-            <wal.fennel.views.FontTextView
-                android:id="@+id/txtSubmitApproval"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/padding_15"
-                android:layout_marginTop="@dimen/padding_10"
-                android:background="@drawable/selector_red_button"
-                android:enabled="false"
-                android:gravity="center"
-                android:padding="@dimen/padding_15"
-                android:text="@string/submit_for_approval"
-                android:textColor="@color/white"
-                fennel:fontName="Avenir-Heavy.ttf" />
+        <wal.fennel.views.FontTextView
+            android:id="@+id/txtSubmitApproval"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/padding_15"
+            android:layout_marginTop="@dimen/padding_10"
+            android:background="@drawable/selector_red_button"
+            android:enabled="false"
+            android:gravity="center"
+            android:padding="@dimen/padding_15"
+            android:text="@string/submit_for_approval"
+            android:textColor="@color/white"
+            fennel:fontName="Avenir-Heavy.ttf" />
 
 
-        </LinearLayout>
-    </ScrollView>
+    </LinearLayout>
+</ScrollView>
 
 </LinearLayout>

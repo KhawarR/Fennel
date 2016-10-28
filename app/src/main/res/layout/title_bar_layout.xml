@@ -2,7 +2,6 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fennel="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-
     >
 
     <wal.fennel.views.FontTextView
@@ -20,10 +19,12 @@
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/imgRight"
-        android:layout_width="@dimen/small_avatar_size"
-        android:layout_height="@dimen/small_avatar_size"
+        android:layout_width="@dimen/medium_avatar_size"
+        android:layout_height="@dimen/medium_avatar_size"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
+        android:layout_marginEnd="5dp"
+        android:layout_marginRight="5dp"
         fennel:civ_border_color="@color/app_green"
         fennel:civ_border_width="1dp" />
 

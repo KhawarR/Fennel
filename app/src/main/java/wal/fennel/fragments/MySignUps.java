@@ -175,12 +175,21 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         });
 
         getDropDownsData();
-        WebApi.getAboutMeAttachment(aboutMeAttachmentCallback);
+//        boolean isFirstRun = PreferenceHelper.getInstance().readFirstRun();
+//        if (isFirstRun) {
+//            PreferenceHelper.getInstance().writeFirstRun(false);
+//            getDropDownsData();
+//        }
     }
 
     @Override
     public void onResume(){
         super.onResume();
+        loadAttachment();
+        WebApi.getAboutMeAttachment(aboutMeAttachmentCallback);
+    }
+
+    private void loadAttachment() {
         String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
         if(!thumbUrl.isEmpty())
         {

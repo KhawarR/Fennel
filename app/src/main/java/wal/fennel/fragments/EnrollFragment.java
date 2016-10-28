@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -342,6 +343,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             farmerIdImageUrl = farmer.getNationalCardUrl();
 
             populateFarmer();
+            setSpinnerBackgroundEnabled();
+        } else {
+            setSpinnerBackgroundDisbaled();
         }
 
         titleBarLayout.setTitleText(title);
@@ -352,6 +356,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         etIdNumber.addTextChangedListener(watcher);
         etMobileNumber.addTextChangedListener(watcher);
     }
+
 
     private void populateFarmer() {
         if (farmer != null) {
@@ -435,9 +440,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             if (thumbUrl != null && !thumbUrl.isEmpty()) {
                 imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 if(NetworkHelper.isNetAvailable(getActivity()))
-                    MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgFarmerPhoto);
+                    MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgFarmerPhoto);
                 else
-                    MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgFarmerPhoto);
+                    MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgFarmerPhoto);
                 isFarmerPhotoSet = true;
             }
 
@@ -446,9 +451,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             {
                 imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 if(NetworkHelper.isNetAvailable(getActivity()))
-                    MyPicassoInstance.getInstance().load(natCardUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgNationalID);
+                    MyPicassoInstance.getInstance().load(natCardUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgNationalID);
                 else
-                    MyPicassoInstance.getInstance().load(natCardUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgNationalID);
+                    MyPicassoInstance.getInstance().load(natCardUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgNationalID);
                 isNationalIdPhotoSet = true;
             }
         }
@@ -919,6 +924,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     @Override
     public void onTitleBarLeftIconClicked(View view) {
+        hideKeyboard();
         ((BaseContainerFragment) getParentFragment()).popFragment();
     }
 
@@ -960,11 +966,16 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 String originalPath = images.get(0).getOriginalPath();
                 String uri = Uri.parse("file://" + originalPath).toString();
 
-                MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgFarmerPhoto);
+                MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgFarmerPhoto);
                 farmerImageUri = originalPath;
                 isFarmerPhotoSet = true;
                 farmerImageUrl = uri;
-
+                if (isEdit) {
+                    if(NetworkHelper.isNetAvailable(getActivity()))
+                        attachFarmerImageToFarmerObject(farmer);
+                    else
+                        editFarmerInDB(false);
+                }
                 checkEnableSubmit();
             }
 
@@ -992,11 +1003,16 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 String originalPath = images.get(0).getOriginalPath();
                 String uri = Uri.parse("file://" + originalPath).toString();
 
-                MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgNationalID);
+                MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgNationalID);
                 farmerIdImageUri = originalPath;
                 isNationalIdPhotoSet = true;
                 farmerIdImageUrl = uri;
-
+                if (isEdit) {
+                    if(NetworkHelper.isNetAvailable(getActivity()))
+                        attachFarmerIDImageToFarmerObject(farmer);
+                    else
+                        editFarmerInDB(false);
+                }
                 checkEnableSubmit();
             }
 
@@ -1087,6 +1103,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         hideKeyboard();
         Spinner spinnerView = (Spinner) parent;
         int position = pos - 1;
+
         switch (spinnerView.getId()) {
             case R.id.spLocation:
             {
@@ -1097,6 +1114,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 else {
                     location = arrLocations.get(position).id;
                     locationName = arrLocations.get(position).name;
+
+                    spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
+                    spVillage.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+                    spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                 }
                 if((boolean)spLocation.getTag())
                 {
@@ -1128,6 +1149,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 else {
                     subLocation = arrSubLocations.get(position).id;
                     subLocationName = arrSubLocations.get(position).name;
+                    spVillage.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
+                    spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                 }
                 if((boolean)spSubLocation.getTag())
                 {
@@ -1153,6 +1176,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 else {
                     village = arrVillages.get(position).id;
                     villageName = arrVillages.get(position).name;
+                    spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
                 }
                 break;
             case R.id.spTree:
@@ -1174,7 +1198,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     }
 
-    private void editFarmerInDB() {
+    private void editFarmerInDB(boolean shouldPopFragment) {
         // Save to DB
         String firstName = etFirstName.getText().toString();
         String secondName = etSecondName.getText().toString();
@@ -1188,6 +1212,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         String fullName = (firstName + " " + secondName).trim();
         fullName = (fullName + " " + surname).trim();
 
+        if(farmerStatus == null)
+            farmerStatus = farmer.signupStatus;
+
         Realm.getDefaultInstance().beginTransaction();
         final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
         farmerDbObj.setAllValues(farmer.farmerId, farmer.farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, subLocationName, villageName, treeSpeciesName, isFarmerHome, mobileNumber, farmer.thumbAttachmentId, farmer.nationalCardAttachmentId, farmerStatus, false, "", "");
@@ -1199,8 +1226,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         loadingFinished();
         Log.i("LP", "Farmer Edited Successfully");
-        Toast.makeText(getContext(), "Farmer Edited Successfully", Toast.LENGTH_SHORT).show();
-        popToSignupsFragment();
+        if(shouldPopFragment){
+            Toast.makeText(getContext(), "Farmer Edited Successfully", Toast.LENGTH_SHORT).show();
+            popToSignupsFragment();
+        }
     }
 
     private void editFarmer() {
@@ -1209,7 +1238,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             WebApi.editFarmer(editFarmerCallback, farmer.farmerId, farmerMap);
         }
         else {
-            editFarmerInDB();
+            editFarmerInDB(true);
         }
     }
 
@@ -1224,8 +1253,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 //                    editFarmWithFarmId(newFarm, farmer.farmId);
                 editFarmWithFarmId(farmer.farmId);
 
-                attachFarmerImageToFarmerObject(farmer);
-                attachFarmerIDImageToFarmerObject(farmer);
+//                attachFarmerImageToFarmerObject(farmer);
+//                attachFarmerIDImageToFarmerObject(farmer);
 
             } else {
 
@@ -1576,5 +1605,17 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             hideKeyboard();
         }
         return false;
+    }
+
+    private void setSpinnerBackgroundDisbaled() {
+        spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+        spVillage.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+        spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+    }
+
+    private void setSpinnerBackgroundEnabled() {
+        spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
+        spVillage.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
+        spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
     }
 }

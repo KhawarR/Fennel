@@ -56,7 +56,7 @@ import wal.fennel.views.TitleBarLayout;
 /**
  * Created by Faizan on 9/27/2016.
  */
-public class AboutMe extends Activity {
+public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClickListener {
 
     @Bind(R.id.titleBar)
     TitleBarLayout titleBarLayout;
@@ -108,6 +108,7 @@ public class AboutMe extends Activity {
         loggedInUserId = PreferenceHelper.getInstance().readLoginUserId();
 
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
+        titleBarLayout.setOnIconClickListener(this);
 
         populateView();
 
@@ -599,5 +600,15 @@ public class AboutMe extends Activity {
             mProgressDialog.setCancelable(false);
             mProgressDialog.setMessage(getString(R.string.loading));
         }
+    }
+
+    @Override
+    public void onTitleBarRightIconClicked(View view) {
+
+    }
+
+    @Override
+    public void onTitleBarLeftIconClicked(View view) {
+        finish();
     }
 }
