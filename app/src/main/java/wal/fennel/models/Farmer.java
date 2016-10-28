@@ -54,11 +54,6 @@ public class Farmer extends RealmObject implements Serializable{
     public String thumbUrl;
     public String nationalCardUrl;
 
-    public boolean isDataDirty = false;
-    public boolean isThumbDirty = false;
-    public boolean isNationalCardDirty = false;
-
-    public String address;
     public String signupStatus;
     public boolean isHeader = false;
 
@@ -82,16 +77,17 @@ public class Farmer extends RealmObject implements Serializable{
         this.mobileNumber = other.mobileNumber;
         this.thumbAttachmentId = other.thumbAttachmentId;
         this.nationalCardAttachmentId = other.nationalCardAttachmentId;
-        this.address = other.address;
         this.signupStatus = other.signupStatus;
         this.isHeader = other.isHeader;
+        this.thumbUrl = other.thumbUrl;
+        this.nationalCardUrl = other.nationalCardUrl;
     }
 
     public Farmer(String farmerId, String farmId, String fullName, String firstName, String secondName, String surname,
                   String idNumber, String gender, boolean isLeader, String location,
                   String subLocation, String villageName, String treeSpecies, boolean farmerHome,
-                  String mobileNumber, String nationalCardAttachmentId, String thumbAttachmentId, String address,
-                  String signupStatus, boolean isHeader) {
+                  String mobileNumber, String nationalCardAttachmentId, String thumbAttachmentId,
+                  String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl) {
         this.farmerId = farmerId;
         this.farmId = farmId;
         this.fullName = fullName;
@@ -109,16 +105,17 @@ public class Farmer extends RealmObject implements Serializable{
         this.mobileNumber = mobileNumber;
         this.thumbAttachmentId = thumbAttachmentId;
         this.nationalCardAttachmentId = nationalCardAttachmentId;
-        this.address = address;
         this.signupStatus = signupStatus;
         this.isHeader = isHeader;
+        this.thumbUrl = thumbUrl;
+        this.nationalCardUrl = nationalCardUrl;
     }
 
     public void setAllValues(String farmerId, String farmId, String fullName, String firstName, String secondName, String surname,
                        String idNumber, String gender, boolean isLeader, String location,
                        String subLocation, String villageName, String treeSpecies, boolean farmerHome,
-                       String mobileNumber, String nationalCardAttachmentId, String thumbAttachmentId, String address,
-                       String signupStatus, boolean isHeader) {
+                       String mobileNumber, String nationalCardAttachmentId, String thumbAttachmentId,
+                       String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl) {
         this.farmerId = farmerId;
         this.farmId = farmId;
         this.fullName = fullName;
@@ -136,9 +133,10 @@ public class Farmer extends RealmObject implements Serializable{
         this.mobileNumber = mobileNumber;
         this.thumbAttachmentId = thumbAttachmentId;
         this.nationalCardAttachmentId = nationalCardAttachmentId;
-        this.address = address;
         this.signupStatus = signupStatus;
         this.isHeader = isHeader;
+        this.thumbUrl = thumbUrl;
+        this.nationalCardUrl = nationalCardUrl;
     }
 
     public String getFarmerId() {
@@ -277,14 +275,6 @@ public class Farmer extends RealmObject implements Serializable{
         this.nationalCardAttachmentId = nationalCardAttachmentId;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
     public String getSignupStatus() {
         return signupStatus;
     }
@@ -315,29 +305,5 @@ public class Farmer extends RealmObject implements Serializable{
 
     public void setNationalCardUrl(String nationalCardUrl) {
         this.nationalCardUrl = nationalCardUrl;
-    }
-
-    public boolean isDataDirty() {
-        return isDataDirty;
-    }
-
-    public void setDataDirty(boolean dataDirty) {
-        isDataDirty = dataDirty;
-    }
-
-    public boolean isThumbDirty() {
-        return isThumbDirty;
-    }
-
-    public void setThumbDirty(boolean thumbDirty) {
-        isThumbDirty = thumbDirty;
-    }
-
-    public boolean isNationalCardDirty() {
-        return isNationalCardDirty;
-    }
-
-    public void setNationalCardDirty(boolean nationalCardDirty) {
-        isNationalCardDirty = nationalCardDirty;
     }
 }
