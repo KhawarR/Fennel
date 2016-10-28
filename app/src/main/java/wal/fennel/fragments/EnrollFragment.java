@@ -203,7 +203,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private String farmerImageUri = null;
     private String farmerIdImageUri = null;
 
-    //    private int PICKER_REQUEST_FARMER_DEVICE = 12001;
+    private String farmerImageUrl = null;
+    private String farmerIdImageUrl = null;
+
+//    private int PICKER_REQUEST_FARMER_DEVICE = 12001;
 //    private int PICKER_REQUEST_FARMER_CAMERA = 12002;
 //    private int PICKER_REQUEST_NAT_ID_DEVICE = 12003;
 //    private int PICKER_REQUEST_NAT_ID_CAMERA = 12004;
@@ -221,7 +224,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         EnrollFragment fragment = new EnrollFragment();
         Bundle args = new Bundle();
         args.putString("title", title);
-        args.putSerializable("farmer", farmer);
+        args.putParcelable("farmer", farmer);
         fragment.setArguments(args);
         return fragment;
     }
@@ -326,7 +329,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         title = getArguments().getString("title");
         if (title.equalsIgnoreCase(Constants.STR_EDIT_FARMER)) {
-            farmer = (Farmer) getArguments().getSerializable("farmer");
+            farmer = (Farmer) getArguments().getParcelable("farmer");
             txtCreateFarmer.setText("SAVE");
 
             if (!farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_INCOMPLETE)) {
@@ -956,9 +959,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgFarmerPhoto);
                 farmerImageUri = originalPath;
                 isFarmerPhotoSet = true;
-                if(farmer == null)
-                    farmer = new Farmer();
-                farmer.thumbUrl = uri;
+                farmerImageUrl = uri;
 
                 checkEnableSubmit();
             }
@@ -990,9 +991,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(transformation).into(imgNationalID);
                 farmerIdImageUri = originalPath;
                 isNationalIdPhotoSet = true;
-                if(farmer == null)
-                    farmer = new Farmer();
-                farmer.nationalCardUrl = uri;
+                farmerIdImageUrl = uri;
 
                 checkEnableSubmit();
             }
@@ -1185,13 +1184,13 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         String fullName = (firstName + " " + secondName).trim();
         fullName = (fullName + " " + surname).trim();
 
-        final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
         Realm.getDefaultInstance().beginTransaction();
+        final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
         farmerDbObj.setAllValues(farmer.farmerId, farmer.farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, subLocationName, villageName, treeSpeciesName, isFarmerHome, mobileNumber, farmer.thumbAttachmentId, farmer.nationalCardAttachmentId, farmerStatus, false, "", "");
-        if (farmerImageUri != null && !farmerImageUri.isEmpty())
-            farmerDbObj.thumbUrl = farmer.thumbUrl;
-        if (farmerIdImageUri != null && !farmerIdImageUri.isEmpty())
-            farmerDbObj.nationalCardUrl = farmer.nationalCardUrl;
+        if (farmerImageUrl != null && !farmerImageUrl.isEmpty())
+            farmerDbObj.thumbUrl = farmerImageUrl;
+        if (farmerIdImageUrl != null && !farmerIdImageUrl.isEmpty())
+            farmerDbObj.nationalCardUrl = farmerIdImageUrl;
         Realm.getDefaultInstance().commitTransaction();
 
         loadingFinished();
@@ -1286,10 +1285,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         Realm.getDefaultInstance().beginTransaction();
         final Farmer farmerDbObj = Realm.getDefaultInstance().createObject(Farmer.class);
         farmerDbObj.setAllValues(id, id, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, subLocationName, villageName, treeSpeciesName, isFarmerHome, mobileNumber, id, id, farmerStatus, false, "", "");
-        if(farmerImageUri != null && !farmerImageUri.isEmpty())
-            farmerDbObj.thumbUrl = farmer.thumbUrl;
-        if(farmerIdImageUri != null && !farmerIdImageUri.isEmpty())
-            farmerDbObj.nationalCardUrl = farmer.nationalCardUrl;
+        if(farmerImageUrl != null && !farmerImageUrl.isEmpty())
+            farmerDbObj.thumbUrl = farmerImageUrl;
+        if(farmerIdImageUrl != null && !farmerIdImageUrl.isEmpty())
+            farmerDbObj.nationalCardUrl = farmerIdImageUrl;
         Realm.getDefaultInstance().commitTransaction();
 
         loadingFinished();

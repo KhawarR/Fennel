@@ -1,5 +1,8 @@
 package wal.fennel.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -9,7 +12,7 @@ import io.realm.RealmObject;
 /**
  * Created by Khawar on 30/9/2016.
  */
-public class Farmer extends RealmObject implements Serializable{
+public class Farmer extends RealmObject implements Parcelable{
 
     public String farmerId = null;
     public String farmId = null;
@@ -305,5 +308,68 @@ public class Farmer extends RealmObject implements Serializable{
 
     public void setNationalCardUrl(String nationalCardUrl) {
         this.nationalCardUrl = nationalCardUrl;
+    }
+
+    public int describeContents() {
+        return 0;
+    }
+
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeString(farmerId);
+        out.writeString(farmId);
+        out.writeString(fullName);
+        out.writeString(firstName);
+        out.writeString(secondName);
+        out.writeString(surname);
+        out.writeString(idNumber);
+        out.writeString(gender);
+        out.writeInt(isLeader ? 1 : 0);
+        out.writeString(location);
+        out.writeString(subLocation);
+        out.writeString(villageName);
+        out.writeString(treeSpecies);
+        out.writeInt(farmerHome ? 1 : 0);
+        out.writeString(mobileNumber);
+        out.writeString(thumbAttachmentId);
+        out.writeString(nationalCardAttachmentId);
+        out.writeString(signupStatus);
+        out.writeInt(isHeader ? 1 : 0);
+        out.writeString(thumbUrl);
+        out.writeString(nationalCardUrl);
+    }
+
+    public static final Parcelable.Creator<Farmer> CREATOR
+            = new Parcelable.Creator<Farmer>() {
+        public Farmer createFromParcel(Parcel in) {
+            return new Farmer(in);
+        }
+
+        public Farmer[] newArray(int size) {
+            return new Farmer[size];
+        }
+    };
+
+    private Farmer(Parcel in) {
+        farmerId = in.readString();
+        farmId = in.readString();
+        fullName = in.readString();
+        firstName = in.readString();
+        secondName = in.readString();
+        surname = in.readString();
+        idNumber = in.readString();
+        gender = in.readString();
+        isLeader = in.readInt() == 1 ? true : false;
+        location = in.readString();
+        subLocation = in.readString();
+        villageName = in.readString();
+        treeSpecies = in.readString();
+        farmerHome = in.readInt() == 1 ? true : false;
+        mobileNumber = in.readString();
+        thumbAttachmentId = in.readString();
+        nationalCardAttachmentId = in.readString();
+        signupStatus = in.readString();
+        isHeader= in.readInt() == 1 ? true : false;
+        thumbUrl = in.readString();
+        nationalCardUrl = in.readString();
     }
 }
