@@ -337,6 +337,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             } else {
                 isEdit = true;
             }
+
+            farmerImageUrl = farmer.getThumbUrl();
+            farmerIdImageUrl = farmer.getNationalCardUrl();
+
             populateFarmer();
         }
 
