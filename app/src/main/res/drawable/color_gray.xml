@@ -12,7 +12,7 @@
     <item>
         <bitmap
             android:gravity="center_vertical|right"
-            android:src="@drawable/chevron_down_with_padd"
+            android:src="@drawable/chevron_gray"
             />
     </item>
 
