@@ -1188,9 +1188,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
         farmerDbObj.setAllValues(farmer.farmerId, farmer.farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, subLocationName, villageName, treeSpeciesName, isFarmerHome, mobileNumber, farmer.thumbAttachmentId, farmer.nationalCardAttachmentId, farmerStatus, false, "", "");
         if (farmerImageUrl != null && !farmerImageUrl.isEmpty())
-            farmerDbObj.thumbUrl = farmerImageUrl;
+            farmerDbObj.setThumbUrl(farmerImageUrl);
         if (farmerIdImageUrl != null && !farmerIdImageUrl.isEmpty())
-            farmerDbObj.nationalCardUrl = farmerIdImageUrl;
+            farmerDbObj.setNationalCardUrl(farmerIdImageUrl);
         Realm.getDefaultInstance().commitTransaction();
 
         loadingFinished();
@@ -1286,9 +1286,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         final Farmer farmerDbObj = Realm.getDefaultInstance().createObject(Farmer.class);
         farmerDbObj.setAllValues(id, id, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, subLocationName, villageName, treeSpeciesName, isFarmerHome, mobileNumber, id, id, farmerStatus, false, "", "");
         if(farmerImageUrl != null && !farmerImageUrl.isEmpty())
-            farmerDbObj.thumbUrl = farmerImageUrl;
+            farmerDbObj.setThumbUrl(farmerImageUrl);
         if(farmerIdImageUrl != null && !farmerIdImageUrl.isEmpty())
-            farmerDbObj.nationalCardUrl = farmerIdImageUrl;
+            farmerDbObj.setNationalCardUrl(farmerIdImageUrl);
         Realm.getDefaultInstance().commitTransaction();
 
         loadingFinished();
