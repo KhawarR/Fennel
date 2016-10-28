@@ -1312,11 +1312,11 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         attachmentMap.put("Description", "picture");
         attachmentMap.put("Name", "profile_picture.png");
         if (newFarmer.getThumbUrl() == null || newFarmer.getThumbUrl().isEmpty()) {
-            attachmentMap.put("ParentId", farmer.farmerId);
+            attachmentMap.put("ParentId", newFarmer.farmerId);
         }
         else
         {
-            String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getThumbUrl());
+            String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), newFarmer.getThumbUrl());
             MyPicassoInstance.getInstance().invalidate(thumbUrl);
         }
 
@@ -1365,7 +1365,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
         RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
-        if (farmer.getThumbUrl() == null || farmer.getThumbUrl().isEmpty()) {
+        if (newFarmer.getThumbUrl() == null || newFarmer.getThumbUrl().isEmpty()) {
 
             Call<ResponseBody> attachmentApi = Fennel.getWebService().addAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, entityBody, imageBody);
             attachmentApi.enqueue(new Callback<ResponseBody>() {
@@ -1373,7 +1373,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                         Log.i("Fennel", "farmer profile picture uploaded successfully!");
-                        Singleton.getInstance().farmerIdtoInvalidate = farmer.farmerId;
+                        Singleton.getInstance().farmerIdtoInvalidate = newFarmer.farmerId;
                     } else {
                         Log.i("Fennel", "farmer profile picture upload failed!");
                     }
@@ -1385,13 +1385,13 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 }
             });
         } else {
-            Call<ResponseBody> attachmentApi = Fennel.getWebService().editAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, farmer.getThumbUrl(), entityBody, imageBody);
+            Call<ResponseBody> attachmentApi = Fennel.getWebService().editAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, newFarmer.getThumbUrl(), entityBody, imageBody);
             attachmentApi.enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                         Log.i("Fennel", "farmer profile picture edited successfully!");
-                        Singleton.getInstance().farmerIdtoInvalidate = farmer.farmerId;
+                        Singleton.getInstance().farmerIdtoInvalidate = newFarmer.farmerId;
                     } else {
                         Log.i("Fennel", "farmer profile picture edit failed!");
                     }
@@ -1405,7 +1405,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         }
     }
 
-    private void attachFarmerIDImageToFarmerObject(Farmer farmer, boolean isEdit) {
+    private void attachFarmerIDImageToFarmerObject(Farmer newFarmer, boolean isEdit) {
 
         if (farmerIdImageUri == null)
             return;
@@ -1413,12 +1413,12 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "ID");
         attachmentMap.put("Name", "national_id.png");
-        if(farmer.getFarmerIdPhotoUrl() == null || farmer.getFarmerIdPhotoUrl().isEmpty()) {
-            attachmentMap.put("ParentId", farmer.farmerId);
+        if(newFarmer.getFarmerIdPhotoUrl() == null || newFarmer.getFarmerIdPhotoUrl().isEmpty()) {
+            attachmentMap.put("ParentId", newFarmer.farmerId);
         }
         else
         {
-            String idPhotoUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getFarmerIdPhotoUrl());
+            String idPhotoUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), newFarmer.getFarmerIdPhotoUrl());
             MyPicassoInstance.getInstance().invalidate(idPhotoUrl);
         }
 
@@ -1452,7 +1452,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
         RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
-        if (farmer.getFarmerIdPhotoUrl() == null || farmer.getFarmerIdPhotoUrl().isEmpty()) {
+        if (newFarmer.getFarmerIdPhotoUrl() == null || newFarmer.getFarmerIdPhotoUrl().isEmpty()) {
 
             Call<ResponseBody> attachmentApi = Fennel.getWebService().addAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, entityBody, imageBody);
             attachmentApi.enqueue(new Callback<ResponseBody>() {
@@ -1474,7 +1474,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             });
         } else {
 
-            Call<ResponseBody> attachmentApi = Fennel.getWebService().editAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, farmer.getFarmerIdPhotoUrl(), entityBody, imageBody);
+            Call<ResponseBody> attachmentApi = Fennel.getWebService().editAttachment(Session.getAuthToken(), NetworkHelper.API_VERSION, newFarmer.getFarmerIdPhotoUrl(), entityBody, imageBody);
             attachmentApi.enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
