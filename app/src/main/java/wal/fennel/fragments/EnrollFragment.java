@@ -1476,7 +1476,6 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                 Log.i("Fennel", "farmer profile picture uploaded successfully!");
-                Singleton.getInstance().farmerIdtoInvalidate = farmer.farmerId;
             } else {
                 Log.i("Fennel", "farmer profile picture upload failed!");
             }
