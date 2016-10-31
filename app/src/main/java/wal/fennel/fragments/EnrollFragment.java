@@ -349,6 +349,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     @Override
     public void onResume() {
         super.onResume();
+
         loadAttachment();
         getAboutMeAttachment();
     }
@@ -1160,6 +1161,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 else {
                     location = arrLocations.get(position).id;
 
+                    spLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                     spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
                     spVillage.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                     spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
@@ -1192,6 +1194,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 }
                 else {
                     subLocation = arrSubLocations.get(position).id;
+                    spLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+                    spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                     spVillage.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
                     spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                 }
@@ -1217,6 +1221,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 }
                 else {
                     village = arrVillages.get(position).id;
+                    spLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+                    spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+                    spVillage.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                     spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
                 }
 
@@ -1227,6 +1234,11 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 }
                 else {
                     treeSpecies = arrTrees.get(position).id;
+                    village = arrVillages.get(position).id;
+                    spLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+                    spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+                    spVillage.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+                    spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                 }
                 break;
         }
