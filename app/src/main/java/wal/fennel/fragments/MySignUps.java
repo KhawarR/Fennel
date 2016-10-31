@@ -854,7 +854,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         apiCall.enqueue(aboutMeAttachmentCallback);
     }
-
     private Callback<ResponseBody> aboutMeAttachmentCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {

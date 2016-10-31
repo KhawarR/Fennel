@@ -107,13 +107,16 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         titleBarLayout.setOnIconClickListener(this);
 
         populateView();
+        getAboutMeInfo();
+    }
+
+    private void loadAttachment() {
         if(!PreferenceHelper.getInstance().readAboutAttId().isEmpty())
         {
             String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), PreferenceHelper.getInstance().readAboutAttId());
             MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
             MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
         }
-        getAboutMeInfo();
     }
 
     private void populateView()
@@ -123,6 +126,8 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         tvSurname.setText(PreferenceHelper.getInstance().readAboutLN());
         tvFieldOfficer.setText(PreferenceHelper.getInstance().readAboutFOname());
         tvFieldManager.setText(PreferenceHelper.getInstance().readAboutFMname());
+
+        loadAttachment();
     }
 
     private void getAboutMeAttachment() {

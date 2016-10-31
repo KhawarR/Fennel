@@ -254,13 +254,6 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
 
-        String aboutMeAttId = PreferenceHelper.getInstance().readAboutAttId();
-        if(!aboutMeAttId.isEmpty())
-        {
-            String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), aboutMeAttId);
-            MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
-        }
-
         tvMale.setSelected(false);
         tvFemale.setSelected(false);
 
@@ -349,6 +342,84 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         etSurname.addTextChangedListener(watcher);
         etIdNumber.addTextChangedListener(watcher);
         etMobileNumber.addTextChangedListener(watcher);
+
+        loadAttachment();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadAttachment();
+        getAboutMeAttachment();
+    }
+
+    private void getAboutMeAttachment() {
+        String queryTable = "Employee__c";
+
+        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readUserEmployeeId());
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        apiCall.enqueue(aboutMeAttachmentCallback);
+    }
+
+    private Callback<ResponseBody> aboutMeAttachmentCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            if (response.code() == 200) {
+                String responseStr = "";
+
+                try {
+                    responseStr = response.body().string();
+                    String attId = parseAboutMeDataAttachment(responseStr);
+                    PreferenceHelper.getInstance().writeAboutAttId(attId);
+                    if(!attId.isEmpty())
+                    {
+                        String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
+                        MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            t.printStackTrace();
+        }
+    };
+
+    private String parseAboutMeDataAttachment(String data) throws JSONException {
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if(arrRecords.length() > 0)
+        {
+            JSONObject facObj = arrRecords.getJSONObject(0);
+
+            JSONObject attachmentObj = facObj.optJSONObject("Attachments");
+            if(attachmentObj != null)
+            {
+                JSONArray attRecords = attachmentObj.getJSONArray("records");
+                if(attRecords.length() > 0)
+                {
+                    JSONObject objFarmerPhoto = attRecords.getJSONObject(0);
+                    String idAttachment = objFarmerPhoto.getString("Id");
+                    return idAttachment;
+                }
+            }
+        }
+        return "";
+    }
+
+    private void loadAttachment() {
+        String aboutMeAttId = PreferenceHelper.getInstance().readAboutAttId();
+        if(!aboutMeAttId.isEmpty())
+        {
+            String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), aboutMeAttId);
+            MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+        }
     }
 
 
@@ -432,9 +503,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
             if (farmer.getThumbUrl() != null && !farmer.getThumbUrl().isEmpty()) {
                 String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getThumbUrl());
-//                String thumbUrl = "https://cs25.salesforce.com/services/data/v36.0/sobjects/Attachment/%s/body";
-//                thumbUrl = String.format(thumbUrl, farmer.getThumbUrl());
-//                ImageLoader.getInstance().displayImage(thumbUrl, imgFarmerPhoto, options);
+
                 imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop()/*.transform(transformation)*/.into(imgFarmerPhoto);
                 isFarmerPhotoSet = true;
@@ -442,9 +511,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             if (farmer.getFarmerIdPhotoUrl() != null && !farmer.getFarmerIdPhotoUrl().isEmpty())
             {
                 String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), farmer.getFarmerIdPhotoUrl());
-//                String thumbUrl = "https://cs25.salesforce.com/services/data/v36.0/sobjects/Attachment/%s/body";
-//                thumbUrl = String.format(thumbUrl, farmer.getFarmerIdPhotoUrl());
-//                ImageLoader.getInstance().displayImage(thumbUrl, imgNationalID, options);
+
                 imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop()/*.transform(transformation)*/.into(imgNationalID);
                 isNationalIdPhotoSet = true;
