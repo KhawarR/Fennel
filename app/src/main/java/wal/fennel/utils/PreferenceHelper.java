@@ -234,6 +234,7 @@ public class PreferenceHelper {
         writeUserId("");
         writePassword("");
         writeLoginUserType("");
+        writeUserEmployeeId("");
 
         writeAboutFN("");
         writeAboutMN("");
@@ -241,6 +242,7 @@ public class PreferenceHelper {
         writeAboutFOname("");
         writeAboutFMname("");
         writeAboutAttId("");
+        writeAboutAttUrl("");
     }
 
     public void writeUserEmployeeId(String userEmpId) {
