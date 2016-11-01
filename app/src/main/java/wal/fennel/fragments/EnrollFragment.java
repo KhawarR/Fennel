@@ -60,6 +60,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
+import wal.fennel.application.Fennel;
 import wal.fennel.common.database.DatabaseHelper;
 import wal.fennel.models.Farm;
 import wal.fennel.models.Farmer;
@@ -69,6 +70,7 @@ import wal.fennel.models.SubLocation;
 import wal.fennel.models.Tree;
 import wal.fennel.models.Village;
 import wal.fennel.network.NetworkHelper;
+import wal.fennel.network.Session;
 import wal.fennel.network.WebApi;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
@@ -254,15 +256,6 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
 
-        String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
-        if(!thumbUrl.isEmpty())
-        {
-            if(NetworkHelper.isNetAvailable(getActivity()))
-                MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
-            else
-                MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
-        }
-
         tvMale.setSelected(false);
         tvFemale.setSelected(false);
 
@@ -355,6 +348,87 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         etSurname.addTextChangedListener(watcher);
         etIdNumber.addTextChangedListener(watcher);
         etMobileNumber.addTextChangedListener(watcher);
+
+        loadAttachment();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        loadAttachment();
+        getAboutMeAttachment();
+    }
+
+    private void getAboutMeAttachment() {
+        String queryTable = "Employee__c";
+
+        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readUserEmployeeId());
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        apiCall.enqueue(aboutMeAttachmentCallback);
+    }
+
+    private Callback<ResponseBody> aboutMeAttachmentCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            if (response.code() == 200) {
+                String responseStr = "";
+
+                try {
+                    responseStr = response.body().string();
+                    String attId = parseAboutMeDataAttachment(responseStr);
+                    PreferenceHelper.getInstance().writeAboutAttId(attId);
+                    if(!attId.isEmpty())
+                    {
+                        String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
+                        MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            t.printStackTrace();
+        }
+    };
+
+    private String parseAboutMeDataAttachment(String data) throws JSONException {
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if(arrRecords.length() > 0)
+        {
+            JSONObject facObj = arrRecords.getJSONObject(0);
+
+            JSONObject attachmentObj = facObj.optJSONObject("Attachments");
+            if(attachmentObj != null)
+            {
+                JSONArray attRecords = attachmentObj.getJSONArray("records");
+                if(attRecords.length() > 0)
+                {
+                    JSONObject objFarmerPhoto = attRecords.getJSONObject(0);
+                    String idAttachment = objFarmerPhoto.getString("Id");
+                    return idAttachment;
+                }
+            }
+        }
+        return "";
+    }
+
+    private void loadAttachment() {
+        String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
+        if(!thumbUrl.isEmpty())
+        {
+            if(NetworkHelper.isNetAvailable(getActivity()))
+                MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+            else
+                MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+        }
     }
 
 
@@ -1115,6 +1189,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                     location = arrLocations.get(position).id;
                     locationName = arrLocations.get(position).name;
 
+                    spLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                     spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
                     spVillage.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                     spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
@@ -1149,6 +1224,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 else {
                     subLocation = arrSubLocations.get(position).id;
                     subLocationName = arrSubLocations.get(position).name;
+
+                    spLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+                    spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+
                     spVillage.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
                     spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                 }
@@ -1176,6 +1255,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 else {
                     village = arrVillages.get(position).id;
                     villageName = arrVillages.get(position).name;
+
+                    spLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+                    spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+                    spVillage.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                     spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
                 }
                 break;
@@ -1187,6 +1270,12 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 else {
                     treeSpecies = arrTrees.get(position).id;
                     treeSpeciesName = arrTrees.get(position).name;
+
+                    village = arrVillages.get(position).id;
+                    spLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+                    spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+                    spVillage.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
+                    spTree.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                 }
                 break;
         }

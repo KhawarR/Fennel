@@ -111,18 +111,10 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         titleBarLayout.setOnIconClickListener(this);
 
         populateView();
-
         WebApi.getAboutMeInfo(aboutMeCallback);
     }
 
-    private void populateView()
-    {
-        tvFirstName.setText(PreferenceHelper.getInstance().readAboutFN());
-        tvSecondName.setText(PreferenceHelper.getInstance().readAboutMN());
-        tvSurname.setText(PreferenceHelper.getInstance().readAboutLN());
-        tvFieldOfficer.setText(PreferenceHelper.getInstance().readAboutFOname());
-        tvFieldManager.setText(PreferenceHelper.getInstance().readAboutFMname());
-
+    private void loadAttachment() {
         String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
         if(!thumbUrl.isEmpty())
         {
@@ -137,6 +129,17 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
                 MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
             }
         }
+    }
+
+    private void populateView()
+    {
+        tvFirstName.setText(PreferenceHelper.getInstance().readAboutFN());
+        tvSecondName.setText(PreferenceHelper.getInstance().readAboutMN());
+        tvSurname.setText(PreferenceHelper.getInstance().readAboutLN());
+        tvFieldOfficer.setText(PreferenceHelper.getInstance().readAboutFOname());
+        tvFieldManager.setText(PreferenceHelper.getInstance().readAboutFMname());
+
+        loadAttachment();
     }
 
     private Callback<ResponseBody> aboutMeAttachmentCallback = new Callback<ResponseBody>() {
