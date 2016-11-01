@@ -357,68 +357,68 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         super.onResume();
 
         loadAttachment();
-        getAboutMeAttachment();
+//        getAboutMeAttachment();
     }
 
-    private void getAboutMeAttachment() {
-        String queryTable = "Employee__c";
-
-        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readUserEmployeeId());
-        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
-        apiCall.enqueue(aboutMeAttachmentCallback);
-    }
-
-    private Callback<ResponseBody> aboutMeAttachmentCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            if (response.code() == 200) {
-                String responseStr = "";
-
-                try {
-                    responseStr = response.body().string();
-                    String attId = parseAboutMeDataAttachment(responseStr);
-                    PreferenceHelper.getInstance().writeAboutAttId(attId);
-                    if(!attId.isEmpty())
-                    {
-                        String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
-                        MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            t.printStackTrace();
-        }
-    };
-
-    private String parseAboutMeDataAttachment(String data) throws JSONException {
-        JSONObject jsonObject = new JSONObject(data);
-        JSONArray arrRecords = jsonObject.getJSONArray("records");
-
-        if(arrRecords.length() > 0)
-        {
-            JSONObject facObj = arrRecords.getJSONObject(0);
-
-            JSONObject attachmentObj = facObj.optJSONObject("Attachments");
-            if(attachmentObj != null)
-            {
-                JSONArray attRecords = attachmentObj.getJSONArray("records");
-                if(attRecords.length() > 0)
-                {
-                    JSONObject objFarmerPhoto = attRecords.getJSONObject(0);
-                    String idAttachment = objFarmerPhoto.getString("Id");
-                    return idAttachment;
-                }
-            }
-        }
-        return "";
-    }
+//    private void getAboutMeAttachment() {
+//        String queryTable = "Employee__c";
+//
+//        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readUserEmployeeId());
+//        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+//        apiCall.enqueue(aboutMeAttachmentCallback);
+//    }
+//
+//    private Callback<ResponseBody> aboutMeAttachmentCallback = new Callback<ResponseBody>() {
+//        @Override
+//        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//            if (response.code() == 200) {
+//                String responseStr = "";
+//
+//                try {
+//                    responseStr = response.body().string();
+//                    String attId = parseAboutMeDataAttachment(responseStr);
+//                    PreferenceHelper.getInstance().writeAboutAttId(attId);
+//                    if(!attId.isEmpty())
+//                    {
+//                        String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
+//                        MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+//                    }
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//
+//        @Override
+//        public void onFailure(Call<ResponseBody> call, Throwable t) {
+//            t.printStackTrace();
+//        }
+//    };
+//
+//    private String parseAboutMeDataAttachment(String data) throws JSONException {
+//        JSONObject jsonObject = new JSONObject(data);
+//        JSONArray arrRecords = jsonObject.getJSONArray("records");
+//
+//        if(arrRecords.length() > 0)
+//        {
+//            JSONObject facObj = arrRecords.getJSONObject(0);
+//
+//            JSONObject attachmentObj = facObj.optJSONObject("Attachments");
+//            if(attachmentObj != null)
+//            {
+//                JSONArray attRecords = attachmentObj.getJSONArray("records");
+//                if(attRecords.length() > 0)
+//                {
+//                    JSONObject objFarmerPhoto = attRecords.getJSONObject(0);
+//                    String idAttachment = objFarmerPhoto.getString("Id");
+//                    return idAttachment;
+//                }
+//            }
+//        }
+//        return "";
+//    }
 
     private void loadAttachment() {
         String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
@@ -1038,7 +1038,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 imgFarmerPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
                 String originalPath = images.get(0).getOriginalPath();
-                String uri = Uri.parse("file://" + originalPath).toString();
+                String uri = NetworkHelper.getUriFromPath(originalPath);
 
                 MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgFarmerPhoto);
                 farmerImageUri = originalPath;
@@ -1075,7 +1075,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
                 String originalPath = images.get(0).getOriginalPath();
-                String uri = Uri.parse("file://" + originalPath).toString();
+                String uri = NetworkHelper.getUriFromPath(originalPath);
 
                 MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgNationalID);
                 farmerIdImageUri = originalPath;

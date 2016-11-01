@@ -3,171 +3,179 @@
     xmlns:fennel="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:orientation="vertical">
 
     <wal.fennel.views.TitleBarLayout
         android:id="@+id/titleBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        fennel:txtLeft="@string/back_txt"
         fennel:drawableRight="@drawable/dummy_profile"
-        fennel:titleText="@string/about_me" />
+        fennel:titleText="@string/about_me"
+        fennel:txtLeft="@string/back_txt" />
 
-    <ScrollView
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:orientation="vertical"
-            android:padding="@dimen/padding_15">
+            android:layout_height="match_parent">
 
-            <wal.fennel.views.FontTextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/padding_20"
-                android:gravity="center_horizontal"
-                android:text="Last Sync:"
-                android:textColor="@color/black_txt_color"
-                android:textSize="@dimen/textsize_22"
-                fennel:fontName="Avenir-Medium.ttf" />
+                android:background="@color/white"
+                android:orientation="vertical"
+                android:padding="@dimen/padding_15">
 
-            <wal.fennel.views.FontTextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:text="8/11/2016 11:55:22"
-                android:textColor="@color/black_txt_color"
-                android:textSize="@dimen/textsize_22"
-                fennel:fontName="Avenir-Medium.ttf" />
+                <wal.fennel.views.FontTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_20"
+                    android:gravity="center_horizontal"
+                    android:text="Last Sync:"
+                    android:textColor="@color/black_txt_color"
+                    android:textSize="@dimen/textsize_22"
+                    fennel:fontName="Avenir-Medium.ttf" />
 
-            <RelativeLayout
-                android:id="@+id/rl_pick_image"
-                android:layout_width="@dimen/large_avatar_size"
-                android:layout_height="@dimen/large_avatar_size"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/padding_20">
+                <wal.fennel.views.FontTextView
+                    android:id="@+id/tvSyncTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:text="8/11/2016 11:55:22"
+                    android:textColor="@color/black_txt_color"
+                    android:textSize="@dimen/textsize_22"
+                    fennel:fontName="Avenir-Medium.ttf" />
 
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/profile_image"
+                <RelativeLayout
+                    android:id="@+id/rl_pick_image"
                     android:layout_width="@dimen/large_avatar_size"
                     android:layout_height="@dimen/large_avatar_size"
-                    android:src="@drawable/dummy_profile" />
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="@dimen/padding_20">
 
-                <ImageView
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/profile_image"
+                        android:layout_width="@dimen/large_avatar_size"
+                        android:layout_height="@dimen/large_avatar_size"
+                        android:src="@drawable/dummy_profile" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:src="@drawable/ic_add_pic" />
+
+                </RelativeLayout>
+
+                <wal.fennel.views.FontTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:src="@drawable/ic_add_pic" />
+                    android:layout_marginTop="@dimen/padding_20"
+                    android:text="@string/first_name"
+                    android:textColor="@color/black_txt_color"
+                    android:textStyle="bold"
+                    fennel:fontName="Avenir-Heavy.ttf" />
 
-            </RelativeLayout>
+                <wal.fennel.views.FontTextView
+                    android:id="@+id/tv_first_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="5dp"
+                    android:textColor="@color/black_txt_color"
+                    fennel:fontName="Avenir-Heavy.ttf" />
 
-            <wal.fennel.views.FontTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/padding_20"
-                android:text="@string/first_name"
-                android:textColor="@color/black_txt_color"
-                android:textStyle="bold"
-                fennel:fontName="Avenir-Heavy.ttf" />
+                <wal.fennel.views.FontTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:text="@string/second_name"
+                    android:textColor="@color/black_txt_color"
+                    android:textStyle="bold"
+                    fennel:fontName="Avenir-Heavy.ttf" />
 
-            <wal.fennel.views.FontTextView
-                android:id="@+id/tv_first_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="10dp"
-                android:textColor="@color/black_txt_color"
-                fennel:fontName="Avenir-Heavy.ttf" />
+                <wal.fennel.views.FontTextView
+                    android:id="@+id/tv_second_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="5dp"
+                    android:textColor="@color/black_txt_color"
+                    fennel:fontName="Avenir-Heavy.ttf" />
 
-            <wal.fennel.views.FontTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/padding_10"
-                android:text="@string/second_name"
-                android:textStyle="bold"
-                android:textColor="@color/black_txt_color"
-                fennel:fontName="Avenir-Heavy.ttf" />
+                <wal.fennel.views.FontTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:text="@string/surname"
+                    android:textColor="@color/black_txt_color"
+                    android:textStyle="bold"
+                    fennel:fontName="Avenir-Heavy.ttf" />
 
-            <wal.fennel.views.FontTextView
-                android:id="@+id/tv_second_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="10dp"
-                android:textColor="@color/black_txt_color"
-                fennel:fontName="Avenir-Heavy.ttf" />
+                <wal.fennel.views.FontTextView
+                    android:id="@+id/tv_sur_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="5dp"
+                    android:textColor="@color/black_txt_color"
+                    fennel:fontName="Avenir-Heavy.ttf" />
 
-            <wal.fennel.views.FontTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/padding_10"
-                android:text="@string/surname"
-                android:textStyle="bold"
-                android:textColor="@color/black_txt_color"
-                fennel:fontName="Avenir-Heavy.ttf" />
+                <wal.fennel.views.FontTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:text="@string/managing_field_officer"
+                    android:textColor="@color/black_txt_color"
+                    android:textStyle="bold"
+                    fennel:fontName="Avenir-Heavy.ttf" />
 
-            <wal.fennel.views.FontTextView
-                android:id="@+id/tv_sur_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="10dp"
-                android:textColor="@color/black_txt_color"
-                fennel:fontName="Avenir-Heavy.ttf" />
+                <wal.fennel.views.FontTextView
+                    android:id="@+id/tv_field_officer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="5dp"
+                    android:textColor="@color/black_txt_color"
+                    fennel:fontName="Avenir-Heavy.ttf" />
 
-            <wal.fennel.views.FontTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/padding_10"
-                android:text="@string/managing_field_officer"
-                android:textStyle="bold"
-                android:textColor="@color/black_txt_color"
-                fennel:fontName="Avenir-Heavy.ttf" />
+                <wal.fennel.views.FontTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:text="@string/managing_field_manager"
+                    android:textColor="@color/black_txt_color"
+                    android:textStyle="bold"
+                    fennel:fontName="Avenir-Heavy.ttf" />
 
-            <wal.fennel.views.FontTextView
-                android:id="@+id/tv_field_officer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="10dp"
-                android:textColor="@color/black_txt_color"
-                fennel:fontName="Avenir-Heavy.ttf" />
+                <wal.fennel.views.FontTextView
+                    android:id="@+id/tv_field_manager"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="5dp"
+                    android:textColor="@color/black_txt_color"
+                    fennel:fontName="Avenir-Heavy.ttf" />
 
-            <wal.fennel.views.FontTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/padding_10"
-                android:text="@string/managing_field_manager"
-                android:textStyle="bold"
-                android:textColor="@color/black_txt_color"
-                fennel:fontName="Avenir-Heavy.ttf" />
+                <wal.fennel.views.FontTextView
+                    android:id="@+id/txtSignOut"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:background="@drawable/selector_green_button"
+                    android:gravity="center"
+                    android:padding="@dimen/padding_15"
+                    android:text="@string/sign_out"
+                    android:textColor="@color/white"
+                    fennel:fontName="Avenir-Heavy.ttf" />
 
-            <wal.fennel.views.FontTextView
-                android:id="@+id/tv_field_manager"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="10dp"
-                android:textColor="@color/black_txt_color"
-                fennel:fontName="Avenir-Heavy.ttf" />
+            </LinearLayout>
+        </ScrollView>
 
-            <wal.fennel.views.FontTextView
-                android:id="@+id/txtSignOut"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/padding_10"
-                android:background="@drawable/selector_green_button"
-                android:gravity="center"
-                android:padding="@dimen/padding_15"
-                android:text="@string/sign_out"
-                android:textColor="@color/white"
-                fennel:fontName="Avenir-Heavy.ttf" />
-
-        </LinearLayout>
-    </ScrollView>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </LinearLayout>

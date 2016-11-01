@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -56,7 +57,8 @@ import wal.fennel.views.TitleBarLayout;
 /**
  * Created by Faizan on 9/27/2016.
  */
-public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClickListener {
+public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClickListener,
+        WebApi.OnSyncCompleteListener {
 
     @Bind(R.id.titleBar)
     TitleBarLayout titleBarLayout;
@@ -76,16 +78,20 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
     @Bind(R.id.tv_field_manager)
     FontTextView tvFieldManager;
 
+    @Bind(R.id.tvSyncTime)
+    FontTextView tvSyncTime;
+
     @Bind(R.id.profile_image)
     CircleImageView cIvProfileMain;
 
     CircleImageView cIvIconRight;
 
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
     private ImagePicker imagePicker;
     private ImagePickerCallback imagePickerCallback;
     private CameraImagePicker cameraImagePicker;
 
-    private String pictureAttachmentId = null;
     private String loggedInUserId = null;
 
     private ProgressDialog mProgressDialog;
@@ -100,6 +106,9 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setCancelable(false);
         mProgressDialog.setMessage(getString(R.string.loading));
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout.setOnRefreshListener(onRefreshListener);
 
         imagePicker = new ImagePicker(AboutMe.this);
         cameraImagePicker = new CameraImagePicker(AboutMe.this);
@@ -154,9 +163,9 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
                     try {
                         responseStr = response.body().string();
                         String attId = parseDataAttachment(responseStr);
-                        pictureAttachmentId = attId;
                         if(!attId.isEmpty() && !attId.equalsIgnoreCase(PreferenceHelper.getInstance().readAboutAttId()))
                         {
+                            PreferenceHelper.getInstance().writeAboutAttId(attId);
                             String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(attId);
                             PreferenceHelper.getInstance().writeAboutAttUrl(thumbUrl);
                             if(NetworkHelper.isNetAvailable(AboutMe.this))
@@ -291,14 +300,15 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
                 String originalPath = images.get(0).getOriginalPath();
-                String uri = Uri.parse("file://" + originalPath).toString();
-                addPictureAttachment(originalPath);
+                String uri = NetworkHelper.getUriFromPath(originalPath);
                 if(NetworkHelper.isNetAvailable(AboutMe.this))
                 {
+                    PreferenceHelper.getInstance().writeAboutIsSyncReq(false);
                     addPictureAttachment(originalPath);
                 }
                 else
                 {
+                    PreferenceHelper.getInstance().writeAboutIsSyncReq(true);
                     PreferenceHelper.getInstance().writeAboutAttUrl(uri);
                 }
                 MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
@@ -333,48 +343,13 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         }
     }
 
-    public void addPictureAttachment(String imageUri) {
+    public void addPictureAttachment(String imagePath) {
+        String attAboutId = PreferenceHelper.getInstance().readAboutAttId();
 
-        HashMap<String, Object> attachmentMap = new HashMap<>();
-        attachmentMap.put("Description", "picture");
-        attachmentMap.put("Name", "profile_picture.png");
-        if (pictureAttachmentId == null || pictureAttachmentId.isEmpty()) {
-            attachmentMap.put("ParentId", PreferenceHelper.getInstance().readUserEmployeeId());
-        }
-        String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
-        MyPicassoInstance.getInstance().invalidate(thumbUrl);
-
-        JSONObject json = new JSONObject(attachmentMap);
-
-        byte[] byteArrayImage = null;
-        Bitmap bmp = null;
-
-        bmp = PhotoUtils.decodeSampledBitmapFromResource(imageUri);
-
-        if(bmp != null)
-        {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.JPEG, 100, bos);
-            byteArrayImage = bos.toByteArray();
-            try {
-                bos.close();
-                bmp.recycle();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        else
-        {
-            byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(imageUri));
-        }
-
-        RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
-        RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
-
-        if (pictureAttachmentId == null || pictureAttachmentId.isEmpty()) {
-            WebApi.addAttachment(addAttachmentCallback, entityBody, imageBody);
+        if (attAboutId == null || attAboutId.isEmpty()) {
+            WebApi.addAboutMeImage(imagePath, addAttachmentCallback);
         } else {
-            WebApi.editAttachment(editAttachmentCallback, pictureAttachmentId, entityBody, imageBody);
+            WebApi.addAboutMeImage(imagePath, editAttachmentCallback);
         }
     }
 
@@ -387,8 +362,9 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
 
                 try {
                     responseStr = response.body().string();
-                    pictureAttachmentId = getAttachmentIdFromUploadSuccess(responseStr);
-                    String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(pictureAttachmentId);
+                    String aboutAttId = getAttachmentIdFromUploadSuccess(responseStr);
+                    PreferenceHelper.getInstance().writeAboutAttId(aboutAttId);
+                    String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(aboutAttId);
                     PreferenceHelper.getInstance().writeAboutAttUrl(thumbUrl);
                     if(NetworkHelper.isNetAvailable(AboutMe.this))
                     {
@@ -613,5 +589,27 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
     @Override
     public void onTitleBarLeftIconClicked(View view) {
         finish();
+    }
+
+    private SwipeRefreshLayout.OnRefreshListener onRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
+        @Override
+        public void onRefresh() {
+            if(PreferenceHelper.getInstance().readIsSyncInProgress())
+                Toast.makeText(getApplicationContext(), "Data sync is already in progress", Toast.LENGTH_SHORT).show();
+            else
+                WebApi.syncAll(AboutMe.this);
+        }
+    };
+
+    @Override
+    public void syncCompleted() {
+        if(mSwipeRefreshLayout != null)
+            mSwipeRefreshLayout.setRefreshing(false);
+
+        String syncTime = PreferenceHelper.getInstance().readLastSyncTime();
+        if(syncTime == null || syncTime.isEmpty())
+            syncTime = "-";
+
+        tvSyncTime.setText(syncTime);
     }
 }

@@ -17,6 +17,7 @@ public class PreferenceHelper {
     private static final String KEY_FIRST_RUN = "_first_run";
     private static final String KEY_LOGIN_USER_TYPE = "_login_user_type";
     private static final String KEY_USER_EMP_ID = "_user_emp_id";
+    private static final String KEY_LAST_SYNC_TIME = "_last_sync_time";
 
     private static final String KEY_ABOUT_ME_FN = "_about_fn";
     private static final String KEY_ABOUT_ME_MN = "_about_mn";
@@ -25,9 +26,9 @@ public class PreferenceHelper {
     private static final String KEY_ABOUT_ME_FM_NAME = "_about_fm_name";
     private static final String KEY_ABOUT_ME_ATT_ID = "_about_att_id";
     private static final String KEY_ABOUT_ME_ATT_URL = "_about_att_url";
+    private static final String KEY_ABOUT_IS_SYNC_REQ = "_about_is_sync_req";
 
-    private static final String KEY_IS_SYNC_REQUIRED = "_is_sync_req";
-    private static final String KEY_IS_SYNC_STARTED = "_is_sync_started";
+    private static final String KEY_IS_SYNC_IN_PROGRESS = "_is_sync_in_progress";
 
 
     private static PreferenceHelper sInstance;
@@ -205,44 +206,15 @@ public class PreferenceHelper {
         return firstRun;
     }
 
-    public void writeIsSyncRequired(boolean value) {
+    public void writeIsSyncInProgress(boolean value) {
         SharedPreferences.Editor editor = mPref.edit();
-        editor.putBoolean(KEY_IS_SYNC_REQUIRED, value);
+        editor.putBoolean(KEY_IS_SYNC_IN_PROGRESS, value);
         editor.commit();
     }
 
-    public boolean readIsSyncRequired() {
-        boolean value = mPref.getBoolean(KEY_IS_SYNC_REQUIRED, false);
+    public boolean readIsSyncInProgress() {
+        boolean value = mPref.getBoolean(KEY_IS_SYNC_IN_PROGRESS, false);
         return value;
-    }
-
-    public void writeIsSyncstarted(boolean value) {
-        SharedPreferences.Editor editor = mPref.edit();
-        editor.putBoolean(KEY_IS_SYNC_STARTED, value);
-        editor.commit();
-    }
-
-    public boolean readIsSyncStarted() {
-        boolean value = mPref.getBoolean(KEY_IS_SYNC_STARTED, false);
-        return value;
-    }
-
-    public void clearSession() {
-        writeToken("");
-        writeInstanceUrl("");
-        writeLoginUserId("");
-        writeUserId("");
-        writePassword("");
-        writeLoginUserType("");
-        writeUserEmployeeId("");
-
-        writeAboutFN("");
-        writeAboutMN("");
-        writeAboutLN("");
-        writeAboutFOname("");
-        writeAboutFMname("");
-        writeAboutAttId("");
-        writeAboutAttUrl("");
     }
 
     public void writeUserEmployeeId(String userEmpId) {
@@ -254,5 +226,46 @@ public class PreferenceHelper {
     public String readUserEmployeeId() {
         String value = mPref.getString(KEY_USER_EMP_ID, "");
         return value;
+    }
+
+    public void writeLastSyncTime(String value) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putString(KEY_LAST_SYNC_TIME, value);
+        editor.commit();
+    }
+
+    public String readLastSyncTime() {
+        String value = mPref.getString(KEY_LAST_SYNC_TIME, "");
+        return value;
+    }
+
+    public void writeAboutIsSyncReq(boolean value) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putBoolean(KEY_ABOUT_IS_SYNC_REQ, value);
+        editor.commit();
+    }
+
+    public boolean readAboutIsSyncReq() {
+        boolean value = mPref.getBoolean(KEY_ABOUT_IS_SYNC_REQ, false);
+        return value;
+    }
+
+    public void clearSession() {
+        writeToken("");
+        writeInstanceUrl("");
+        writeLoginUserId("");
+        writeUserId("");
+        writePassword("");
+        writeLoginUserType("");
+        writeUserEmployeeId("");
+        writeLastSyncTime("");
+
+        writeAboutFN("");
+        writeAboutMN("");
+        writeAboutLN("");
+        writeAboutFOname("");
+        writeAboutFMname("");
+        writeAboutAttId("");
+        writeAboutAttUrl("");
     }
 }

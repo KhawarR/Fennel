@@ -3,6 +3,7 @@ package wal.fennel.network;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 
 import wal.fennel.utils.PreferenceHelper;
 
@@ -29,6 +30,8 @@ public class NetworkHelper {
     public static final String GET_VILLAGES = "SELECT Id, Name, Sub_Location__c FROM Village__c";
     public static final String GET_TREES = "Select t.Sub_Location__r.Name, t.Sub_Location__c, t.Name, t.Id From Tree_Species__c t";
 
+    private static final String STR_FILE_PREFIX = "file://";
+
     public static boolean isNetAvailable(Context context){
         ConnectivityManager cm =
                 (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -37,15 +40,29 @@ public class NetworkHelper {
         boolean isConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
 
-        return isConnected && isCommunicationAllowed();
+        return isConnected;
     }
 
     public static boolean isCommunicationAllowed()
     {
-        return !PreferenceHelper.getInstance().readIsSyncStarted();
+        return !PreferenceHelper.getInstance().readis();
     }
 
     public static String makeAttachmentUrlFromId(String attId) {
         return String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
+    }
+
+    public static String getUploadPathFromUri(String uri) {
+        if(uri == null || uri.isEmpty())
+            return "";
+
+        return uri.replace(STR_FILE_PREFIX, "");
+    }
+
+    public static String getUriFromPath(String path) {
+        if(path == null || path.isEmpty())
+            return "";
+
+        return Uri.parse("file://" + path).toString();
     }
 }
