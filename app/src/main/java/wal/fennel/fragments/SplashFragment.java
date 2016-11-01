@@ -31,7 +31,7 @@ public class SplashFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
 
 
-        new CountDownTimer(3000, 1000) {
+        new CountDownTimer(1000, 1000) {
 
             public void onTick(long millisUntilFinished) {
                 //    mTextField.setText("seconds remaining: " + millisUntilFinished / 1000);
