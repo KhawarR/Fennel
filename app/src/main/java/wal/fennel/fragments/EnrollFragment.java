@@ -1054,8 +1054,11 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             public void onImagesChosen(List<ChosenImage> images) {
                 // Display images
 //                ImageLoader.getInstance().displayImage(images.get(0).getQueryUri(), imgNationalID, options);
+
                 imgNationalID.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 farmerIdImageUri = images.get(0).getOriginalPath();
+//                Bitmap idImage = getBitmapFromPath(farmerIdImageUri);
+//                imgNationalID.setImageBitmap(idImage);
                 MyPicassoInstance.getInstance().load(images.get(0).getQueryUri()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop()/*.transform(transformation)*/.into(imgNationalID);
                 isNationalIdPhotoSet = true;
                 if (isEdit) {
@@ -1077,6 +1080,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             cameraImagePicker.pickImage();
         }
     }
+
+
 
     private void disableForm() {
         disableView(etFirstName);
@@ -1407,7 +1412,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         byte[] byteArrayImage = null;
         Bitmap bmp = null;
 
-        bmp = PhotoUtils.decodeSampledBitmapFromResource(farmerImageUri);
+//        bmp = PhotoUtils.decodeSampledBitmapFromResource(farmerImageUri);
+        bmp = PhotoUtils.getBitmapFromPath(farmerImageUri);
 
         if(bmp != null)
         {
@@ -1509,7 +1515,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         byte[] byteArrayImage = null;
         Bitmap bmp = null;
 
-        bmp = PhotoUtils.decodeSampledBitmapFromResource(farmerIdImageUri);
+//        bmp = PhotoUtils.decodeSampledBitmapFromResource(farmerIdImageUri);
+        bmp = PhotoUtils.getBitmapFromPath(farmerIdImageUri);
 
         if(bmp != null)
         {
