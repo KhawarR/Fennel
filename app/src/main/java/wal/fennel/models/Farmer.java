@@ -38,15 +38,21 @@ public class Farmer extends RealmObject implements Parcelable{
 
     @SerializedName("Location__c")
     public String location;
+    public String locationId;
 
     @SerializedName("Sub_Location__c")
     public String subLocation;
+    public String subLocationId;
 
     @SerializedName("Mobile_Number__c")
     public String mobileNumber;
 
     public String villageName;
+    public String villageId;
+
     public String treeSpecies;
+    public String treeSpeciesId;
+
     public boolean farmerHome;
 
     public String thumbAttachmentId;
@@ -57,6 +63,10 @@ public class Farmer extends RealmObject implements Parcelable{
 
     public String signupStatus;
     public boolean isHeader = false;
+
+    public boolean isDataDirty = false;
+    public boolean isFarmerPicDirty = false;
+    public boolean isNatIdCardDirty = false;
 
     public Farmer() {}
 
@@ -71,9 +81,13 @@ public class Farmer extends RealmObject implements Parcelable{
         this.gender = other.gender;
         this.isLeader = other.isLeader;
         this.location = other.location;
+        this.locationId = other.locationId;
         this.subLocation = other.subLocation;
+        this.subLocationId = other.subLocationId;
         this.villageName = other.villageName;
+        this.villageId = other.villageId;
         this.treeSpecies = other.treeSpecies;
+        this.treeSpeciesId = other.treeSpeciesId;
         this.farmerHome = other.farmerHome;
         this.mobileNumber = other.mobileNumber;
         this.thumbAttachmentId = other.thumbAttachmentId;
@@ -82,11 +96,14 @@ public class Farmer extends RealmObject implements Parcelable{
         this.isHeader = other.isHeader;
         this.thumbUrl = other.thumbUrl;
         this.nationalCardUrl = other.nationalCardUrl;
+        this.isDataDirty = other.isDataDirty;
+        this.isFarmerPicDirty = other.isFarmerPicDirty;
+        this.isNatIdCardDirty = other.isNatIdCardDirty;
     }
 
     public Farmer(String farmerId, String farmId, String fullName, String firstName, String secondName, String surname,
-                  String idNumber, String gender, boolean isLeader, String location,
-                  String subLocation, String villageName, String treeSpecies, boolean farmerHome,
+                  String idNumber, String gender, boolean isLeader, String location, String locationId,
+                  String subLocation, String subLocationId, String villageName, String villageId, String treeSpecies, String treeSpeciesId, boolean farmerHome,
                   String mobileNumber, String nationalCardAttachmentId, String thumbAttachmentId,
                   String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl) {
         this.farmerId = farmerId;
@@ -99,9 +116,13 @@ public class Farmer extends RealmObject implements Parcelable{
         this.gender = gender;
         this.isLeader = isLeader;
         this.location = location;
+        this.locationId = locationId;
         this.subLocation = subLocation;
+        this.subLocationId = subLocationId;
         this.villageName = villageName;
+        this.villageId = villageId;
         this.treeSpecies = treeSpecies;
+        this.treeSpeciesId = treeSpeciesId;
         this.farmerHome = farmerHome;
         this.mobileNumber = mobileNumber;
         this.thumbAttachmentId = thumbAttachmentId;
@@ -113,10 +134,10 @@ public class Farmer extends RealmObject implements Parcelable{
     }
 
     public void setAllValues(String farmerId, String farmId, String fullName, String firstName, String secondName, String surname,
-                       String idNumber, String gender, boolean isLeader, String location,
-                       String subLocation, String villageName, String treeSpecies, boolean farmerHome,
-                       String mobileNumber, String nationalCardAttachmentId, String thumbAttachmentId,
-                       String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl) {
+                             String idNumber, String gender, boolean isLeader, String location, String locationId,
+                             String subLocation, String subLocationId, String villageName, String villageId, String treeSpecies, String treeSpeciesId, boolean farmerHome,
+                             String mobileNumber, String nationalCardAttachmentId, String thumbAttachmentId,
+                             String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl) {
         this.farmerId = farmerId;
         this.farmId = farmId;
         this.fullName = fullName;
@@ -127,9 +148,13 @@ public class Farmer extends RealmObject implements Parcelable{
         this.gender = gender;
         this.isLeader = isLeader;
         this.location = location;
+        this.locationId = locationId;
         this.subLocation = subLocation;
+        this.subLocationId = subLocationId;
         this.villageName = villageName;
+        this.villageId = villageId;
         this.treeSpecies = treeSpecies;
+        this.treeSpeciesId = treeSpeciesId;
         this.farmerHome = farmerHome;
         this.mobileNumber = mobileNumber;
         this.thumbAttachmentId = thumbAttachmentId;
@@ -308,6 +333,62 @@ public class Farmer extends RealmObject implements Parcelable{
         this.nationalCardUrl = nationalCardUrl;
     }
 
+    public boolean isDataDirty() {
+        return isDataDirty;
+    }
+
+    public void setDataDirty(boolean dataDirty) {
+        isDataDirty = dataDirty;
+    }
+
+    public boolean isFarmerPicDirty() {
+        return isFarmerPicDirty;
+    }
+
+    public void setFarmerPicDirty(boolean farmerPicDirty) {
+        isFarmerPicDirty = farmerPicDirty;
+    }
+
+    public boolean isNatIdCardDirty() {
+        return isNatIdCardDirty;
+    }
+
+    public void setNatIdCardDirty(boolean natIdCardDirty) {
+        isNatIdCardDirty = natIdCardDirty;
+    }
+
+    public String getLocationId() {
+        return locationId;
+    }
+
+    public void setLocationId(String locationId) {
+        this.locationId = locationId;
+    }
+
+    public String getSubLocationId() {
+        return subLocationId;
+    }
+
+    public void setSubLocationId(String subLocationId) {
+        this.subLocationId = subLocationId;
+    }
+
+    public String getVillageId() {
+        return villageId;
+    }
+
+    public void setVillageId(String villageId) {
+        this.villageId = villageId;
+    }
+
+    public String getTreeSpeciesId() {
+        return treeSpeciesId;
+    }
+
+    public void setTreeSpeciesId(String treeSpeciesId) {
+        this.treeSpeciesId = treeSpeciesId;
+    }
+
     public int describeContents() {
         return 0;
     }
@@ -323,9 +404,13 @@ public class Farmer extends RealmObject implements Parcelable{
         out.writeString(gender);
         out.writeInt(isLeader ? 1 : 0);
         out.writeString(location);
+        out.writeString(locationId);
         out.writeString(subLocation);
+        out.writeString(subLocationId);
         out.writeString(villageName);
+        out.writeString(villageId);
         out.writeString(treeSpecies);
+        out.writeString(treeSpeciesId);
         out.writeInt(farmerHome ? 1 : 0);
         out.writeString(mobileNumber);
         out.writeString(thumbAttachmentId);
@@ -334,6 +419,9 @@ public class Farmer extends RealmObject implements Parcelable{
         out.writeInt(isHeader ? 1 : 0);
         out.writeString(thumbUrl);
         out.writeString(nationalCardUrl);
+        out.writeInt(isDataDirty ? 1 : 0);
+        out.writeInt(isFarmerPicDirty ? 1 : 0);
+        out.writeInt(isNatIdCardDirty ? 1 : 0);
     }
 
     public static final Parcelable.Creator<Farmer> CREATOR
@@ -358,9 +446,13 @@ public class Farmer extends RealmObject implements Parcelable{
         gender = in.readString();
         isLeader = in.readInt() == 1 ? true : false;
         location = in.readString();
+        locationId = in.readString();
         subLocation = in.readString();
+        subLocationId = in.readString();
         villageName = in.readString();
+        villageId = in.readString();
         treeSpecies = in.readString();
+        treeSpeciesId = in.readString();
         farmerHome = in.readInt() == 1 ? true : false;
         mobileNumber = in.readString();
         thumbAttachmentId = in.readString();
@@ -369,5 +461,8 @@ public class Farmer extends RealmObject implements Parcelable{
         isHeader= in.readInt() == 1 ? true : false;
         thumbUrl = in.readString();
         nationalCardUrl = in.readString();
+        isDataDirty = in.readInt() == 1 ? true : false;
+        isFarmerPicDirty = in.readInt() == 1 ? true : false;
+        isNatIdCardDirty = in.readInt() == 1 ? true : false;
     }
 }

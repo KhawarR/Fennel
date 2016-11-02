@@ -45,7 +45,7 @@ public class NetworkHelper {
 
     public static boolean isCommunicationAllowed()
     {
-        return !PreferenceHelper.getInstance().readis();
+        return !PreferenceHelper.getInstance().readIsSyncInProgress();
     }
 
     public static String makeAttachmentUrlFromId(String attId) {

@@ -147,6 +147,7 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         tvSurname.setText(PreferenceHelper.getInstance().readAboutLN());
         tvFieldOfficer.setText(PreferenceHelper.getInstance().readAboutFOname());
         tvFieldManager.setText(PreferenceHelper.getInstance().readAboutFMname());
+        tvSyncTime.setText(PreferenceHelper.getInstance().readLastSyncTime());
 
         loadAttachment();
     }

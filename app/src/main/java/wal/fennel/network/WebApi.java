@@ -1,25 +1,37 @@
 package wal.fennel.network;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
+import io.realm.Realm;
+import io.realm.RealmResults;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import wal.fennel.activities.LoginActivity;
 import wal.fennel.application.Fennel;
 import wal.fennel.datamodels.Auth;
+import wal.fennel.models.Farm;
+import wal.fennel.models.Farmer;
 import wal.fennel.models.ResponseModel;
+import wal.fennel.utils.Constants;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PhotoUtils;
 import wal.fennel.utils.PreferenceHelper;
@@ -168,6 +180,157 @@ public class WebApi {
         return false;
     }
 
+    public static void syncAll(OnSyncCompleteListener onSyncCompleteListener){
+
+        countCalls = 0;
+        countFailedCalls = 0;
+
+        WebApi.getInstance().onSyncCompleteListener = onSyncCompleteListener;
+
+        boolean syncStarted = false;
+
+        // About Me portion
+        if(PreferenceHelper.getInstance().readAboutIsSyncReq()){
+            String imagePath = NetworkHelper.getUploadPathFromUri(PreferenceHelper.getInstance().readAboutAttUrl());
+            countCalls++;
+            syncStarted = true;
+            WebApi.addAboutMeImage(imagePath, new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    countCalls--;
+                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                        checkSyncComplete();
+                    }
+                    else if(response.code() == 401)
+                    {
+                        countFailedCalls++;
+                        PreferenceHelper.getInstance().clearSession();
+                        Intent intent = new Intent(mContext, LoginActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        mContext.startActivity(intent);
+                    } else {
+                        countFailedCalls++;
+                        checkSyncComplete();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    countCalls--;
+                    countFailedCalls++;
+                    t.printStackTrace();
+                    checkSyncComplete();
+                }
+            });
+        }
+
+        // Farmers
+        RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).equalTo("isDataDirty", true).findAll();
+        for (int i = 0; i < farmerDbList.size(); i++) {
+
+            syncStarted = true;
+
+            final Farmer farmer = farmerDbList.get(i);
+
+            final HashMap<String, Object> farmerMap = getFarmerMap(farmer);
+            countCalls++;
+            if(farmer.farmerId.isEmpty()){
+                WebApi.createFarmer(new Callback<ResponseModel>() {
+                    @Override
+                    public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
+                        countCalls--;
+                        if ((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().success == true) {
+                            addFarmWithFarmerId(response.body().id, farmer);
+
+                            checkSyncComplete();
+
+//                            if(farmer.isFarmerPicDirty)
+//                                attachFarmerImageToFarmerObject(farmer);
+//                            if(farmer.isNatIdCardDirty)
+//                                attachFarmerIDImageToFarmerObject(farmer);
+                        }
+                        else if(response.code() == 401)
+                        {
+                            countFailedCalls++;
+                            PreferenceHelper.getInstance().clearSession();
+                            Intent intent = new Intent(mContext, LoginActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            mContext.startActivity(intent);
+                        } else {
+                            countFailedCalls++;
+                            checkSyncComplete();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseModel> call, Throwable t) {
+                        t.printStackTrace();
+                        countFailedCalls++;
+                        checkSyncComplete();
+                    }
+                }, farmerMap);
+            }
+            else {
+                WebApi.editFarmer(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        countCalls--;
+                        if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                            editFarmWithFarmId(farmer);
+
+                            checkSyncComplete();
+
+//                            if(farmer.isFarmerPicDirty)
+//                                attachFarmerImageToFarmerObject(farmer);
+//                            if(farmer.isNatIdCardDirty)
+//                                attachFarmerIDImageToFarmerObject(farmer);
+                        }
+                        else if(response.code() == 401)
+                        {
+                            countFailedCalls++;
+                            PreferenceHelper.getInstance().clearSession();
+                            Intent intent = new Intent(mContext, LoginActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            mContext.startActivity(intent);
+                        } else {
+                            countFailedCalls++;
+                            checkSyncComplete();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        t.printStackTrace();
+                        countFailedCalls++;
+                        checkSyncComplete();
+                    }
+                }, farmer.farmerId, farmerMap);
+            }
+        }
+
+        // Edited farmers
+        // Created farmer pic
+        // Edited farmer pic
+        // Locations etc
+
+        // Complete sync and release the lock of comm.
+        if(!syncStarted)
+        {
+            Toast.makeText(mContext, "Data already synced", Toast.LENGTH_SHORT).show();
+            long yourMillis = System.currentTimeMillis();
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            Date resultDate = new Date(yourMillis);
+            String syncTime = sdf.format(resultDate);
+            PreferenceHelper.getInstance().writeLastSyncTime(syncTime);
+            if(WebApi.getInstance().onSyncCompleteListener != null) {
+                WebApi.getInstance().onSyncCompleteListener.syncCompleted();
+            }
+        }
+        else {
+            PreferenceHelper.getInstance().writeIsSyncInProgress(true);
+        }
+    }
+
     public static void addAboutMeImage(String imagePath, Callback<ResponseBody> callback){
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "picture");
@@ -213,41 +376,114 @@ public class WebApi {
         }
     }
 
-    public static void syncAll(OnSyncCompleteListener onSyncCompleteListener){
+    private static HashMap<String, Object> getFarmerMap(Farmer farmer) {
 
-        countCalls = 0;
-        countFailedCalls = 0;
+        final HashMap<String, Object> newFarmerMap = new HashMap<>();
+        newFarmerMap.put("First_Name__c", farmer.firstName);
+        newFarmerMap.put("Middle_Name__c", farmer.secondName);
+        newFarmerMap.put("Last_Name__c", farmer.surname);
+        newFarmerMap.put("Name", farmer.idNumber);
+        newFarmerMap.put("Mobile_Number__c", farmer.mobileNumber);
+        newFarmerMap.put("Gender__c", farmer.gender.trim().equalsIgnoreCase("male") ? "Male" : "Female");
+        newFarmerMap.put("Leader__c", farmer.isLeader ? 1 : 0);
 
-        WebApi.getInstance().onSyncCompleteListener = onSyncCompleteListener;
-        PreferenceHelper.getInstance().writeIsSyncInProgress(true);
+        return newFarmerMap;
+    }
 
-        // About Me portion
-        if(PreferenceHelper.getInstance().readAboutIsSyncReq()){
-            String imagePath = NetworkHelper.getUploadPathFromUri(PreferenceHelper.getInstance().readAboutAttUrl());
-            WebApi.addAboutMeImage(imagePath, new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    countCalls--;
-                    checkSyncComplete();
-                }
+    private static HashMap<String, Object> getFarmMap(Farmer farmer) {
 
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    countCalls--;
-                    countFailedCalls++;
-                    t.printStackTrace();
-                }
-            });
-            countCalls++;
+        final HashMap<String, Object> newFarmMap = new HashMap<>();
+        newFarmMap.put("LocationLookup__c", farmer.locationId);
+        newFarmMap.put("Sub_LocationLookup__c", farmer.subLocationId);
+        newFarmMap.put("Village__c", farmer.villageId);
+        newFarmMap.put("Tree_Specie__c", farmer.treeSpeciesId);
+        newFarmMap.put("Is_Farmer_Home__c", farmer.isFarmerHome() ? true : false);
+
+        if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FACILITATOR))
+        {
+            newFarmMap.put("Facilitator__c", PreferenceHelper.getInstance().readLoginUserId());
+            newFarmMap.put("Facilitator_Signup__c", PreferenceHelper.getInstance().readLoginUserId());
+        }
+        else if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FIELD_OFFICER))
+        {
+            newFarmMap.put("Field_Officer_Signup__c", PreferenceHelper.getInstance().readLoginUserId());
+        }
+        else if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FIELD_MANAGER))
+        {
+            newFarmMap.put("Field_Manager_Signup__c", PreferenceHelper.getInstance().readLoginUserId());
         }
 
-        // Created farmers
-        // Edited farmers
-        // Created farmer pic
-        // Edited farmer pic
-        // Locations etc
+        if (farmer.signupStatus != null && !farmer.signupStatus.isEmpty()) {
+            newFarmMap.put("Sign_Up_Status__c", farmer.signupStatus);
+        }
 
-        // Complete sync and release the lock of comm.
+        return newFarmMap;
+    }
+
+    private static void addFarmWithFarmerId(String id, Farmer farmer) {
+        HashMap<String, Object> farmMap = getFarmMap(farmer);
+        farmMap.put("Farmer__c", id);
+        countCalls++;
+        WebApi.createFarm(new Callback<ResponseModel>() {
+            @Override
+            public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
+                countCalls--;
+                if (response.body() != null && response.body().success == true) {
+                    checkSyncComplete();
+                }
+                else if(response.code() == 401)
+                {
+                    countFailedCalls++;
+                    PreferenceHelper.getInstance().clearSession();
+                    Intent intent = new Intent(mContext, LoginActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivity(intent);
+                } else {
+                    countFailedCalls++;
+                    checkSyncComplete();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseModel> call, Throwable t) {
+                countCalls--;
+                countFailedCalls++;
+                t.printStackTrace();
+            }
+        }, farmMap);
+    }
+
+    private static void editFarmWithFarmId(Farmer farmer) {
+
+        HashMap<String, Object> farmMap = getFarmMap(farmer);
+        farmMap.put("Farmer__c", farmer.farmerId);
+        WebApi.editFarm(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                countCalls--;
+                if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                    checkSyncComplete();
+                }
+                else if(response.code() == 401)
+                {
+                    countFailedCalls++;
+                    PreferenceHelper.getInstance().clearSession();
+                    Intent intent = new Intent(mContext, LoginActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivity(intent);
+                } else {
+                    countFailedCalls++;
+                    checkSyncComplete();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
+                countFailedCalls++;
+                checkSyncComplete();
+            }
+        }, farmer.farmId, farmMap);
     }
 
     private static void checkSyncComplete(){
@@ -256,8 +492,14 @@ public class WebApi {
                 Toast.makeText(mContext, "Sync completed", Toast.LENGTH_SHORT).show();
             else
                 Toast.makeText(mContext, "Sync finished, but some records failed to sync", Toast.LENGTH_LONG).show();
-            if(WebApi.getInstance().onSyncCompleteListener != null)
+            long yourMillis = System.currentTimeMillis();
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            Date resultDate = new Date(yourMillis);
+            String syncTime = sdf.format(resultDate);
+            PreferenceHelper.getInstance().writeLastSyncTime(syncTime);
+            if(WebApi.getInstance().onSyncCompleteListener != null) {
                 WebApi.getInstance().onSyncCompleteListener.syncCompleted();
+            }
         }
     }
 

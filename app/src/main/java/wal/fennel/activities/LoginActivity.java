@@ -87,6 +87,9 @@ public class LoginActivity extends BaseActivity implements SplashFragment.CountD
     }
 
     public void callLoginFragment() {
+
+        PreferenceHelper.getInstance().writeIsSyncInProgress(false);
+
         if(!PreferenceHelper.getInstance().readToken().isEmpty() && !PreferenceHelper.getInstance().readLoginUserId().isEmpty())
         {
             Fennel.restClient.setApiBaseUrl(PreferenceHelper.getInstance().readInstanceUrl());

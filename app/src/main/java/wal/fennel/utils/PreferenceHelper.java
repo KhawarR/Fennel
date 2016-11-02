@@ -235,7 +235,7 @@ public class PreferenceHelper {
     }
 
     public String readLastSyncTime() {
-        String value = mPref.getString(KEY_LAST_SYNC_TIME, "");
+        String value = mPref.getString(KEY_LAST_SYNC_TIME, "-");
         return value;
     }
 
@@ -259,6 +259,7 @@ public class PreferenceHelper {
         writeLoginUserType("");
         writeUserEmployeeId("");
         writeLastSyncTime("");
+        writeIsSyncInProgress(false);
 
         writeAboutFN("");
         writeAboutMN("");

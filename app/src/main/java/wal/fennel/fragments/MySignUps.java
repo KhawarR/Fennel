@@ -252,17 +252,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         if(incompleteFarmersList.size() > 0)
         {
-            myFarmers.add(new Farmer("", "", Constants.STR_INCOMPLETE, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", true, "", ""));
+            myFarmers.add(new Farmer("", "", Constants.STR_INCOMPLETE, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
             myFarmers.addAll(incompleteFarmersList);
         }
         if(pendingFarmersList.size() > 0)
         {
-            myFarmers.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", true, "", ""));
+            myFarmers.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
             myFarmers.addAll(pendingFarmersList);
         }
         if(approvedFarmersList.size() > 0)
         {
-            myFarmers.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", true, "", ""));
+            myFarmers.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
             myFarmers.addAll(approvedFarmersList);
         }
 
@@ -345,9 +345,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 String id = "";
                 String farmId = "";
                 String location = "";
+                String locationId = "";
                 String subLocation = "";
+                String subLocationId = "";
                 String tree = "";
+                String treeId = "";
                 String village = "";
+                String villageId = "";
                 String fullName = "";
                 String firstName = "";
                 String secondName = "";
@@ -363,18 +367,21 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 if(objLocation != null)
                 {
                     location = objLocation.getString("Name");
+                    locationId = objLocation.getString("Id");
                 }
 
                 JSONObject objSubLocation = farmObj.optJSONObject("Sub_LocationLookup__r");
                 if(objSubLocation != null)
                 {
                     subLocation = objSubLocation.getString("Name");
+                    subLocationId = objSubLocation.getString("Id");
                 }
 
                 JSONObject objVillage = farmObj.optJSONObject("Village__r");
                 if(objVillage != null)
                 {
                     village = objVillage.getString("Name");
+                    villageId = objVillage.getString("Id");
                 }
 
 
@@ -382,6 +389,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 if(objTree != null)
                 {
                     tree = objTree.getString("Name");
+                    treeId = objTree.getString("Id");
                 }
 
                 id = farmObj.optString("Farmer__c");
@@ -412,7 +420,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 //                String status = farmObj.getString("Status__c");
                 String status = farmObj.getString("Sign_Up_Status__c");
 
-                Farmer farmer = new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", status, false, "", "");
+                Farmer farmer = new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "");
 
                 if(status.equalsIgnoreCase(Constants.STR_INCOMPLETE))
                 {
@@ -430,7 +438,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 // Save to DB
                 realm.beginTransaction();
                 final Farmer farmerDbObj = realm.createObject(Farmer.class);
-                farmerDbObj.setAllValues(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, subLocation, village, tree, isFarmerHome, mobileNumber, "", "", status, false, "", "");
+                farmerDbObj.setAllValues(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "");
                 realm.commitTransaction();
             }
         }
@@ -441,17 +449,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         if(incompleteFarmersList.size() > 0)
         {
-            myFarmers.add(new Farmer("", "", Constants.STR_INCOMPLETE, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", true, "", ""));
+            myFarmers.add(new Farmer("", "", Constants.STR_INCOMPLETE, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
             myFarmers.addAll(incompleteFarmersList);
         }
         if(pendingFarmersList.size() > 0)
         {
-            myFarmers.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", true, "", ""));
+            myFarmers.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
             myFarmers.addAll(pendingFarmersList);
         }
         if(approvedFarmersList.size() > 0)
         {
-            myFarmers.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", false, "", "", "", "", true, "", ""));
+            myFarmers.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
             myFarmers.addAll(approvedFarmersList);
         }
 

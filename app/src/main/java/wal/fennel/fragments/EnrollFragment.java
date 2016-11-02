@@ -1305,12 +1305,20 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             farmerStatus = farmer.signupStatus;
 
         Realm.getDefaultInstance().beginTransaction();
+
         final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
-        farmerDbObj.setAllValues(farmer.farmerId, farmer.farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, subLocationName, villageName, treeSpeciesName, isFarmerHome, mobileNumber, farmer.thumbAttachmentId, farmer.nationalCardAttachmentId, farmerStatus, false, "", "");
-        if (farmerImageUrl != null && !farmerImageUrl.isEmpty())
+        farmerDbObj.setAllValues(farmer.farmerId, farmer.farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, location, subLocationName, subLocation, villageName, village, treeSpeciesName, treeSpecies, isFarmerHome, mobileNumber, farmer.thumbAttachmentId, farmer.nationalCardAttachmentId, farmerStatus, false, "", "");
+        farmerDbObj.setDataDirty(true);
+
+        if(farmerImageUrl != null && !farmerImageUrl.isEmpty()){
             farmerDbObj.setThumbUrl(farmerImageUrl);
-        if (farmerIdImageUrl != null && !farmerIdImageUrl.isEmpty())
+            farmerDbObj.setFarmerPicDirty(true);
+        }
+        if(farmerIdImageUrl != null && !farmerIdImageUrl.isEmpty()){
             farmerDbObj.setNationalCardUrl(farmerIdImageUrl);
+            farmerDbObj.setNatIdCardDirty(true);
+        }
+
         Realm.getDefaultInstance().commitTransaction();
 
         loadingFinished();
@@ -1337,8 +1345,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                 Log.i("LP", "Farmer Edited!");
 //                    updateFarmer(farmer, true);
-                Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
-                newFarm.farmId = farmer.farmId;
+//                Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
+//                newFarm.farmId = farmer.farmId;
 //                    editFarmWithFarmId(newFarm, farmer.farmId);
                 editFarmWithFarmId(farmer.farmId);
 
@@ -1391,7 +1399,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     private void createFarmerInDB() {
         // Save to DB
-        String id = String.valueOf(System.currentTimeMillis());
+        String id = "";
         String firstName = etFirstName.getText().toString();
         String secondName = etSecondName.getText().toString();
         String surname = etSurname.getText().toString();
@@ -1405,12 +1413,20 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         fullName = (fullName + " " + surname).trim();
 
         Realm.getDefaultInstance().beginTransaction();
+
         final Farmer farmerDbObj = Realm.getDefaultInstance().createObject(Farmer.class);
-        farmerDbObj.setAllValues(id, id, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, subLocationName, villageName, treeSpeciesName, isFarmerHome, mobileNumber, id, id, farmerStatus, false, "", "");
-        if(farmerImageUrl != null && !farmerImageUrl.isEmpty())
+        farmerDbObj.setAllValues(id, id, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, location, subLocationName, subLocation, villageName, village, treeSpeciesName, treeSpecies, isFarmerHome, mobileNumber, id, id, farmerStatus, false, "", "");
+        farmerDbObj.setDataDirty(true);
+
+        if(farmerImageUrl != null && !farmerImageUrl.isEmpty()){
             farmerDbObj.setThumbUrl(farmerImageUrl);
-        if(farmerIdImageUrl != null && !farmerIdImageUrl.isEmpty())
+            farmerDbObj.setFarmerPicDirty(true);
+        }
+        if(farmerIdImageUrl != null && !farmerIdImageUrl.isEmpty()){
             farmerDbObj.setNationalCardUrl(farmerIdImageUrl);
+            farmerDbObj.setNatIdCardDirty(true);
+        }
+
         Realm.getDefaultInstance().commitTransaction();
 
         loadingFinished();
@@ -1436,23 +1452,13 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             if ((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().success == true) {
                 Log.i("LP", "Farmer Added To Server");
                 newFarmer.farmerId = response.body().id;
-//                    addFarmerToDB(newFarmer, response.body().id, true);
-//                Farm newFarm = createFarmWithFarmerId(response.body().id);
-//                    addFarmWithFarmerId(newFarm, response.body().id);
                 addFarmWithFarmerId(response.body().id);
 
                 attachFarmerImageToFarmerObject(newFarmer);
                 attachFarmerIDImageToFarmerObject(newFarmer);
 
             } else {
-
-//                    addFarmerToDB(newFarmer, null, false);
-//                    Farm newFarm = createFarmWithFarmerId(null);
-//                    addFarmToDB(newFarm, null, false);
-//                    Toast.makeText(getContext(), "Farmer Enrollment Failed", Toast.LENGTH_SHORT).show();
-
                 loadingFinished();
-//                    popToSignupsFragment();
 
                 String message = "";
                 try {
@@ -1482,13 +1488,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             Log.i("LP", t.getMessage().toString());
             Toast.makeText(getContext(), "Farmer Enrollment Failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
 
-//                Farmer newFarmer = getFarmer();
-//                addFarmerToDB(newFarmer, null, false);
-//                Farm newFarm = createFarmWithFarmerId(null);
-//                addFarmToDB(newFarm, null, false);
-
             loadingFinished();
-//                popToSignupsFragment();
         }
     };
 
