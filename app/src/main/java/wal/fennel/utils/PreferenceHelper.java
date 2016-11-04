@@ -4,6 +4,9 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import io.realm.Realm;
+import wal.fennel.models.Farmer;
+
 @SuppressLint("CommitPrefEdits")
 public class PreferenceHelper {
 
@@ -268,5 +271,11 @@ public class PreferenceHelper {
         writeAboutFMname("");
         writeAboutAttId("");
         writeAboutAttUrl("");
+        writeAboutIsSyncReq(false);
+
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.delete(Farmer.class);
+        realm.commitTransaction();
     }
 }

@@ -192,8 +192,6 @@ public class WebApi {
 
         WebApi.getInstance().onSyncCompleteListener = onSyncCompleteListener;
 
-//        boolean syncStarted = false;
-
         // About Me portion
         if(PreferenceHelper.getInstance().readAboutIsSyncReq()){
             String imagePath = NetworkHelper.getUploadPathFromUri(PreferenceHelper.getInstance().readAboutAttUrl());
@@ -515,6 +513,7 @@ public class WebApi {
 
         HashMap<String, Object> farmMap = getFarmMap(farmer);
         farmMap.put("Farmer__c", farmer.farmerId);
+        countCalls++;
         WebApi.editFarm(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {

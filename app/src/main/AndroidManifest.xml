@@ -32,6 +32,11 @@
             android:name="wal.fennel.activities.AboutMe"
             android:theme="@style/AppTheme"
             android:screenOrientation="portrait"/>
+        <receiver android:name="wal.fennel.network.NetworkChangeReceiver" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="d3e227cb7f57d1985242cf57557781227233f3fb" />

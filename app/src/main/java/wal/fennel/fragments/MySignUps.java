@@ -210,7 +210,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     //region Netwrok calls, callbacks & parsers
     private void getMySignups(){
 
-        if(NetworkHelper.isNetAvailable(getActivity()))
+        if(NetworkHelper.isNetAvailable(getActivity()) && !WebApi.isSyncRequired())
         {
             getMySignupsFromServer();
         }
