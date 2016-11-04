@@ -326,7 +326,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             farmer = (Farmer) getArguments().getParcelable("farmer");
             txtCreateFarmer.setText("SAVE");
 
-            if (!farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_INCOMPLETE)) {
+            if (!farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_ENROLLED)) {
                 disableForm();
             } else {
                 isEdit = true;
@@ -583,7 +583,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         loadingStarted();
 
-        farmerStatus = "Interested";
+        farmerStatus = "Enrolled";
         createOrEditFarmer();
     }
 
@@ -1415,7 +1415,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         Realm.getDefaultInstance().beginTransaction();
 
         final Farmer farmerDbObj = Realm.getDefaultInstance().createObject(Farmer.class);
-        farmerDbObj.setAllValues(id, id, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, location, subLocationName, subLocation, villageName, village, treeSpeciesName, treeSpecies, isFarmerHome, mobileNumber, id, id, farmerStatus, false, "", "");
+        farmerDbObj.setAllValues(id, "", fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, location, subLocationName, subLocation, villageName, village, treeSpeciesName, treeSpecies, isFarmerHome, mobileNumber, "", "", farmerStatus, false, "", "");
         farmerDbObj.setDataDirty(true);
 
         if(farmerImageUrl != null && !farmerImageUrl.isEmpty()){

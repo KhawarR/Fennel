@@ -110,6 +110,10 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(onRefreshListener);
 
+//        if(PreferenceHelper.getInstance().readIsSyncInProgress()){
+//            mSwipeRefreshLayout.setRefreshing(true);
+//        }
+
         imagePicker = new ImagePicker(AboutMe.this);
         cameraImagePicker = new CameraImagePicker(AboutMe.this);
 
@@ -595,10 +599,20 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
     private SwipeRefreshLayout.OnRefreshListener onRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
         @Override
         public void onRefresh() {
-            if(PreferenceHelper.getInstance().readIsSyncInProgress())
-                Toast.makeText(getApplicationContext(), "Data sync is already in progress", Toast.LENGTH_SHORT).show();
-            else
-                WebApi.syncAll(AboutMe.this);
+            if(NetworkHelper.isNetAvailable(getApplicationContext())){
+                if(!PreferenceHelper.getInstance().readIsSyncInProgress()){
+                    if(WebApi.isSyncRequired())
+                        WebApi.syncAll(AboutMe.this);
+                    else {
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        Toast.makeText(getApplicationContext(), "Data is already synced", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+            else {
+                Toast.makeText(getApplicationContext(), "Network not available", Toast.LENGTH_SHORT).show();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
         }
     };
 

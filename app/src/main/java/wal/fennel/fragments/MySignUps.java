@@ -236,7 +236,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         for (int i = 0; i < farmerDbList.size(); i++) {
             Farmer farmer = farmerDbList.get(i);
 
-            if(farmer.signupStatus.equalsIgnoreCase(Constants.STR_INCOMPLETE))
+            if(farmer.signupStatus.equalsIgnoreCase(Constants.STR_ENROLLED))
             {
                 incompleteFarmersList.add(farmer);
             }
@@ -252,7 +252,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         if(incompleteFarmersList.size() > 0)
         {
-            myFarmers.add(new Farmer("", "", Constants.STR_INCOMPLETE, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            myFarmers.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
             myFarmers.addAll(incompleteFarmersList);
         }
         if(pendingFarmersList.size() > 0)
@@ -422,7 +422,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                 Farmer farmer = new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "");
 
-                if(status.equalsIgnoreCase(Constants.STR_INCOMPLETE))
+                if(status.equalsIgnoreCase(Constants.STR_ENROLLED))
                 {
                     incompleteFarmersList.add(farmer);
                 }
@@ -449,7 +449,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         if(incompleteFarmersList.size() > 0)
         {
-            myFarmers.add(new Farmer("", "", Constants.STR_INCOMPLETE, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            myFarmers.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
             myFarmers.addAll(incompleteFarmersList);
         }
         if(pendingFarmersList.size() > 0)

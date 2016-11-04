@@ -247,7 +247,7 @@ public class PreferenceHelper {
 
     public boolean readAboutIsSyncReq() {
         boolean value = mPref.getBoolean(KEY_ABOUT_IS_SYNC_REQ, false);
-        return value;
+        return value && !(PreferenceHelper.getInstance().readAboutAttUrl().startsWith("http"));
     }
 
     public void clearSession() {

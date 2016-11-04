@@ -118,7 +118,7 @@ public class MySignupsAdapter extends BaseAdapter {
 
             ImageView ivLeftIcon = (ImageView) view.findViewById(R.id.iv_mysignups_icon_left);
 
-            if(farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_INCOMPLETE))
+            if(farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_ENROLLED))
             {
                 ivLeftIcon.setImageResource(R.drawable.ic_arrow_right);
                 ivLeftIcon.setVisibility(View.VISIBLE);
