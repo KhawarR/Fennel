@@ -173,11 +173,11 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             }
         });
 
-        boolean isFirstRun = PreferenceHelper.getInstance().readFirstRun();
-        if (isFirstRun) {
-            PreferenceHelper.getInstance().writeFirstRun(false);
+//        boolean isFirstRun = PreferenceHelper.getInstance().readFirstRun();
+//        if (isFirstRun) {
+//            PreferenceHelper.getInstance().writeFirstRun(false);
             getLocationsData();
-        }
+//        }
 
         getAboutMeAttachment();
     }

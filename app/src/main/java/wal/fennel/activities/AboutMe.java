@@ -332,7 +332,7 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         byte[] byteArrayImage = null;
         Bitmap bmp = null;
 
-        bmp = PhotoUtils.decodeSampledBitmapFromResource(imageUri);
+        bmp = PhotoUtils.getBitmapFromPath(imageUri);
 
         if(bmp != null)
         {
