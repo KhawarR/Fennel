@@ -1037,6 +1037,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             @Override
             public void onError(String message) {
                 // Do error handling
+                Log.i("LP", message);
             }
         };
         if (isDevice) {
@@ -1070,6 +1071,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             @Override
             public void onError(String message) {
                 // Do error handling
+                Log.i("LP", message);
             }
         };
         if (isDevice) {

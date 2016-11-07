@@ -1,5 +1,8 @@
 buildscript {
     repositories {
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
         maven { url 'https://maven.fabric.io/public' }
     }
 
@@ -47,7 +50,7 @@ dependencies {
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile 'com.kbeanie:multipicker:1.1.2@aar'
 
-    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.squareup.picasso:picasso:2.6.0-SNAPSHOT'
     compile 'com.squareup.okhttp3:okhttp:3.4.1'
     compile 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.1.0'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.5@aar') {
