@@ -570,7 +570,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         loadingStarted();
 
-        farmerStatus = "Interested";
+        farmerStatus = "Enrolled";
         createOrEditFarmer();
     }
 

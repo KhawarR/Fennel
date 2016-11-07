@@ -15,7 +15,7 @@ public class Constants {
     public static final long TIME_DIFF = 2000;
 
 
-    public static final String STR_INCOMPLETE = "INTERESTED";
+    public static final String STR_INCOMPLETE = "ENROLLED";
     public static final String STR_PENDING = "PENDING";
     public static final String STR_APPROVED = "APPROVED";
 
