@@ -192,7 +192,7 @@ public class WebApi {
 
         WebApi.getInstance().onSyncCompleteListener = onSyncCompleteListener;
 
-        // About Me portion
+        //region About Me portion
         if(PreferenceHelper.getInstance().readAboutIsSyncReq()){
             String imagePath = NetworkHelper.getUploadPathFromUri(PreferenceHelper.getInstance().readAboutAttUrl());
             countCalls++;
@@ -274,18 +274,17 @@ public class WebApi {
                 });
             }
         }
+        //endregion
 
-        // Farmers
+        //region Farmers
         RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).equalTo("isDataDirty", true).findAll();
         for (int i = 0; i < farmerDbList.size(); i++) {
-
-//            syncStarted = true;
 
             final Farmer farmer = farmerDbList.get(i);
 
             final HashMap<String, Object> farmerMap = getFarmerMap(farmer);
             countCalls++;
-            if(farmer.farmerId.isEmpty()){
+            if(farmer.farmerId.isEmpty() || farmer.farmerId.startsWith(Constants.STR_FARMER_ID_PREFIX)){
                 WebApi.createFarmer(new Callback<ResponseModel>() {
                     @Override
                     public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
@@ -366,6 +365,7 @@ public class WebApi {
                 }, farmer.farmerId, farmerMap);
             }
         }
+        //endregion
 
         PreferenceHelper.getInstance().writeIsSyncInProgress(true);
     }

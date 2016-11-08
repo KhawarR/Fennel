@@ -601,7 +601,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         boolean goodToGo = true;
         String missingData = "";
         View scrollToView = null;
-        if (etFirstName.getText() == null || etFirstName.getText().toString().isEmpty()) {
+        if (etFirstName.getText() == null || etFirstName.getText().toString().trim().toString().isEmpty()) {
             goodToGo = false;
             missingData += "\n- First Name";
             lblFirstName.setTextColor(getResources().getColor(R.color.dark_red));
@@ -611,7 +611,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         {
             lblFirstName.setTextColor(getResources().getColor(R.color.black));
         }
-        if (etSurname.getText() == null || etSurname.getText().toString().isEmpty()) {
+        if (etSurname.getText() == null || etSurname.getText().toString().trim().isEmpty()) {
             goodToGo = false;
             missingData += "\n- Surname";
             lblSurname.setTextColor(getResources().getColor(R.color.dark_red));
@@ -867,9 +867,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private HashMap<String, Object> getFarmerMap() {
 
         final HashMap<String, Object> newFarmerMap = new HashMap<>();
-        newFarmerMap.put("First_Name__c", etFirstName.getText() != null ? etFirstName.getText().toString() : "");
-        newFarmerMap.put("Middle_Name__c", etSecondName.getText() != null ? etSecondName.getText().toString() : "");
-        newFarmerMap.put("Last_Name__c", etSurname.getText() != null ? etSurname.getText().toString() : "");
+        newFarmerMap.put("First_Name__c", etFirstName.getText() != null ? etFirstName.getText().toString().trim().toString() : "");
+        newFarmerMap.put("Middle_Name__c", etSecondName.getText() != null ? etSecondName.getText().toString().trim() : "");
+        newFarmerMap.put("Last_Name__c", etSurname.getText() != null ? etSurname.getText().toString().trim() : "");
         newFarmerMap.put("Name", etIdNumber.getText() != null ? etIdNumber.getText().toString() : "");
         newFarmerMap.put("Mobile_Number__c", etMobileNumber.getText() != null ? etMobileNumber.getText().toString() : "");
         newFarmerMap.put("Gender__c", (tvFemale.isSelected() == true) ? "Female" : "Male");
@@ -883,9 +883,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private Farmer getFarmer() {
 
         final Farmer newFarmer = new Farmer();
-        newFarmer.setFirstName(etFirstName.getText() != null ? etFirstName.getText().toString() : "");
-        newFarmer.setSecondName(etSecondName.getText() != null ? etSecondName.getText().toString() : "");
-        newFarmer.setSurname(etSurname.getText() != null ? etSurname.getText().toString() : "");
+        newFarmer.setFirstName(etFirstName.getText() != null ? etFirstName.getText().toString().trim().toString() : "");
+        newFarmer.setSecondName(etSecondName.getText() != null ? etSecondName.getText().toString().trim() : "");
+        newFarmer.setSurname(etSurname.getText() != null ? etSurname.getText().toString().trim() : "");
         newFarmer.setIdNumber(etIdNumber.getText() != null ? etIdNumber.getText().toString() : "");
         newFarmer.setMobileNumber(etMobileNumber.getText() != null ? etMobileNumber.getText().toString() : "");
         newFarmer.setGender((tvFemale.isSelected() == true) ? "Female" : "Male");
@@ -943,9 +943,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     };
 
     private void checkEnableSubmit() {
-        if (etFirstName.getText().toString().isEmpty()
-                || etSecondName.getText().toString().isEmpty()
-                || etSurname.getText().toString().isEmpty()
+        if (etFirstName.getText().toString().trim().toString().isEmpty()
+                || etSecondName.getText().toString().trim().isEmpty()
+                || etSurname.getText().toString().trim().isEmpty()
                 || etIdNumber.getText().toString().isEmpty()
                 || etMobileNumber.getText().toString().isEmpty()
                 || !isFarmerPhotoSet
@@ -1289,9 +1289,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     private void editFarmerInDB(boolean shouldPopFragment) {
         // Save to DB
-        String firstName = etFirstName.getText().toString();
-        String secondName = etSecondName.getText().toString();
-        String surname = etSurname.getText().toString();
+        String firstName = etFirstName.getText().toString().trim().toString();
+        String secondName = etSecondName.getText().toString().trim();
+        String surname = etSurname.getText().toString().trim();
         String idNumber = etIdNumber.getText().toString();
         String gender = (tvFemale.isSelected() == true) ? "Female" : "Male";
         boolean leader = tvLeaderYes.isSelected();
@@ -1399,10 +1399,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     private void createFarmerInDB() {
         // Save to DB
-        String id = String.valueOf(System.currentTimeMillis());
-        String firstName = etFirstName.getText().toString();
-        String secondName = etSecondName.getText().toString();
-        String surname = etSurname.getText().toString();
+        String id = Constants.STR_FARMER_ID_PREFIX + String.valueOf(System.currentTimeMillis());
+        String firstName = etFirstName.getText().toString().trim().toString();
+        String secondName = etSecondName.getText().toString().trim();
+        String surname = etSurname.getText().toString().trim();
         String idNumber = etIdNumber.getText().toString();
         String gender = (tvFemale.isSelected() == true) ? "Female" : "Male";
         boolean leader = tvLeaderYes.isSelected();
