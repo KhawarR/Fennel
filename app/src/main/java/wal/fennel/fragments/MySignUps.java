@@ -88,8 +88,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.fragment_my_sign_ups, container, false);
         ButterKnife.bind(this, view);
 
-        getMySignups();
-
         return view;
     }
 
@@ -173,6 +171,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
         });
+
+        getMySignups();
 
         getDropDownsData();
 //        boolean isFirstRun = PreferenceHelper.getInstance().readFirstRun();
