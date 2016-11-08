@@ -1399,7 +1399,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     private void createFarmerInDB() {
         // Save to DB
-        String id = "";
+        String id = String.valueOf(System.currentTimeMillis());
         String firstName = etFirstName.getText().toString();
         String secondName = etSecondName.getText().toString();
         String surname = etSurname.getText().toString();

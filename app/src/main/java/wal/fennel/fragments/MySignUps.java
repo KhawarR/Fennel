@@ -285,6 +285,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
+            WebApi.saveSyncTimeStamp();
             if(isValid())
             {
                 if (response.code() == 200) {
