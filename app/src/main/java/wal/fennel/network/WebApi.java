@@ -757,10 +757,14 @@ public class WebApi {
 
     private static void checkSyncComplete(){
         if(countCalls == 0) {
-//            if(countFailedCalls == 0)
+            if(countFailedCalls == 0){
 //                Toast.makeText(mContext, "Sync completed", Toast.LENGTH_SHORT).show();
-//            else
+                Log.i("Sync process: ", "Sync completed");
+            }
+            else{
 //                Toast.makeText(mContext, "Sync finished, but some records failed to sync", Toast.LENGTH_LONG).show();
+                Log.i("Sync process: ", "Sync finished, but some records failed to sync");
+            }
             saveSyncTimeStamp();
             if(WebApi.getInstance().onSyncCompleteListener != null) {
                 WebApi.getInstance().onSyncCompleteListener.syncCompleted();
