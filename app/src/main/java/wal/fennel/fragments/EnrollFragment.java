@@ -1056,6 +1056,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             @Override
             public void onError(String message) {
                 // Do error handling
+                Log.i("LP", message);
             }
         };
         if (isDevice) {
@@ -1093,6 +1094,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             @Override
             public void onError(String message) {
                 // Do error handling
+                Log.i("LP", message);
             }
         };
         if (isDevice) {
@@ -1516,7 +1518,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         byte[] byteArrayImage = null;
         Bitmap bmp = null;
 
-        bmp = PhotoUtils.decodeSampledBitmapFromResource(farmerImageUri);
+//        bmp = PhotoUtils.decodeSampledBitmapFromResource(farmerImageUri);
+        bmp = PhotoUtils.getBitmapFromPath(farmerImageUri);
 
         if(bmp != null)
         {
@@ -1614,7 +1617,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         byte[] byteArrayImage = null;
         Bitmap bmp = null;
 
-        bmp = PhotoUtils.decodeSampledBitmapFromResource(farmerIdImageUri);
+//        bmp = PhotoUtils.decodeSampledBitmapFromResource(farmerIdImageUri);
+        bmp = PhotoUtils.getBitmapFromPath(farmerIdImageUri);
 
         if(bmp != null)
         {

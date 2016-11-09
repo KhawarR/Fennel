@@ -398,7 +398,8 @@ public class WebApi {
         byte[] byteArrayImage = null;
         Bitmap bmp = null;
 
-        bmp = PhotoUtils.decodeSampledBitmapFromResource(imagePath);
+//        bmp = PhotoUtils.decodeSampledBitmapFromResource(imagePath);
+        bmp = PhotoUtils.getBitmapFromPath(imagePath);
 
         if(bmp != null)
         {
@@ -572,7 +573,8 @@ public class WebApi {
         Bitmap bmp = null;
 
         String imagePath = NetworkHelper.getUploadPathFromUri(farmer.thumbUrl);
-        bmp = PhotoUtils.decodeSampledBitmapFromResource(imagePath);
+//        bmp = PhotoUtils.decodeSampledBitmapFromResource(imagePath);
+        bmp = PhotoUtils.getBitmapFromPath(imagePath);
 
         if(bmp != null)
         {
@@ -675,7 +677,8 @@ public class WebApi {
         Bitmap bmp = null;
 
         String imagePath = NetworkHelper.getUploadPathFromUri(farmer.nationalCardUrl);
-        bmp = PhotoUtils.decodeSampledBitmapFromResource(imagePath);
+//        bmp = PhotoUtils.decodeSampledBitmapFromResource(imagePath);
+        bmp = PhotoUtils.getBitmapFromPath(imagePath);
 
         if(bmp != null)
         {

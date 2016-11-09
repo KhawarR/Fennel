@@ -173,13 +173,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         });
 
         getMySignups();
-
         getDropDownsData();
-//        boolean isFirstRun = PreferenceHelper.getInstance().readFirstRun();
-//        if (isFirstRun) {
-//            PreferenceHelper.getInstance().writeFirstRun(false);
-//            getDropDownsData();
-//        }
     }
 
     @Override
