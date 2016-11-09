@@ -186,7 +186,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     public void onResume(){
         super.onResume();
         loadAttachment();
-        WebApi.getAboutMeAttachment(aboutMeAttachmentCallback);
     }
 
     private void loadAttachment() {
@@ -207,10 +206,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
     };
 
-    //region Netwrok calls, callbacks & parsers
+    //region Network calls, callbacks & parsers
     private void getMySignups(){
 
-        if(NetworkHelper.isNetAvailable(getActivity()) && !WebApi.isSyncRequired())
+        if(NetworkHelper.isNetAvailable(getActivity()) && !WebApi.isSyncRequired() && PreferenceHelper.getInstance().readFirstRun())
         {
             getMySignupsFromServer();
         }
@@ -279,6 +278,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         loadingStarted();
         WebApi.getMySignUps(mySignupsCallback);
+        WebApi.getAboutMeAttachment(aboutMeAttachmentCallback);
     }
 
     private Callback<ResponseBody> mySignupsCallback = new Callback<ResponseBody>() {
@@ -293,6 +293,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                     try {
                         responseStr = response.body().string();
+                        PreferenceHelper.getInstance().writeFirstRun(false);
                         parseData(responseStr);
                         WebApi.getMyFarmerAttachments(myFarmersAttachments);
                     } catch (IOException e) {

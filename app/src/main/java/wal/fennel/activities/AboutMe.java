@@ -124,7 +124,7 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         titleBarLayout.setOnIconClickListener(this);
 
         populateView();
-        WebApi.getAboutMeInfo(aboutMeCallback);
+//        WebApi.getAboutMeInfo(aboutMeCallback);
     }
 
     private void loadAttachment() {
@@ -156,85 +156,85 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         loadAttachment();
     }
 
-    private Callback<ResponseBody> aboutMeAttachmentCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            loadingFinished();
-
-            {
-                if (response.code() == 200) {
-                    String responseStr = "";
-
-                    try {
-                        responseStr = response.body().string();
-                        String attId = parseDataAttachment(responseStr);
-                        if(!attId.isEmpty() && !attId.equalsIgnoreCase(PreferenceHelper.getInstance().readAboutAttId()))
-                        {
-                            PreferenceHelper.getInstance().writeAboutAttId(attId);
-                            String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(attId);
-                            PreferenceHelper.getInstance().writeAboutAttUrl(thumbUrl);
-                            if(NetworkHelper.isNetAvailable(AboutMe.this))
-                            {
-                                MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
-                                MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
-                            }
-                            else
-                            {
-                                MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
-                                MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
-                            }
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                else if(response.code() == 401)
-                {
-                    PreferenceHelper.getInstance().clearSession();
-                    Intent intent = new Intent(AboutMe.this, LoginActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                    finish();
-                }
-                else {
-                    Toast.makeText(AboutMe.this, "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            loadingFinished();
-            t.printStackTrace();
-        }
-    };
-
-    private String parseDataAttachment(String data) throws JSONException {
-        JSONObject jsonObject = new JSONObject(data);
-        JSONArray arrRecords = jsonObject.getJSONArray("records");
-
-        if(arrRecords.length() > 0)
-        {
-            JSONObject facObj = arrRecords.getJSONObject(0);
-
-            JSONObject attachmentObj = facObj.optJSONObject("Attachments");
-            if(attachmentObj != null)
-            {
-                JSONArray attRecords = attachmentObj.getJSONArray("records");
-                if(attRecords.length() > 0)
-                {
-                    JSONObject objFarmerPhoto = attRecords.getJSONObject(0);
-                    String idAttachment = objFarmerPhoto.getString("Id");
-                    return idAttachment;
-                }
-            }
-        }
-
-        return "";
-    }
-
+//    private Callback<ResponseBody> aboutMeAttachmentCallback = new Callback<ResponseBody>() {
+//        @Override
+//        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//            loadingFinished();
+//
+//            {
+//                if (response.code() == 200) {
+//                    String responseStr = "";
+//
+//                    try {
+//                        responseStr = response.body().string();
+//                        String attId = parseDataAttachment(responseStr);
+//                        if(!attId.isEmpty() && !attId.equalsIgnoreCase(PreferenceHelper.getInstance().readAboutAttId()))
+//                        {
+//                            PreferenceHelper.getInstance().writeAboutAttId(attId);
+//                            String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(attId);
+//                            PreferenceHelper.getInstance().writeAboutAttUrl(thumbUrl);
+//                            if(NetworkHelper.isNetAvailable(AboutMe.this))
+//                            {
+//                                MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+//                                MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+//                            }
+//                            else
+//                            {
+//                                MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+//                                MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+//                            }
+//                        }
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//                else if(response.code() == 401)
+//                {
+//                    PreferenceHelper.getInstance().clearSession();
+//                    Intent intent = new Intent(AboutMe.this, LoginActivity.class);
+//                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    startActivity(intent);
+//                    finish();
+//                }
+//                else {
+//                    Toast.makeText(AboutMe.this, "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        }
+//
+//        @Override
+//        public void onFailure(Call<ResponseBody> call, Throwable t) {
+//            loadingFinished();
+//            t.printStackTrace();
+//        }
+//    };
+//
+//    private String parseDataAttachment(String data) throws JSONException {
+//        JSONObject jsonObject = new JSONObject(data);
+//        JSONArray arrRecords = jsonObject.getJSONArray("records");
+//
+//        if(arrRecords.length() > 0)
+//        {
+//            JSONObject facObj = arrRecords.getJSONObject(0);
+//
+//            JSONObject attachmentObj = facObj.optJSONObject("Attachments");
+//            if(attachmentObj != null)
+//            {
+//                JSONArray attRecords = attachmentObj.getJSONArray("records");
+//                if(attRecords.length() > 0)
+//                {
+//                    JSONObject objFarmerPhoto = attRecords.getJSONObject(0);
+//                    String idAttachment = objFarmerPhoto.getString("Id");
+//                    return idAttachment;
+//                }
+//            }
+//        }
+//
+//        return "";
+//    }
+//
 //    @Override
 //    protected String getTrackerScreenName() {
 //        return null;
@@ -306,16 +306,16 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
                 // Display images
                 String originalPath = images.get(0).getOriginalPath();
                 String uri = NetworkHelper.getUriFromPath(originalPath);
-                if(NetworkHelper.isNetAvailable(AboutMe.this))
-                {
-                    PreferenceHelper.getInstance().writeAboutIsSyncReq(false);
-                    addPictureAttachment(originalPath);
-                }
-                else
-                {
+//                if(NetworkHelper.isNetAvailable(AboutMe.this))
+//                {
+//                    PreferenceHelper.getInstance().writeAboutIsSyncReq(false);
+//                    addPictureAttachment(originalPath);
+//                }
+//                else
+//                {
                     PreferenceHelper.getInstance().writeAboutIsSyncReq(true);
                     PreferenceHelper.getInstance().writeAboutAttUrl(uri);
-                }
+//                }
                 MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
                 MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
             }
@@ -348,243 +348,243 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         }
     }
 
-    public void addPictureAttachment(String imagePath) {
-        String attAboutId = PreferenceHelper.getInstance().readAboutAttId();
-
-        if (attAboutId == null || attAboutId.isEmpty()) {
-            WebApi.addAboutMeImage(imagePath, addAttachmentCallback);
-        } else {
-            WebApi.addAboutMeImage(imagePath, editAttachmentCallback);
-        }
-    }
-
-    Callback<ResponseBody> addAttachmentCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                Log.i("Fennel", "facilitator profile picture uploaded successfully!");
-                String responseStr = null;
-
-                try {
-                    responseStr = response.body().string();
-                    String aboutAttId = getAttachmentIdFromUploadSuccess(responseStr);
-                    PreferenceHelper.getInstance().writeAboutAttId(aboutAttId);
-                    String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(aboutAttId);
-                    PreferenceHelper.getInstance().writeAboutAttUrl(thumbUrl);
-                    if(NetworkHelper.isNetAvailable(AboutMe.this))
-                    {
-                        MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
-                        MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
-                    }
-                    else
-                    {
-                        MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
-                        MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            else if(response.code() == 401)
-            {
-                PreferenceHelper.getInstance().clearSession();
-                Intent intent = new Intent(AboutMe.this, LoginActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                finish();
-            } else {
-                Log.i("Fennel", "facilitator profile picture upload failed!");
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            Log.i("Fennel", "facilitator profile picture upload failed!");
-        }
-    };
-
-    Callback<ResponseBody> editAttachmentCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                Log.i("Fennel", "facilitator profile picture edited successfully!");
-
-                String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
-                if(NetworkHelper.isNetAvailable(AboutMe.this))
-                {
-                    MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
-                    MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
-                }
-                else
-                {
-                    MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
-                    MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
-                }
-            }
-            else if(response.code() == 401)
-            {
-                PreferenceHelper.getInstance().clearSession();
-                Intent intent = new Intent(AboutMe.this, LoginActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                finish();
-            } else {
-                Log.i("Fennel", "facilitator profile picture edit failed!");
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            Log.i("Fennel", "facilitator profile picture edit failed!");
-        }
-    };
-
-    private String getAttachmentIdFromUploadSuccess(String data) {
-        JSONObject responseJson = null;
-        String attachmentId = null;
-        try {
-            responseJson = new JSONObject(data);
-            attachmentId = responseJson.getString("id");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return attachmentId;
-    }
-
-    private Callback<ResponseBody> aboutMeCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            if (response.code() == 200) {
-                String responseStr = "";
-
-                try {
-                    responseStr = response.body().string();
-                    parseAboutMeData(responseStr);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            t.printStackTrace();
-        }
-    };
-
-    private void parseAboutMeData(String data) throws JSONException {
-        JSONObject jsonObject = new JSONObject(data);
-        JSONArray arrRecords = jsonObject.getJSONArray("records");
-
-        if (arrRecords.length() > 0) {
-            JSONObject objRecord = arrRecords.getJSONObject(0);
-
-            String fn = (!(objRecord.getString("First_Name__c").equals("null"))) ? (objRecord.getString("First_Name__c")) : "";
-            String mn = (!(objRecord.getString("Middle_Name__c").equals("null"))) ? (objRecord.getString("Middle_Name__c")) : "";
-            String ln = (!(objRecord.getString("Last_Name__c").equals("null"))) ? (objRecord.getString("Last_Name__c")) : "";
-            String fo_name = "";
-            String fm_name = "";
-
-            JSONObject objFacilitator = objRecord.optJSONObject("Facilitators__r");
-            JSONObject objFieldOffice = objRecord.optJSONObject("Field_Officers__r");
-            JSONObject objFieldManager = objRecord.optJSONObject("Field_Managers__r");
-
-            if(objFacilitator != null)
-            {
-                getAndSaveId(objFacilitator, Constants.STR_FACILITATOR);
-                JSONArray arrRec = objFacilitator.getJSONArray("records");
-                if(arrRec.length() > 0)
-                {
-                    JSONObject obj1 = arrRec.getJSONObject(0);
-                    JSONObject objFO = obj1.optJSONObject("Field_Officer__r");
-                    if(objFO != null)
-                    {
-                        JSONObject objFOEmployee = objFO.optJSONObject("Employee__r");
-                        if(objFOEmployee != null)
-                        {
-                            fo_name = objFOEmployee.getString("Full_Name__c");
-                        }
-
-                        JSONObject objFO_FM = objFO.optJSONObject("Field_Manager__r");
-                        if(objFO_FM != null)
-                        {
-                            JSONObject objFO_FMEmployee = objFO_FM.optJSONObject("Employee__r");
-                            if(objFO_FMEmployee != null)
-                            {
-                                fm_name = objFO_FMEmployee.getString("Full_Name__c");
-                            }
-                        }
-                    }
-                }
-                saveAboutMeInfo(fn, mn, ln, fo_name, fm_name);
-            }
-            else if(objFieldOffice != null)
-            {
-                getAndSaveId(objFieldOffice, Constants.STR_FIELD_OFFICER);
-                JSONArray arrRec = objFieldOffice.getJSONArray("records");
-                if(arrRec.length() > 0)
-                {
-                    JSONObject obj1 = arrRec.getJSONObject(0);
-                    JSONObject objFM = obj1.optJSONObject("Field_Manager__r");
-                    if(objFM != null)
-                    {
-                        JSONObject objFO_FMEmployee = objFM.optJSONObject("Employee__r");
-                        if(objFO_FMEmployee != null)
-                        {
-                            fm_name = objFO_FMEmployee.getString("Full_Name__c");
-                        }
-                    }
-                }
-                saveAboutMeInfo(fn, mn, ln, fo_name, fm_name);
-            }
-            else if(objFieldManager != null)
-            {
-                getAndSaveId(objFieldManager, Constants.STR_FIELD_MANAGER);
-                saveAboutMeInfo(fn, mn, ln, fo_name, fm_name);
-            }
-        }
-    }
-
-    private void saveAboutMeInfo(String fn, String mn, String ln, String fo_name, String fm_name)
-    {
-        PreferenceHelper.getInstance().writeAboutFN(fn);
-        PreferenceHelper.getInstance().writeAboutMN(mn);
-        PreferenceHelper.getInstance().writeAboutLN(ln);
-        PreferenceHelper.getInstance().writeAboutFOname(fo_name);
-        PreferenceHelper.getInstance().writeAboutFMname(fm_name);
-
-        populateView();
-    }
-
-    private void getAndSaveId(JSONObject jsonObject, String type) throws JSONException {
-        JSONArray arrRec = jsonObject.getJSONArray("records");
-        if(arrRec.length() > 0)
-        {
-            JSONObject obj1 = arrRec.getJSONObject(0);
-            String idFac = obj1.getString("Id");
-            PreferenceHelper.getInstance().writeLoginUserType(type);
-            PreferenceHelper.getInstance().writeLoginUserId(idFac);
-
-            WebApi.getAboutMeAttachment(aboutMeAttachmentCallback);
-        }
-    }
-
-    public void loadingStarted() {
-        if (mProgressDialog != null && !mProgressDialog.isShowing()) {
-            mProgressDialog.setCancelable(false);
-            mProgressDialog.show();
-        }
-    }
-
-    public void loadingFinished() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.dismiss();
-            mProgressDialog.setCancelable(false);
-            mProgressDialog.setMessage(getString(R.string.loading));
-        }
-    }
+//    public void addPictureAttachment(String imagePath) {
+//        String attAboutId = PreferenceHelper.getInstance().readAboutAttId();
+//
+//        if (attAboutId == null || attAboutId.isEmpty()) {
+//            WebApi.addAboutMeImage(imagePath, addAttachmentCallback);
+//        } else {
+//            WebApi.addAboutMeImage(imagePath, editAttachmentCallback);
+//        }
+//    }
+//
+//    Callback<ResponseBody> addAttachmentCallback = new Callback<ResponseBody>() {
+//        @Override
+//        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+//                Log.i("Fennel", "facilitator profile picture uploaded successfully!");
+//                String responseStr = null;
+//
+//                try {
+//                    responseStr = response.body().string();
+//                    String aboutAttId = getAttachmentIdFromUploadSuccess(responseStr);
+//                    PreferenceHelper.getInstance().writeAboutAttId(aboutAttId);
+//                    String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(aboutAttId);
+//                    PreferenceHelper.getInstance().writeAboutAttUrl(thumbUrl);
+//                    if(NetworkHelper.isNetAvailable(AboutMe.this))
+//                    {
+//                        MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+//                        MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+//                    }
+//                    else
+//                    {
+//                        MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+//                        MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+//                    }
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            else if(response.code() == 401)
+//            {
+//                PreferenceHelper.getInstance().clearSession();
+//                Intent intent = new Intent(AboutMe.this, LoginActivity.class);
+//                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+//                startActivity(intent);
+//                finish();
+//            } else {
+//                Log.i("Fennel", "facilitator profile picture upload failed!");
+//            }
+//        }
+//
+//        @Override
+//        public void onFailure(Call<ResponseBody> call, Throwable t) {
+//            Log.i("Fennel", "facilitator profile picture upload failed!");
+//        }
+//    };
+//
+//    Callback<ResponseBody> editAttachmentCallback = new Callback<ResponseBody>() {
+//        @Override
+//        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+//                Log.i("Fennel", "facilitator profile picture edited successfully!");
+//
+//                String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
+//                if(NetworkHelper.isNetAvailable(AboutMe.this))
+//                {
+//                    MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+//                    MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+//                }
+//                else
+//                {
+//                    MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvProfileMain);
+//                    MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+//                }
+//            }
+//            else if(response.code() == 401)
+//            {
+//                PreferenceHelper.getInstance().clearSession();
+//                Intent intent = new Intent(AboutMe.this, LoginActivity.class);
+//                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+//                startActivity(intent);
+//                finish();
+//            } else {
+//                Log.i("Fennel", "facilitator profile picture edit failed!");
+//            }
+//        }
+//
+//        @Override
+//        public void onFailure(Call<ResponseBody> call, Throwable t) {
+//            Log.i("Fennel", "facilitator profile picture edit failed!");
+//        }
+//    };
+//
+//    private String getAttachmentIdFromUploadSuccess(String data) {
+//        JSONObject responseJson = null;
+//        String attachmentId = null;
+//        try {
+//            responseJson = new JSONObject(data);
+//            attachmentId = responseJson.getString("id");
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//        return attachmentId;
+//    }
+//
+//    private Callback<ResponseBody> aboutMeCallback = new Callback<ResponseBody>() {
+//        @Override
+//        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//            if (response.code() == 200) {
+//                String responseStr = "";
+//
+//                try {
+//                    responseStr = response.body().string();
+//                    parseAboutMeData(responseStr);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//
+//        @Override
+//        public void onFailure(Call<ResponseBody> call, Throwable t) {
+//            t.printStackTrace();
+//        }
+//    };
+//
+//    private void parseAboutMeData(String data) throws JSONException {
+//        JSONObject jsonObject = new JSONObject(data);
+//        JSONArray arrRecords = jsonObject.getJSONArray("records");
+//
+//        if (arrRecords.length() > 0) {
+//            JSONObject objRecord = arrRecords.getJSONObject(0);
+//
+//            String fn = (!(objRecord.getString("First_Name__c").equals("null"))) ? (objRecord.getString("First_Name__c")) : "";
+//            String mn = (!(objRecord.getString("Middle_Name__c").equals("null"))) ? (objRecord.getString("Middle_Name__c")) : "";
+//            String ln = (!(objRecord.getString("Last_Name__c").equals("null"))) ? (objRecord.getString("Last_Name__c")) : "";
+//            String fo_name = "";
+//            String fm_name = "";
+//
+//            JSONObject objFacilitator = objRecord.optJSONObject("Facilitators__r");
+//            JSONObject objFieldOffice = objRecord.optJSONObject("Field_Officers__r");
+//            JSONObject objFieldManager = objRecord.optJSONObject("Field_Managers__r");
+//
+//            if(objFacilitator != null)
+//            {
+//                getAndSaveId(objFacilitator, Constants.STR_FACILITATOR);
+//                JSONArray arrRec = objFacilitator.getJSONArray("records");
+//                if(arrRec.length() > 0)
+//                {
+//                    JSONObject obj1 = arrRec.getJSONObject(0);
+//                    JSONObject objFO = obj1.optJSONObject("Field_Officer__r");
+//                    if(objFO != null)
+//                    {
+//                        JSONObject objFOEmployee = objFO.optJSONObject("Employee__r");
+//                        if(objFOEmployee != null)
+//                        {
+//                            fo_name = objFOEmployee.getString("Full_Name__c");
+//                        }
+//
+//                        JSONObject objFO_FM = objFO.optJSONObject("Field_Manager__r");
+//                        if(objFO_FM != null)
+//                        {
+//                            JSONObject objFO_FMEmployee = objFO_FM.optJSONObject("Employee__r");
+//                            if(objFO_FMEmployee != null)
+//                            {
+//                                fm_name = objFO_FMEmployee.getString("Full_Name__c");
+//                            }
+//                        }
+//                    }
+//                }
+//                saveAboutMeInfo(fn, mn, ln, fo_name, fm_name);
+//            }
+//            else if(objFieldOffice != null)
+//            {
+//                getAndSaveId(objFieldOffice, Constants.STR_FIELD_OFFICER);
+//                JSONArray arrRec = objFieldOffice.getJSONArray("records");
+//                if(arrRec.length() > 0)
+//                {
+//                    JSONObject obj1 = arrRec.getJSONObject(0);
+//                    JSONObject objFM = obj1.optJSONObject("Field_Manager__r");
+//                    if(objFM != null)
+//                    {
+//                        JSONObject objFO_FMEmployee = objFM.optJSONObject("Employee__r");
+//                        if(objFO_FMEmployee != null)
+//                        {
+//                            fm_name = objFO_FMEmployee.getString("Full_Name__c");
+//                        }
+//                    }
+//                }
+//                saveAboutMeInfo(fn, mn, ln, fo_name, fm_name);
+//            }
+//            else if(objFieldManager != null)
+//            {
+//                getAndSaveId(objFieldManager, Constants.STR_FIELD_MANAGER);
+//                saveAboutMeInfo(fn, mn, ln, fo_name, fm_name);
+//            }
+//        }
+//    }
+//
+//    private void saveAboutMeInfo(String fn, String mn, String ln, String fo_name, String fm_name)
+//    {
+//        PreferenceHelper.getInstance().writeAboutFN(fn);
+//        PreferenceHelper.getInstance().writeAboutMN(mn);
+//        PreferenceHelper.getInstance().writeAboutLN(ln);
+//        PreferenceHelper.getInstance().writeAboutFOname(fo_name);
+//        PreferenceHelper.getInstance().writeAboutFMname(fm_name);
+//
+//        populateView();
+//    }
+//
+//    private void getAndSaveId(JSONObject jsonObject, String type) throws JSONException {
+//        JSONArray arrRec = jsonObject.getJSONArray("records");
+//        if(arrRec.length() > 0)
+//        {
+//            JSONObject obj1 = arrRec.getJSONObject(0);
+//            String idFac = obj1.getString("Id");
+//            PreferenceHelper.getInstance().writeLoginUserType(type);
+//            PreferenceHelper.getInstance().writeLoginUserId(idFac);
+//
+//            WebApi.getAboutMeAttachment(aboutMeAttachmentCallback);
+//        }
+//    }
+//
+//    public void loadingStarted() {
+//        if (mProgressDialog != null && !mProgressDialog.isShowing()) {
+//            mProgressDialog.setCancelable(false);
+//            mProgressDialog.show();
+//        }
+//    }
+//
+//    public void loadingFinished() {
+//        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+//            mProgressDialog.dismiss();
+//            mProgressDialog.setCancelable(false);
+//            mProgressDialog.setMessage(getString(R.string.loading));
+//        }
+//    }
 
     @Override
     public void onTitleBarRightIconClicked(View view) {

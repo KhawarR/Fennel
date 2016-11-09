@@ -325,6 +325,7 @@ public class Login extends BaseFragment{
 
     private void proceedToMainScreen()
     {
+        PreferenceHelper.getInstance().writeFirstRun(true);
         startActivity(new Intent(getActivity(), MainActivity.class));
         getActivity().finish();
     }
