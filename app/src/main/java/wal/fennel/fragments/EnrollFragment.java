@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -34,14 +32,11 @@ import com.kbeanie.multipicker.api.Picker;
 import com.kbeanie.multipicker.api.callbacks.ImagePickerCallback;
 import com.kbeanie.multipicker.api.entity.ChosenImage;
 import com.squareup.picasso.NetworkPolicy;
-import com.squareup.picasso.Transformation;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,17 +47,12 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
-import wal.fennel.application.Fennel;
 import wal.fennel.common.database.DatabaseHelper;
-import wal.fennel.models.Farm;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.Location;
 import wal.fennel.models.ResponseModel;
@@ -70,15 +60,11 @@ import wal.fennel.models.SubLocation;
 import wal.fennel.models.Tree;
 import wal.fennel.models.Village;
 import wal.fennel.network.NetworkHelper;
-import wal.fennel.network.Session;
 import wal.fennel.network.WebApi;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
 import wal.fennel.utils.MyPicassoInstance;
-import wal.fennel.utils.PhotoUtils;
 import wal.fennel.utils.PreferenceHelper;
-import wal.fennel.utils.RoundedCornersTransformation;
-import wal.fennel.utils.Singleton;
 import wal.fennel.views.NothingSelectedSpinnerAdapter;
 import wal.fennel.views.TitleBarLayout;
 
@@ -88,6 +74,7 @@ import wal.fennel.views.TitleBarLayout;
  */
 public class EnrollFragment extends BaseContainerFragment implements AdapterView.OnItemSelectedListener, View.OnTouchListener {
 
+    //region Class variables
     @Bind(R.id.scrollView)
     ScrollView scrollView;
 
@@ -201,6 +188,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private boolean isFarmerPhotoSet = false;
     private boolean isNationalIdPhotoSet = false;
 
+    private boolean isFarmerPhotoEdited = false;
+    private boolean isNationalIdPhotoEdited = false;
+
     private String farmerStatus = null;
 
     private String farmerImageUri = null;
@@ -209,10 +199,6 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private String farmerImageUrl = null;
     private String farmerIdImageUrl = null;
 
-//    private int PICKER_REQUEST_FARMER_DEVICE = 12001;
-//    private int PICKER_REQUEST_FARMER_CAMERA = 12002;
-//    private int PICKER_REQUEST_NAT_ID_DEVICE = 12003;
-//    private int PICKER_REQUEST_NAT_ID_CAMERA = 12004;
     private ArrayList<Location> arrLocations = new ArrayList<>();
     private ArrayList<String> strArrLocations = new ArrayList<>();
     private ArrayList<SubLocation> arrSubLocations = new ArrayList<>();
@@ -221,7 +207,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private ArrayList<String> strArrVillages = new ArrayList<>();
     private ArrayList<Tree> arrTrees = new ArrayList<>();
     private ArrayList<String> strArrTrees = new ArrayList<>();
-    private Transformation transformation;
+    //endregion
 
     public static EnrollFragment newInstance(String title, Farmer farmer) {
         EnrollFragment fragment = new EnrollFragment();
@@ -241,8 +227,6 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         imagePicker = new ImagePicker(EnrollFragment.this);
         cameraImagePicker = new CameraImagePicker(EnrollFragment.this);
-
-        transformation = new RoundedCornersTransformation();
 
         return view;
     }
@@ -300,7 +284,6 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         spLocation.setOnTouchListener(this);
 
         spSubLocation.setTag(true);
-//        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsSubLocation, R.layout.simple_spinner_item);
         ArrayAdapter<String> arrayAdapterSubLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrSubLocations);
         spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterSubLoc, R.layout.spinner_nothing_selected, getContext(), "SUB LOCATION"));
         spSubLocation.setOnItemSelectedListener(this);
@@ -308,14 +291,12 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
 
         spVillage.setTag(true);
-//        arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsVillage, R.layout.simple_spinner_item);
         ArrayAdapter<String> arrayAdapterVillage = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrVillages);
         spVillage.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterVillage, R.layout.spinner_nothing_selected, getContext(), "VILLAGE"));
         spVillage.setOnItemSelectedListener(this);
         spVillage.setOnTouchListener(this);
 
         spTree.setTag(true);
-//        arrayAdapter = ArrayAdapter.createFromResource(getContext(), R.array.optionsTree, R.layout.simple_spinner_item);
         ArrayAdapter<String> arrayAdapterTree = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrTrees);
         spTree.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterTree, R.layout.spinner_nothing_selected, getContext(), "TREE SPECIES"));
         spTree.setOnItemSelectedListener(this);
@@ -357,68 +338,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         super.onResume();
 
         loadAttachment();
-//        getAboutMeAttachment();
     }
-
-//    private void getAboutMeAttachment() {
-//        String queryTable = "Employee__c";
-//
-//        String query = String.format(NetworkHelper.QUERY_ABOUT_ME_ATTACHMENT, queryTable, PreferenceHelper.getInstance().readUserEmployeeId());
-//        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
-//        apiCall.enqueue(aboutMeAttachmentCallback);
-//    }
-//
-//    private Callback<ResponseBody> aboutMeAttachmentCallback = new Callback<ResponseBody>() {
-//        @Override
-//        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//            if (response.code() == 200) {
-//                String responseStr = "";
-//
-//                try {
-//                    responseStr = response.body().string();
-//                    String attId = parseAboutMeDataAttachment(responseStr);
-//                    PreferenceHelper.getInstance().writeAboutAttId(attId);
-//                    if(!attId.isEmpty())
-//                    {
-//                        String thumbUrl = String.format(NetworkHelper.URL_ATTACHMENTS, PreferenceHelper.getInstance().readInstanceUrl(), attId);
-//                        MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
-//                    }
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//
-//        @Override
-//        public void onFailure(Call<ResponseBody> call, Throwable t) {
-//            t.printStackTrace();
-//        }
-//    };
-//
-//    private String parseAboutMeDataAttachment(String data) throws JSONException {
-//        JSONObject jsonObject = new JSONObject(data);
-//        JSONArray arrRecords = jsonObject.getJSONArray("records");
-//
-//        if(arrRecords.length() > 0)
-//        {
-//            JSONObject facObj = arrRecords.getJSONObject(0);
-//
-//            JSONObject attachmentObj = facObj.optJSONObject("Attachments");
-//            if(attachmentObj != null)
-//            {
-//                JSONArray attRecords = attachmentObj.getJSONArray("records");
-//                if(attRecords.length() > 0)
-//                {
-//                    JSONObject objFarmerPhoto = attRecords.getJSONObject(0);
-//                    String idAttachment = objFarmerPhoto.getString("Id");
-//                    return idAttachment;
-//                }
-//            }
-//        }
-//        return "";
-//    }
 
     private void loadAttachment() {
         String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
@@ -430,7 +350,6 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
         }
     }
-
 
     private void populateFarmer() {
         if (farmer != null) {
@@ -570,7 +489,6 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         view.setSelected(true);
 
         hideKeyboard();
-
     }
 
     @OnClick(R.id.txtCreateFarmer)
@@ -728,201 +646,182 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         ((BaseContainerFragment) (getParentFragment())).popFragment();
     }
 
-//    private void addFarmerToDB(Farmer newFarmer, String id, boolean synced) {
+//    private void addFarmWithFarmerId(String id) {
+//        HashMap<String, Object> farmMap = getFarmMap();
+//        farmMap.put("Farmer__c", id);
+//        WebApi.createFarm(createFarmCallback, farmMap);
+//    }
+
+//    Callback<ResponseModel> createFarmCallback = new Callback<ResponseModel>() {
+//        @Override
+//        public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
+//            loadingFinished();
+//            if (response.body() != null && response.body().success == true) {
+//                Log.i("LP", "Farm Added To Server");
+//                Toast.makeText(getContext(), "Farmer Enrolled Successfully", Toast.LENGTH_SHORT).show();
 //
-//        DatabaseHelper.getInstance().insertFarmer(newFarmer, id, synced);
-//    }
-
-//    private void updateFarmer(Farmer newFarmer, boolean synced) {
-//        DatabaseHelper.getInstance().updateFarmer(newFarmer, synced);
-//    }
-
-//    private void addFarmToDB(Farm newFarm, String id, boolean synced) {
-//        DatabaseHelper.getInstance().insertFarm(newFarm, id, synced);
-//    }
-
-//    private void updateFarm(Farm newFarm, boolean synced) {
-//        DatabaseHelper.getInstance().updateFarm(newFarm, synced);
-//    }
-
-    private void addFarmWithFarmerId(String id) {
-        HashMap<String, Object> farmMap = getFarmMap();
-        farmMap.put("Farmer__c", id);
-        WebApi.createFarm(createFarmCallback, farmMap);
-    }
-
-    Callback<ResponseModel> createFarmCallback = new Callback<ResponseModel>() {
-        @Override
-        public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
-            loadingFinished();
-            if (response.body() != null && response.body().success == true) {
-                Log.i("LP", "Farm Added To Server");
-                Toast.makeText(getContext(), "Farmer Enrolled Successfully", Toast.LENGTH_SHORT).show();
-
-//                    addFarmToDB(farm, response.body().id, true);
-                popToSignupsFragment();
-            } else {
-//                    addFarmToDB(farm, null, false);
-//                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
-                String message = "";
-                try {
-                    String error = response.errorBody().string();
-                    JSONArray arr = new JSONArray(error);
-                    JSONObject obj = arr.getJSONObject(0);
-                    message = obj.getString("message");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                catch (ArrayIndexOutOfBoundsException e) {
-                    e.printStackTrace();
-                }
-
-                if(message.isEmpty())
-                    message = "Farmer Enrollment Failed";
-                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
-            }
-            Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
-        }
-
-        @Override
-        public void onFailure(Call<ResponseModel> call, Throwable t) {
-            Log.i("LP", t.getMessage().toString());
-            Toast.makeText(getContext(), "Farmer Enrollment Failed", Toast.LENGTH_SHORT).show();
-//                addFarmToDB(farm, null, false);
-            loadingFinished();
+////                    addFarmToDB(farm, response.body().id, true);
 //                popToSignupsFragment();
-        }
-    };
-
-    private void editFarmWithFarmId(String farmId) {
-
-        HashMap<String, Object> farmMap = getFarmMap();
-        farmMap.put("Farmer__c", farmer.farmerId);
-        WebApi.editFarm(editFarmCallback, farmId, farmMap);
-    }
-
-    Callback<ResponseBody> editFarmCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            loadingFinished();
-            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                Log.i("LP", "Farmer Edited Successfully");
-                Toast.makeText(getContext(), "Farmer Edited Successfully", Toast.LENGTH_SHORT).show();
-//                    updateFarm(farm, true);
-                popToSignupsFragment();
-
-            } else {
-//                    updateFarm(farm, false);
-//                    Toast.makeText(getContext(), "Farmer Edit Failed", Toast.LENGTH_SHORT).show();
-                String message = "";
-                try {
-                    String error = response.errorBody().string();
-                    JSONArray arr = new JSONArray(error);
-                    JSONObject obj = arr.getJSONObject(0);
-                    message = obj.getString("message");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                catch (ArrayIndexOutOfBoundsException e) {
-                    e.printStackTrace();
-                }
-
-                if(message.isEmpty())
-                    message = "Farmer Edit Failed";
-                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
-            }
-            Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            Log.i("LP", t.getMessage().toString());
-            Toast.makeText(getContext(), "Farmer Edit Failed: " + t.getMessage(), Toast.LENGTH_LONG).show();
-
-//                updateFarm(farm, false);
-            loadingFinished();
+//            } else {
+////                    addFarmToDB(farm, null, false);
+////                    Toast.makeText(getContext(), "Farmer Enrollment Failed!", Toast.LENGTH_SHORT).show();
+//                String message = "";
+//                try {
+//                    String error = response.errorBody().string();
+//                    JSONArray arr = new JSONArray(error);
+//                    JSONObject obj = arr.getJSONObject(0);
+//                    message = obj.getString("message");
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//                catch (ArrayIndexOutOfBoundsException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                if(message.isEmpty())
+//                    message = "Farmer Enrollment Failed";
+//                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+//            }
+//            Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
+//        }
+//
+//        @Override
+//        public void onFailure(Call<ResponseModel> call, Throwable t) {
+//            Log.i("LP", t.getMessage().toString());
+//            Toast.makeText(getContext(), "Farmer Enrollment Failed", Toast.LENGTH_SHORT).show();
+//            loadingFinished();
+//        }
+//    };
+//
+//    private void editFarmWithFarmId(String farmId) {
+//
+//        HashMap<String, Object> farmMap = getFarmMap();
+//        farmMap.put("Farmer__c", farmer.farmerId);
+//        WebApi.editFarm(editFarmCallback, farmId, farmMap);
+//    }
+//
+//    Callback<ResponseBody> editFarmCallback = new Callback<ResponseBody>() {
+//        @Override
+//        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//            loadingFinished();
+//            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+//                Log.i("LP", "Farmer Edited Successfully");
+//                Toast.makeText(getContext(), "Farmer Edited Successfully", Toast.LENGTH_SHORT).show();
+////                    updateFarm(farm, true);
 //                popToSignupsFragment();
-        }
-    };
+//
+//            } else {
+////                    updateFarm(farm, false);
+////                    Toast.makeText(getContext(), "Farmer Edit Failed", Toast.LENGTH_SHORT).show();
+//                String message = "";
+//                try {
+//                    String error = response.errorBody().string();
+//                    JSONArray arr = new JSONArray(error);
+//                    JSONObject obj = arr.getJSONObject(0);
+//                    message = obj.getString("message");
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//                catch (ArrayIndexOutOfBoundsException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                if(message.isEmpty())
+//                    message = "Farmer Edit Failed";
+//                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+//            }
+//            Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
+//        }
+//
+//        @Override
+//        public void onFailure(Call<ResponseBody> call, Throwable t) {
+//            Log.i("LP", t.getMessage().toString());
+//            Toast.makeText(getContext(), "Farmer Edit Failed: " + t.getMessage(), Toast.LENGTH_LONG).show();
+//
+////                updateFarm(farm, false);
+//            loadingFinished();
+////                popToSignupsFragment();
+//        }
+//    };
 
-    private Farm createFarmWithFarmerId(String farmerId) {
+//    private Farm createFarmWithFarmerId(String farmerId) {
+//
+//        final Farm newFarm = new Farm();
+//        if (farmerId != null)
+//            newFarm.setFarmerId(farmerId);
+//
+//        newFarm.setFacilitatorId(PreferenceHelper.getInstance().readLoginUserId());
+//        newFarm.setFarmerStatus(farmerStatus);
+//        newFarm.setLocation("");//location != null ? location : "");
+//        newFarm.setSubLocation("");//subLocation != null ? subLocation : "");
+//        newFarm.setVillageName("");//village != null ? village : "");
+//        newFarm.setTreeSpecies("");//treeSpecies != null ? treeSpecies : "");
+//        return newFarm;
+//    }
 
-        final Farm newFarm = new Farm();
-        if (farmerId != null)
-            newFarm.setFarmerId(farmerId);
+//    private HashMap<String, Object> getFarmerMap() {
+//
+//        final HashMap<String, Object> newFarmerMap = new HashMap<>();
+//        newFarmerMap.put("First_Name__c", etFirstName.getText() != null ? etFirstName.getText().toString().trim().toString() : "");
+//        newFarmerMap.put("Middle_Name__c", etSecondName.getText() != null ? etSecondName.getText().toString().trim() : "");
+//        newFarmerMap.put("Last_Name__c", etSurname.getText() != null ? etSurname.getText().toString().trim() : "");
+//        newFarmerMap.put("Name", etIdNumber.getText() != null ? etIdNumber.getText().toString() : "");
+//        newFarmerMap.put("Mobile_Number__c", etMobileNumber.getText() != null ? etMobileNumber.getText().toString() : "");
+//        newFarmerMap.put("Gender__c", (tvFemale.isSelected() == true) ? "Female" : "Male");
+//        newFarmerMap.put("Leader__c", (tvLeaderYes.isSelected() == true) ? 1 : 0);
+////        String fullName = ((etFirstName.getText() != null && !etFirstName.getText().equals("")) ? etFirstName.getText().toString() : "") + ((etSecondName.getText() != null && !etSecondName.getText().equals("")) ? " " + etSecondName.getText().toString() : "") + ((etSurname.getText() != null && !etSecondName.getText().equals("")) ? " " + etSurname.getText().toString() : "");
+////        newFarmer.setFullName(fullName);
+//
+//        return newFarmerMap;
+//    }
 
-        newFarm.setFacilitatorId(PreferenceHelper.getInstance().readLoginUserId());
-        newFarm.setFarmerStatus(farmerStatus);
-        newFarm.setLocation("");//location != null ? location : "");
-        newFarm.setSubLocation("");//subLocation != null ? subLocation : "");
-        newFarm.setVillageName("");//village != null ? village : "");
-        newFarm.setTreeSpecies("");//treeSpecies != null ? treeSpecies : "");
-        return newFarm;
-    }
-
-    private HashMap<String, Object> getFarmerMap() {
-
-        final HashMap<String, Object> newFarmerMap = new HashMap<>();
-        newFarmerMap.put("First_Name__c", etFirstName.getText() != null ? etFirstName.getText().toString().trim().toString() : "");
-        newFarmerMap.put("Middle_Name__c", etSecondName.getText() != null ? etSecondName.getText().toString().trim() : "");
-        newFarmerMap.put("Last_Name__c", etSurname.getText() != null ? etSurname.getText().toString().trim() : "");
-        newFarmerMap.put("Name", etIdNumber.getText() != null ? etIdNumber.getText().toString() : "");
-        newFarmerMap.put("Mobile_Number__c", etMobileNumber.getText() != null ? etMobileNumber.getText().toString() : "");
-        newFarmerMap.put("Gender__c", (tvFemale.isSelected() == true) ? "Female" : "Male");
-        newFarmerMap.put("Leader__c", (tvLeaderYes.isSelected() == true) ? 1 : 0);
-//        String fullName = ((etFirstName.getText() != null && !etFirstName.getText().equals("")) ? etFirstName.getText().toString() : "") + ((etSecondName.getText() != null && !etSecondName.getText().equals("")) ? " " + etSecondName.getText().toString() : "") + ((etSurname.getText() != null && !etSecondName.getText().equals("")) ? " " + etSurname.getText().toString() : "");
-//        newFarmer.setFullName(fullName);
-
-        return newFarmerMap;
-    }
-
-    private Farmer getFarmer() {
-
-        final Farmer newFarmer = new Farmer();
-        newFarmer.setFirstName(etFirstName.getText() != null ? etFirstName.getText().toString().trim().toString() : "");
-        newFarmer.setSecondName(etSecondName.getText() != null ? etSecondName.getText().toString().trim() : "");
-        newFarmer.setSurname(etSurname.getText() != null ? etSurname.getText().toString().trim() : "");
-        newFarmer.setIdNumber(etIdNumber.getText() != null ? etIdNumber.getText().toString() : "");
-        newFarmer.setMobileNumber(etMobileNumber.getText() != null ? etMobileNumber.getText().toString() : "");
-        newFarmer.setGender((tvFemale.isSelected() == true) ? "Female" : "Male");
-        newFarmer.setLeader((tvLeaderYes.isSelected() == true) ? true : false);
-
-        return newFarmer;
-    }
-
-    private HashMap<String, Object> getFarmMap() {
-
-        final HashMap<String, Object> newFarmMap = new HashMap<>();
-        newFarmMap.put("LocationLookup__c", location);
-        newFarmMap.put("Sub_LocationLookup__c", subLocation);
-        newFarmMap.put("Village__c", village);
-        newFarmMap.put("Tree_Specie__c", treeSpecies);
-        newFarmMap.put("Is_Farmer_Home__c", txtFarmerHomeYes.isSelected()? true : false);
-
-        if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FACILITATOR))
-        {
-            newFarmMap.put("Facilitator__c", PreferenceHelper.getInstance().readLoginUserId());
-            newFarmMap.put("Facilitator_Signup__c", PreferenceHelper.getInstance().readLoginUserId());
-        }
-        else if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FIELD_OFFICER))
-        {
-            newFarmMap.put("Field_Officer_Signup__c", PreferenceHelper.getInstance().readLoginUserId());
-        }
-        else if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FIELD_MANAGER))
-        {
-            newFarmMap.put("Field_Manager_Signup__c", PreferenceHelper.getInstance().readLoginUserId());
-        }
-
-        if (farmerStatus != null && !farmerStatus.isEmpty()) {
-            newFarmMap.put("Sign_Up_Status__c", farmerStatus);
-        }
-
-        return newFarmMap;
-    }
+//    private Farmer getFarmer() {
+//
+//        final Farmer newFarmer = new Farmer();
+//        newFarmer.setFirstName(etFirstName.getText() != null ? etFirstName.getText().toString().trim().toString() : "");
+//        newFarmer.setSecondName(etSecondName.getText() != null ? etSecondName.getText().toString().trim() : "");
+//        newFarmer.setSurname(etSurname.getText() != null ? etSurname.getText().toString().trim() : "");
+//        newFarmer.setIdNumber(etIdNumber.getText() != null ? etIdNumber.getText().toString() : "");
+//        newFarmer.setMobileNumber(etMobileNumber.getText() != null ? etMobileNumber.getText().toString() : "");
+//        newFarmer.setGender((tvFemale.isSelected() == true) ? "Female" : "Male");
+//        newFarmer.setLeader((tvLeaderYes.isSelected() == true) ? true : false);
+//
+//        return newFarmer;
+//    }
+//
+//    private HashMap<String, Object> getFarmMap() {
+//
+//        final HashMap<String, Object> newFarmMap = new HashMap<>();
+//        newFarmMap.put("LocationLookup__c", location);
+//        newFarmMap.put("Sub_LocationLookup__c", subLocation);
+//        newFarmMap.put("Village__c", village);
+//        newFarmMap.put("Tree_Specie__c", treeSpecies);
+//        newFarmMap.put("Is_Farmer_Home__c", txtFarmerHomeYes.isSelected()? true : false);
+//
+//        if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FACILITATOR))
+//        {
+//            newFarmMap.put("Facilitator__c", PreferenceHelper.getInstance().readLoginUserId());
+//            newFarmMap.put("Facilitator_Signup__c", PreferenceHelper.getInstance().readLoginUserId());
+//        }
+//        else if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FIELD_OFFICER))
+//        {
+//            newFarmMap.put("Field_Officer_Signup__c", PreferenceHelper.getInstance().readLoginUserId());
+//        }
+//        else if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FIELD_MANAGER))
+//        {
+//            newFarmMap.put("Field_Manager_Signup__c", PreferenceHelper.getInstance().readLoginUserId());
+//        }
+//
+//        if (farmerStatus != null && !farmerStatus.isEmpty()) {
+//            newFarmMap.put("Sign_Up_Status__c", farmerStatus);
+//        }
+//
+//        return newFarmMap;
+//    }
 
     private final TextWatcher watcher = new TextWatcher() {
 
@@ -974,14 +873,12 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     void onClickFarmerPhoto(View view) {
         hideKeyboard();
         showPickerDialog(true);
-//        pickFarmerImage(true);
     }
 
     @OnClick(R.id.imgNationalID)
     void onClickNationalID(View view) {
         hideKeyboard();
         showPickerDialog(false);
-//        pickNationalIdImage(true);
     }
 
     @Override
@@ -992,7 +889,6 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     @Override
     public void onTitleBarRightIconClicked(View view) {
         hideKeyboard();
-//        ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
         startActivity(new Intent(getActivity(), AboutMe.class));
     }
 
@@ -1043,11 +939,12 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgFarmerPhoto);
                 farmerImageUri = originalPath;
                 isFarmerPhotoSet = true;
+                isFarmerPhotoEdited = true;
                 farmerImageUrl = uri;
                 if (isEdit) {
-                    if(NetworkHelper.isNetAvailable(getActivity()))
-                        attachFarmerImageToFarmerObject(farmer);
-                    else
+//                    if(NetworkHelper.isNetAvailable(getActivity()))
+//                        attachFarmerImageToFarmerObject(farmer);
+//                    else
                         editFarmerInDB(false);
                 }
                 checkEnableSubmit();
@@ -1081,11 +978,12 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgNationalID);
                 farmerIdImageUri = originalPath;
                 isNationalIdPhotoSet = true;
+                isNationalIdPhotoEdited = true;
                 farmerIdImageUrl = uri;
                 if (isEdit) {
-                    if(NetworkHelper.isNetAvailable(getActivity()))
-                        attachFarmerIDImageToFarmerObject(farmer);
-                    else
+//                    if(NetworkHelper.isNetAvailable(getActivity()))
+//                        attachFarmerIDImageToFarmerObject(farmer);
+//                    else
                         editFarmerInDB(false);
                 }
                 checkEnableSubmit();
@@ -1138,10 +1036,6 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == Picker.PICK_IMAGE_DEVICE) {
-//                if(imagePicker == null) {
-//                    imagePicker = new ImagePicker(getActivity());
-//                    imagePicker.setImagePickerCallback(farmerPhotoPickerCallback);
-//                }
                 imagePicker.submit(data);
             } else if (requestCode == Picker.PICK_IMAGE_CAMERA) {
                 cameraImagePicker.submit(data);
@@ -1149,8 +1043,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         }
     }
 
-    private void updateSubLocFromLocation(String locationId)
-    {
+    private void updateSubLocFromLocation(String locationId) {
         arrSubLocations = DatabaseHelper.getInstance().getSubLocationsFromLocation(locationId);
         strArrSubLocations.clear();
         for (int i = 0; i < arrSubLocations.size(); i++) {
@@ -1158,8 +1051,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         }
     }
 
-    private void updateVillageAndTreeFromSubLocation(String subLocationId)
-    {
+    private void updateVillageAndTreeFromSubLocation(String subLocationId) {
         arrVillages = DatabaseHelper.getInstance().getVillagesFromSubLocation(subLocationId);
         strArrVillages.clear();
         for (int i = 0; i < arrVillages.size(); i++) {
@@ -1309,15 +1201,13 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         Realm.getDefaultInstance().beginTransaction();
 
         final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
-        farmerDbObj.setAllValues(farmer.farmerId, farmer.farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, location, subLocationName, subLocation, villageName, village, treeSpeciesName, treeSpecies, isFarmerHome, mobileNumber, farmer.thumbAttachmentId, farmer.nationalCardAttachmentId, farmerStatus, false, "", "");
+        farmerDbObj.setAllValues(farmer.farmerId, farmer.farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, location, subLocationName, subLocation, villageName, village, treeSpeciesName, treeSpecies, isFarmerHome, mobileNumber, farmer.thumbAttachmentId, farmer.nationalCardAttachmentId, farmerStatus, false, farmerImageUrl, farmerIdImageUrl);
         farmerDbObj.setDataDirty(true);
 
-        if(farmerImageUrl != null && !farmerImageUrl.isEmpty()){
-            farmerDbObj.setThumbUrl(farmerImageUrl);
+        if(isFarmerPhotoEdited){
             farmerDbObj.setFarmerPicDirty(true);
         }
-        if(farmerIdImageUrl != null && !farmerIdImageUrl.isEmpty()){
-            farmerDbObj.setNationalCardUrl(farmerIdImageUrl);
+        if(isNationalIdPhotoEdited){
             farmerDbObj.setNatIdCardDirty(true);
         }
 
@@ -1332,72 +1222,72 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     }
 
     private void editFarmer() {
-        if(NetworkHelper.isNetAvailable(getActivity())){
-            final HashMap<String, Object> farmerMap = getFarmerMap();
-            WebApi.editFarmer(editFarmerCallback, farmer.farmerId, farmerMap);
-        }
-        else {
+//        if(NetworkHelper.isNetAvailable(getActivity())){
+//            final HashMap<String, Object> farmerMap = getFarmerMap();
+//            WebApi.editFarmer(editFarmerCallback, farmer.farmerId, farmerMap);
+//        }
+//        else {
             editFarmerInDB(true);
-        }
+//        }
     }
 
-    Callback<ResponseBody> editFarmerCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                Log.i("LP", "Farmer Edited!");
-//                    updateFarmer(farmer, true);
-//                Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
-//                newFarm.farmId = farmer.farmId;
-//                    editFarmWithFarmId(newFarm, farmer.farmId);
-                editFarmWithFarmId(farmer.farmId);
-
-//                attachFarmerImageToFarmerObject(farmer);
-//                attachFarmerIDImageToFarmerObject(farmer);
-
-            } else {
-
-                String message = "";
-                try {
-                    String error = response.errorBody().string();
-                    JSONArray arr = new JSONArray(error);
-                    JSONObject obj = arr.getJSONObject(0);
-                    message = obj.getString("message");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                catch (ArrayIndexOutOfBoundsException e) {
-                    e.printStackTrace();
-                }
-
-                if(message.isEmpty())
-                    message = "Farmer Edit Failed";
-                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
-//                    updateFarmer(farmer, false);
-//                    Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
-//                    newFarm.farmId = farmer.farmId;
-//                    updateFarm(newFarm, false);
-
-                loadingFinished();
-//                    popToSignupsFragment();
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            Log.i("LP", t.getMessage().toString());
-            String message = t.getMessage();
-            Toast.makeText(getContext(), "Farmer Edit Failed: " + message, Toast.LENGTH_SHORT).show();
-//                updateFarmer(farmer, false);
-//                Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
-//                newFarm.farmId = farmer.farmId;
-//                updateFarm(newFarm, false);
-            loadingFinished();
-//                popToSignupsFragment();
-        }
-    };
+//    Callback<ResponseBody> editFarmerCallback = new Callback<ResponseBody>() {
+//        @Override
+//        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+//                Log.i("LP", "Farmer Edited!");
+////                    updateFarmer(farmer, true);
+////                Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
+////                newFarm.farmId = farmer.farmId;
+////                    editFarmWithFarmId(newFarm, farmer.farmId);
+//                editFarmWithFarmId(farmer.farmId);
+//
+////                attachFarmerImageToFarmerObject(farmer);
+////                attachFarmerIDImageToFarmerObject(farmer);
+//
+//            } else {
+//
+//                String message = "";
+//                try {
+//                    String error = response.errorBody().string();
+//                    JSONArray arr = new JSONArray(error);
+//                    JSONObject obj = arr.getJSONObject(0);
+//                    message = obj.getString("message");
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//                catch (ArrayIndexOutOfBoundsException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                if(message.isEmpty())
+//                    message = "Farmer Edit Failed";
+//                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+////                    updateFarmer(farmer, false);
+////                    Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
+////                    newFarm.farmId = farmer.farmId;
+////                    updateFarm(newFarm, false);
+//
+//                loadingFinished();
+////                    popToSignupsFragment();
+//            }
+//        }
+//
+//        @Override
+//        public void onFailure(Call<ResponseBody> call, Throwable t) {
+//            Log.i("LP", t.getMessage().toString());
+//            String message = t.getMessage();
+//            Toast.makeText(getContext(), "Farmer Edit Failed: " + message, Toast.LENGTH_SHORT).show();
+////                updateFarmer(farmer, false);
+////                Farm newFarm = createFarmWithFarmerId(farmer.farmerId);
+////                newFarm.farmId = farmer.farmId;
+////                updateFarm(newFarm, false);
+//            loadingFinished();
+////                popToSignupsFragment();
+//        }
+//    };
 
     private void createFarmerInDB() {
         // Save to DB
@@ -1438,248 +1328,248 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     }
 
     private void createFarmer() {
-        if(NetworkHelper.isNetAvailable(getActivity())) {
-            final HashMap<String, Object> farmerMap = getFarmerMap();
-            WebApi.createFarmer(createFarmerCallback, farmerMap);
-        }
-        else {
+//        if(NetworkHelper.isNetAvailable(getActivity())) {
+//            final HashMap<String, Object> farmerMap = getFarmerMap();
+//            WebApi.createFarmer(createFarmerCallback, farmerMap);
+//        }
+//        else {
             createFarmerInDB();
-        }
+//        }
     }
 
-    Callback<ResponseModel> createFarmerCallback = new Callback<ResponseModel>() {
-        @Override
-        public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
-            Farmer newFarmer = getFarmer();
-            if ((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().success == true) {
-                Log.i("LP", "Farmer Added To Server");
-                newFarmer.farmerId = response.body().id;
-                addFarmWithFarmerId(response.body().id);
+//    Callback<ResponseModel> createFarmerCallback = new Callback<ResponseModel>() {
+//        @Override
+//        public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
+//            Farmer newFarmer = getFarmer();
+//            if ((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().success == true) {
+//                Log.i("LP", "Farmer Added To Server");
+//                newFarmer.farmerId = response.body().id;
+//                addFarmWithFarmerId(response.body().id);
+//
+//                attachFarmerImageToFarmerObject(newFarmer);
+//                attachFarmerIDImageToFarmerObject(newFarmer);
+//
+//            } else {
+//                loadingFinished();
+//
+//                String message = "";
+//                try {
+//                    String error = response.errorBody().string();
+//                    JSONArray arr = new JSONArray(error);
+//                    JSONObject obj = arr.getJSONObject(0);
+//                    message = obj.getString("message");
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//                catch (ArrayIndexOutOfBoundsException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                if(message.isEmpty())
+//                    message = "Farmer Enrollment Failed";
+//                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+//
+//            }
+//            Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
+//        }
+//
+//        @Override
+//        public void onFailure(Call<ResponseModel> call, Throwable t) {
+//            Log.i("LP", t.getMessage().toString());
+//            Toast.makeText(getContext(), "Farmer Enrollment Failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+//
+//            loadingFinished();
+//        }
+//    };
 
-                attachFarmerImageToFarmerObject(newFarmer);
-                attachFarmerIDImageToFarmerObject(newFarmer);
-
-            } else {
-                loadingFinished();
-
-                String message = "";
-                try {
-                    String error = response.errorBody().string();
-                    JSONArray arr = new JSONArray(error);
-                    JSONObject obj = arr.getJSONObject(0);
-                    message = obj.getString("message");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                catch (ArrayIndexOutOfBoundsException e) {
-                    e.printStackTrace();
-                }
-
-                if(message.isEmpty())
-                    message = "Farmer Enrollment Failed";
-                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
-
-            }
-            Log.i("LP", ((response.body() != null) ? response.body().toString() : ""));
-        }
-
-        @Override
-        public void onFailure(Call<ResponseModel> call, Throwable t) {
-            Log.i("LP", t.getMessage().toString());
-            Toast.makeText(getContext(), "Farmer Enrollment Failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-
-            loadingFinished();
-        }
-    };
-
-    private void attachFarmerImageToFarmerObject(final Farmer farmer) {
-
-        if (farmerImageUri == null)
-            return;
-
-        HashMap<String, Object> attachmentMap = new HashMap<>();
-        attachmentMap.put("Description", "picture");
-        attachmentMap.put("Name", "profile_picture.png");
-        if (farmer.getThumbAttachmentId() == null || farmer.getThumbAttachmentId().isEmpty()) {
-            attachmentMap.put("ParentId", farmer.farmerId);
-        }
-        else
-        {
-            MyPicassoInstance.getInstance().invalidate(farmer.getThumbUrl());
-        }
-
-        JSONObject json = new JSONObject(attachmentMap);
-
-//        File f = new File(farmerImageUri);
-//        byte[] byteArrayImage = getByteArrayFromFile(f);
-
-        byte[] byteArrayImage = null;
-        Bitmap bmp = null;
-
-//        bmp = PhotoUtils.decodeSampledBitmapFromResource(farmerImageUri);
-        bmp = PhotoUtils.getBitmapFromPath(farmerImageUri);
-
-        if(bmp != null)
-        {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.JPEG, 100, bos);
-            byteArrayImage = bos.toByteArray();
-            try {
-                bos.close();
-                bmp.recycle();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        else
-        {
-            byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(farmerImageUri));
-        }
-
-//        bmp = BitmapFactory.decodeFile(farmerImageUri);
-//        if (bmp == null) {
+//    private void attachFarmerImageToFarmerObject(final Farmer farmer) {
+//
+//        if (farmerImageUri == null)
+//            return;
+//
+//        HashMap<String, Object> attachmentMap = new HashMap<>();
+//        attachmentMap.put("Description", "picture");
+//        attachmentMap.put("Name", "profile_picture.png");
+//        if (farmer.getThumbAttachmentId() == null || farmer.getThumbAttachmentId().isEmpty()) {
+//            attachmentMap.put("ParentId", farmer.farmerId);
+//        }
+//        else
+//        {
+//            MyPicassoInstance.getInstance().invalidate(farmer.getThumbUrl());
+//        }
+//
+//        JSONObject json = new JSONObject(attachmentMap);
+//
+////        File f = new File(farmerImageUri);
+////        byte[] byteArrayImage = getByteArrayFromFile(f);
+//
+//        byte[] byteArrayImage = null;
+//        Bitmap bmp = null;
+//
+////        bmp = PhotoUtils.decodeSampledBitmapFromResource(farmerImageUri);
+//        bmp = PhotoUtils.getBitmapFromPath(farmerImageUri);
+//
+//        if(bmp != null)
+//        {
 //            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-//            bmp.compress(Bitmap.CompressFormat.JPEG, 40, bos);
+//            bmp.compress(Bitmap.CompressFormat.JPEG, 100, bos);
 //            byteArrayImage = bos.toByteArray();
 //            try {
 //                bos.close();
+//                bmp.recycle();
 //            } catch (IOException e) {
 //                e.printStackTrace();
 //            }
-//        } else {
-//            File f = new File(farmerImageUri);
-//            byteArrayImage = getByteArrayFromFile(f);
 //        }
+//        else
+//        {
+//            byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(farmerImageUri));
+//        }
+//
+////        bmp = BitmapFactory.decodeFile(farmerImageUri);
+////        if (bmp == null) {
+////            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+////            bmp.compress(Bitmap.CompressFormat.JPEG, 40, bos);
+////            byteArrayImage = bos.toByteArray();
+////            try {
+////                bos.close();
+////            } catch (IOException e) {
+////                e.printStackTrace();
+////            }
+////        } else {
+////            File f = new File(farmerImageUri);
+////            byteArrayImage = getByteArrayFromFile(f);
+////        }
+//
+//        RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
+//        RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
+//
+//        if (farmer.getThumbAttachmentId() == null || farmer.getThumbAttachmentId().isEmpty()) {
+//            WebApi.addAttachment(addFarmerPicCallback, entityBody, imageBody);
+//        } else {
+//            WebApi.editAttachment(editFarmerPicCallback, farmer.getThumbAttachmentId(), entityBody, imageBody);
+//        }
+//    }
 
-        RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
-        RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
-
-        if (farmer.getThumbAttachmentId() == null || farmer.getThumbAttachmentId().isEmpty()) {
-            WebApi.addAttachment(addFarmerPicCallback, entityBody, imageBody);
-        } else {
-            WebApi.editAttachment(editFarmerPicCallback, farmer.getThumbAttachmentId(), entityBody, imageBody);
-        }
-    }
-
-    Callback<ResponseBody> addFarmerPicCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                Log.i("Fennel", "farmer profile picture uploaded successfully!");
-            } else {
-                Log.i("Fennel", "farmer profile picture upload failed!");
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            Log.i("Fennel", "farmer profile picture upload failed!");
-        }
-    };
-
-    Callback<ResponseBody> editFarmerPicCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                Log.i("Fennel", "farmer profile picture edited successfully!");
-                Singleton.getInstance().farmerIdtoInvalidate = farmer.farmerId;
-            } else {
-                Log.i("Fennel", "farmer profile picture edit failed!");
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            Log.i("Fennel", "farmer profile picture edit failed!");
-        }
-    };
-
-    private void attachFarmerIDImageToFarmerObject(Farmer farmer) {
-
-        if (farmerIdImageUri == null)
-            return;
-
-        HashMap<String, Object> attachmentMap = new HashMap<>();
-        attachmentMap.put("Description", "ID");
-        attachmentMap.put("Name", "national_id.png");
-        if(farmer.getNationalCardAttachmentId() == null || farmer.getNationalCardAttachmentId().isEmpty()) {
-            attachmentMap.put("ParentId", farmer.farmerId);
-        }
-        else
-        {
-            MyPicassoInstance.getInstance().invalidate(farmer.getNationalCardUrl());
-        }
-
-        JSONObject json = new JSONObject(attachmentMap);
-
-        byte[] byteArrayImage = null;
-        Bitmap bmp = null;
-
-//        bmp = PhotoUtils.decodeSampledBitmapFromResource(farmerIdImageUri);
-        bmp = PhotoUtils.getBitmapFromPath(farmerIdImageUri);
-
-        if(bmp != null)
-        {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.JPEG, 100, bos);
-            byteArrayImage = bos.toByteArray();
-            try {
-                bos.close();
-                bmp.recycle();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        else
-        {
-            byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(farmerIdImageUri));
-        }
-
-        RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
-        RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
-
-        if (farmer.getNationalCardAttachmentId() == null || farmer.getNationalCardAttachmentId().isEmpty()) {
-            WebApi.addAttachment(addFarmerIdPicCallback, entityBody, imageBody);
-        } else {
-            WebApi.editAttachment(editFarmerIdPicCallback, farmer.getNationalCardAttachmentId(), entityBody, imageBody);
-        }
-    }
-
-    Callback<ResponseBody> addFarmerIdPicCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                //Save id with attac
-                // hment
-                Log.i("Fennel", "farmer ID picture uploaded successfully!");
-            } else {
-                Log.i("Fennel", "farmer ID picture upload failed!");
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            Log.i("Fennel", "farmer ID picture upload failed!");
-        }
-    };
-
-    Callback<ResponseBody> editFarmerIdPicCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                Log.i("Fennel", "farmer ID picture edited successfully!");
-            } else {
-                Log.i("Fennel", "farmer ID picture edit failed!");
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            Log.i("Fennel", "farmer ID picture edit failed!");
-        }
-    };
+//    Callback<ResponseBody> addFarmerPicCallback = new Callback<ResponseBody>() {
+//        @Override
+//        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+//                Log.i("Fennel", "farmer profile picture uploaded successfully!");
+//            } else {
+//                Log.i("Fennel", "farmer profile picture upload failed!");
+//            }
+//        }
+//
+//        @Override
+//        public void onFailure(Call<ResponseBody> call, Throwable t) {
+//            Log.i("Fennel", "farmer profile picture upload failed!");
+//        }
+//    };
+//
+//    Callback<ResponseBody> editFarmerPicCallback = new Callback<ResponseBody>() {
+//        @Override
+//        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+//                Log.i("Fennel", "farmer profile picture edited successfully!");
+//                Singleton.getInstance().farmerIdtoInvalidate = farmer.farmerId;
+//            } else {
+//                Log.i("Fennel", "farmer profile picture edit failed!");
+//            }
+//        }
+//
+//        @Override
+//        public void onFailure(Call<ResponseBody> call, Throwable t) {
+//            Log.i("Fennel", "farmer profile picture edit failed!");
+//        }
+//    };
+//
+//    private void attachFarmerIDImageToFarmerObject(Farmer farmer) {
+//
+//        if (farmerIdImageUri == null)
+//            return;
+//
+//        HashMap<String, Object> attachmentMap = new HashMap<>();
+//        attachmentMap.put("Description", "ID");
+//        attachmentMap.put("Name", "national_id.png");
+//        if(farmer.getNationalCardAttachmentId() == null || farmer.getNationalCardAttachmentId().isEmpty()) {
+//            attachmentMap.put("ParentId", farmer.farmerId);
+//        }
+//        else
+//        {
+//            MyPicassoInstance.getInstance().invalidate(farmer.getNationalCardUrl());
+//        }
+//
+//        JSONObject json = new JSONObject(attachmentMap);
+//
+//        byte[] byteArrayImage = null;
+//        Bitmap bmp = null;
+//
+////        bmp = PhotoUtils.decodeSampledBitmapFromResource(farmerIdImageUri);
+//        bmp = PhotoUtils.getBitmapFromPath(farmerIdImageUri);
+//
+//        if(bmp != null)
+//        {
+//            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//            bmp.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+//            byteArrayImage = bos.toByteArray();
+//            try {
+//                bos.close();
+//                bmp.recycle();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        else
+//        {
+//            byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(farmerIdImageUri));
+//        }
+//
+//        RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
+//        RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
+//
+//        if (farmer.getNationalCardAttachmentId() == null || farmer.getNationalCardAttachmentId().isEmpty()) {
+//            WebApi.addAttachment(addFarmerIdPicCallback, entityBody, imageBody);
+//        } else {
+//            WebApi.editAttachment(editFarmerIdPicCallback, farmer.getNationalCardAttachmentId(), entityBody, imageBody);
+//        }
+//    }
+//
+//    Callback<ResponseBody> addFarmerIdPicCallback = new Callback<ResponseBody>() {
+//        @Override
+//        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+//                //Save id with attac
+//                // hment
+//                Log.i("Fennel", "farmer ID picture uploaded successfully!");
+//            } else {
+//                Log.i("Fennel", "farmer ID picture upload failed!");
+//            }
+//        }
+//
+//        @Override
+//        public void onFailure(Call<ResponseBody> call, Throwable t) {
+//            Log.i("Fennel", "farmer ID picture upload failed!");
+//        }
+//    };
+//
+//    Callback<ResponseBody> editFarmerIdPicCallback = new Callback<ResponseBody>() {
+//        @Override
+//        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+//                Log.i("Fennel", "farmer ID picture edited successfully!");
+//            } else {
+//                Log.i("Fennel", "farmer ID picture edit failed!");
+//            }
+//        }
+//
+//        @Override
+//        public void onFailure(Call<ResponseBody> call, Throwable t) {
+//            Log.i("Fennel", "farmer ID picture edit failed!");
+//        }
+//    };
 
     private void hideKeyboard() {
 

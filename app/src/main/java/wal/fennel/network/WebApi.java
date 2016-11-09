@@ -16,6 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -29,6 +30,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import wal.fennel.R;
 import wal.fennel.activities.LoginActivity;
+import wal.fennel.adapters.MySignupsAdapter;
 import wal.fennel.application.Fennel;
 import wal.fennel.datamodels.Auth;
 import wal.fennel.models.Farm;
@@ -761,14 +763,13 @@ public class WebApi {
     private static void checkSyncComplete(){
         if(countCalls == 0) {
             if(countFailedCalls == 0){
-//                Toast.makeText(mContext, "Sync completed", Toast.LENGTH_SHORT).show();
                 Log.i("Sync process: ", "Sync completed");
             }
             else{
-//                Toast.makeText(mContext, "Sync finished, but some records failed to sync", Toast.LENGTH_LONG).show();
                 Log.i("Sync process: ", "Sync finished, but some records failed to sync");
             }
             saveSyncTimeStamp();
+
             if(WebApi.getInstance().onSyncCompleteListener != null) {
                 WebApi.getInstance().onSyncCompleteListener.syncCompleted();
             }
@@ -790,6 +791,290 @@ public class WebApi {
         Date resultDate = new Date(yourMillis);
         String syncTime = sdf.format(resultDate);
         PreferenceHelper.getInstance().writeLastSyncTime(syncTime);
+    }
+
+    public static void getFullServerData(){
+
+        WebApi.getMySignUps(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.code() == 200) {
+                    String responseStr = "";
+                    try {
+                        responseStr = response.body().string();
+                        parseMySignupsData(responseStr);
+                        WebApi.getMyFarmerAttachments(myFarmersAttachmentsCallback);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+
+        WebApi.getAboutMeAttachment(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.code() == 200) {
+                    String responseStr = "";
+
+                    try {
+                        responseStr = response.body().string();
+                        String attId = parseAboutMeDataAttachment(responseStr);
+                        PreferenceHelper.getInstance().writeAboutAttId(attId);
+                        if(!attId.isEmpty())
+                        {
+                            String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(attId);
+                            PreferenceHelper.getInstance().writeAboutAttUrl(thumbUrl);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+    }
+
+    private static Callback<ResponseBody> myFarmersAttachmentsCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            if (response.code() == 200) {
+                String responseStr = "";
+
+                try {
+                    responseStr = response.body().string();
+                    parseFarmerAttachmentData(responseStr);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            t.printStackTrace();
+        }
+    };
+
+    private static void parseMySignupsData(String data) throws JSONException {
+
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.delete(Farmer.class);
+        realm.commitTransaction();
+
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if(arrRecords.length() > 0)
+        {
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject farmObj = arrRecords.getJSONObject(i);
+
+                String id = "";
+                String farmId = "";
+                String location = "";
+                String locationId = "";
+                String subLocation = "";
+                String subLocationId = "";
+                String tree = "";
+                String treeId = "";
+                String village = "";
+                String villageId = "";
+                String fullName = "";
+                String firstName = "";
+                String secondName = "";
+                String surname = "";
+                String idNumber = "";
+                String gender = "";
+                String mobileNumber = "";
+                boolean isFarmerHome = false;
+                boolean leader = false;
+
+                farmId = farmObj.getString("Id");
+                JSONObject objLocation = farmObj.optJSONObject("LocationLookup__r");
+                if(objLocation != null)
+                {
+                    location = objLocation.getString("Name");
+                    locationId = objLocation.getString("Id");
+                }
+
+                JSONObject objSubLocation = farmObj.optJSONObject("Sub_LocationLookup__r");
+                if(objSubLocation != null)
+                {
+                    subLocation = objSubLocation.getString("Name");
+                    subLocationId = objSubLocation.getString("Id");
+                }
+
+                JSONObject objVillage = farmObj.optJSONObject("Village__r");
+                if(objVillage != null)
+                {
+                    village = objVillage.getString("Name");
+                    villageId = objVillage.getString("Id");
+                }
+
+
+                JSONObject objTree = farmObj.optJSONObject("Tree_Specie__r");
+                if(objTree != null)
+                {
+                    tree = objTree.getString("Name");
+                    treeId = objTree.getString("Id");
+                }
+
+                id = farmObj.optString("Farmer__c");
+                if(id != null && id.equalsIgnoreCase("null")) id = "";
+
+                JSONObject objFarmer = farmObj.optJSONObject("Farmer__r");
+                if(objFarmer != null)
+                {
+                    fullName = objFarmer.getString("FullName__c");
+                    if(fullName.equalsIgnoreCase("null")) fullName = "";
+                    firstName = objFarmer.getString("First_Name__c");
+                    if(firstName.equalsIgnoreCase("null")) firstName = "";
+                    secondName = objFarmer.getString("Middle_Name__c");
+                    if(secondName.equalsIgnoreCase("null")) secondName = "";
+                    surname = objFarmer.getString("Last_Name__c");
+                    if(surname.equalsIgnoreCase("null")) surname = "";
+                    idNumber = objFarmer.getString("Name");
+                    if(idNumber.equalsIgnoreCase("null")) idNumber = "";
+                    gender = objFarmer.getString("Gender__c");
+                    if(gender.equalsIgnoreCase("null")) gender = "";
+                    mobileNumber = objFarmer.getString("Mobile_Number__c");
+                    if(mobileNumber.equalsIgnoreCase("null")) mobileNumber = "";
+                    leader = objFarmer.getBoolean("Leader__c");
+                }
+                isFarmerHome = farmObj.optBoolean("Is_Farmer_Home__c");
+                String status = farmObj.getString("Sign_Up_Status__c");
+
+                // Save to DB
+                realm.beginTransaction();
+                final Farmer farmerDbObj = realm.createObject(Farmer.class);
+                farmerDbObj.setAllValues(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "");
+                realm.commitTransaction();
+            }
+        }
+    }
+
+    private static String parseAboutMeDataAttachment(String data) throws JSONException {
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if(arrRecords.length() > 0)
+        {
+            JSONObject facObj = arrRecords.getJSONObject(0);
+            JSONObject attachmentObj = facObj.optJSONObject("Attachments");
+            if(attachmentObj != null)
+            {
+                JSONArray attRecords = attachmentObj.getJSONArray("records");
+                if(attRecords.length() > 0)
+                {
+                    JSONObject objFarmerPhoto = attRecords.getJSONObject(0);
+                    String idAttachment = objFarmerPhoto.getString("Id");
+                    return idAttachment;
+                }
+            }
+        }
+        return "";
+    }
+
+    private static void parseFarmerAttachmentData(String data) throws JSONException {
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        Realm realm = Realm.getDefaultInstance();
+
+        if(arrRecords.length() > 0)
+        {
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject farmerObj = arrRecords.getJSONObject(i);
+                String id = farmerObj.getString("Id");
+
+                String farmerPicId = "";
+                String farmerNatId = "";
+
+                JSONObject attachmentObj = farmerObj.optJSONObject("Attachments");
+                if(attachmentObj != null)
+                {
+
+                    JSONArray attRecords = attachmentObj.getJSONArray("records");
+                    for (int j = 0; j < attRecords.length(); j++) {
+                        JSONObject objAttachment = attRecords.getJSONObject(j);
+                        String description = objAttachment.getString("Description").toLowerCase().trim();
+                        if(description.contains("pic") || description.contains("photo"))
+                        {
+                            farmerPicId = objAttachment.getString("Id");
+                        }
+                        else if(description.contains("id"))
+                        {
+                            farmerNatId = objAttachment.getString("Id");
+                        }
+                    }
+                }
+
+                final Farmer farmerDb = realm.where(Farmer.class).equalTo("farmerId", id).findFirst();
+                if(farmerDb != null)
+                {
+                    realm.beginTransaction();
+
+                    farmerDb.setThumbAttachmentId(farmerPicId);
+                    farmerDb.setNationalCardAttachmentId(farmerNatId);
+
+                    String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(farmerDb.getThumbAttachmentId());
+                    if(!farmerPicId.isEmpty())
+                    {
+                        farmerDb.setThumbUrl(thumbUrl);
+                    }
+
+                    String natIdUrl = NetworkHelper.makeAttachmentUrlFromId(farmerDb.getNationalCardAttachmentId());
+                    if(!farmerNatId.isEmpty())
+                    {
+                        farmerDb.setNationalCardUrl(natIdUrl);
+                    }
+                    realm.commitTransaction();
+
+                    MyPicassoInstance.getInstance().load(thumbUrl).fetch(new com.squareup.picasso.Callback() {
+                        @Override
+                        public void onSuccess() {
+                            Log.i("Fetch success", "Farmer Pic: " + farmerDb.getThumbUrl());
+                        }
+
+                        @Override
+                        public void onError() {
+                            Log.i("Fetch failed", "Farmer Pic: " + farmerDb.getThumbUrl());
+                        }
+                    });
+
+                    MyPicassoInstance.getInstance().load(natIdUrl).fetch(new com.squareup.picasso.Callback() {
+                        @Override
+                        public void onSuccess() {
+                            Log.i("Fetch success", "NAT ID: " + farmerDb.getNationalCardUrl());
+                        }
+
+                        @Override
+                        public void onError() {
+                            Log.i("Fetch failed", "NAT ID: " + farmerDb.getNationalCardUrl());
+                        }
+                    });
+                }
+            }
+        }
     }
 
     public interface OnSyncCompleteListener{

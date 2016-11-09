@@ -247,7 +247,10 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
 
     @OnClick(R.id.txtSignOut)
     void onClickSignOut(View view) {
-        showLogoutDialog();
+        if(WebApi.isSyncRequired())
+            Toast.makeText(getApplicationContext(), "Must sync data before Signout", Toast.LENGTH_SHORT).show();
+        else
+            showLogoutDialog();
     }
 
     @OnClick(R.id.rl_pick_image)
@@ -606,6 +609,7 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
                     else {
                         mSwipeRefreshLayout.setRefreshing(false);
                         Toast.makeText(getApplicationContext(), "Data is already synced", Toast.LENGTH_SHORT).show();
+                        WebApi.getFullServerData();
                     }
                 }
             }
@@ -626,5 +630,7 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
             syncTime = "-";
 
         tvSyncTime.setText(syncTime);
+
+        WebApi.getFullServerData();
     }
 }

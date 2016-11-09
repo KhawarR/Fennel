@@ -13,8 +13,15 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
-        if(NetworkHelper.isNetAvailable(context) && !PreferenceHelper.getInstance().readIsSyncInProgress() && WebApi.isSyncRequired()){
-            WebApi.syncAll(null);
+        if(NetworkHelper.isNetAvailable(context)){
+            if(!PreferenceHelper.getInstance().readIsSyncInProgress()){
+                if(WebApi.isSyncRequired()){
+                    WebApi.syncAll(null);
+                }
+                else {
+//                    WebApi.getFullServerData();
+                }
+            }
         }
     }
 }
