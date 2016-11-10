@@ -608,6 +608,9 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
                         Toast.makeText(getApplicationContext(), "Data is already synced", Toast.LENGTH_SHORT).show();
                     }
                 }
+                else {
+                    mSwipeRefreshLayout.setRefreshing(false);
+                }
             }
             else {
                 Toast.makeText(getApplicationContext(), "Network not available", Toast.LENGTH_SHORT).show();
