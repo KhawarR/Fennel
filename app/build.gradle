@@ -50,6 +50,7 @@ dependencies {
     compile 'com.makeramen:roundedimageview:2.2.1'
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile 'com.kbeanie:multipicker:1.1.2@aar'
+    compile 'io.realm:android-adapters:1.4.0'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.5@aar') {
         transitive = true;
     }

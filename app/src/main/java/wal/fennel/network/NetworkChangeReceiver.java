@@ -19,7 +19,7 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
                     WebApi.syncAll(null);
                 }
                 else {
-//                    WebApi.getFullServerData();
+                    WebApi.getFullServerData();
                 }
             }
         }

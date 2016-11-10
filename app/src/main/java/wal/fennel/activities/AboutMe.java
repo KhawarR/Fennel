@@ -630,7 +630,5 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
             syncTime = "-";
 
         tvSyncTime.setText(syncTime);
-
-        WebApi.getFullServerData();
     }
 }

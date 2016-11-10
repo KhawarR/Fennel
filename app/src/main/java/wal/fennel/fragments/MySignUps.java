@@ -1,9 +1,12 @@
 package wal.fennel.fragments;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -36,6 +39,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -57,6 +61,7 @@ import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PreferenceHelper;
+import wal.fennel.utils.Singleton;
 import wal.fennel.views.TitleBarLayout;
 
 /**
@@ -77,7 +82,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     MySignupsAdapter adapter;
 
-    ArrayList<Farmer> myFarmers = new ArrayList<>();
+//    RealmList<Farmer> myFarmers = new RealmList<>();
     int locationsResponseCounter = 0;
     //endregion
 
@@ -164,7 +169,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 position -= mLvFarmers.getHeaderViewsCount();
-                Farmer farmer = myFarmers.get(position);
+                Farmer farmer = Singleton.getInstance().mySignupsList.get(position);
                 if(!farmer.isHeader())
                 {
                     ((BaseContainerFragment) getParentFragment()).replaceFragment(EnrollFragment.newInstance(Constants.STR_EDIT_FARMER, farmer), true);
@@ -180,6 +185,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     public void onResume(){
         super.onResume();
         loadAttachment();
+//        if(mLvFarmers != null && adapter != null)
+//            adapter.notifyDataSetChanged();
+        refreshDataFromDB();
+        IntentFilter iff= new IntentFilter(Constants.MY_SIGNPS_BROADCAST_ACTION);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(onMySignupsUpdated, iff);
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(onMySignupsUpdated);
     }
 
     private void loadAttachment() {
@@ -215,7 +231,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     private void getMySignupsFromDB()
     {
-        myFarmers.clear();
+        Singleton.getInstance().mySignupsList.clear();
 
         if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         loadingStarted();
@@ -245,22 +261,22 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         if(incompleteFarmersList.size() > 0)
         {
-            myFarmers.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
-            myFarmers.addAll(incompleteFarmersList);
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.addAll(incompleteFarmersList);
         }
         if(pendingFarmersList.size() > 0)
         {
-            myFarmers.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
-            myFarmers.addAll(pendingFarmersList);
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.addAll(pendingFarmersList);
         }
         if(approvedFarmersList.size() > 0)
         {
-            myFarmers.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
-            myFarmers.addAll(approvedFarmersList);
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.addAll(approvedFarmersList);
         }
 
         // Creating our custom adapter
-        adapter = new MySignupsAdapter(getActivity(), myFarmers);
+        adapter = new MySignupsAdapter(getActivity(), Singleton.getInstance().mySignupsList);
         // Create the list view and bind the adapter
         mLvFarmers.setAdapter(adapter);
 
@@ -317,13 +333,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     };
 
     private void parseData(String data) throws JSONException {
-
-        myFarmers.clear();
-
-        Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        realm.delete(Farmer.class);
-        realm.commitTransaction();
 
         ArrayList<Farmer> incompleteFarmersList = new ArrayList<>();
         ArrayList<Farmer> pendingFarmersList = new ArrayList<>();
@@ -430,12 +439,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 {
                     approvedFarmersList.add(farmer);
                 }
-
-                // Save to DB
-                realm.beginTransaction();
-                final Farmer farmerDbObj = realm.createObject(Farmer.class);
-                farmerDbObj.setAllValues(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "");
-                realm.commitTransaction();
             }
         }
         else
@@ -443,24 +446,39 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
         }
 
+        Singleton.getInstance().mySignupsList.clear();
+
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.delete(Farmer.class);
+        realm.commitTransaction();
+
         if(incompleteFarmersList.size() > 0)
         {
-            myFarmers.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
-            myFarmers.addAll(incompleteFarmersList);
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.addAll(incompleteFarmersList);
         }
         if(pendingFarmersList.size() > 0)
         {
-            myFarmers.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
-            myFarmers.addAll(pendingFarmersList);
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.addAll(pendingFarmersList);
         }
         if(approvedFarmersList.size() > 0)
         {
-            myFarmers.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
-            myFarmers.addAll(approvedFarmersList);
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.addAll(approvedFarmersList);
+        }
+
+        for (int i = 0; i < Singleton.getInstance().mySignupsList.size(); i++) {
+            // Save to DB
+            realm.beginTransaction();
+            final Farmer farmerDbObj = realm.createObject(Farmer.class);
+            farmerDbObj.setAllValues(Singleton.getInstance().mySignupsList.get(i));
+            realm.commitTransaction();
         }
 
         // Creating our custom adapter
-        adapter = new MySignupsAdapter(getActivity(), myFarmers);
+        adapter = new MySignupsAdapter(getActivity(), Singleton.getInstance().mySignupsList);
         // Create the list view and bind the adapter
         mLvFarmers.setAdapter(adapter);
     }
@@ -538,8 +556,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     }
                 }
 
-                for (int j = 0; j < myFarmers.size(); j++) {
-                    final Farmer farmer = myFarmers.get(j);
+                for (int j = 0; j < Singleton.getInstance().mySignupsList.size(); j++) {
+                    final Farmer farmer = Singleton.getInstance().mySignupsList.get(j);
                     if(farmer.getFarmerId().equalsIgnoreCase(id))
                     {
                         farmer.setThumbAttachmentId(farmerPicId);
@@ -984,4 +1002,20 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             break;
         }
     }
+
+    private void refreshDataFromDB(){
+        if(mLvFarmers != null && adapter != null) {
+            getMySignupsFromDB();
+            adapter = new MySignupsAdapter(getActivity(), Singleton.getInstance().mySignupsList);
+            mLvFarmers.setAdapter(adapter);
+        }
+    }
+
+    private BroadcastReceiver onMySignupsUpdated = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            refreshDataFromDB();
+        }
+    };
 }

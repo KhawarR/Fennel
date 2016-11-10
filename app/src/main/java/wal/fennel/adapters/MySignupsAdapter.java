@@ -18,7 +18,6 @@ import wal.fennel.models.Farmer;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.utils.Constants;
 import wal.fennel.utils.MyPicassoInstance;
-import wal.fennel.utils.PreferenceHelper;
 import wal.fennel.utils.Singleton;
 import wal.fennel.views.FontTextView;
 
@@ -29,7 +28,7 @@ public class MySignupsAdapter extends BaseAdapter {
 
     private Context mContext;
     private ArrayList<Farmer> mList = new ArrayList<>();
-    private ArrayList<Farmer> mFarmersList = new ArrayList<>();
+//    private ArrayList<Farmer> mFarmersList = new ArrayList<>();
 
     // View Type for Separators
     private static final int ITEM_VIEW_TYPE_SEPARATOR = 0;
@@ -42,7 +41,7 @@ public class MySignupsAdapter extends BaseAdapter {
     public MySignupsAdapter(Context context, ArrayList list) {
         mContext = context;
         mList.addAll(list);
-        mFarmersList.addAll(list);
+//        mFarmersList.addAll(list);
     }
 
     @Override
@@ -81,6 +80,11 @@ public class MySignupsAdapter extends BaseAdapter {
 //    public boolean isEnabled(int position) {
 //        return getItemViewType(position) != ITEM_VIEW_TYPE_SEPARATOR;
 //    }
+
+    public void setUpdateDataSet(){
+        mList.clear();
+        mList.addAll(Singleton.getInstance().mySignupsList);
+    }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -177,11 +181,11 @@ public class MySignupsAdapter extends BaseAdapter {
         charText = charText.toLowerCase(Locale.getDefault());
         mList.clear();
         if (charText.length() == 0) {
-            mList.addAll(mFarmersList);
+            mList.addAll(Singleton.getInstance().mySignupsList);
         }
         else
         {
-            for (Farmer farmer : mFarmersList)
+            for (Farmer farmer : Singleton.getInstance().mySignupsList)
             {
                 if (farmer.getFullName().toLowerCase(Locale.getDefault()).contains(charText) || farmer.isHeader())
                 {

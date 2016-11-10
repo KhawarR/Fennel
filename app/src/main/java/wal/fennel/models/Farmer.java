@@ -165,6 +165,34 @@ public class Farmer extends RealmObject implements Parcelable{
         this.nationalCardUrl = nationalCardUrl;
     }
 
+    public void setAllValues(Farmer other) {
+        this.farmerId = other.farmerId;
+        this.farmId = other.farmId;
+        this.fullName = other.fullName;
+        this.firstName = other.firstName;
+        this.secondName = other.secondName;
+        this.surname = other.surname;
+        this.idNumber = other.idNumber;
+        this.gender = other.gender;
+        this.isLeader = other.isLeader;
+        this.location = other.location;
+        this.locationId = other.locationId;
+        this.subLocation = other.subLocation;
+        this.subLocationId = other.subLocationId;
+        this.villageName = other.villageName;
+        this.villageId = other.villageId;
+        this.treeSpecies = other.treeSpecies;
+        this.treeSpeciesId = other.treeSpeciesId;
+        this.farmerHome = other.farmerHome;
+        this.mobileNumber = other.mobileNumber;
+        this.thumbAttachmentId = other.thumbAttachmentId;
+        this.nationalCardAttachmentId = other.nationalCardAttachmentId;
+        this.signupStatus = other.signupStatus;
+        this.isHeader = other.isHeader;
+        this.thumbUrl = other.thumbUrl;
+        this.nationalCardUrl = other.nationalCardUrl;
+    }
+
     public String getFarmerId() {
         return farmerId;
     }

@@ -3,6 +3,7 @@ package wal.fennel.network;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -770,6 +771,8 @@ public class WebApi {
             }
             saveSyncTimeStamp();
 
+            getFullServerData();
+
             if(WebApi.getInstance().onSyncCompleteListener != null) {
                 WebApi.getInstance().onSyncCompleteListener.syncCompleted();
             }
@@ -873,10 +876,9 @@ public class WebApi {
 
     private static void parseMySignupsData(String data) throws JSONException {
 
-        Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        realm.delete(Farmer.class);
-        realm.commitTransaction();
+        ArrayList<Farmer> incompleteFarmersList = new ArrayList<>();
+        ArrayList<Farmer> pendingFarmersList = new ArrayList<>();
+        ArrayList<Farmer> approvedFarmersList = new ArrayList<>();
 
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
@@ -959,16 +961,63 @@ public class WebApi {
                     if(mobileNumber.equalsIgnoreCase("null")) mobileNumber = "";
                     leader = objFarmer.getBoolean("Leader__c");
                 }
+
                 isFarmerHome = farmObj.optBoolean("Is_Farmer_Home__c");
+
+//                String status = farmObj.getString("Status__c");
                 String status = farmObj.getString("Sign_Up_Status__c");
 
-                // Save to DB
-                realm.beginTransaction();
-                final Farmer farmerDbObj = realm.createObject(Farmer.class);
-                farmerDbObj.setAllValues(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "");
-                realm.commitTransaction();
+                Farmer farmer = new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "");
+
+                if(status.equalsIgnoreCase(Constants.STR_ENROLLED))
+                {
+                    incompleteFarmersList.add(farmer);
+                }
+                else if(status.equalsIgnoreCase(Constants.STR_PENDING))
+                {
+                    pendingFarmersList.add(farmer);
+                }
+                else if(status.equalsIgnoreCase(Constants.STR_APPROVED))
+                {
+                    approvedFarmersList.add(farmer);
+                }
             }
         }
+
+        Singleton.getInstance().mySignupsList.clear();
+
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.delete(Farmer.class);
+        realm.commitTransaction();
+
+        if(incompleteFarmersList.size() > 0)
+        {
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.addAll(incompleteFarmersList);
+        }
+        if(pendingFarmersList.size() > 0)
+        {
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.addAll(pendingFarmersList);
+        }
+        if(approvedFarmersList.size() > 0)
+        {
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.addAll(approvedFarmersList);
+        }
+
+        for (int i = 0; i < Singleton.getInstance().mySignupsList.size(); i++) {
+            // Save to DB
+            realm.beginTransaction();
+            final Farmer farmerDbObj = realm.createObject(Farmer.class);
+            farmerDbObj.setAllValues(Singleton.getInstance().mySignupsList.get(i));
+            realm.commitTransaction();
+        }
+
+        Intent resultsIntent=new Intent(Constants.MY_SIGNPS_BROADCAST_ACTION);
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(mContext);
+        localBroadcastManager.sendBroadcast(resultsIntent);
     }
 
     private static String parseAboutMeDataAttachment(String data) throws JSONException {
@@ -1074,6 +1123,10 @@ public class WebApi {
                     });
                 }
             }
+
+            Intent resultsIntent=new Intent(Constants.MY_SIGNPS_BROADCAST_ACTION);
+            LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(mContext);
+            localBroadcastManager.sendBroadcast(resultsIntent);
         }
     }
 
