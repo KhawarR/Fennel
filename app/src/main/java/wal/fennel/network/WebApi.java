@@ -766,6 +766,7 @@ public class WebApi {
                 Log.i("Sync process: ", "Sync finished, but some records failed to sync");
             }
             saveSyncTimeStamp();
+            PreferenceHelper.getInstance().writeSessionExpiredSyncReq(false);
             if(WebApi.getInstance().onSyncCompleteListener != null) {
                 WebApi.getInstance().onSyncCompleteListener.syncCompleted();
             }

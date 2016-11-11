@@ -217,6 +217,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         else
         {
             getMySignupsFromDB();
+            if(PreferenceHelper.getInstance().isSessionExpiredSyncReq())
+                WebApi.syncAll(null);
         }
     }
 
