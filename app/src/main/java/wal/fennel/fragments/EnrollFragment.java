@@ -181,6 +181,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     @Bind(R.id.imgNationalID)
     ImageView imgNationalID;
 
+    @Bind(R.id.ll_main_container)
+    LinearLayout ll_main_container;
+
     CircleImageView cIvIconRight;
 
     private String title;
@@ -342,6 +345,13 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         }
 
         titleBarLayout.setTitleText(title);
+
+        ll_main_container.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideKeyboard();
+            }
+        });
 
         etFirstName.addTextChangedListener(watcher);
         etSecondName.addTextChangedListener(watcher);
@@ -944,7 +954,6 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     private void checkEnableSubmit() {
         if (etFirstName.getText().toString().trim().toString().isEmpty()
-                || etSecondName.getText().toString().trim().isEmpty()
                 || etSurname.getText().toString().trim().isEmpty()
                 || etIdNumber.getText().toString().isEmpty()
                 || etMobileNumber.getText().toString().isEmpty()
