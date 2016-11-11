@@ -204,6 +204,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private boolean isFarmerPhotoSet = false;
     private boolean isNationalIdPhotoSet = false;
 
+    private boolean isFarmerPhotoEdited = false;
+    private boolean isNationalIdPhotoEdited = false;
+
     private String farmerStatus = null;
 
     private String farmerImageUri = null;
@@ -1052,6 +1055,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgFarmerPhoto);
                 farmerImageUri = originalPath;
                 isFarmerPhotoSet = true;
+                isFarmerPhotoEdited = true;
                 farmerImageUrl = uri;
                 if (isEdit) {
                     if(NetworkHelper.isNetAvailable(getActivity()))
@@ -1089,6 +1093,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(imgNationalID);
                 farmerIdImageUri = originalPath;
                 isNationalIdPhotoSet = true;
+                isNationalIdPhotoEdited = true;
                 farmerIdImageUrl = uri;
                 if (isEdit) {
                     if(NetworkHelper.isNetAvailable(getActivity()))
@@ -1316,15 +1321,13 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         Realm.getDefaultInstance().beginTransaction();
 
         final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
-        farmerDbObj.setAllValues(farmer.farmerId, farmer.farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, location, subLocationName, subLocation, villageName, village, treeSpeciesName, treeSpecies, isFarmerHome, mobileNumber, farmer.thumbAttachmentId, farmer.nationalCardAttachmentId, farmerStatus, false, "", "");
+        farmerDbObj.setAllValues(farmer.farmerId, farmer.farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, location, subLocationName, subLocation, villageName, village, treeSpeciesName, treeSpecies, isFarmerHome, mobileNumber, farmer.thumbAttachmentId, farmer.nationalCardAttachmentId, farmerStatus, false, farmerImageUrl, farmerIdImageUrl);
         farmerDbObj.setDataDirty(true);
 
-        if(farmerImageUrl != null && !farmerImageUrl.isEmpty()){
-            farmerDbObj.setThumbUrl(farmerImageUrl);
+        if(isFarmerPhotoEdited){
             farmerDbObj.setFarmerPicDirty(true);
         }
-        if(farmerIdImageUrl != null && !farmerIdImageUrl.isEmpty()){
-            farmerDbObj.setNationalCardUrl(farmerIdImageUrl);
+        if(isNationalIdPhotoEdited){
             farmerDbObj.setNatIdCardDirty(true);
         }
 
