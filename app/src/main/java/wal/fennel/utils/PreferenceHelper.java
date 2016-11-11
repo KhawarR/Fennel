@@ -21,6 +21,7 @@ public class PreferenceHelper {
     private static final String KEY_LOGIN_USER_TYPE = "_login_user_type";
     private static final String KEY_USER_EMP_ID = "_user_emp_id";
     private static final String KEY_LAST_SYNC_TIME = "_last_sync_time";
+    private static final String KEY_SESSION_EXPIRE_SYNC_REQ = "_session_expired_sync_req";
 
     private static final String KEY_ABOUT_ME_FN = "_about_fn";
     private static final String KEY_ABOUT_ME_MN = "_about_mn";
@@ -253,29 +254,44 @@ public class PreferenceHelper {
         return value && !(PreferenceHelper.getInstance().readAboutAttUrl().startsWith("http"));
     }
 
-    public void clearSession() {
+    public void writeSessionExpiredSyncReq(boolean value) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putBoolean(KEY_SESSION_EXPIRE_SYNC_REQ, value);
+        editor.commit();
+    }
+
+    public boolean isSessionExpiredSyncReq() {
+        boolean value = mPref.getBoolean(KEY_SESSION_EXPIRE_SYNC_REQ, false);
+        return value;
+    }
+
+    public void clearSession(boolean clearAll) {
         writeToken("");
-        writeInstanceUrl("");
-        writeLoginUserId("");
-        writeUserId("");
-        writePassword("");
-        writeLoginUserType("");
-        writeUserEmployeeId("");
-        writeLastSyncTime("");
-        writeIsSyncInProgress(false);
+        writeSessionExpiredSyncReq(true);
+        if(clearAll){
+            writeInstanceUrl("");
+            writeLoginUserId("");
+            writeUserId("");
+            writePassword("");
+            writeLoginUserType("");
+            writeUserEmployeeId("");
+            writeLastSyncTime("");
+            writeIsSyncInProgress(false);
+            writeSessionExpiredSyncReq(false);
 
-        writeAboutFN("");
-        writeAboutMN("");
-        writeAboutLN("");
-        writeAboutFOname("");
-        writeAboutFMname("");
-        writeAboutAttId("");
-        writeAboutAttUrl("");
-        writeAboutIsSyncReq(false);
+            writeAboutFN("");
+            writeAboutMN("");
+            writeAboutLN("");
+            writeAboutFOname("");
+            writeAboutFMname("");
+            writeAboutAttId("");
+            writeAboutAttUrl("");
+            writeAboutIsSyncReq(false);
 
-        Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        realm.delete(Farmer.class);
-        realm.commitTransaction();
+            Realm realm = Realm.getDefaultInstance();
+            realm.beginTransaction();
+            realm.delete(Farmer.class);
+            realm.commitTransaction();
+        }
     }
 }

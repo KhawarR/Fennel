@@ -224,7 +224,7 @@ public class WebApi {
                         else if(response.code() == 401)
                         {
                             countFailedCalls++;
-                            PreferenceHelper.getInstance().clearSession();
+                            PreferenceHelper.getInstance().clearSession(false);
                             Intent intent = new Intent(mContext, LoginActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             mContext.startActivity(intent);
@@ -256,7 +256,7 @@ public class WebApi {
 
                         } else if (response.code() == 401) {
                             countFailedCalls++;
-                            PreferenceHelper.getInstance().clearSession();
+                            PreferenceHelper.getInstance().clearSession(false);
                             Intent intent = new Intent(mContext, LoginActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             mContext.startActivity(intent);
@@ -313,7 +313,7 @@ public class WebApi {
                         else if(response.code() == 401)
                         {
                             countFailedCalls++;
-                            PreferenceHelper.getInstance().clearSession();
+                            PreferenceHelper.getInstance().clearSession(false);
                             Intent intent = new Intent(mContext, LoginActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             mContext.startActivity(intent);
@@ -349,7 +349,7 @@ public class WebApi {
                         else if(response.code() == 401)
                         {
                             countFailedCalls++;
-                            PreferenceHelper.getInstance().clearSession();
+                            PreferenceHelper.getInstance().clearSession(false);
                             Intent intent = new Intent(mContext, LoginActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             mContext.startActivity(intent);
@@ -494,7 +494,7 @@ public class WebApi {
                 else if(response.code() == 401)
                 {
                     countFailedCalls++;
-                    PreferenceHelper.getInstance().clearSession();
+                    PreferenceHelper.getInstance().clearSession(false);
                     Intent intent = new Intent(mContext, LoginActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(intent);
@@ -535,7 +535,7 @@ public class WebApi {
                 else if(response.code() == 401)
                 {
                     countFailedCalls++;
-                    PreferenceHelper.getInstance().clearSession();
+                    PreferenceHelper.getInstance().clearSession(false);
                     Intent intent = new Intent(mContext, LoginActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(intent);
@@ -770,9 +770,8 @@ public class WebApi {
                 Log.i("Sync process: ", "Sync finished, but some records failed to sync");
             }
             saveSyncTimeStamp();
-
             getFullServerData();
-
+            PreferenceHelper.getInstance().writeSessionExpiredSyncReq(false);
             if(WebApi.getInstance().onSyncCompleteListener != null) {
                 WebApi.getInstance().onSyncCompleteListener.syncCompleted();
             }
