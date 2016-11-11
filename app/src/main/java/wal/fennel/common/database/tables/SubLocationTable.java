@@ -48,7 +48,7 @@ public class SubLocationTable {
                     TABLE_SUB_LOCATION,
                     null,
                     values);
-            Log.i(TAG, "Row inserted at ID: " + newRowId);
+//            Log.i(TAG, "Row inserted at ID: " + newRowId);
         }
 
         return newRowId;

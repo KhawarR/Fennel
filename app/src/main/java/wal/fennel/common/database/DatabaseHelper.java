@@ -149,28 +149,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void insertLocation(Location newLocation) {
         long rowInserted = LocationTable.insert(this, newLocation);
         if (rowInserted != -1) {
-            Log.i("FENNEL", "Location inserted!");
+//            Log.i("FENNEL", "Location inserted!");
         }
     }
 
     public void insertSubLocation(SubLocation newSubLocation) {
         long rowInserted = SubLocationTable.insert(this, newSubLocation);
         if (rowInserted != -1) {
-            Log.i("FENNEL", "SubLocation inserted!");
+//            Log.i("FENNEL", "SubLocation inserted!");
         }
     }
 
     public void inserVillage(Village newVillage) {
         long rowInserted = VillageTable.insert(this, newVillage);
         if (rowInserted != -1) {
-            Log.i("FENNEL", "Village inserted!");
+//            Log.i("FENNEL", "Village inserted!");
         }
     }
 
     public void insertTree(Tree newTree) {
         long rowInserted = TreeTable.insert(this, newTree);
         if (rowInserted != -1) {
-            Log.i("FENNEL", "Tree inserted!");
+//            Log.i("FENNEL", "Tree inserted!");
         }
     }
 

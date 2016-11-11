@@ -1574,6 +1574,11 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                 Log.i("Fennel", "farmer profile picture uploaded successfully!");
+                Realm realm = Realm.getDefaultInstance();
+                realm.beginTransaction();
+                final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                farmerDbObj.setFarmerPicDirty(false);
+                realm.commitTransaction();
             } else {
                 Log.i("Fennel", "farmer profile picture upload failed!");
             }
@@ -1591,6 +1596,11 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                 Log.i("Fennel", "farmer profile picture edited successfully!");
                 Singleton.getInstance().farmerIdtoInvalidate = farmer.farmerId;
+                Realm realm = Realm.getDefaultInstance();
+                realm.beginTransaction();
+                final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                farmerDbObj.setFarmerPicDirty(false);
+                realm.commitTransaction();
             } else {
                 Log.i("Fennel", "farmer profile picture edit failed!");
             }
@@ -1656,9 +1666,13 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                //Save id with attac
-                // hment
+                //Save id with attachment
                 Log.i("Fennel", "farmer ID picture uploaded successfully!");
+                Realm realm = Realm.getDefaultInstance();
+                realm.beginTransaction();
+                final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                farmerDbObj.setNatIdCardDirty(false);
+                realm.commitTransaction();
             } else {
                 Log.i("Fennel", "farmer ID picture upload failed!");
             }
@@ -1675,6 +1689,11 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                 Log.i("Fennel", "farmer ID picture edited successfully!");
+                Realm realm = Realm.getDefaultInstance();
+                realm.beginTransaction();
+                final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                farmerDbObj.setNatIdCardDirty(false);
+                realm.commitTransaction();
             } else {
                 Log.i("Fennel", "farmer ID picture edit failed!");
             }
