@@ -253,29 +253,32 @@ public class PreferenceHelper {
         return value && !(PreferenceHelper.getInstance().readAboutAttUrl().startsWith("http"));
     }
 
-    public void clearSession() {
+    public void clearSession(boolean clearAll) {
         writeToken("");
-        writeInstanceUrl("");
-        writeLoginUserId("");
-        writeUserId("");
-        writePassword("");
-        writeLoginUserType("");
-        writeUserEmployeeId("");
-        writeLastSyncTime("");
-        writeIsSyncInProgress(false);
 
-        writeAboutFN("");
-        writeAboutMN("");
-        writeAboutLN("");
-        writeAboutFOname("");
-        writeAboutFMname("");
-        writeAboutAttId("");
-        writeAboutAttUrl("");
-        writeAboutIsSyncReq(false);
+        if(clearAll){
+            writeInstanceUrl("");
+            writeLoginUserId("");
+            writeUserId("");
+            writePassword("");
+            writeLoginUserType("");
+            writeUserEmployeeId("");
+            writeLastSyncTime("");
+            writeIsSyncInProgress(false);
 
-        Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        realm.delete(Farmer.class);
-        realm.commitTransaction();
+            writeAboutFN("");
+            writeAboutMN("");
+            writeAboutLN("");
+            writeAboutFOname("");
+            writeAboutFMname("");
+            writeAboutAttId("");
+            writeAboutAttUrl("");
+            writeAboutIsSyncReq(false);
+
+            Realm realm = Realm.getDefaultInstance();
+            realm.beginTransaction();
+            realm.delete(Farmer.class);
+            realm.commitTransaction();
+        }
     }
 }

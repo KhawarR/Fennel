@@ -192,7 +192,7 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
                 }
                 else if(response.code() == 401)
                 {
-                    PreferenceHelper.getInstance().clearSession();
+                    PreferenceHelper.getInstance().clearSession(false);
                     Intent intent = new Intent(AboutMe.this, LoginActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
@@ -261,7 +261,7 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         pickerDialog.setPositiveButton("Yes",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        PreferenceHelper.getInstance().clearSession();
+                        PreferenceHelper.getInstance().clearSession(true);
                         Intent intent = new Intent(AboutMe.this, LoginActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
@@ -387,7 +387,7 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
             }
             else if(response.code() == 401)
             {
-                PreferenceHelper.getInstance().clearSession();
+                PreferenceHelper.getInstance().clearSession(false);
                 Intent intent = new Intent(AboutMe.this, LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
@@ -423,7 +423,7 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
             }
             else if(response.code() == 401)
             {
-                PreferenceHelper.getInstance().clearSession();
+                PreferenceHelper.getInstance().clearSession(false);
                 Intent intent = new Intent(AboutMe.this, LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);

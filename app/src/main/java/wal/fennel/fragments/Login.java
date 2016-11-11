@@ -80,6 +80,10 @@ public class Login extends BaseFragment{
         if (etId.getText().toString().isEmpty() || etPassword.getText().toString().isEmpty()) {
             Toast.makeText(getActivity(), "Please put username & password", Toast.LENGTH_SHORT).show();
         } else {
+
+            if(!etId.getText().toString().trim().equalsIgnoreCase(PreferenceHelper.getInstance().readUserId()) || !etPassword.getText().toString().trim().equalsIgnoreCase(PreferenceHelper.getInstance().readPassword()))
+                PreferenceHelper.getInstance().clearSession(true);
+
             String username = "waajay@westagilelabs.com.waldev";
             String password = "walshamba123";
             loadingStarted();
@@ -153,7 +157,7 @@ public class Login extends BaseFragment{
             }
             else if(response.code() == 401)
             {
-                PreferenceHelper.getInstance().clearSession();
+                PreferenceHelper.getInstance().clearSession(false);
                 startActivity(new Intent(getActivity(), LoginActivity.class));
                 getActivity().finish();
             }
