@@ -123,6 +123,11 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
         titleBarLayout.setOnIconClickListener(this);
 
+        if(PreferenceHelper.getInstance().readIsSyncInProgress()){
+            WebApi.setSyncCompleteListener(this);
+            mSwipeRefreshLayout.setRefreshing(true);
+        }
+
         populateView();
 //        WebApi.getAboutMeInfo(aboutMeCallback);
     }

@@ -188,6 +188,10 @@ public class WebApi {
         return false;
     }
 
+    public static void setSyncCompleteListener(OnSyncCompleteListener onSyncCompleteListener) {
+        WebApi.getInstance().onSyncCompleteListener = onSyncCompleteListener;
+    }
+
     public static void syncAll(OnSyncCompleteListener onSyncCompleteListener){
 
         countCalls = 0;

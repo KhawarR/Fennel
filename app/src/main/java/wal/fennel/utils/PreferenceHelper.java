@@ -22,6 +22,7 @@ public class PreferenceHelper {
     private static final String KEY_USER_EMP_ID = "_user_emp_id";
     private static final String KEY_LAST_SYNC_TIME = "_last_sync_time";
     private static final String KEY_SESSION_EXPIRE_SYNC_REQ = "_session_expired_sync_req";
+    private static final String KEY_NETWORK_CHANGE_SYNC_STAMP = "_key_network_change_sync_stamp";
 
     private static final String KEY_ABOUT_ME_FN = "_about_fn";
     private static final String KEY_ABOUT_ME_MN = "_about_mn";
@@ -265,6 +266,17 @@ public class PreferenceHelper {
         return value;
     }
 
+    public void writeNetworkChangeSyncStamp(String value) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putString(KEY_NETWORK_CHANGE_SYNC_STAMP, value);
+        editor.commit();
+    }
+
+    public String readNetworkChangeSyncStamp() {
+        String value = mPref.getString(KEY_NETWORK_CHANGE_SYNC_STAMP, "-");
+        return value;
+    }
+
     public void clearSession(boolean clearAll) {
         writeToken("");
         writeSessionExpiredSyncReq(true);
@@ -278,6 +290,7 @@ public class PreferenceHelper {
             writeLastSyncTime("");
             writeIsSyncInProgress(false);
             writeSessionExpiredSyncReq(false);
+            writeNetworkChangeSyncStamp("");
 
             writeAboutFN("");
             writeAboutMN("");
