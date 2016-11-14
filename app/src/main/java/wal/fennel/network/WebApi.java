@@ -297,9 +297,9 @@ public class WebApi {
                             String newFarmerId = response.body().id;
 
                             Realm realm = Realm.getDefaultInstance();
-                            Realm.getDefaultInstance().beginTransaction();
+                            realm.beginTransaction();
                             farmer.farmerId = newFarmerId;
-                            Realm.getDefaultInstance().commitTransaction();
+                            realm.commitTransaction();
 
                             addFarmWithFarmerId(farmer);
 
@@ -486,10 +486,10 @@ public class WebApi {
                 if (response.body() != null && response.body().success == true) {
                     checkSyncComplete();
                     Realm realm = Realm.getDefaultInstance();
-                    Realm.getDefaultInstance().beginTransaction();
-                    final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                    realm.beginTransaction();
+                    final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
                     farmerDbObj.setDataDirty(false);
-                    Realm.getDefaultInstance().commitTransaction();
+                    realm.commitTransaction();
                 }
                 else if(response.code() == 401)
                 {
@@ -525,10 +525,10 @@ public class WebApi {
                 if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
 
                     Realm realm = Realm.getDefaultInstance();
-                    Realm.getDefaultInstance().beginTransaction();
-                    final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                    realm.beginTransaction();
+                    final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
                     farmerDbObj.setDataDirty(false);
-                    Realm.getDefaultInstance().commitTransaction();
+                    realm.commitTransaction();
 
                     checkSyncComplete();
                 }
@@ -608,10 +608,10 @@ public class WebApi {
                     if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                         Log.i("Fennel", "farmer profile picture uploaded successfully!");
                         Realm realm = Realm.getDefaultInstance();
-                        Realm.getDefaultInstance().beginTransaction();
-                        final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                        realm.beginTransaction();
+                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
                         farmerDbObj.setFarmerPicDirty(false);
-                        Realm.getDefaultInstance().commitTransaction();
+                        realm.commitTransaction();
                     } else {
                         countFailedCalls++;
                         Log.i("Fennel", "farmer profile picture upload failed!");
@@ -636,10 +636,10 @@ public class WebApi {
                         Log.i("Fennel", "farmer profile picture edited successfully!");
                         Singleton.getInstance().farmerIdtoInvalidate = farmer.farmerId;
                         Realm realm = Realm.getDefaultInstance();
-                        Realm.getDefaultInstance().beginTransaction();
-                        final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                        realm.beginTransaction();
+                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
                         farmerDbObj.setFarmerPicDirty(false);
-                        Realm.getDefaultInstance().commitTransaction();
+                        realm.commitTransaction();
                     } else {
                         countFailedCalls++;
                         Log.i("Fennel", "farmer profile picture edit failed!");
@@ -712,10 +712,10 @@ public class WebApi {
                     if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                         Log.i("Fennel", "farmer ID picture uploaded successfully!");
                         Realm realm = Realm.getDefaultInstance();
-                        Realm.getDefaultInstance().beginTransaction();
-                        final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                        realm.beginTransaction();
+                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
                         farmerDbObj.setNatIdCardDirty(false);
-                        Realm.getDefaultInstance().commitTransaction();
+                        realm.commitTransaction();
                     } else {
                         countFailedCalls++;
                         Log.i("Fennel", "farmer ID picture upload failed!");
@@ -739,10 +739,10 @@ public class WebApi {
                     if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                         Log.i("Fennel", "farmer ID picture edited successfully!");
                         Realm realm = Realm.getDefaultInstance();
-                        Realm.getDefaultInstance().beginTransaction();
-                        final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                        realm.beginTransaction();
+                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
                         farmerDbObj.setNatIdCardDirty(false);
-                        Realm.getDefaultInstance().commitTransaction();
+                        realm.commitTransaction();
                     } else {
                         Log.i("Fennel", "farmer ID picture edit failed!");
                         countFailedCalls++;

@@ -48,7 +48,7 @@ public class TreeTable {
                     TABLE_TREE,
                     null,
                     values);
-            Log.i(TAG, "Row inserted at ID: " + newRowId);
+//            Log.i(TAG, "Row inserted at ID: " + newRowId);
         }
 
         return newRowId;

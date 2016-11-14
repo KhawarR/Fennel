@@ -48,7 +48,7 @@ public class VillageTable {
                     TABLE_VILLAGE,
                     null,
                     values);
-            Log.i(TAG, "Row inserted at ID: " + newRowId);
+//            Log.i(TAG, "Row inserted at ID: " + newRowId);
         }
 
         return newRowId;

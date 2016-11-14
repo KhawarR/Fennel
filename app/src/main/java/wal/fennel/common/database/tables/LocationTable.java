@@ -45,7 +45,7 @@ public class LocationTable {
                     TABLE_LOCATION,
                     null,
                     values);
-            Log.i(TAG, "Row inserted at ID: " + newRowId);
+//            Log.i(TAG, "Row inserted at ID: " + newRowId);
         }
 
         return newRowId;
