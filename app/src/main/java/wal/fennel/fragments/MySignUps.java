@@ -594,7 +594,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                             realm.commitTransaction();
                         }
 
-                        MyPicassoInstance.getInstance().load(thumbUrl).fetch(new com.squareup.picasso.Callback() {
+                        MyPicassoInstance.getInstance().load(thumbUrl).fetch(/*new com.squareup.picasso.Callback() {
                             @Override
                             public void onSuccess() {
                                 Log.i("Fetch success", "Farmer Pic: " + farmer.getThumbUrl());
@@ -604,9 +604,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                             public void onError() {
                                 Log.i("Fetch failed", "Farmer Pic: " + farmer.getThumbUrl());
                             }
-                        });
+                        }*/);
 
-                        MyPicassoInstance.getInstance().load(natIdUrl).fetch(new com.squareup.picasso.Callback() {
+                        MyPicassoInstance.getInstance().load(natIdUrl).fetch(/*new com.squareup.picasso.Callback() {
                             @Override
                             public void onSuccess() {
                                 Log.i("Fetch success", "NAT ID: " + farmer.getNationalCardUrl());
@@ -616,7 +616,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                             public void onError() {
                                 Log.i("Fetch failed", "NAT ID: " + farmer.getNationalCardUrl());
                             }
-                        });
+                        }*/);
 
                         break;
                     }

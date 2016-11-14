@@ -1097,7 +1097,7 @@ public class WebApi {
                     }
                     realm.commitTransaction();
 
-                    MyPicassoInstance.getInstance().load(thumbUrl).fetch(new com.squareup.picasso.Callback() {
+                    MyPicassoInstance.getInstance().load(thumbUrl).fetch(/*new com.squareup.picasso.Callback() {
                         @Override
                         public void onSuccess() {
                             Log.i("Fetch success", "Farmer Pic: " + farmerDb.getThumbUrl());
@@ -1107,9 +1107,9 @@ public class WebApi {
                         public void onError() {
                             Log.i("Fetch failed", "Farmer Pic: " + farmerDb.getThumbUrl());
                         }
-                    });
+                    }*/);
 
-                    MyPicassoInstance.getInstance().load(natIdUrl).fetch(new com.squareup.picasso.Callback() {
+                    MyPicassoInstance.getInstance().load(natIdUrl).fetch(/*new com.squareup.picasso.Callback() {
                         @Override
                         public void onSuccess() {
                             Log.i("Fetch success", "NAT ID: " + farmerDb.getNationalCardUrl());
@@ -1119,7 +1119,7 @@ public class WebApi {
                         public void onError() {
                             Log.i("Fetch failed", "NAT ID: " + farmerDb.getNationalCardUrl());
                         }
-                    });
+                    }*/);
                 }
             }
 
