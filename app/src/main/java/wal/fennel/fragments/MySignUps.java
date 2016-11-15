@@ -10,7 +10,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -39,7 +38,6 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
-import io.realm.RealmList;
 import io.realm.RealmResults;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -73,7 +71,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     @Bind(R.id.titleBar)
     TitleBarLayout titleBarLayout;
     @Bind(R.id.lv_farmers)
-    ListView mLvFarmers;
+    ListView mLvMySignups;
 
     EditText etSearch;
     RelativeLayout rlAdd;
@@ -107,7 +105,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         mSwipeRefreshLayout.setOnRefreshListener(onRefreshListener);
 
         LayoutInflater myinflater = getActivity().getLayoutInflater();
-        ViewGroup myHeader = (ViewGroup)myinflater.inflate(R.layout.header_mysignups_list, mLvFarmers, false);
+        ViewGroup myHeader = (ViewGroup)myinflater.inflate(R.layout.header_mysignups_list, mLvMySignups, false);
 
         rlAdd = (RelativeLayout) myHeader.findViewById(R.id.rl_add);
         rlAdd.setOnClickListener(this);
@@ -163,12 +161,12 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         myHeader.setEnabled(false);
         myHeader.setOnClickListener(null);
-        mLvFarmers.addHeaderView(myHeader);
+        mLvMySignups.addHeaderView(myHeader);
 
-        mLvFarmers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mLvMySignups.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                position -= mLvFarmers.getHeaderViewsCount();
+                position -= mLvMySignups.getHeaderViewsCount();
                 Farmer farmer = Singleton.getInstance().mySignupsList.get(position);
                 if(!farmer.isHeader())
                 {
@@ -185,7 +183,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     public void onResume(){
         super.onResume();
         loadAttachment();
-//        if(mLvFarmers != null && adapter != null)
+//        if(mLvMySignups != null && adapter != null)
 //            adapter.notifyDataSetChanged();
         refreshDataFromDB();
         IntentFilter iff= new IntentFilter(Constants.MY_SIGNPS_BROADCAST_ACTION);
@@ -280,7 +278,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         // Creating our custom adapter
         adapter = new MySignupsAdapter(getActivity(), Singleton.getInstance().mySignupsList);
         // Create the list view and bind the adapter
-        mLvFarmers.setAdapter(adapter);
+        mLvMySignups.setAdapter(adapter);
 
         loadingFinished();
     }
@@ -482,7 +480,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         // Creating our custom adapter
         adapter = new MySignupsAdapter(getActivity(), Singleton.getInstance().mySignupsList);
         // Create the list view and bind the adapter
-        mLvFarmers.setAdapter(adapter);
+        mLvMySignups.setAdapter(adapter);
     }
 
     private Callback<ResponseBody> myFarmersAttachments = new Callback<ResponseBody>() {
@@ -1006,10 +1004,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     }
 
     private void refreshDataFromDB(){
-        if(mLvFarmers != null && adapter != null) {
+        if(mLvMySignups != null && adapter != null) {
             getMySignupsFromDB();
             adapter = new MySignupsAdapter(getActivity(), Singleton.getInstance().mySignupsList);
-            mLvFarmers.setAdapter(adapter);
+            mLvMySignups.setAdapter(adapter);
         }
     }
 

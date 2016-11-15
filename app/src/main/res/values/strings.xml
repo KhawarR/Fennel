@@ -27,6 +27,7 @@
     <string name="my_farmers">MY FARMERS</string>
     <string name="my_logbook">MY LOGBOOK</string>
     <string name="my_dashboard">MY DASHBOARD</string>
+    <string name="farmer_status">FARMER STATUS</string>
     <string name="employee_id_number">Employee ID Number</string>
     <string name="password">Password</string>
     <string name="sign_in">SIGN IN</string>

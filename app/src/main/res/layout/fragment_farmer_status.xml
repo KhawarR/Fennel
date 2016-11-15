@@ -12,12 +12,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         fennel:drawableRight="@drawable/dummy_profile"
-        fennel:titleText="@string/my_farmers" />
+        fennel:titleText="@string/farmer_status" />
 
-    <Button
-        android:id="@+id/btnFarmerStatus"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Farmer Status"/>
+        android:layout_height="0dp"
+        android:layout_weight="1.0">
+
+        <ListView
+            android:id="@+id/lvFarmers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </LinearLayout>

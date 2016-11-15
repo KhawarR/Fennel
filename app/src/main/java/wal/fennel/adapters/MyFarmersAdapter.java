@@ -24,11 +24,10 @@ import wal.fennel.views.FontTextView;
 /**
  * Created by Khawar on 30/9/2016.
  */
-public class MySignupsAdapter extends BaseAdapter {
+public class MyFarmersAdapter extends BaseAdapter {
 
     private Context mContext;
     private ArrayList<Farmer> mList = new ArrayList<>();
-//    private ArrayList<Farmer> mFarmersList = new ArrayList<>();
 
     // View Type for Separators
     private static final int ITEM_VIEW_TYPE_SEPARATOR = 0;
@@ -38,10 +37,9 @@ public class MySignupsAdapter extends BaseAdapter {
     // -- Separators and Regular rows --
     private static final int ITEM_VIEW_TYPE_COUNT = 2;
 
-    public MySignupsAdapter(Context context, ArrayList list) {
+    public MyFarmersAdapter(Context context, ArrayList list) {
         mContext = context;
         mList.addAll(list);
-//        mFarmersList.addAll(list);
     }
 
     @Override
@@ -103,7 +101,7 @@ public class MySignupsAdapter extends BaseAdapter {
             }
             else {
                 // Regular row
-                view = inflater.inflate(R.layout.row_my_signups, null);
+                view = inflater.inflate(R.layout.row_my_farmers, null);
             }
         }
         else {
@@ -120,79 +118,28 @@ public class MySignupsAdapter extends BaseAdapter {
         else {
             // If regular
 
-            ImageView ivLeftIcon = (ImageView) view.findViewById(R.id.iv_mysignups_icon_left);
+            ImageView ivIconRight = (ImageView) view.findViewById(R.id.ivIconRight);
 
             if(farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_ENROLLED))
             {
-                ivLeftIcon.setImageResource(R.drawable.ic_arrow_right);
-                ivLeftIcon.setVisibility(View.VISIBLE);
+                ivIconRight.setImageResource(R.drawable.ic_arrow_right);
+                ivIconRight.setVisibility(View.VISIBLE);
             }
             else if(farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_PENDING))
             {
-                ivLeftIcon.setVisibility(View.GONE);
+                ivIconRight.setVisibility(View.GONE);
             }
             else if(farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_APPROVED))
             {
-                ivLeftIcon.setImageResource(R.drawable.ic_approved);
-                ivLeftIcon.setVisibility(View.VISIBLE);
+                ivIconRight.setImageResource(R.drawable.ic_approved);
+                ivIconRight.setVisibility(View.VISIBLE);
             }
 
             // Set contact name and number
-            FontTextView name = (FontTextView) view.findViewById(R.id.tv_name);
+            FontTextView name = (FontTextView) view.findViewById(R.id.tvFarmerName);
             name.setText( farmer.getFullName());
-
-            FontTextView village = (FontTextView) view.findViewById(R.id.tv_village);
-            FontTextView sublocation = (FontTextView) view.findViewById(R.id.tv_sublocation);
-
-            if(!farmer.getSubLocation().isEmpty())
-                sublocation.setText(farmer.getSubLocation());
-            else
-                sublocation.setText("");
-
-            if(!farmer.getVillageName().isEmpty())
-                village.setText(farmer.getVillageName() + ", ");
-            else
-                village.setText("");
-
-            CircleImageView thumb = (CircleImageView) view.findViewById(R.id.profile_image);
-            String thumbUrl = farmer.getThumbUrl();
-            if(thumbUrl != null && !thumbUrl.isEmpty())
-            {
-                if(Singleton.getInstance().farmerIdtoInvalidate.equalsIgnoreCase(farmer.farmerId)) {
-                    MyPicassoInstance.getInstance().invalidate(thumbUrl);
-                    Singleton.getInstance().farmerIdtoInvalidate = "";
-                }
-                if(NetworkHelper.isNetAvailable(mContext))
-                    MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).onlyScaleDown().centerCrop().into(thumb);
-                else
-                    MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).onlyScaleDown().centerCrop().into(thumb);
-            }
-            else
-            {
-                thumb.setImageResource(R.drawable.dummy_profile);
-            }
         }
 
         return view;
-    }
-
-    // Filter Class
-    public void filter(String charText) {
-        charText = charText.toLowerCase(Locale.getDefault());
-        mList.clear();
-        if (charText.length() == 0) {
-            mList.addAll(Singleton.getInstance().mySignupsList);
-        }
-        else
-        {
-            for (Farmer farmer : Singleton.getInstance().mySignupsList)
-            {
-                if (farmer.getFullName().toLowerCase(Locale.getDefault()).contains(charText) || farmer.isHeader())
-                {
-                    mList.add(farmer);
-                }
-            }
-        }
-        notifyDataSetChanged();
     }
 }
