@@ -953,19 +953,19 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             ArrayList<Tree> allTrees = new ArrayList<>();
             for (int i = 0; i < arrRecords.length(); i++) {
 
-                JSONObject subLocationObj = arrRecords.getJSONObject(i);
+                JSONObject treeObj = arrRecords.getJSONObject(i).getJSONObject("Tree_Species__r");
 
                 String id = "";
                 String name = "";
                 String subLocationId = "";
 
-                id = subLocationObj.getString("Id");
+                id = treeObj.getString("Id");
                 if (id.equalsIgnoreCase("null")) id = "";
 
-                name = subLocationObj.getString("Name");
+                name = treeObj.getString("Name");
                 if (name.equalsIgnoreCase("null")) name = "";
 
-                subLocationId = subLocationObj.getString("Sub_Location__c");
+                subLocationId = arrRecords.getJSONObject(i).getString("Sub_Location__c");
                 if (subLocationId.equalsIgnoreCase("null")) subLocationId = "";
 
                 Tree tree = new Tree(id, name, subLocationId);
