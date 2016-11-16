@@ -33,7 +33,8 @@ public class NetworkHelper {
     public static final String GET_LOCATIONS = "SELECT Id, Name FROM Location__c";
     public static final String GET_SUB_LOCATIONS = "SELECT Id, Name, Location__c FROM Sub_Location__c";
     public static final String GET_VILLAGES = "SELECT Id, Name, Sub_Location__c FROM Village__c";
-    public static final String GET_TREES = "Select t.Sub_Location__r.Name, t.Sub_Location__c, t.Name, t.Id From Tree_Species__c t";
+//    public static final String GET_TREES = "Select t.Sub_Location__r.Name, t.Sub_Location__c, t.Name, t.Id From Tree_Species__c t";
+    public static final String GET_TREES = "Select t.Sub_Location__r.Name, t.Sub_Location__c, t.Tree_Species__r.Name, t.Tree_Species__r.Id, t.Tree_Species__c From Tree_Specie_Locations__c t";
 
     private static final String STR_FILE_PREFIX = "file://";
 

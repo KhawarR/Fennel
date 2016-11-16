@@ -510,7 +510,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             }
             if (farmer.getTreeSpecies() != null && !farmer.getTreeSpecies().isEmpty()) {
                 spTree.setTag(false);
-                spTree.setSelection(getPositionForSpinnerArray(farmer.getTreeSpecies(), strArrTrees) + 1);
+                if(strArrTrees.size() > 0)
+                    spTree.setSelection(getPositionForSpinnerArray(farmer.getTreeSpecies(), strArrTrees) + 1);
             }
 
             if (farmer.isFarmerHome()) {
