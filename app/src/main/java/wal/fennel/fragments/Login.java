@@ -84,7 +84,9 @@ public class Login extends BaseFragment{
             if(!etId.getText().toString().trim().equalsIgnoreCase(PreferenceHelper.getInstance().readUserId()) || !etPassword.getText().toString().trim().equalsIgnoreCase(PreferenceHelper.getInstance().readPassword()))
                 PreferenceHelper.getInstance().clearSession(true);
 
-            String username = "waajay@westagilelabs.com.waldev";
+            //TODO Test to Production
+//            String username = "waajay@westagilelabs.com.waldev";
+            String username = "waajay@westagilelabs.com";
             String password = "walshamba123";
             loadingStarted();
             boolean isCallProcessed = WebApi.salesForceAuth(authCallback, username, password);

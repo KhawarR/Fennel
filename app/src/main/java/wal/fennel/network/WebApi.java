@@ -1107,28 +1107,27 @@ public class WebApi {
                     }
                 }
 
-                final Farmer farmerDb = realm.where(Farmer.class).equalTo("farmerId", id).findFirst();
-                if(farmerDb != null)
+                RealmResults<Farmer> farmerDbList = realm.where(Farmer.class).equalTo("farmerId", id).findAll();
+                if(farmerDbList != null && farmerDbList.size() > 0)
                 {
-                    realm.beginTransaction();
+                    for (int k = 0; k < farmerDbList.size(); k++) {
+                        realm.beginTransaction();
+                        farmerDbList.get(k).setThumbAttachmentId(farmerPicId);
+                        farmerDbList.get(k).setNationalCardAttachmentId(farmerNatId);
 
-                    farmerDb.setThumbAttachmentId(farmerPicId);
-                    farmerDb.setNationalCardAttachmentId(farmerNatId);
+                        String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(farmerDbList.get(k).getThumbAttachmentId());
+                        if(!farmerPicId.isEmpty())
+                        {
+                            farmerDbList.get(k).setThumbUrl(thumbUrl);
+                        }
+                        String natIdUrl = NetworkHelper.makeAttachmentUrlFromId(farmerDbList.get(k).getNationalCardAttachmentId());
+                        if(!farmerNatId.isEmpty())
+                        {
+                            farmerDbList.get(k).setNationalCardUrl(natIdUrl);
+                        }
+                        realm.commitTransaction();
 
-                    String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(farmerDb.getThumbAttachmentId());
-                    if(!farmerPicId.isEmpty())
-                    {
-                        farmerDb.setThumbUrl(thumbUrl);
-                    }
-
-                    String natIdUrl = NetworkHelper.makeAttachmentUrlFromId(farmerDb.getNationalCardAttachmentId());
-                    if(!farmerNatId.isEmpty())
-                    {
-                        farmerDb.setNationalCardUrl(natIdUrl);
-                    }
-                    realm.commitTransaction();
-
-                    MyPicassoInstance.getInstance().load(thumbUrl).fetch(/*new com.squareup.picasso.Callback() {
+                        MyPicassoInstance.getInstance().load(thumbUrl).fetch(/*new com.squareup.picasso.Callback() {
                         @Override
                         public void onSuccess() {
                             Log.i("Fetch success", "Farmer Pic: " + farmerDb.getThumbUrl());
@@ -1140,7 +1139,7 @@ public class WebApi {
                         }
                     }*/);
 
-                    MyPicassoInstance.getInstance().load(natIdUrl).fetch(/*new com.squareup.picasso.Callback() {
+                        MyPicassoInstance.getInstance().load(natIdUrl).fetch(/*new com.squareup.picasso.Callback() {
                         @Override
                         public void onSuccess() {
                             Log.i("Fetch success", "NAT ID: " + farmerDb.getNationalCardUrl());
@@ -1151,6 +1150,8 @@ public class WebApi {
                             Log.i("Fetch failed", "NAT ID: " + farmerDb.getNationalCardUrl());
                         }
                     }*/);
+
+                    }
                 }
             }
 

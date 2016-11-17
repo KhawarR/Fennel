@@ -12,8 +12,14 @@ import wal.fennel.utils.PreferenceHelper;
  */
 public class NetworkHelper {
     public static final String GRANT = "password";
-    public static final String CLIENT_ID = "3MVG9eYfd1zvW1E6CGmr.WMml7GUxIj_4B4n2IGfk693m6sEsdV7Eni_5Kgts.uwmLbU03gHKPPrjYN5dcTxr";
-    public static final String CLIENT_SECRET = "1367114753175275829";
+    //TODO Test to Production
+    // ------------------- Testing
+//    public static final String CLIENT_ID = "3MVG9eYfd1zvW1E6CGmr.WMml7GUxIj_4B4n2IGfk693m6sEsdV7Eni_5Kgts.uwmLbU03gHKPPrjYN5dcTxr";
+//    public static final String CLIENT_SECRET = "1367114753175275829";
+    // ------------------- Production
+    public static final String CLIENT_ID = "3MVG9CVKiXR7Ri5oS6br.mcM16uAbGiOHbpwBR3WPEvOjvogmydDocsRwSJLL9ql4PTmUaCHxYB1H2lb.nxxr";
+    public static final String CLIENT_SECRET = "2913726762900040703";
+
     public static final String REDIRECT_URI = "https://success";
     public static final String API_VERSION = "v36.0";
     public static final String URL_ATTACHMENTS = "%s/services/data/" + API_VERSION + "/sobjects/Attachment/%s/body";
