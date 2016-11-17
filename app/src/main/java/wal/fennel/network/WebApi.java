@@ -20,6 +20,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -296,9 +298,34 @@ public class WebApi {
                     @Override
                     public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
                         countCalls--;
-                        if ((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().success == true) {
 
-                            String newFarmerId = response.body().id;
+                        String errorMessage = "";
+                        if(response.code() == 400) {
+                            try {
+                                errorMessage = response.errorBody().string().toString();
+                                JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
+                                errorMessage = objError.getString("message");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        if (((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().success == true) || !errorMessage.isEmpty()) {
+
+                            String newFarmerId = "";
+
+                            if(!errorMessage.isEmpty()) {
+                                Matcher m = Pattern.compile("\\((.*?)\\)").matcher(errorMessage);
+                                while(m.find()) {
+                                    newFarmerId = m.group(1);
+                                }
+                            }
+
+                            if(newFarmerId.isEmpty()){
+                                newFarmerId = response.body().id;
+                            }
 
                             Realm realm = Realm.getDefaultInstance();
                             realm.beginTransaction();

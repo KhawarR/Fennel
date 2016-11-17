@@ -950,7 +950,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         if(arrRecords.length() > 0) {
-            ArrayList<Tree> allTrees = new ArrayList<>();
             for (int i = 0; i < arrRecords.length(); i++) {
 
                 JSONObject treeObj = arrRecords.getJSONObject(i).getJSONObject("Tree_Species__r");
@@ -969,7 +968,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 if (subLocationId.equalsIgnoreCase("null")) subLocationId = "";
 
                 Tree tree = new Tree(id, name, subLocationId);
-                allTrees.add(tree);
                 DatabaseHelper.getInstance().insertTree(tree);
             }
         }
