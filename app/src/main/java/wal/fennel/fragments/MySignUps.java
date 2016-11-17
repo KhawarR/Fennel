@@ -10,7 +10,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -39,7 +38,6 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
-import io.realm.RealmList;
 import io.realm.RealmResults;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -577,21 +575,23 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                             farmer.setNationalCardUrl(natIdUrl);
                         }
 
-                        Farmer farmerDb = realm.where(Farmer.class).equalTo("farmerId", id).findFirst();
-                        if(farmerDb != null)
+                        RealmResults<Farmer> farmerDbList = realm.where(Farmer.class).equalTo("farmerId", id).findAll();
+                        if(farmerDbList != null && farmerDbList.size() > 0)
                         {
-                            realm.beginTransaction();
-                            farmerDb.setThumbAttachmentId(farmerPicId);
-                            farmerDb.setNationalCardAttachmentId(farmerNatId);
-                            if(!farmerPicId.isEmpty())
-                            {
-                                farmerDb.setThumbUrl(thumbUrl);
+                            for (int k = 0; k < farmerDbList.size(); k++) {
+                                realm.beginTransaction();
+                                farmerDbList.get(k).setThumbAttachmentId(farmerPicId);
+                                farmerDbList.get(k).setNationalCardAttachmentId(farmerNatId);
+                                if(!farmerPicId.isEmpty())
+                                {
+                                    farmerDbList.get(k).setThumbUrl(thumbUrl);
+                                }
+                                if(!farmerNatId.isEmpty())
+                                {
+                                    farmerDbList.get(k).setNationalCardUrl(natIdUrl);
+                                }
+                                realm.commitTransaction();
                             }
-                            if(!farmerNatId.isEmpty())
-                            {
-                                farmerDb.setNationalCardUrl(natIdUrl);
-                            }
-                            realm.commitTransaction();
                         }
 
                         MyPicassoInstance.getInstance().load(thumbUrl).fetch(/*new com.squareup.picasso.Callback() {
@@ -617,8 +617,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                                 Log.i("Fetch failed", "NAT ID: " + farmer.getNationalCardUrl());
                             }
                         }*/);
-
-                        break;
                     }
                 }
             }
