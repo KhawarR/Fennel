@@ -1,9 +1,7 @@
 package wal.fennel.utils;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-import io.realm.RealmList;
 import wal.fennel.models.Farmer;
 
 /**
@@ -14,6 +12,7 @@ public class Singleton {
     public String farmerIdtoInvalidate = "";
 
     public ArrayList<Farmer> mySignupsList = new ArrayList<>();
+    public ArrayList<Farmer> myFarmersTaskList = new ArrayList<>();
 
     private static Singleton instance;
 
