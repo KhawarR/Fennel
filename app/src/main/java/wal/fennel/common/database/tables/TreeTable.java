@@ -43,7 +43,7 @@ public class TreeTable {
         // Insert the new row, returning the primary key value of the new row
         long newRowId = 0;
 
-        if (!treeExists(dbHelper, tree.id)) {
+        if (!treeExists(dbHelper, tree.id, tree.subLocationId)) {
             newRowId = db.insert(
                     TABLE_TREE,
                     null,
@@ -54,10 +54,10 @@ public class TreeTable {
         return newRowId;
     }
 
-    public static boolean treeExists(DatabaseHelper dbHelper, String locId) {
+    public static boolean treeExists(DatabaseHelper dbHelper, String treeId, String subLocaId) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        String query = "SELECT * FROM " + TABLE_TREE + " WHERE " + COLUMN_SFDC_ID + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{locId});
+        String query = "SELECT * FROM " + TABLE_TREE + " WHERE " + COLUMN_SFDC_ID + " = ? AND " + COLUMN_SUB_LOCATION_ID + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{treeId, subLocaId});
         if (cursor.getCount() <= 0) {
             cursor.close();
             return false;
