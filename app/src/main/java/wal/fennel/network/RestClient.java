@@ -21,10 +21,10 @@ import wal.fennel.utils.FarmerFieldsExclusion;
 
 public class RestClient {
 
+    //TODO Test to Production
 /////////////////// STAGING SERVER ////////////////////////
     private static String BASE_URL_AUTH = "https://test.salesforce.com";
     private static String BASE_URL = "https://test.salesforce.com";
-
 /////////////////// PRODUCTION SERVER //////////////////////
 //    private static String BASE_URL_AUTH = "https://login.salesforce.com";
 //    private static String BASE_URL = "https://login.salesforce.com";

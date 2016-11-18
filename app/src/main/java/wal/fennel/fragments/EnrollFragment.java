@@ -1164,7 +1164,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                     treeSpecies = arrTrees.get(position).id;
                     treeSpeciesName = arrTrees.get(position).name;
 
-                    village = arrVillages.get(position).id;
+//                    village = arrVillages.get(position).id;
                     spLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                     spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                     spVillage.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
