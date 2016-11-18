@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,12 +15,17 @@ import com.squareup.picasso.NetworkPolicy;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
 import wal.fennel.adapters.MyFarmersAdapter;
-import wal.fennel.adapters.MySignupsAdapter;
 import wal.fennel.models.Farmer;
+import wal.fennel.models.Task;
 import wal.fennel.network.NetworkHelper;
+import wal.fennel.network.WebApi;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
 import wal.fennel.utils.MyPicassoInstance;
@@ -43,12 +49,14 @@ public class FarmerStatus extends BaseFragment {
 
     CircleImageView cIvIconRight;
 
+    private Farmer farmer;
+
     public static FarmerStatus newInstance(String title, Farmer farmer) {
         FarmerStatus fragment = new FarmerStatus();
-//        Bundle args = new Bundle();
-//        args.putString("title", title);
-//        args.putParcelable("farmer", farmer);
-//        fragment.setArguments(args);
+        Bundle args = new Bundle();
+        args.putString("title", title);
+        args.putParcelable("farmer", farmer);
+        fragment.setArguments(args);
         return fragment;
     }
 
@@ -64,6 +72,8 @@ public class FarmerStatus extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        this.farmer = getArguments().getParcelable("farmer");
 
         titleBarLayout.setOnIconClickListener(this);
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
@@ -92,6 +102,31 @@ public class FarmerStatus extends BaseFragment {
         MyFarmersAdapter adapter = new MyFarmersAdapter(getActivity(), Singleton.getInstance().mySignupsList);
         // Create the list view and bind the adapter
         mLvFarmers.setAdapter(adapter);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        getFarmerTaskItems();
+    }
+
+    private void getFarmerTaskItems(){
+        if(farmer.farmerTasks.size() > 0){
+            for (int i = 0; i < farmer.farmerTasks.size(); i++) {
+                final Task task = farmer.farmerTasks.get(i);
+                WebApi.getFarmingTaskItems(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        Log.i("","");
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+                    }
+                }, task.taskId);
+            }
+        }
     }
 
     @Override

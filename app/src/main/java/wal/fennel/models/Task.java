@@ -8,15 +8,24 @@ import io.realm.RealmObject;
 /**
  * Created by irfanayaz on 11/16/16.
  */
-public class Tasks extends RealmObject implements Parcelable {
+public class Task extends RealmObject implements Parcelable {
 
     public String taskId;
     public String name;
 //    ArrayList<FarmingTaskItem> taskItems;
 
-    public Tasks() {
+    public Task() {
     }
 
+    public Task(String taskId, String name) {
+        this.taskId = taskId;
+        this.name = name;
+    }
+
+    public Task(Task other) {
+        this.taskId = other.taskId;
+        this.name = other.name;
+    }
 
     public void setTaskId(String taskId) {
         this.taskId = taskId;
@@ -37,20 +46,20 @@ public class Tasks extends RealmObject implements Parcelable {
         dest.writeString(this.name);
     }
 
-    protected Tasks(Parcel in) {
+    protected Task(Parcel in) {
         this.taskId = in.readString();
         this.name = in.readString();
     }
 
-    public static final Parcelable.Creator<Tasks> CREATOR = new Parcelable.Creator<Tasks>() {
+    public static final Parcelable.Creator<Task> CREATOR = new Parcelable.Creator<Task>() {
         @Override
-        public Tasks createFromParcel(Parcel source) {
-            return new Tasks(source);
+        public Task createFromParcel(Parcel source) {
+            return new Task(source);
         }
 
         @Override
-        public Tasks[] newArray(int size) {
-            return new Tasks[size];
+        public Task[] newArray(int size) {
+            return new Task[size];
         }
     };
 }

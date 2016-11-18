@@ -86,7 +86,7 @@ public class FarmerTasksAdapter extends BaseAdapter {
 
             if (itemViewType == ITEM_VIEW_TYPE_SEPARATOR) {
                 // If its a section ?
-                view = inflater.inflate(R.layout.row_section_header_signups, null);
+                view = inflater.inflate(R.layout.row_section_header, null);
             }
             else {
                 // Regular row

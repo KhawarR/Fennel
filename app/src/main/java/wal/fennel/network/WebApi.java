@@ -174,6 +174,12 @@ public class WebApi {
         return processCall(apiCall, callback);
     }
 
+    public static boolean getFarmingTaskItems(Callback<ResponseBody> callback, String farmingTaskId){
+        String query = String.format(NetworkHelper.GET_FARMER_TASK_ITEMS, farmingTaskId);
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        return processCall(apiCall, callback);
+    }
+
     private static <T> boolean processCall(Call<T> call, Callback<T> callback){
         try {
             if(mContext == null)

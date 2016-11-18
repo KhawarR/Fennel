@@ -69,7 +69,7 @@ public class Farmer extends RealmObject implements Parcelable{
     public boolean isFarmerPicDirty = false;
     public boolean isNatIdCardDirty = false;
 
-    public RealmList<Tasks> farmerTasks;
+    public RealmList<Task> farmerTasks;
 
     public Farmer() {}
 
@@ -109,7 +109,7 @@ public class Farmer extends RealmObject implements Parcelable{
                   String idNumber, String gender, boolean isLeader, String location, String locationId,
                   String subLocation, String subLocationId, String villageName, String villageId, String treeSpecies, String treeSpeciesId, boolean farmerHome,
                   String mobileNumber, String nationalCardAttachmentId, String thumbAttachmentId,
-                  String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl, RealmList<Tasks> tasks) {
+                  String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl, RealmList<Task> tasks) {
         this.farmerId = farmerId;
         this.farmId = farmId;
         this.fullName = fullName;
@@ -142,7 +142,7 @@ public class Farmer extends RealmObject implements Parcelable{
                              String idNumber, String gender, boolean isLeader, String location, String locationId,
                              String subLocation, String subLocationId, String villageName, String villageId, String treeSpecies, String treeSpeciesId, boolean farmerHome,
                              String mobileNumber, String nationalCardAttachmentId, String thumbAttachmentId,
-                             String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl, RealmList<Tasks> tasks) {
+                             String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl, RealmList<Task> tasks) {
         this.farmerId = farmerId;
         this.farmId = farmId;
         this.fullName = fullName;
@@ -425,11 +425,11 @@ public class Farmer extends RealmObject implements Parcelable{
         this.treeSpeciesId = treeSpeciesId;
     }
 
-    public RealmList<Tasks> getFarmerTasks() {
+    public RealmList<Task> getFarmerTasks() {
         return farmerTasks;
     }
 
-    public void setFarmerTasks(RealmList<Tasks> farmerTasks) {
+    public void setFarmerTasks(RealmList<Task> farmerTasks) {
         this.farmerTasks = farmerTasks;
     }
 
@@ -511,6 +511,6 @@ public class Farmer extends RealmObject implements Parcelable{
         isNatIdCardDirty = in.readInt() == 1 ? true : false;
 
         farmerTasks = new RealmList<>();
-        in.readTypedList(farmerTasks, Tasks.CREATOR);
+        in.readTypedList(farmerTasks, Task.CREATOR);
     }
 }
