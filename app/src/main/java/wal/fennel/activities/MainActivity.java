@@ -12,7 +12,7 @@ import android.widget.TabHost;
 import wal.fennel.R;
 import wal.fennel.fragments.BaseContainerFragment;
 import wal.fennel.fragments.MyDashboardContainerFragment;
-import wal.fennel.fragments.MyFarmerContainerFragment;
+import wal.fennel.fragments.MyFarmerTasksContainerFragment;
 import wal.fennel.fragments.MyLogbookContainerFragment;
 import wal.fennel.fragments.MySignUpsContainerFragment;
 
@@ -42,7 +42,7 @@ public class MainActivity extends BaseActivity implements TabHost.OnTabChangeLis
                 MySignUpsContainerFragment.class, null);
         mTabHost.addTab(
                 mTabHost.newTabSpec(TAB_2_TAG).setIndicator("", ContextCompat.getDrawable(this, R.drawable.selector_myfarmers)),
-                MyFarmerContainerFragment.class, null);
+                MyFarmerTasksContainerFragment.class, null);
         mTabHost.addTab(
                 mTabHost.newTabSpec(TAB_3_TAG).setIndicator("", ContextCompat.getDrawable(this, R.drawable.selector_mydashboard)),
                 MyDashboardContainerFragment.class, null);

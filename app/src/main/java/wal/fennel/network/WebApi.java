@@ -5,9 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
-
-import com.squareup.picasso.NetworkPolicy;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,15 +28,11 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import wal.fennel.R;
 import wal.fennel.activities.LoginActivity;
-import wal.fennel.adapters.MySignupsAdapter;
 import wal.fennel.application.Fennel;
 import wal.fennel.datamodels.Auth;
-import wal.fennel.models.Farm;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.ResponseModel;
-import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PhotoUtils;
@@ -96,6 +89,12 @@ public class WebApi {
 
     public static boolean getMySignUps(Callback<ResponseBody> callback){
         String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS_1, PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId());
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        return processCall(apiCall, callback);
+    }
+
+    public static boolean getMyfarmerTasks(Callback<ResponseBody> callback){
+        String query = String.format(NetworkHelper.GET_MY_FARMERS_TASKS, PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId());
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         return processCall(apiCall, callback);
     }
@@ -997,7 +996,7 @@ public class WebApi {
 //                String status = farmObj.getString("Status__c");
                 String status = farmObj.getString("Sign_Up_Status__c");
 
-                Farmer farmer = new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "");
+                Farmer farmer = new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "", null);
 
                 if(status.equalsIgnoreCase(Constants.STR_ENROLLED))
                 {
@@ -1023,17 +1022,17 @@ public class WebApi {
 
         if(incompleteFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null));
             Singleton.getInstance().mySignupsList.addAll(incompleteFarmersList);
         }
         if(pendingFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null));
             Singleton.getInstance().mySignupsList.addAll(pendingFarmersList);
         }
         if(approvedFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null));
             Singleton.getInstance().mySignupsList.addAll(approvedFarmersList);
         }
 

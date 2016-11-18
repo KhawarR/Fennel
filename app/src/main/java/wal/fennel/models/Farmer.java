@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import io.realm.RealmList;
 import io.realm.RealmObject;
 
 /**
@@ -68,6 +69,8 @@ public class Farmer extends RealmObject implements Parcelable{
     public boolean isFarmerPicDirty = false;
     public boolean isNatIdCardDirty = false;
 
+    public RealmList<Tasks> farmerTasks;
+
     public Farmer() {}
 
     public Farmer(Farmer other) {
@@ -99,13 +102,14 @@ public class Farmer extends RealmObject implements Parcelable{
         this.isDataDirty = other.isDataDirty;
         this.isFarmerPicDirty = other.isFarmerPicDirty;
         this.isNatIdCardDirty = other.isNatIdCardDirty;
+        this.farmerTasks = other.farmerTasks;
     }
 
     public Farmer(String farmerId, String farmId, String fullName, String firstName, String secondName, String surname,
                   String idNumber, String gender, boolean isLeader, String location, String locationId,
                   String subLocation, String subLocationId, String villageName, String villageId, String treeSpecies, String treeSpeciesId, boolean farmerHome,
                   String mobileNumber, String nationalCardAttachmentId, String thumbAttachmentId,
-                  String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl) {
+                  String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl, RealmList<Tasks> tasks) {
         this.farmerId = farmerId;
         this.farmId = farmId;
         this.fullName = fullName;
@@ -131,13 +135,14 @@ public class Farmer extends RealmObject implements Parcelable{
         this.isHeader = isHeader;
         this.thumbUrl = thumbUrl;
         this.nationalCardUrl = nationalCardUrl;
+        this.farmerTasks = tasks;
     }
 
     public void setAllValues(String farmerId, String farmId, String fullName, String firstName, String secondName, String surname,
                              String idNumber, String gender, boolean isLeader, String location, String locationId,
                              String subLocation, String subLocationId, String villageName, String villageId, String treeSpecies, String treeSpeciesId, boolean farmerHome,
                              String mobileNumber, String nationalCardAttachmentId, String thumbAttachmentId,
-                             String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl) {
+                             String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl, RealmList<Tasks> tasks) {
         this.farmerId = farmerId;
         this.farmId = farmId;
         this.fullName = fullName;
@@ -163,6 +168,7 @@ public class Farmer extends RealmObject implements Parcelable{
         this.isHeader = isHeader;
         this.thumbUrl = thumbUrl;
         this.nationalCardUrl = nationalCardUrl;
+        this.farmerTasks = tasks;
     }
 
     public void setAllValues(Farmer other) {
@@ -191,6 +197,8 @@ public class Farmer extends RealmObject implements Parcelable{
         this.isHeader = other.isHeader;
         this.thumbUrl = other.thumbUrl;
         this.nationalCardUrl = other.nationalCardUrl;
+        this.farmerTasks = other.farmerTasks;
+
     }
 
     public String getFarmerId() {
@@ -417,6 +425,14 @@ public class Farmer extends RealmObject implements Parcelable{
         this.treeSpeciesId = treeSpeciesId;
     }
 
+    public RealmList<Tasks> getFarmerTasks() {
+        return farmerTasks;
+    }
+
+    public void setFarmerTasks(RealmList<Tasks> farmerTasks) {
+        this.farmerTasks = farmerTasks;
+    }
+
     public int describeContents() {
         return 0;
     }
@@ -450,6 +466,7 @@ public class Farmer extends RealmObject implements Parcelable{
         out.writeInt(isDataDirty ? 1 : 0);
         out.writeInt(isFarmerPicDirty ? 1 : 0);
         out.writeInt(isNatIdCardDirty ? 1 : 0);
+        out.writeTypedList(farmerTasks);
     }
 
     public static final Parcelable.Creator<Farmer> CREATOR
@@ -492,5 +509,8 @@ public class Farmer extends RealmObject implements Parcelable{
         isDataDirty = in.readInt() == 1 ? true : false;
         isFarmerPicDirty = in.readInt() == 1 ? true : false;
         isNatIdCardDirty = in.readInt() == 1 ? true : false;
+
+        farmerTasks = new RealmList<>();
+        in.readTypedList(farmerTasks, Tasks.CREATOR);
     }
 }

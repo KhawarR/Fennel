@@ -37,6 +37,9 @@ public class NetworkHelper {
 //    public static final String GET_TREES = "Select t.Sub_Location__r.Name, t.Sub_Location__c, t.Name, t.Id From Tree_Species__c t";
     public static final String GET_TREES = "Select t.Sub_Location__r.Name, t.Sub_Location__c, t.Tree_Species__r.Name, t.Tree_Species__r.Id, t.Tree_Species__c From Tree_Specie_Locations__c t";
 
+//    public static final String GET_MY_FARMERS_TASKS = "Select f.Status__c, f.Started_Date__c, f.Shamba__r.Facilitator_Signup__c, f.Shamba__r.Field_Officer_Signup__c, f.Shamba__r.Field_Manager_Signup__c, f.Shamba__r.Farmer__c, f.Shamba__r.Farmer__r.Name, f.Shamba__r.Farmer__r.FullName__c, f.Shamba__r.Sub_LocationLookup__r.Name, f.Shamba__r.Village__r.Name, f.Shamba__c, f.Name, f.Due_Date__c, f.Completion_Date__c From Farming_Task__c f WHERE (Shamba__r.Facilitator_Signup__c = '%s' OR f.Shamba__r.Field_Officer_Signup__c = '%s' OR f.Shamba__r.Field_Manager_Signup__c = '%s') AND f.Status__c = 'Not Started' Order By Due_Date__c , Status__c";
+public static final String GET_MY_FARMERS_TASKS = "Select f.Status__c, f.Started_Date__c, f.Shamba__r.Facilitator_Signup__c, f.Shamba__r.Field_Officer_Signup__c, f.Shamba__r.Field_Manager_Signup__c, f.Shamba__r.Farmer__c, f.Shamba__r.Farmer__r.Name, f.Shamba__r.Farmer__r.FullName__c, f.Shamba__r.Sub_LocationLookup__r.Name, f.Shamba__r.Village__r.Name, f.Shamba__c, f.Name, f.Due_Date__c, f.Completion_Date__c From Farming_Task__c f WHERE (Shamba__r.Facilitator_Signup__c = '%s' OR f.Shamba__r.Field_Officer_Signup__c = '%s' OR f.Shamba__r.Field_Manager_Signup__c = '%s') Order By Due_Date__c , Status__c";
+
     private static final String STR_FILE_PREFIX = "file://";
 
     public static boolean isNetAvailable(Context context){

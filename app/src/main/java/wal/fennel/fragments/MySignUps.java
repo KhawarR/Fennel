@@ -261,17 +261,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         if(incompleteFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null));
             Singleton.getInstance().mySignupsList.addAll(incompleteFarmersList);
         }
         if(pendingFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null));
             Singleton.getInstance().mySignupsList.addAll(pendingFarmersList);
         }
         if(approvedFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null));
             Singleton.getInstance().mySignupsList.addAll(approvedFarmersList);
         }
 
@@ -425,7 +425,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 //                String status = farmObj.getString("Status__c");
                 String status = farmObj.getString("Sign_Up_Status__c");
 
-                Farmer farmer = new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "");
+                Farmer farmer = new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "", null);
 
                 if(status.equalsIgnoreCase(Constants.STR_ENROLLED))
                 {
@@ -455,17 +455,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         if(incompleteFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null));
             Singleton.getInstance().mySignupsList.addAll(incompleteFarmersList);
         }
         if(pendingFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null));
             Singleton.getInstance().mySignupsList.addAll(pendingFarmersList);
         }
         if(approvedFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null));
             Singleton.getInstance().mySignupsList.addAll(approvedFarmersList);
         }
 
