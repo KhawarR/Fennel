@@ -29,9 +29,6 @@ public class MyFarmers extends BaseFragment {
     @Bind(R.id.titleBar)
     TitleBarLayout titleBarLayout;
 
-    @Bind(R.id.btnFarmerStatus)
-    Button btnFarmerStatus;
-
     CircleImageView cIvIconRight;
 
     @Nullable
@@ -49,13 +46,6 @@ public class MyFarmers extends BaseFragment {
 
         titleBarLayout.setOnIconClickListener(this);
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
-
-        btnFarmerStatus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ((BaseContainerFragment) getParentFragment()).replaceFragment(FarmerStatus.newInstance(Constants.STR_EDIT_FARMER, null), true);
-            }
-        });
 
         String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
         if(!thumbUrl.isEmpty())
