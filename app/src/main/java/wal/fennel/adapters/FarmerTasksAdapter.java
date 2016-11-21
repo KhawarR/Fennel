@@ -150,6 +150,11 @@ public class FarmerTasksAdapter extends BaseAdapter {
         return view;
     }
 
+    @Override
+    public boolean isEnabled(int position) {
+        return getItemViewType(position) != ITEM_VIEW_TYPE_SEPARATOR;
+    }
+
     public void filter(String charText) {
 
         mList.clear();

@@ -76,10 +76,10 @@ public class MySignupsAdapter extends BaseAdapter {
         }
     }
 
-//    @Override
-//    public boolean isEnabled(int position) {
-//        return getItemViewType(position) != ITEM_VIEW_TYPE_SEPARATOR;
-//    }
+    @Override
+    public boolean isEnabled(int position) {
+        return getItemViewType(position) != ITEM_VIEW_TYPE_SEPARATOR;
+    }
 
     public void setUpdateDataSet(){
         mList.clear();

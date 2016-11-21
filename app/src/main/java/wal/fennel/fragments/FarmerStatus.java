@@ -12,6 +12,8 @@ import android.widget.ListView;
 
 import com.squareup.picasso.NetworkPolicy;
 
+import java.util.ArrayList;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -21,7 +23,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
-import wal.fennel.adapters.MyFarmersAdapter;
+import wal.fennel.adapters.FarmerStatusAdapter;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.Task;
 import wal.fennel.network.NetworkHelper;
@@ -30,7 +32,6 @@ import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PreferenceHelper;
-import wal.fennel.utils.Singleton;
 import wal.fennel.views.FontTextView;
 import wal.fennel.views.TitleBarLayout;
 
@@ -51,6 +52,8 @@ public class FarmerStatus extends BaseFragment {
     CircleImageView cIvIconRight;
 
     private Farmer farmer;
+
+    private ArrayList<Task> dummyTaskList = new ArrayList<>();
 
     public static FarmerStatus newInstance(String title, Farmer farmer) {
         FarmerStatus fragment = new FarmerStatus();
@@ -118,9 +121,37 @@ public class FarmerStatus extends BaseFragment {
 
         mLvFarmers.addHeaderView(myHeader);
 
-        MyFarmersAdapter adapter = new MyFarmersAdapter(getActivity(), Singleton.getInstance().mySignupsList);
+        dummyDataPop();
+
+        FarmerStatusAdapter adapter = new FarmerStatusAdapter(getActivity(), dummyTaskList);
         // Create the list view and bind the adapter
         mLvFarmers.setAdapter(adapter);
+    }
+
+    private void dummyDataPop(){
+
+        Task doing = new Task("", "DOING", "", "", "", "", true);
+        Task task1 = new Task("1", "DummyTask1", "2016-11-10", null, "2016-11-30", Constants.STR_IN_PROGRESS, false);
+        Task task2 = new Task("2", "DummyTask2", "2016-11-10", null, "2016-11-20", Constants.STR_IN_PROGRESS, false);
+
+        Task notStarted = new Task("", "NOT STARTED", "", "", "", "", true);
+        Task task3 = new Task("3", "DummyTask3", null, "2016-11-15", "2016-11-20", Constants.STR_NOT_STARTED, false);
+        Task task4 = new Task("4", "DummyTask4", null, null, "2016-11-20", Constants.STR_NOT_STARTED, false);
+
+        Task done = new Task("", "DONE", "", "", "", "", true);
+        Task task5 = new Task("5", "DummyTask5", "2016-11-10", "2016-11-15", "2016-11-20", Constants.STR_COMPLETED, false);
+        Task task6 = new Task("6", "DummyTask6", "2016-11-10", "2016-11-15", "2016-11-13", Constants.STR_COMPLETED, false);
+
+        dummyTaskList.add(doing);
+        dummyTaskList.add(task1);
+        dummyTaskList.add(task2);
+        dummyTaskList.add(notStarted);
+        dummyTaskList.add(task3);
+        dummyTaskList.add(task4);
+        dummyTaskList.add(done);
+        dummyTaskList.add(task5);
+        dummyTaskList.add(task6);
+
     }
 
     @Override

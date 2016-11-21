@@ -16,29 +16,30 @@ public class Task extends RealmObject implements Parcelable {
     public String completionDate;
     public String dueDate;
     public String status;
+    public boolean isHeader;
 
-    public Task(String taskId, String name, String startedDate, String completionDate, String dueDate, String status) {
+    public Task(){
+
+    }
+
+    public Task(String taskId, String name, String startedDate, String completionDate, String dueDate, String status, boolean isHeader) {
         this.taskId = taskId;
         this.name = name;
         this.startedDate = startedDate;
         this.completionDate = completionDate;
         this.dueDate = dueDate;
         this.status = status;
-    }
-
-//    ArrayList<FarmingTaskItem> taskItems;
-
-    public Task() {
-    }
-
-    public Task(String taskId, String name) {
-        this.taskId = taskId;
-        this.name = name;
+        this.isHeader = isHeader;
     }
 
     public Task(Task other) {
         this.taskId = other.taskId;
         this.name = other.name;
+        this.startedDate = other.startedDate;
+        this.completionDate = other.completionDate;
+        this.dueDate = other.dueDate;
+        this.status = other.status;
+        this.isHeader = other.isHeader;
     }
 
     public void setTaskId(String taskId) {
@@ -81,6 +82,22 @@ public class Task extends RealmObject implements Parcelable {
         this.status = status;
     }
 
+    public String getTaskId() {
+        return taskId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isHeader() {
+        return isHeader;
+    }
+
+    public void setHeader(boolean header) {
+        isHeader = header;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -94,6 +111,7 @@ public class Task extends RealmObject implements Parcelable {
         dest.writeString(this.completionDate);
         dest.writeString(this.dueDate);
         dest.writeString(this.status);
+        dest.writeInt(isHeader ? 1 : 0);
     }
 
     protected Task(Parcel in) {
@@ -103,6 +121,7 @@ public class Task extends RealmObject implements Parcelable {
         this.completionDate = in.readString();
         this.dueDate = in.readString();
         this.status = in.readString();
+        this.isHeader = in.readInt() == 1 ? true : false;
     }
 
     public static final Parcelable.Creator<Task> CREATOR = new Parcelable.Creator<Task>() {

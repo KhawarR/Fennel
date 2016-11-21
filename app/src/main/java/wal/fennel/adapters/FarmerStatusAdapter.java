@@ -15,6 +15,7 @@ import java.util.Locale;
 import de.hdodenhof.circleimageview.CircleImageView;
 import wal.fennel.R;
 import wal.fennel.models.Farmer;
+import wal.fennel.models.Task;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.utils.Constants;
 import wal.fennel.utils.MyPicassoInstance;
@@ -24,10 +25,10 @@ import wal.fennel.views.FontTextView;
 /**
  * Created by Khawar on 30/9/2016.
  */
-public class MyFarmersAdapter extends BaseAdapter {
+public class FarmerStatusAdapter extends BaseAdapter {
 
     private Context mContext;
-    private ArrayList<Farmer> mList = new ArrayList<>();
+    private ArrayList<Task> mList = new ArrayList<>();
 
     // View Type for Separators
     private static final int ITEM_VIEW_TYPE_SEPARATOR = 0;
@@ -37,7 +38,7 @@ public class MyFarmersAdapter extends BaseAdapter {
     // -- Separators and Regular rows --
     private static final int ITEM_VIEW_TYPE_COUNT = 2;
 
-    public MyFarmersAdapter(Context context, ArrayList list) {
+    public FarmerStatusAdapter(Context context, ArrayList<Task> list) {
         mContext = context;
         mList.addAll(list);
     }
@@ -74,14 +75,9 @@ public class MyFarmersAdapter extends BaseAdapter {
         }
     }
 
-//    @Override
-//    public boolean isEnabled(int position) {
-//        return getItemViewType(position) != ITEM_VIEW_TYPE_SEPARATOR;
-//    }
-
-    public void setUpdateDataSet(){
-        mList.clear();
-        mList.addAll(Singleton.getInstance().mySignupsList);
+    @Override
+    public boolean isEnabled(int position) {
+        return getItemViewType(position) != ITEM_VIEW_TYPE_SEPARATOR;
     }
 
     @Override
@@ -89,7 +85,7 @@ public class MyFarmersAdapter extends BaseAdapter {
 
         View view;
 
-        Farmer farmer = mList.get(position);
+        Task task = mList.get(position);
         int itemViewType = getItemViewType(position);
 
         if (convertView == null) {
@@ -113,23 +109,19 @@ public class MyFarmersAdapter extends BaseAdapter {
             // If separator
 
             FontTextView separatorView = (FontTextView) view.findViewById(R.id.tv_header);
-            separatorView.setText(farmer.getFullName());
+            separatorView.setText(task.getName());
         }
         else {
             // If regular
 
             ImageView ivIconRight = (ImageView) view.findViewById(R.id.ivIconRight);
 
-            if(farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_ENROLLED))
+            if(task.getStatus().equalsIgnoreCase(Constants.STR_NOT_STARTED) || task.getStatus().equalsIgnoreCase(Constants.STR_NOT_STARTED))
             {
                 ivIconRight.setImageResource(R.drawable.ic_arrow_right);
                 ivIconRight.setVisibility(View.VISIBLE);
             }
-            else if(farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_PENDING))
-            {
-                ivIconRight.setVisibility(View.GONE);
-            }
-            else if(farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_APPROVED))
+            else if(task.getStatus().equalsIgnoreCase(Constants.STR_COMPLETED))
             {
                 ivIconRight.setImageResource(R.drawable.ic_approved);
                 ivIconRight.setVisibility(View.VISIBLE);
@@ -137,7 +129,7 @@ public class MyFarmersAdapter extends BaseAdapter {
 
             // Set contact name and number
             FontTextView name = (FontTextView) view.findViewById(R.id.tvFarmerName);
-            name.setText( farmer.getFullName());
+            name.setText( task.getName());
         }
 
         return view;
