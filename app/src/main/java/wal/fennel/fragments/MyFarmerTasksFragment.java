@@ -256,6 +256,7 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
 
             String taskName = taskObj.getString("Name");
             String farmerName = "";
+            String mobileNumber = "";
             String subLocationName = "";
             String villageName = "";
             String farmerIdNumber = "";
@@ -273,6 +274,7 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
             id = shambaObj.getString("Farmer__c");
             farmerName = farmerObj.getString("FullName__c");
             farmerIdNumber = farmerObj.getString("Name");
+            mobileNumber = farmerObj.getString("Mobile_Number__c");
             subLocationName = shambaObj.getJSONObject("Sub_LocationLookup__r").getString("Name");
             villageName = shambaObj.getJSONObject("Village__r").getString("Name");
 
@@ -281,6 +283,7 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
             farmer.farmId = farmId;
             farmer.idNumber = farmerIdNumber;
             farmer.fullName = farmerName;
+            farmer.mobileNumber = mobileNumber;
             farmer.subLocation = subLocationName;
             farmer.villageName = villageName;
             farmer.isHeader = false;

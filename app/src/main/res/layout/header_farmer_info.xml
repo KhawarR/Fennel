@@ -11,7 +11,7 @@
         android:id="@+id/ivFarmerThumb"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:src="@drawable/login_bg"/>
+        android:src="@drawable/dummy_profile"/>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -28,7 +28,6 @@
             android:textColor="@color/black_txt_color"
             android:textSize="18sp"
             fennel:fontName="Avenir-Heavy.ttf"
-            android:text="Tabu Karisa Karema"
             android:textStyle="bold"/>
 
         <wal.fennel.views.FontTextView
@@ -37,8 +36,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/black_txt_color"
             android:textSize="14sp"
-            fennel:fontName="Avenir-Medium.ttf"
-            android:text="Kwa Firi, Mihirini"/>
+            fennel:fontName="Avenir-Medium.ttf"/>
 
         <wal.fennel.views.FontTextView
             android:id="@+id/tvMobile"
@@ -47,7 +45,6 @@
             android:textColor="@color/black_txt_color"
             android:textSize="16sp"
             fennel:fontName="Avenir-Medium.ttf"
-            android:text="MOBILE 032165478965"
             android:textStyle="bold"
             android:layout_marginTop="5dp"/>
 

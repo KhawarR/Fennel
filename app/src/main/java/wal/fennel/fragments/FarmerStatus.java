@@ -31,6 +31,7 @@ import wal.fennel.utils.Constants;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PreferenceHelper;
 import wal.fennel.utils.Singleton;
+import wal.fennel.views.FontTextView;
 import wal.fennel.views.TitleBarLayout;
 
 /**
@@ -97,6 +98,24 @@ public class FarmerStatus extends BaseFragment {
         ViewGroup myHeader = (ViewGroup)getActivity().getLayoutInflater().inflate(R.layout.header_farmer_info, mLvFarmers, false);
         myHeader.setEnabled(false);
         myHeader.setOnClickListener(null);
+
+        CircleImageView ivFarmerThumb = (CircleImageView) myHeader.findViewById(R.id.ivFarmerThumb);
+        {
+            if(NetworkHelper.isNetAvailable(getActivity()))
+                MyPicassoInstance.getInstance().load(farmer.thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
+            else
+                MyPicassoInstance.getInstance().load(farmer.thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
+
+        }
+
+        FontTextView tvFarmerName = (FontTextView) myHeader.findViewById(R.id.tvFullName);
+        FontTextView tvFullName = (FontTextView) myHeader.findViewById(R.id.tvLocation);
+        FontTextView tvMobile = (FontTextView) myHeader.findViewById(R.id.tvMobile);
+
+        tvFarmerName.setText(farmer.fullName);
+        tvFullName.setText(farmer.villageName + ", " + farmer.subLocation);
+        tvMobile.setText("MOBILE " + farmer.mobileNumber);
+
         mLvFarmers.addHeaderView(myHeader);
 
         MyFarmersAdapter adapter = new MyFarmersAdapter(getActivity(), Singleton.getInstance().mySignupsList);
