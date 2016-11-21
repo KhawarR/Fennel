@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import wal.fennel.utils.Constants;
 
 /**
  * Created by Khawar on 30/9/2016.
@@ -71,6 +72,8 @@ public class Farmer extends RealmObject implements Parcelable{
 
     public RealmList<Tasks> farmerTasks;
 
+    public String farmerType = Constants.FarmerType.MYSIGNUPS.toString();
+
     public Farmer() {}
 
     public Farmer(Farmer other) {
@@ -103,13 +106,14 @@ public class Farmer extends RealmObject implements Parcelable{
         this.isFarmerPicDirty = other.isFarmerPicDirty;
         this.isNatIdCardDirty = other.isNatIdCardDirty;
         this.farmerTasks = other.farmerTasks;
+        this.farmerType = other.farmerType;
     }
 
     public Farmer(String farmerId, String farmId, String fullName, String firstName, String secondName, String surname,
                   String idNumber, String gender, boolean isLeader, String location, String locationId,
                   String subLocation, String subLocationId, String villageName, String villageId, String treeSpecies, String treeSpeciesId, boolean farmerHome,
                   String mobileNumber, String nationalCardAttachmentId, String thumbAttachmentId,
-                  String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl, RealmList<Tasks> tasks) {
+                  String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl, RealmList<Tasks> tasks, Constants.FarmerType type) {
         this.farmerId = farmerId;
         this.farmId = farmId;
         this.fullName = fullName;
@@ -136,13 +140,14 @@ public class Farmer extends RealmObject implements Parcelable{
         this.thumbUrl = thumbUrl;
         this.nationalCardUrl = nationalCardUrl;
         this.farmerTasks = tasks;
+        this.farmerType = type.toString();
     }
 
     public void setAllValues(String farmerId, String farmId, String fullName, String firstName, String secondName, String surname,
                              String idNumber, String gender, boolean isLeader, String location, String locationId,
                              String subLocation, String subLocationId, String villageName, String villageId, String treeSpecies, String treeSpeciesId, boolean farmerHome,
                              String mobileNumber, String nationalCardAttachmentId, String thumbAttachmentId,
-                             String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl, RealmList<Tasks> tasks) {
+                             String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl, RealmList<Tasks> tasks, Constants.FarmerType type) {
         this.farmerId = farmerId;
         this.farmId = farmId;
         this.fullName = fullName;
@@ -169,6 +174,7 @@ public class Farmer extends RealmObject implements Parcelable{
         this.thumbUrl = thumbUrl;
         this.nationalCardUrl = nationalCardUrl;
         this.farmerTasks = tasks;
+        this.farmerType = type.toString();
     }
 
     public void setAllValues(Farmer other) {
@@ -198,6 +204,7 @@ public class Farmer extends RealmObject implements Parcelable{
         this.thumbUrl = other.thumbUrl;
         this.nationalCardUrl = other.nationalCardUrl;
         this.farmerTasks = other.farmerTasks;
+        this.farmerType = other.farmerType;
 
     }
 
@@ -433,6 +440,14 @@ public class Farmer extends RealmObject implements Parcelable{
         this.farmerTasks = farmerTasks;
     }
 
+    public Constants.FarmerType getFarmerType() {
+        return Constants.FarmerType.valueOf(this.farmerType);
+    }
+
+    public void setFarmerType(Constants.FarmerType farmerType) {
+        this.farmerType = farmerType.toString();
+    }
+
     public int describeContents() {
         return 0;
     }
@@ -467,6 +482,7 @@ public class Farmer extends RealmObject implements Parcelable{
         out.writeInt(isFarmerPicDirty ? 1 : 0);
         out.writeInt(isNatIdCardDirty ? 1 : 0);
         out.writeTypedList(farmerTasks);
+        out.writeString(farmerType);
     }
 
     public static final Parcelable.Creator<Farmer> CREATOR
@@ -512,5 +528,7 @@ public class Farmer extends RealmObject implements Parcelable{
 
         farmerTasks = new RealmList<>();
         in.readTypedList(farmerTasks, Tasks.CREATOR);
+
+        farmerType = in.readString();
     }
 }

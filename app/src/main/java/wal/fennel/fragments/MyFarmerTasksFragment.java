@@ -23,12 +23,16 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
+import io.realm.RealmList;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -37,6 +41,7 @@ import wal.fennel.R;
 import wal.fennel.activities.LoginActivity;
 import wal.fennel.adapters.FarmerTasksAdapter;
 import wal.fennel.models.Farmer;
+import wal.fennel.models.Tasks;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.network.WebApi;
 import wal.fennel.utils.CircleViewTransformation;
@@ -45,6 +50,8 @@ import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PreferenceHelper;
 import wal.fennel.utils.Singleton;
 import wal.fennel.views.TitleBarLayout;
+
+import static io.realm.Realm.getDefaultInstance;
 
 /**
  * Created by irfanayaz on 11/15/16.
@@ -128,7 +135,7 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
-        Realm realm = Realm.getDefaultInstance();
+        Realm realm = getDefaultInstance();
 
         if(arrRecords.length() > 0)
         {
@@ -232,55 +239,149 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
 
     private void parseData(String data) throws JSONException {
 
-//        ArrayList<Farmer> myFarmersTasks = new ArrayList<>();
-
         Log.i("FENNEL", data);
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
+        Map<String,Farmer> farmersMap = new HashMap<>();
+        Map<String,Tasks> tasksMap = new HashMap<>();
+        List<Farmer> farmersTaskList = new ArrayList<>();
+//            allFarmerTasks = new ArrayList<>();
+
         if(arrRecords.length() > 0)
         {
-            allFarmerTasks = new ArrayList<>();
+
             for (int i = 0; i < arrRecords.length(); i++) {
 
-                String taskName = "";
-                String farmerName = "";
-                String subLocationName = "";
-                String villageName = "";
-                String farmerIdNumber = "";
-                String id = "";
-                String farmId = "";
-
                 JSONObject taskObj = arrRecords.getJSONObject(i);
-                taskName = taskObj.getString("Name");
 
-                allFarmerTasks.add(new Farmer("", "", taskName, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null));
+                String taskName = taskObj.getString("Name");
+                String id = taskObj.getString("Id");
+                String status = taskObj.getString("Status__c");
+                String startedDate = taskObj.getString("Started_Date__c");
+                String dueDate = taskObj.getString("Due_Date__c");
+                String completionDate = taskObj.getString("Completion_Date__c");
 
                 JSONObject shambaObj = taskObj.getJSONObject("Shamba__r");
-                farmId = taskObj.getString("Shamba__c");
+                String farmId = taskObj.getString("Shamba__c");
                 JSONObject farmerObj = shambaObj.getJSONObject("Farmer__r");
-                id = shambaObj.getString("Farmer__c");
-                farmerName = farmerObj.getString("FullName__c");
-                farmerIdNumber = farmerObj.getString("Name");
-                subLocationName = shambaObj.getJSONObject("Sub_LocationLookup__r").getString("Name");
-                villageName = shambaObj.getJSONObject("Village__r").getString("Name");
+                String farmerId = shambaObj.getString("Farmer__c");
+                String farmerName = farmerObj.getString("FullName__c");
+                String farmerIdNumber = farmerObj.getString("Name");
+                String subLocationName = shambaObj.getJSONObject("Sub_LocationLookup__r").getString("Name");
+                String villageName = shambaObj.getJSONObject("Village__r").getString("Name");
 
-                Farmer farmer = new Farmer();
-                farmer.farmerId = id;
-                farmer.farmId = farmId;
-                farmer.idNumber = farmerIdNumber;
-                farmer.fullName = farmerName;
-                farmer.subLocation = subLocationName;
-                farmer.villageName = villageName;
-                farmer.isHeader = false;
+                Tasks currentTask;
+                if (tasksMap.containsKey(id)) {
+                    currentTask = (Tasks) tasksMap.get(id);
+                } else {
+                    Realm realm = Realm.getDefaultInstance();
+                    realm.beginTransaction();
 
-                allFarmerTasks.add(farmer);
+                    currentTask = realm.createObject(Tasks.class);
+                    currentTask.setTaskId(id);
+                    currentTask.setName(taskName);
+                    currentTask.setStartedDate(startedDate);
+                    currentTask.setCompletionDate(completionDate);
+                    currentTask.setDueDate(dueDate);
+                    currentTask.setStatus(status);
+
+                    realm.commitTransaction();
+//                    currentTask = new Tasks(id, taskName, startedDate, completionDate, dueDate, status);
+                    tasksMap.put(id, currentTask);
+                }
+
+                Farmer currentFarmer;
+                RealmList<Tasks> farmingTasks;
+                if (farmersMap.containsKey(farmerIdNumber)) {
+                   currentFarmer = (Farmer) farmersMap.get(farmerIdNumber);
+                    farmingTasks = currentFarmer.getFarmerTasks();
+                    if (farmingTasks != null) {
+                        farmingTasks.add(currentTask);
+                    } else {
+                        farmingTasks = new RealmList<>();
+                        farmingTasks.add(currentTask);
+                        currentFarmer.farmerTasks = farmingTasks;
+                    }
+
+                } else {
+                    currentFarmer = new Farmer();
+                    currentFarmer.farmerId = farmerId;
+                    currentFarmer.farmId = farmId;
+                    currentFarmer.idNumber = farmerIdNumber;
+                    currentFarmer.fullName = farmerName;
+                    currentFarmer.subLocation = subLocationName;
+                    currentFarmer.villageName = villageName;
+                    currentFarmer.isHeader = false;
+                    currentFarmer.setFarmerType(Constants.FarmerType.MYFARMERTASKS);
+
+                    farmingTasks = new RealmList<>();
+                    farmingTasks.add(currentTask);
+                    currentFarmer.farmerTasks = farmingTasks;
+
+                    farmersMap.put(farmerIdNumber, currentFarmer);
+                }
+
+                if (!(farmersTaskList.contains(currentFarmer))) {
+                    farmersTaskList.add(currentFarmer);
+                }
+
+//                allFarmerTasks.add(new Farmer("", "", taskName, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYFARMERTASKS));
+//                allFarmerTasks.add(currentFarmer);
+            }
+        }
+//        addFarmerTasksToDB(farmersTaskList);
+        Singleton.getInstance().myFarmersTaskList = (ArrayList<Farmer>) farmersTaskList;
+        parseDataForMyFarmers(farmersTaskList);
+
+    }
+
+    private void addFarmerTasksToDB(List<Farmer> farmersTaskList) {
+
+        Realm realm = getDefaultInstance();
+        realm.beginTransaction();
+        for (int i = 0; i < farmersTaskList.size(); i++) {
+            // Save to DB
+            final Farmer farmerDbObj = realm.createObject(Farmer.class);
+            farmerDbObj.setAllValues(farmersTaskList.get(i));
+        }
+        realm.commitTransaction();
+    }
+
+    private void parseDataForMyFarmers(List<Farmer> farmerList) {
+
+        Map<String,Farmer> farmersMap = new HashMap<>();
+        Map<String,Tasks> tasksMap = new HashMap<>();
+        List<List<Farmer>> farmersTaskList = new ArrayList<List<Farmer>>();
+
+        for (Farmer currentFarmer : farmerList) {
+            for (Tasks currentTask : currentFarmer.farmerTasks) {
+                boolean taskFound = false;
+                for (List<Farmer> taskList : farmersTaskList) {
+                    Farmer taskObject = (Farmer) taskList.get(0);
+                    if (taskObject.farmerId.equals(currentTask.taskId)) {
+                        taskFound = true;
+                        taskList.add(currentFarmer);
+                        break;
+                    }
+                }
+                if (!taskFound) {
+                    ArrayList<Farmer> newTaskList = new ArrayList<>();
+                    newTaskList.add(new Farmer(currentTask.taskId, "", currentTask.name, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYFARMERTASKS));
+                    newTaskList.add(currentFarmer);
+                    farmersTaskList.add(newTaskList);
+                }
             }
         }
 
-        Singleton.getInstance().myFarmersTaskList = allFarmerTasks;
+        allFarmerTasks = new ArrayList<Farmer>();
+        for (List<Farmer> listOfFarmer : farmersTaskList) {
+            allFarmerTasks.addAll(listOfFarmer);
+        }
+
         tasksAdapter = new FarmerTasksAdapter(getActivity(), allFarmerTasks);
         farmerTasks.setAdapter(tasksAdapter);
+
     }
 
     private Callback<ResponseBody> myFarmerTasksCallback = new Callback<ResponseBody>() {
