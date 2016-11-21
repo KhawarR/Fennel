@@ -157,4 +157,9 @@ public class FarmerStatus extends BaseFragment {
     public void onTitleBarRightIconClicked(View view) {
         startActivity(new Intent(getActivity(), AboutMe.class));
     }
+
+    @Override
+    public void onTitleBarLeftIconClicked(View view) {
+        ((BaseContainerFragment) getParentFragment()).popFragment();
+    }
 }

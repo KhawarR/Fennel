@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         fennel:drawableRight="@drawable/dummy_profile"
+        fennel:txtLeft="@string/back_txt"
         fennel:titleText="@string/farmer_status" />
 
     <android.support.v4.widget.SwipeRefreshLayout
