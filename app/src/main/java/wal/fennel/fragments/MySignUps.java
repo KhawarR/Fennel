@@ -236,7 +236,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         loadingStarted();
 
-        RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).findAll();
+        RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerType", Constants.FarmerType.MYSIGNUPS.toString()).findAll();
 
         ArrayList<Farmer> incompleteFarmersList = new ArrayList<>();
         ArrayList<Farmer> pendingFarmersList = new ArrayList<>();

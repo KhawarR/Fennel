@@ -330,6 +330,7 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
 //                allFarmerTasks.add(currentFarmer);
             }
         }
+        //TODO: uncomment this
 //        addFarmerTasksToDB(farmersTaskList);
         Singleton.getInstance().myFarmersTaskList = (ArrayList<Farmer>) farmersTaskList;
         parseDataForMyFarmers(farmersTaskList);
