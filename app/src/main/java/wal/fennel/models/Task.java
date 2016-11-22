@@ -3,6 +3,7 @@ package wal.fennel.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import io.realm.RealmList;
 import io.realm.RealmObject;
 
 /**
@@ -17,12 +18,13 @@ public class Task extends RealmObject implements Parcelable {
     public String dueDate;
     public String status;
     public boolean isHeader;
+    public RealmList<TaskItem> taskItems = new RealmList<>();
 
     public Task(){
 
     }
 
-    public Task(String taskId, String name, String startedDate, String completionDate, String dueDate, String status, boolean isHeader) {
+    public Task(String taskId, String name, String startedDate, String completionDate, String dueDate, String status, boolean isHeader, RealmList<TaskItem> taskItems) {
         this.taskId = taskId;
         this.name = name;
         this.startedDate = startedDate;
@@ -30,6 +32,7 @@ public class Task extends RealmObject implements Parcelable {
         this.dueDate = dueDate;
         this.status = status;
         this.isHeader = isHeader;
+        this.taskItems = taskItems;
     }
 
     public Task(Task other) {
@@ -40,6 +43,7 @@ public class Task extends RealmObject implements Parcelable {
         this.dueDate = other.dueDate;
         this.status = other.status;
         this.isHeader = other.isHeader;
+        this.taskItems = other.taskItems;
     }
 
     public void setTaskId(String taskId) {
@@ -98,6 +102,14 @@ public class Task extends RealmObject implements Parcelable {
         isHeader = header;
     }
 
+    public RealmList<TaskItem> getTaskItems() {
+        return taskItems;
+    }
+
+    public void setTaskItems(RealmList<TaskItem> taskItems) {
+        this.taskItems = taskItems;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -112,6 +124,7 @@ public class Task extends RealmObject implements Parcelable {
         dest.writeString(this.dueDate);
         dest.writeString(this.status);
         dest.writeInt(isHeader ? 1 : 0);
+        dest.writeTypedList(taskItems);
     }
 
     protected Task(Parcel in) {
@@ -122,6 +135,9 @@ public class Task extends RealmObject implements Parcelable {
         this.dueDate = in.readString();
         this.status = in.readString();
         this.isHeader = in.readInt() == 1 ? true : false;
+
+        taskItems = new RealmList<>();
+        in.readTypedList(taskItems, TaskItem.CREATOR);
     }
 
     public static final Parcelable.Creator<Task> CREATOR = new Parcelable.Creator<Task>() {

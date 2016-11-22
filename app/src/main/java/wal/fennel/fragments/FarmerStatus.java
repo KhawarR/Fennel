@@ -4,14 +4,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.squareup.picasso.NetworkPolicy;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
 import butterknife.Bind;
@@ -23,6 +26,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
+import wal.fennel.activities.LoginActivity;
 import wal.fennel.adapters.FarmerStatusAdapter;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.Task;
@@ -161,6 +165,9 @@ public class FarmerStatus extends BaseFragment {
     }
 
     private void getFarmerTaskItems(){
+
+        loadingStarted();
+
         if(farmer.farmerTasks.size() > 0){
             String farmingTaskIds = "";
             for (int i = 0; i < farmer.farmerTasks.size(); i++) {
@@ -174,18 +181,50 @@ public class FarmerStatus extends BaseFragment {
                 }
             }
 
-            WebApi.getFarmingTaskItems(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    Log.i("","");
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-
-                }
-            }, farmingTaskIds);
+            WebApi.getFarmingTaskItems(farmerStatusCallback, farmingTaskIds);
         }
+    }
+
+    private Callback<ResponseBody> farmerStatusCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            loadingFinished();
+            if(isValid())
+            {
+                if (response.code() == 200) {
+                    String responseStr = "";
+
+                    try {
+                        responseStr = response.body().string();
+                        parseData(responseStr);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if(response.code() == 401)
+                {
+                    PreferenceHelper.getInstance().clearSession(false);
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    getActivity().finish();
+                }
+                else
+                {
+                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
+    private void parseData(String data) throws JSONException {
+
     }
 
     @Override
