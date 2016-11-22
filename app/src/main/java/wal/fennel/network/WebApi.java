@@ -174,8 +174,14 @@ public class WebApi {
         return processCall(apiCall, callback);
     }
 
-    public static boolean getFarmingTaskItems(Callback<ResponseBody> callback, String farmingTaskId){
-        String query = String.format(NetworkHelper.GET_FARMER_TASK_ITEMS, farmingTaskId);
+//    public static boolean getFarmingTaskItems(Callback<ResponseBody> callback, String farmingTaskId){
+//        String query = String.format(NetworkHelper.GET_FARMER_TASK_ITEMS, farmingTaskId);
+//        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+//        return processCall(apiCall, callback);
+//    }
+
+    public static boolean getFarmingTaskItems(Callback<ResponseBody> callback, String farmingTaskIds){
+        String query = String.format(NetworkHelper.GET_FARMER_TASK_ITEMS, farmingTaskIds);
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         return processCall(apiCall, callback);
     }

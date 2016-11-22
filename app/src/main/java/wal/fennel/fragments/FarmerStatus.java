@@ -162,20 +162,29 @@ public class FarmerStatus extends BaseFragment {
 
     private void getFarmerTaskItems(){
         if(farmer.farmerTasks.size() > 0){
+            String farmingTaskIds = "";
             for (int i = 0; i < farmer.farmerTasks.size(); i++) {
-                final Task task = farmer.farmerTasks.get(i);
-                WebApi.getFarmingTaskItems(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        Log.i("","");
-                    }
+                String id = farmer.farmerTasks.get(i).taskId;
+                id = "'" + id + "'";
 
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                farmingTaskIds = farmingTaskIds + id;
 
-                    }
-                }, task.taskId);
+                if(i + 1 != farmer.farmerTasks.size()){
+                    farmingTaskIds = farmingTaskIds + ",";
+                }
             }
+
+            WebApi.getFarmingTaskItems(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    Log.i("","");
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+                }
+            }, farmingTaskIds);
         }
     }
 
