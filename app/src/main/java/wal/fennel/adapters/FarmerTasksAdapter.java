@@ -46,6 +46,12 @@ public class FarmerTasksAdapter extends BaseAdapter {
 //        mFarmersList.addAll(list);
     }
 
+    public void setTaskList(ArrayList list) {
+        mList.addAll(list);
+        allTasks.addAll(list);
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getCount() {
         return mList.size();
@@ -110,7 +116,6 @@ public class FarmerTasksAdapter extends BaseAdapter {
             ImageView ivLeftIcon = (ImageView) view.findViewById(R.id.iv_mysignups_icon_left);
             ivLeftIcon.setImageResource(R.drawable.ic_arrow_right);
 
-
             // Set contact name and number
             FontTextView name = (FontTextView) view.findViewById(R.id.tv_name);
             name.setText( farmer.getFullName());
@@ -148,6 +153,11 @@ public class FarmerTasksAdapter extends BaseAdapter {
         }
 
         return view;
+    }
+
+    @Override
+    public int getViewTypeCount() {
+        return ITEM_VIEW_TYPE_COUNT;
     }
 
     @Override

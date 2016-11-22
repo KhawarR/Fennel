@@ -31,11 +31,11 @@
         android:inputType="text"
         />
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefreshLayout"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1.0">
+    <!--<android.support.v4.widget.SwipeRefreshLayout-->
+        <!--android:id="@+id/swipeRefreshLayout"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="0dp"-->
+        <!--android:layout_weight="1.0">-->
 
         <ListView
             android:id="@+id/lv_farmer_tasks"
@@ -43,6 +43,6 @@
             android:layout_height="wrap_content"
             android:background="@color/white"/>
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+    <!--</android.support.v4.widget.SwipeRefreshLayout>-->
 
 </LinearLayout>
