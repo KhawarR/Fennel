@@ -1079,6 +1079,7 @@ public class WebApi {
                 JSONObject farmerObj = shambaObj.getJSONObject("Farmer__r");
                 String farmerId = shambaObj.getString("Farmer__c");
                 String farmerName = farmerObj.getString("FullName__c");
+                String mobileNumber = farmerObj.getString("Mobile_Number__c");
                 String farmerIdNumber = farmerObj.getString("Name");
                 String subLocationName = shambaObj.getJSONObject("Sub_LocationLookup__r").getString("Name");
                 String villageName = shambaObj.getJSONObject("Village__r").getString("Name");
@@ -1122,6 +1123,7 @@ public class WebApi {
                     currentFarmer.farmId = farmId;
                     currentFarmer.idNumber = farmerIdNumber;
                     currentFarmer.fullName = farmerName;
+                    currentFarmer.mobileNumber = mobileNumber;
                     currentFarmer.subLocation = subLocationName;
                     currentFarmer.villageName = villageName;
                     currentFarmer.isHeader = false;
