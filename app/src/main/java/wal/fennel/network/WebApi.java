@@ -17,10 +17,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.realm.Realm;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -33,11 +36,14 @@ import wal.fennel.application.Fennel;
 import wal.fennel.datamodels.Auth;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.ResponseModel;
+import wal.fennel.models.Task;
 import wal.fennel.utils.Constants;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PhotoUtils;
 import wal.fennel.utils.PreferenceHelper;
 import wal.fennel.utils.Singleton;
+
+import static io.realm.Realm.getDefaultInstance;
 
 /**
  * Created by Khawar on 21/10/2016.
@@ -890,7 +896,281 @@ public class WebApi {
                 t.printStackTrace();
             }
         });
+
+        WebApi.getMyfarmerTasks(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                    if (response.code() == 200) {
+                        String responseStr = "";
+
+                        try {
+                            responseStr = response.body().string();
+//                        PreferenceHelper.getInstance().writeFirstRun(false);
+                            parseMyFarmersData(responseStr);
+                            WebApi.getMyFarmerAttachments(myFarmerTasksAttachments);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
     }
+
+    private static Callback<ResponseBody> myFarmerTasksAttachments = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.code() == 200) {
+                    String responseStr = "";
+
+                    try {
+                        responseStr = response.body().string();
+                        parseMyFarmersAttachmentData(responseStr);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            t.printStackTrace();
+        }
+    };
+
+    private static void parseMyFarmersAttachmentData(String data) throws JSONException {
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        Realm realm = getDefaultInstance();
+
+        if(arrRecords.length() > 0)
+        {
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject farmerObj = arrRecords.getJSONObject(i);
+                String id = farmerObj.getString("Id");
+
+                String farmerPicId = "";
+                String farmerNatId = "";
+
+                JSONObject attachmentObj = farmerObj.optJSONObject("Attachments");
+                if(attachmentObj != null)
+                {
+
+                    JSONArray attRecords = attachmentObj.getJSONArray("records");
+                    for (int j = 0; j < attRecords.length(); j++) {
+                        JSONObject objAttachment = attRecords.getJSONObject(j);
+                        String description = objAttachment.getString("Description").toLowerCase().trim();
+                        if(description.contains("pic") || description.contains("photo"))
+                        {
+                            farmerPicId = objAttachment.getString("Id");
+                        }
+                        else if(description.contains("id"))
+                        {
+                            farmerNatId = objAttachment.getString("Id");
+                        }
+                    }
+                }
+
+                ArrayList<Farmer> allFarmerTasks = Singleton.getInstance().myFarmersTaskList;
+
+                for (int j = 0; j < allFarmerTasks.size(); j++) {
+                    final Farmer farmer = allFarmerTasks.get(j);
+
+                    if(farmer.getFarmerId().equalsIgnoreCase(id))
+                    {
+                        farmer.setThumbAttachmentId(farmerPicId);
+                        farmer.setNationalCardAttachmentId(farmerNatId);
+
+                        String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(farmer.getThumbAttachmentId());
+                        if(!farmerPicId.isEmpty())
+                        {
+                            farmer.setThumbUrl(thumbUrl);
+                        }
+
+                        String natIdUrl = NetworkHelper.makeAttachmentUrlFromId(farmer.getNationalCardAttachmentId());
+                        if(!farmerNatId.isEmpty())
+                        {
+                            farmer.setNationalCardUrl(natIdUrl);
+                        }
+
+                        Farmer farmerDb = realm.where(Farmer.class).equalTo("farmerId", id).findFirst();
+                        if(farmerDb != null)
+                        {
+                            realm.beginTransaction();
+                            farmerDb.setThumbAttachmentId(farmerPicId);
+                            farmerDb.setNationalCardAttachmentId(farmerNatId);
+                            if(!farmerPicId.isEmpty())
+                            {
+                                farmerDb.setThumbUrl(thumbUrl);
+                            }
+                            if(!farmerNatId.isEmpty())
+                            {
+                                farmerDb.setNationalCardUrl(natIdUrl);
+                            }
+                            realm.commitTransaction();
+                        }
+
+                        MyPicassoInstance.getInstance().load(thumbUrl).fetch(/*new com.squareup.picasso.Callback() {
+                            @Override
+                            public void onSuccess() {
+                                Log.i("Fetch success", "Farmer Pic: " + farmer.getThumbUrl());
+                            }
+
+                            @Override
+                            public void onError() {
+                                Log.i("Fetch failed", "Farmer Pic: " + farmer.getThumbUrl());
+                            }
+                        }*/);
+
+                        MyPicassoInstance.getInstance().load(natIdUrl).fetch(/*new com.squareup.picasso.Callback() {
+                            @Override
+                            public void onSuccess() {
+                                Log.i("Fetch success", "NAT ID: " + farmer.getNationalCardUrl());
+                            }
+
+                            @Override
+                            public void onError() {
+                                Log.i("Fetch failed", "NAT ID: " + farmer.getNationalCardUrl());
+                            }
+                        }*/);
+
+                        break;
+                    }
+                }
+            }
+
+//            tasksAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private static void parseMyFarmersData(String data) throws JSONException {
+
+        Log.i("FENNEL", data);
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        Map<String,Farmer> farmersMap = new HashMap<>();
+        Map<String,Task> tasksMap = new HashMap<>();
+        List<Farmer> farmersTaskList = new ArrayList<>();
+
+        if(arrRecords.length() > 0)
+        {
+
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject taskObj = arrRecords.getJSONObject(i);
+
+                String taskName = taskObj.getString("Name");
+                String id = taskObj.getString("Id");
+                String status = taskObj.getString("Status__c");
+                String startedDate = taskObj.getString("Started_Date__c");
+                String dueDate = taskObj.getString("Due_Date__c");
+                String completionDate = taskObj.getString("Completion_Date__c");
+
+                JSONObject shambaObj = taskObj.getJSONObject("Shamba__r");
+                String farmId = taskObj.getString("Shamba__c");
+                JSONObject farmerObj = shambaObj.getJSONObject("Farmer__r");
+                String farmerId = shambaObj.getString("Farmer__c");
+                String farmerName = farmerObj.getString("FullName__c");
+                String mobileNumber = farmerObj.getString("Mobile_Number__c");
+                String farmerIdNumber = farmerObj.getString("Name");
+                String subLocationName = shambaObj.getJSONObject("Sub_LocationLookup__r").getString("Name");
+                String villageName = shambaObj.getJSONObject("Village__r").getString("Name");
+
+                Task currentTask;
+                if (tasksMap.containsKey(taskName)) {
+                    currentTask = (Task) tasksMap.get(taskName);
+                } else {
+                    Realm realm = Realm.getDefaultInstance();
+                    realm.beginTransaction();
+
+                    currentTask = realm.createObject(Task.class);
+                    currentTask.setTaskId(id);
+                    currentTask.setName(taskName);
+                    currentTask.setStartedDate(startedDate);
+                    currentTask.setCompletionDate(completionDate);
+                    currentTask.setDueDate(dueDate);
+                    currentTask.setStatus(status);
+
+                    realm.commitTransaction();
+//                    currentTask = new Tasks(id, taskName, startedDate, completionDate, dueDate, status);
+                    tasksMap.put(taskName, currentTask);
+                }
+
+                Farmer currentFarmer;
+                RealmList<Task> farmingTasks;
+                if (farmersMap.containsKey(farmerIdNumber)) {
+                    currentFarmer = (Farmer) farmersMap.get(farmerIdNumber);
+                    farmingTasks = currentFarmer.getFarmerTasks();
+                    if (farmingTasks != null) {
+                        farmingTasks.add(currentTask);
+                    } else {
+                        farmingTasks = new RealmList<>();
+                        farmingTasks.add(currentTask);
+                        currentFarmer.farmerTasks = farmingTasks;
+                    }
+
+                } else {
+                    currentFarmer = new Farmer();
+                    currentFarmer.farmerId = farmerId;
+                    currentFarmer.farmId = farmId;
+                    currentFarmer.idNumber = farmerIdNumber;
+                    currentFarmer.fullName = farmerName;
+                    currentFarmer.mobileNumber = mobileNumber;
+                    currentFarmer.subLocation = subLocationName;
+                    currentFarmer.villageName = villageName;
+                    currentFarmer.isHeader = false;
+                    currentFarmer.setFarmerType(Constants.FarmerType.MYFARMERTASKS);
+
+                    farmingTasks = new RealmList<>();
+                    farmingTasks.add(currentTask);
+                    currentFarmer.farmerTasks = farmingTasks;
+
+                    farmersMap.put(farmerIdNumber, currentFarmer);
+                }
+
+                if (!(farmersTaskList.contains(currentFarmer))) {
+                    farmersTaskList.add(currentFarmer);
+                }
+            }
+        }
+
+        addFarmerTasksToDB(farmersTaskList);
+        Singleton.getInstance().myFarmersTaskList = (ArrayList<Farmer>) farmersTaskList;
+    }
+
+    private static void addFarmerTasksToDB(List<Farmer> farmersTaskList) {
+
+        Realm realm = getDefaultInstance();
+
+        RealmResults<Farmer> farmerDbList = realm.where(Farmer.class).equalTo("farmerType", Constants.FarmerType.MYFARMERTASKS.toString()).findAll();
+        realm.beginTransaction();
+        farmerDbList.deleteAllFromRealm();
+        realm.commitTransaction();
+
+        realm.beginTransaction();
+        for (int i = 0; i < farmersTaskList.size(); i++) {
+            // Save to DB
+            final Farmer farmerDbObj = realm.createObject(Farmer.class);
+            farmerDbObj.setAllValues(farmersTaskList.get(i));
+        }
+        realm.commitTransaction();
+    }
+
+
 
     private static Callback<ResponseBody> myFarmersAttachmentsCallback = new Callback<ResponseBody>() {
         @Override
@@ -1028,9 +1308,14 @@ public class WebApi {
         Singleton.getInstance().mySignupsList.clear();
 
         Realm realm = Realm.getDefaultInstance();
+        RealmResults<Farmer> farmerDbList = realm.where(Farmer.class).equalTo("farmerType", Constants.FarmerType.MYSIGNUPS.toString()).findAll();
         realm.beginTransaction();
-        realm.delete(Farmer.class);
+        farmerDbList.deleteAllFromRealm();
         realm.commitTransaction();
+
+//        realm.beginTransaction();
+//        realm.delete(Farmer.class);
+//        realm.commitTransaction();
 
         if(incompleteFarmersList.size() > 0)
         {
