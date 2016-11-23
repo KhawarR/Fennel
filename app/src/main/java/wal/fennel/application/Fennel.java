@@ -8,6 +8,7 @@ import com.google.android.gms.analytics.Tracker;
 
 import io.fabric.sdk.android.Fabric;
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import wal.fennel.common.database.DatabaseHelper;
 import wal.fennel.network.RestClient;
 import wal.fennel.network.WebApi;
@@ -50,6 +51,11 @@ public class Fennel extends Application {
 //        initImageLoader();
 
         Realm.init(getApplicationContext());
+        RealmConfiguration config = new RealmConfiguration.Builder()
+                .deleteRealmIfMigrationNeeded()
+                .build();
+        Realm.setDefaultConfiguration(config);
+
         WebApi.initializeInstance(getApplicationContext());
         MyPicassoInstance.initializeInstance(getApplicationContext());
         PreferenceHelper.initializeInstance(getApplicationContext());
