@@ -14,65 +14,65 @@ import wal.fennel.utils.Constants;
  */
 public class Farmer extends RealmObject implements Parcelable{
 
-    public String farmerId = null;
-    public String farmId = null;
+    private String farmerId = null;
+    private String farmId = null;
 
     @SerializedName("FullName__c")
-    public String fullName;
+    private String fullName;
 
     @SerializedName("First_Name__c")
-    public String firstName;
+    private String firstName;
 
     @SerializedName("Middle_Name__c")
-    public String secondName;
+    private String secondName;
 
     @SerializedName("Last_Name__c")
-    public String surname;
+    private String surname;
 
     @SerializedName("Name")
-    public String idNumber;
+    private String idNumber;
 
     @SerializedName("Gender__c")
-    public String gender;
+    private String gender;
 
     @SerializedName("Leader__c")
-    public boolean isLeader;
+    private boolean isLeader;
 
     @SerializedName("Location__c")
-    public String location;
-    public String locationId;
+    private String location;
+    private String locationId;
 
     @SerializedName("Sub_Location__c")
-    public String subLocation;
-    public String subLocationId;
+    private String subLocation;
+    private String subLocationId;
 
     @SerializedName("Mobile_Number__c")
-    public String mobileNumber;
+    private String mobileNumber;
 
-    public String villageName;
-    public String villageId;
+    private String villageName;
+    private String villageId;
 
-    public String treeSpecies;
-    public String treeSpeciesId;
+    private String treeSpecies;
+    private String treeSpeciesId;
 
-    public boolean farmerHome;
+    private boolean farmerHome;
 
-    public String thumbAttachmentId;
-    public String nationalCardAttachmentId;
+    private String thumbAttachmentId;
+    private String nationalCardAttachmentId;
 
-    public String thumbUrl;
-    public String nationalCardUrl;
+    private String thumbUrl;
+    private String nationalCardUrl;
 
-    public String signupStatus;
-    public boolean isHeader = false;
+    private String signupStatus;
+    private boolean isHeader = false;
 
-    public boolean isDataDirty = false;
-    public boolean isFarmerPicDirty = false;
-    public boolean isNatIdCardDirty = false;
+    private boolean isDataDirty = false;
+    private boolean isFarmerPicDirty = false;
+    private boolean isNatIdCardDirty = false;
 
-    public RealmList<Task> farmerTasks;
+    private RealmList<Task> farmerTasks;
 
-    public String farmerType = Constants.FarmerType.MYSIGNUPS.toString();
+    private String farmerType = Constants.FarmerType.MYSIGNUPS.toString();
 
     public Farmer() {}
 

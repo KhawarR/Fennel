@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +13,9 @@ import android.widget.Toast;
 
 import com.squareup.picasso.NetworkPolicy;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,6 +23,8 @@ import java.util.ArrayList;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.realm.Realm;
+import io.realm.RealmList;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,12 +35,15 @@ import wal.fennel.activities.LoginActivity;
 import wal.fennel.adapters.FarmerStatusAdapter;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.Task;
+import wal.fennel.models.TaskItem;
+import wal.fennel.models.TaskItemOption;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.network.WebApi;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PreferenceHelper;
+import wal.fennel.utils.Singleton;
 import wal.fennel.views.FontTextView;
 import wal.fennel.views.TitleBarLayout;
 
@@ -109,9 +117,9 @@ public class FarmerStatus extends BaseFragment {
         CircleImageView ivFarmerThumb = (CircleImageView) myHeader.findViewById(R.id.ivFarmerThumb);
         {
             if(NetworkHelper.isNetAvailable(getActivity()))
-                MyPicassoInstance.getInstance().load(farmer.thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
+                MyPicassoInstance.getInstance().load(farmer.getThumbUrl()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
             else
-                MyPicassoInstance.getInstance().load(farmer.thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
+                MyPicassoInstance.getInstance().load(farmer.getThumbUrl()).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
 
         }
 
@@ -119,9 +127,9 @@ public class FarmerStatus extends BaseFragment {
         FontTextView tvFullName = (FontTextView) myHeader.findViewById(R.id.tvLocation);
         FontTextView tvMobile = (FontTextView) myHeader.findViewById(R.id.tvMobile);
 
-        tvFarmerName.setText(farmer.fullName);
-        tvFullName.setText(farmer.villageName + ", " + farmer.subLocation);
-        tvMobile.setText("MOBILE " + farmer.mobileNumber);
+        tvFarmerName.setText(farmer.getFullName());
+        tvFullName.setText(farmer.getVillageName() + ", " + farmer.getSubLocation());
+        tvMobile.setText("MOBILE " + farmer.getMobileNumber());
 
         mLvFarmers.addHeaderView(myHeader);
 
@@ -168,15 +176,15 @@ public class FarmerStatus extends BaseFragment {
 
         loadingStarted();
 
-        if(farmer.farmerTasks.size() > 0){
+        if(farmer.getFarmerTasks().size() > 0){
             String farmingTaskIds = "";
-            for (int i = 0; i < farmer.farmerTasks.size(); i++) {
-                String id = farmer.farmerTasks.get(i).taskId;
+            for (int i = 0; i < farmer.getFarmerTasks().size(); i++) {
+                String id = farmer.getFarmerTasks().get(i).getTaskId();
                 id = "'" + id + "'";
 
                 farmingTaskIds = farmingTaskIds + id;
 
-                if(i + 1 != farmer.farmerTasks.size()){
+                if(i + 1 != farmer.getFarmerTasks().size()){
                     farmingTaskIds = farmingTaskIds + ",";
                 }
             }
@@ -197,6 +205,7 @@ public class FarmerStatus extends BaseFragment {
                     try {
                         responseStr = response.body().string();
                         parseData(responseStr);
+                        Log.i("Parsing" , "Complete" );
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (JSONException e) {
@@ -224,7 +233,65 @@ public class FarmerStatus extends BaseFragment {
     };
 
     private void parseData(String data) throws JSONException {
-        
+
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        for (int i = 0; i < arrRecords.length(); i++) {
+
+            JSONObject objTask = arrRecords.getJSONObject(i);
+
+            String id = objTask.getString("Id");
+            String textValue = objTask.getString("Text_Value__c");
+            int sequence = objTask.getInt("Sequence__c");
+            String recordType = objTask.getJSONObject("RecordType").getString("Name");
+            String name = objTask.getString("Name");
+            double latitude = objTask.optDouble("Location__Latitude__s");
+            if(Double.isNaN(latitude))
+                latitude = 0;
+            double longitude = objTask.optDouble("Location__Longitude__s");
+            if(Double.isNaN(longitude))
+                longitude = 0;
+            String gpsTakenTime = objTask.getString("GPS_Taken_Time__c");
+            String fileType = objTask.getString("File_Type__c");
+            String farmingTaskId = objTask.getString("Farming_Task__c");
+            String description = objTask.getString("Description__c");
+
+            RealmList<TaskItemOption> options = new RealmList<>();
+
+            JSONObject objOptions = objTask.optJSONObject("Task_Item_Options__r");
+            if(objOptions != null){
+                JSONArray arrOptions = objOptions.getJSONArray("records");
+                for (int j = 0; j < arrOptions.length(); j++) {
+                    JSONObject objOption = arrOptions.getJSONObject(j);
+                    String optionId = objOption.getString("Id");
+                    String optionName = objOption.getString("Name");
+                    boolean isValue = objOption.getBoolean("Value__c");
+
+                    options.add(new TaskItemOption(optionId, optionName, isValue));
+                }
+            }
+
+            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, gpsTakenTime, latitude, longitude, options);
+
+            for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
+
+                if(Singleton.getInstance().myFarmersList.get(j).getFarmerTasks() != null){
+
+                    for (int k = 0; k < Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().size(); k++) {
+
+                        if (taskItem.getFarmingTaskId().equalsIgnoreCase(Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskId())){
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            if(Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskItems() == null)
+                                Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).setTaskItems(new RealmList<TaskItem>());
+                            Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskItems().add(taskItem);
+                            realm.commitTransaction();
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override

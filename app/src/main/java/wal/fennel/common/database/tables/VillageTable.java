@@ -36,14 +36,14 @@ public class VillageTable {
 
         //Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
-        values.put(COLUMN_SFDC_ID, village.id);
-        values.put(COLUMN_NAME, village.name);
-        values.put(COLUMN_SUB_LOCATION_ID, village.subLocationId);
+        values.put(COLUMN_SFDC_ID, village.getId());
+        values.put(COLUMN_NAME, village.getName());
+        values.put(COLUMN_SUB_LOCATION_ID, village.getSubLocationId());
 
         // Insert the new row, returning the primary key value of the new row
         long newRowId = 0;
 
-        if (!villageExits(dbHelper, village.id)) {
+        if (!villageExits(dbHelper, village.getId())) {
             newRowId = db.insert(
                     TABLE_VILLAGE,
                     null,

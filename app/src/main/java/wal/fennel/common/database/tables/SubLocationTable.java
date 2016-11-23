@@ -36,14 +36,14 @@ public class SubLocationTable {
 
         //Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
-        values.put(COLUMN_SFDC_ID, subLocation.id);
-        values.put(COLUMN_NAME, subLocation.name);
-        values.put(COLUMN_LOCATION_ID, subLocation.locationId);
+        values.put(COLUMN_SFDC_ID, subLocation.getId());
+        values.put(COLUMN_NAME, subLocation.getName());
+        values.put(COLUMN_LOCATION_ID, subLocation.getLocationId());
 
         // Insert the new row, returning the primary key value of the new row
         long newRowId = 0;
 
-        if (!subLocationsExits(dbHelper, subLocation.id)) {
+        if (!subLocationsExits(dbHelper, subLocation.getId())) {
             newRowId = db.insert(
                     TABLE_SUB_LOCATION,
                     null,

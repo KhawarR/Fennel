@@ -121,7 +121,7 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if(allFarmerTasks.get(position).farmerTasks.size() > 0)
+        if(allFarmerTasks.get(position).getFarmerTasks().size() > 0)
             ((BaseContainerFragment) getParentFragment()).replaceFragment(FarmerStatus.newInstance(Constants.STR_EDIT_FARMER, allFarmerTasks.get(position)), true);
     }
 
@@ -132,7 +132,7 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
 
 
     private void getMyFarmerTasks() {
-        ArrayList<Farmer> allFarmerTasks = Singleton.getInstance().myFarmersTaskList;
+        ArrayList<Farmer> allFarmerTasks = Singleton.getInstance().myFarmersList;
         parseDataForMyFarmers(allFarmerTasks);
     }
 
@@ -144,11 +144,11 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
         List<List<Farmer>> farmersTaskList = new ArrayList<List<Farmer>>();
 
         for (Farmer currentFarmer : farmerList) {
-            for (Task currentTask : currentFarmer.farmerTasks) {
+            for (Task currentTask : currentFarmer.getFarmerTasks()) {
                 boolean taskFound = false;
                 for (List<Farmer> taskList : farmersTaskList) {
                     Farmer taskObject = (Farmer) taskList.get(0);
-                    if (taskObject.farmerId.equals(currentTask.taskId)) {
+                    if (taskObject.getFarmerId().equals(currentTask.getTaskId())) {
                         taskFound = true;
                         taskList.add(currentFarmer);
                         break;
@@ -156,7 +156,7 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
                 }
                 if (!taskFound) {
                     ArrayList<Farmer> newTaskList = new ArrayList<>();
-                    newTaskList.add(new Farmer(currentTask.taskId, "", currentTask.name, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYFARMERTASKS));
+                    newTaskList.add(new Farmer(currentTask.getTaskId(), "", currentTask.getName(), "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYFARMERTASKS));
                     newTaskList.add(currentFarmer);
                     farmersTaskList.add(newTaskList);
                 }

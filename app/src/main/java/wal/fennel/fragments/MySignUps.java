@@ -255,15 +255,15 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         for (int i = 0; i < farmerDbList.size(); i++) {
             Farmer farmer = farmerDbList.get(i);
 
-            if(farmer.signupStatus.equalsIgnoreCase(Constants.STR_ENROLLED))
+            if(farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_ENROLLED))
             {
                 incompleteFarmersList.add(farmer);
             }
-            else if(farmer.signupStatus.equalsIgnoreCase(Constants.STR_PENDING))
+            else if(farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_PENDING))
             {
                 pendingFarmersList.add(farmer);
             }
-            else if(farmer.signupStatus.equalsIgnoreCase(Constants.STR_APPROVED))
+            else if(farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_APPROVED))
             {
                 approvedFarmersList.add(farmer);
             }
@@ -295,13 +295,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     private void getMyFarmerTasksFromDB()
     {
-        Singleton.getInstance().myFarmersTaskList.clear();
+        Singleton.getInstance().myFarmersList.clear();
 
         if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         loadingStarted();
 
         RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerType", Constants.FarmerType.MYFARMERTASKS.toString()).findAll();
-        Singleton.getInstance().myFarmersTaskList.addAll(farmerDbList);
+        Singleton.getInstance().myFarmersList.addAll(farmerDbList);
 
         loadingFinished();
     }
@@ -1082,7 +1082,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     }
                 }
 
-                ArrayList<Farmer> allFarmerTasks = Singleton.getInstance().myFarmersTaskList;
+                ArrayList<Farmer> allFarmerTasks = Singleton.getInstance().myFarmersList;
 
                 for (int j = 0; j < allFarmerTasks.size(); j++) {
                     final Farmer farmer = allFarmerTasks.get(j);
@@ -1218,24 +1218,24 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     } else {
                         farmingTasks = new RealmList<>();
                         farmingTasks.add(currentTask);
-                        currentFarmer.farmerTasks = farmingTasks;
+                        currentFarmer.setFarmerTasks(farmingTasks);
                     }
 
                 } else {
                     currentFarmer = new Farmer();
-                    currentFarmer.farmerId = farmerId;
-                    currentFarmer.farmId = farmId;
-                    currentFarmer.idNumber = farmerIdNumber;
-                    currentFarmer.fullName = farmerName;
-                    currentFarmer.mobileNumber = mobileNumber;
-                    currentFarmer.subLocation = subLocationName;
-                    currentFarmer.villageName = villageName;
-                    currentFarmer.isHeader = false;
+                    currentFarmer.setFarmerId(farmerId);
+                    currentFarmer.setFarmId(farmId);
+                    currentFarmer.setIdNumber(farmerIdNumber);
+                    currentFarmer.setFullName(farmerName);
+                    currentFarmer.setMobileNumber(mobileNumber);
+                    currentFarmer.setSubLocation(subLocationName);
+                    currentFarmer.setVillageName(villageName);
+                    currentFarmer.setHeader(false);
                     currentFarmer.setFarmerType(Constants.FarmerType.MYFARMERTASKS);
 
                     farmingTasks = new RealmList<>();
                     farmingTasks.add(currentTask);
-                    currentFarmer.farmerTasks = farmingTasks;
+                    currentFarmer.setFarmerTasks(farmingTasks);
 
                     farmersMap.put(farmerIdNumber, currentFarmer);
                 }
@@ -1247,7 +1247,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
 
         addFarmerTasksToDB(farmersTaskList);
-        Singleton.getInstance().myFarmersTaskList = (ArrayList<Farmer>) farmersTaskList;
+        Singleton.getInstance().myFarmersList = (ArrayList<Farmer>) farmersTaskList;
 
     }
 

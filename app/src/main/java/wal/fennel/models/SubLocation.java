@@ -5,9 +5,9 @@ package wal.fennel.models;
  */
 public class SubLocation {
 
-    public String id;
-    public String name;
-    public String locationId;
+    private String id;
+    private String name;
+    private String locationId;
 
     public SubLocation(String id, String name, String locationId) {
         this.id = id;
@@ -25,5 +25,17 @@ public class SubLocation {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getLocationId() {
+        return locationId;
     }
 }

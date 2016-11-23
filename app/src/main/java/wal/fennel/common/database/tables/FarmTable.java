@@ -50,13 +50,13 @@ public class FarmTable {
         if (id != null) {
             values.put(COLUMN_SFDC_ID, id);
         }
-        values.put(COLUMN_FACILITATOR_ID, farm.facilitatorId);
-        values.put(COLUMN_FARMER_ID, farm.farmerId);
-        values.put(COLUMN_FARMER_ENROLLMENT_DATE, farm.farmerEnrollmentDate);
-        values.put(COLUMN_LOCATION, farm.location);
-        values.put(COLUMN_SUB_LOCATION, farm.subLocation);
-        values.put(COLUMN_VILLAGE_NAME, farm.villageName);
-        values.put(COLUMN_TREE_SPECIES, farm.treeSpecies);
+        values.put(COLUMN_FACILITATOR_ID, farm.getFacilitatorId());
+        values.put(COLUMN_FARMER_ID, farm.getFarmerId());
+        values.put(COLUMN_FARMER_ENROLLMENT_DATE, farm.getFarmerEnrollmentDate());
+        values.put(COLUMN_LOCATION, farm.getLocation());
+        values.put(COLUMN_SUB_LOCATION, farm.getSubLocation());
+        values.put(COLUMN_VILLAGE_NAME, farm.getVillageName());
+        values.put(COLUMN_TREE_SPECIES, farm.getTreeSpecies());
         values.put(COLUMN_SYNCED, synced);
 
         // Insert the new row, returning the primary key value of the new row
@@ -91,18 +91,18 @@ public class FarmTable {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(COLUMN_FACILITATOR_ID, farm.facilitatorId);
-        values.put(COLUMN_FARMER_ID, farm.farmerId);
-        values.put(COLUMN_FARMER_ENROLLMENT_DATE, farm.farmerEnrollmentDate);
-        values.put(COLUMN_LOCATION, farm.location);
-        values.put(COLUMN_SUB_LOCATION, farm.subLocation);
-        values.put(COLUMN_VILLAGE_NAME, farm.villageName);
-        values.put(COLUMN_TREE_SPECIES, farm.treeSpecies);
+        values.put(COLUMN_FACILITATOR_ID, farm.getFacilitatorId());
+        values.put(COLUMN_FARMER_ID, farm.getFarmerId());
+        values.put(COLUMN_FARMER_ENROLLMENT_DATE, farm.getFarmerEnrollmentDate());
+        values.put(COLUMN_LOCATION, farm.getLocation());
+        values.put(COLUMN_SUB_LOCATION, farm.getSubLocation());
+        values.put(COLUMN_VILLAGE_NAME, farm.getVillageName());
+        values.put(COLUMN_TREE_SPECIES, farm.getTreeSpecies());
         values.put(COLUMN_SYNCED, synced);
 
         // Which row to update, based on the email
         String selection = COLUMN_SFDC_ID + " = ?";
-        String[] selectionArgs = {farm.farmId};
+        String[] selectionArgs = {farm.getFarmId()};
 
         int count = db.update(
                 TABLE_FARM,

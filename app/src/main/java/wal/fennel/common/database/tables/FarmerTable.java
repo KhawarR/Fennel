@@ -64,26 +64,26 @@ public class FarmerTable {
         if (id != null) {
             values.put(COLUMN_SFDC_ID, id);
         }
-        values.put(COLUMN_FIRST_NAME, farmer.firstName);
-        values.put(COLUMN_MIDDLE_NAME, farmer.secondName);
-        values.put(COLUMN_LAST_NAME, farmer.surname);
-        values.put(COLUMN_ID_NUMBER, farmer.idNumber);
-        values.put(COLUMN_GENDER, farmer.gender);
-        values.put(COLUMN_LEADER, farmer.isLeader);
-        values.put(COLUMN_LOCATION, farmer.location);
-        values.put(COLUMN_SUB_LOCATION, farmer.subLocation);
-        values.put(COLUMN_VILLAGE_NAME, farmer.villageName);
-        values.put(COLUMN_TREE_SPECIES, farmer.treeSpecies);
-        values.put(COLUMN_FARMER_HOME, farmer.farmerHome);
-        values.put(COLUMN_MOBILE_NUMBER, farmer.mobileNumber);
-        values.put(COLUMN_FARMER_PHOTO, farmer.thumbAttachmentId);
-        values.put(COLUMN_FARMER_ID_PHOTO, farmer.nationalCardAttachmentId);
+        values.put(COLUMN_FIRST_NAME, farmer.getFirstName());
+        values.put(COLUMN_MIDDLE_NAME, farmer.getSecondName());
+        values.put(COLUMN_LAST_NAME, farmer.getSurname());
+        values.put(COLUMN_ID_NUMBER, farmer.getIdNumber());
+        values.put(COLUMN_GENDER, farmer.getGender());
+        values.put(COLUMN_LEADER, farmer.isLeader());
+        values.put(COLUMN_LOCATION, farmer.getLocation());
+        values.put(COLUMN_SUB_LOCATION, farmer.getSubLocation());
+        values.put(COLUMN_VILLAGE_NAME, farmer.getVillageName());
+        values.put(COLUMN_TREE_SPECIES, farmer.getTreeSpecies());
+        values.put(COLUMN_FARMER_HOME, farmer.isFarmerHome());
+        values.put(COLUMN_MOBILE_NUMBER, farmer.getMobileNumber());
+        values.put(COLUMN_FARMER_PHOTO, farmer.getThumbAttachmentId());
+        values.put(COLUMN_FARMER_ID_PHOTO, farmer.getNationalCardAttachmentId());
         values.put(COLUMN_SYNCED, synced);
 
         // Insert the new row, returning the primary key value of the new row
         long newRowId = 0;
 
-        if (!farmerExists(dbHelper, farmer.idNumber)) {
+        if (!farmerExists(dbHelper, farmer.getIdNumber())) {
             newRowId = db.insert(
                     TABLE_FARMERS,
                     null,
@@ -113,25 +113,25 @@ public class FarmerTable {
 
         ContentValues values = new ContentValues();
 
-        values.put(COLUMN_FIRST_NAME, farmer.firstName);
-        values.put(COLUMN_MIDDLE_NAME, farmer.secondName);
-        values.put(COLUMN_LAST_NAME, farmer.surname);
-        values.put(COLUMN_ID_NUMBER, farmer.idNumber);
-        values.put(COLUMN_GENDER, farmer.gender);
-        values.put(COLUMN_LEADER, farmer.isLeader);
-        values.put(COLUMN_LOCATION, farmer.location);
-        values.put(COLUMN_SUB_LOCATION, farmer.subLocation);
-        values.put(COLUMN_VILLAGE_NAME, farmer.villageName);
-        values.put(COLUMN_TREE_SPECIES, farmer.treeSpecies);
-        values.put(COLUMN_FARMER_HOME, farmer.farmerHome);
-        values.put(COLUMN_MOBILE_NUMBER, farmer.mobileNumber);
-        values.put(COLUMN_FARMER_PHOTO, farmer.thumbAttachmentId);
-        values.put(COLUMN_FARMER_ID_PHOTO, farmer.nationalCardAttachmentId);
+        values.put(COLUMN_FIRST_NAME, farmer.getFirstName());
+        values.put(COLUMN_MIDDLE_NAME, farmer.getSecondName());
+        values.put(COLUMN_LAST_NAME, farmer.getSurname());
+        values.put(COLUMN_ID_NUMBER, farmer.getIdNumber());
+        values.put(COLUMN_GENDER, farmer.getGender());
+        values.put(COLUMN_LEADER, farmer.isLeader());
+        values.put(COLUMN_LOCATION, farmer.getLocation());
+        values.put(COLUMN_SUB_LOCATION, farmer.getSubLocation());
+        values.put(COLUMN_VILLAGE_NAME, farmer.getVillageName());
+        values.put(COLUMN_TREE_SPECIES, farmer.getTreeSpecies());
+        values.put(COLUMN_FARMER_HOME, farmer.isFarmerHome());
+        values.put(COLUMN_MOBILE_NUMBER, farmer.getMobileNumber());
+        values.put(COLUMN_FARMER_PHOTO, farmer.getThumbAttachmentId());
+        values.put(COLUMN_FARMER_ID_PHOTO, farmer.getNationalCardAttachmentId());
         values.put(COLUMN_SYNCED, synced);
 
         // Which row to update, based on the email
         String selection = COLUMN_SFDC_ID + " = ?";
-        String[] selectionArgs = {farmer.farmerId};
+        String[] selectionArgs = {farmer.getFarmerId()};
 
         int count = db.update(
                 TABLE_FARMERS,

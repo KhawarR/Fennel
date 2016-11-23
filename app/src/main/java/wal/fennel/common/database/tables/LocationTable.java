@@ -34,13 +34,13 @@ public class LocationTable {
 
         //Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
-        values.put(COLUMN_SFDC_ID, location.id);
-        values.put(COLUMN_NAME, location.name);
+        values.put(COLUMN_SFDC_ID, location.getId());
+        values.put(COLUMN_NAME, location.getName());
 
         // Insert the new row, returning the primary key value of the new row
         long newRowId = 0;
 
-        if (!locationExists(dbHelper, location.id)) {
+        if (!locationExists(dbHelper, location.getId())) {
             newRowId = db.insert(
                     TABLE_LOCATION,
                     null,

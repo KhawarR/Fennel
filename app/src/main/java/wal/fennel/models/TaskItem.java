@@ -12,18 +12,18 @@ import io.realm.RealmObject;
 
 public class TaskItem extends RealmObject implements Parcelable {
 
-    public int sequence;
-    public String id = "";
-    public String farmingTaskId = "";
-    public String name = "";
-    public String recordType = "";
-    public String description = "";
-    public String textValue = "";
-    public String fileType = "";
-    public String gpsTakenTime = "";
-    public double latitude;
-    public double longitude;
-    public RealmList<TaskItemOption> options = new RealmList<>();
+    private int sequence;
+    private String id = "";
+    private String farmingTaskId = "";
+    private String name = "";
+    private String recordType = "";
+    private String description = "";
+    private String textValue = "";
+    private String fileType = "";
+    private String gpsTakenTime = "";
+    private double latitude;
+    private double longitude;
+    private RealmList<TaskItemOption> options = new RealmList<>();
 
     public TaskItem(){
 

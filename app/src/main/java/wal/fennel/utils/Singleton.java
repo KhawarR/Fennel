@@ -12,7 +12,7 @@ public class Singleton {
     public String farmerIdtoInvalidate = "";
 
     public ArrayList<Farmer> mySignupsList = new ArrayList<>();
-    public ArrayList<Farmer> myFarmersTaskList = new ArrayList<>();
+    public ArrayList<Farmer> myFarmersList = new ArrayList<>();
 
     private static Singleton instance;
 

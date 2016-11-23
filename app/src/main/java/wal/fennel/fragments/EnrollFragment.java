@@ -245,28 +245,28 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         strArrLocations = new ArrayList<>();
 
         for (int i = 0; i < arrLocations.size(); i++) {
-            strArrLocations.add(arrLocations.get(i).name);
+            strArrLocations.add(arrLocations.get(i).getName());
         }
 
         arrSubLocations = DatabaseHelper.getInstance().getAllSubLocations();
         strArrSubLocations = new ArrayList<>();
 
         for (int i = 0; i < arrSubLocations.size(); i++) {
-            strArrSubLocations.add(arrSubLocations.get(i).name);
+            strArrSubLocations.add(arrSubLocations.get(i).getName());
         }
 
         arrVillages = DatabaseHelper.getInstance().getAllVillages();
         strArrVillages = new ArrayList<>();
 
         for (int i = 0; i < arrVillages.size(); i++) {
-            strArrVillages.add(arrVillages.get(i).name);
+            strArrVillages.add(arrVillages.get(i).getName());
         }
 
         arrTrees = DatabaseHelper.getInstance().getAllTrees();
         strArrTrees = new ArrayList<>();
 
         for (int i = 0; i < arrTrees.size(); i++) {
-            strArrTrees.add(arrTrees.get(i).name);
+            strArrTrees.add(arrTrees.get(i).getName());
         }
 
         spLocation.setTag(true);
@@ -386,7 +386,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 int index = getPositionForSpinnerArray(farmer.getLocation(), strArrLocations);
                 if(index >= 0)
                 {
-                    updateSubLocFromLocation(arrLocations.get(index).id);
+                    updateSubLocFromLocation(arrLocations.get(index).getId());
                     ArrayAdapter<String> arrayAdapterSubLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrSubLocations);
                     spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterSubLoc, R.layout.spinner_nothing_selected, getContext(), "SUB LOCATION"));
 
@@ -400,7 +400,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 {
                     spSubLocation.setTag(false);
                     spSubLocation.setSelection(index + 1);
-                    updateVillageAndTreeFromSubLocation(arrSubLocations.get(index).id);
+                    updateVillageAndTreeFromSubLocation(arrSubLocations.get(index).getId());
 
                     ArrayAdapter<String> arrayAdapterVillage = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrVillages);
                     spVillage.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterVillage, R.layout.spinner_nothing_selected, getContext(), "VILLAGE"));
@@ -1046,7 +1046,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         arrSubLocations = DatabaseHelper.getInstance().getSubLocationsFromLocation(locationId);
         strArrSubLocations.clear();
         for (int i = 0; i < arrSubLocations.size(); i++) {
-            strArrSubLocations.add(arrSubLocations.get(i).name);
+            strArrSubLocations.add(arrSubLocations.get(i).getName());
         }
     }
 
@@ -1054,13 +1054,13 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         arrVillages = DatabaseHelper.getInstance().getVillagesFromSubLocation(subLocationId);
         strArrVillages.clear();
         for (int i = 0; i < arrVillages.size(); i++) {
-            strArrVillages.add(arrVillages.get(i).name);
+            strArrVillages.add(arrVillages.get(i).getName());
         }
 
         arrTrees = DatabaseHelper.getInstance().getTreesFromSubLocation(subLocationId);
         strArrTrees.clear();
         for (int i = 0; i < arrTrees.size(); i++) {
-            strArrTrees.add(arrTrees.get(i).name);
+            strArrTrees.add(arrTrees.get(i).getName());
         }
     }
 
@@ -1079,8 +1079,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                     locationName = "";
                 }
                 else {
-                    location = arrLocations.get(position).id;
-                    locationName = arrLocations.get(position).name;
+                    location = arrLocations.get(position).getId();
+                    locationName = arrLocations.get(position).getName();
 
                     spLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                     spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.spinner_bg));
@@ -1115,8 +1115,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                     subLocationName = "";
                 }
                 else {
-                    subLocation = arrSubLocations.get(position).id;
-                    subLocationName = arrSubLocations.get(position).name;
+                    subLocation = arrSubLocations.get(position).getId();
+                    subLocationName = arrSubLocations.get(position).getName();
 
                     spLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                     spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
@@ -1146,8 +1146,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                     villageName = "";
                 }
                 else {
-                    village = arrVillages.get(position).id;
-                    villageName = arrVillages.get(position).name;
+                    village = arrVillages.get(position).getId();
+                    villageName = arrVillages.get(position).getName();
 
                     spLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
                     spSubLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
@@ -1161,8 +1161,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                     treeSpeciesName = "";
                 }
                 else {
-                    treeSpecies = arrTrees.get(position).id;
-                    treeSpeciesName = arrTrees.get(position).name;
+                    treeSpecies = arrTrees.get(position).getId();
+                    treeSpeciesName = arrTrees.get(position).getName();
 
 //                    village = arrVillages.get(position).id;
                     spLocation.setBackground(ContextCompat.getDrawable(getActivity(), R.drawable.color_gray));
@@ -1195,12 +1195,12 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         fullName = (fullName + " " + surname).trim();
 
         if(farmerStatus == null)
-            farmerStatus = farmer.signupStatus;
+            farmerStatus = farmer.getSignupStatus();
 
         Realm.getDefaultInstance().beginTransaction();
 
-        final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
-        farmerDbObj.setAllValues(farmer.farmerId, farmer.farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, location, subLocationName, subLocation, villageName, village, treeSpeciesName, treeSpecies, isFarmerHome, mobileNumber, farmer.thumbAttachmentId, farmer.nationalCardAttachmentId, farmerStatus, false, farmerImageUrl, farmerIdImageUrl, null, Constants.FarmerType.MYSIGNUPS);
+        final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.getFarmerId()).findFirst();
+        farmerDbObj.setAllValues(farmer.getFarmerId(), farmer.getFarmId(), fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, location, subLocationName, subLocation, villageName, village, treeSpeciesName, treeSpecies, isFarmerHome, mobileNumber, farmer.getThumbAttachmentId(), farmer.getNationalCardAttachmentId(), farmerStatus, false, farmerImageUrl, farmerIdImageUrl, null, Constants.FarmerType.MYSIGNUPS);
         farmerDbObj.setDataDirty(true);
 
         if(isFarmerPhotoEdited){

@@ -12,9 +12,9 @@ import io.realm.RealmObject;
 
 public class TaskItemOption extends RealmObject implements Parcelable{
 
-    public String id = "";
-    public String name = "";
-    public boolean isValue = false;
+    private String id = "";
+    private String name = "";
+    private boolean isValue = false;
 
     public TaskItemOption(){
 

@@ -5,9 +5,9 @@ package wal.fennel.models;
  */
 public class Tree {
 
-    public String id;
-    public String name;
-    public String subLocationId;
+    private String id;
+    private String name;
+    private String subLocationId;
 
     public Tree(String id, String name, String subLocationId) {
         this.id = id;
@@ -25,6 +25,18 @@ public class Tree {
 
     public void setSubLocationId(String subLocationId) {
         this.subLocationId = subLocationId;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getSubLocationId() {
+        return subLocationId;
     }
 }
 

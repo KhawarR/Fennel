@@ -5,9 +5,9 @@ package wal.fennel.models;
  */
 public class ResponseModel {
 
-    public String id;
-    public boolean success;
-    public Object[] errors;
+    private String id;
+    private boolean success;
+    private Object[] errors;
 
     public void setId(String id) {
         this.id = id;
@@ -19,5 +19,17 @@ public class ResponseModel {
 
     public void setErrors(Object[] errors) {
         this.errors = errors;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public Object[] getErrors() {
+        return errors;
     }
 }

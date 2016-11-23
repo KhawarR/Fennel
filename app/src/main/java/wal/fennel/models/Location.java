@@ -5,8 +5,8 @@ package wal.fennel.models;
  */
 public class Location {
 
-    public String id;
-    public String name;
+    private String id;
+    private String name;
 
     public Location(String id, String name) {
         this.id = id;
@@ -19,5 +19,13 @@ public class Location {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
     }
 }

@@ -36,14 +36,14 @@ public class TreeTable {
 
         //Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
-        values.put(COLUMN_SFDC_ID, tree.id);
-        values.put(COLUMN_NAME, tree.name);
-        values.put(COLUMN_SUB_LOCATION_ID, tree.subLocationId);
+        values.put(COLUMN_SFDC_ID, tree.getId());
+        values.put(COLUMN_NAME, tree.getName());
+        values.put(COLUMN_SUB_LOCATION_ID, tree.getSubLocationId());
 
         // Insert the new row, returning the primary key value of the new row
         long newRowId = 0;
 
-        if (!treeExists(dbHelper, tree.id, tree.subLocationId)) {
+        if (!treeExists(dbHelper, tree.getId(), tree.getSubLocationId())) {
             newRowId = db.insert(
                     TABLE_TREE,
                     null,

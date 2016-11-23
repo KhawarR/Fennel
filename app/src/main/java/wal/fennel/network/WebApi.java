@@ -310,7 +310,7 @@ public class WebApi {
 
             final HashMap<String, Object> farmerMap = getFarmerMap(farmer);
             countCalls++;
-            if(farmer.farmerId.isEmpty() || farmer.farmerId.startsWith(Constants.STR_FARMER_ID_PREFIX)){
+            if(farmer.getFarmerId().isEmpty() || farmer.getFarmerId().startsWith(Constants.STR_FARMER_ID_PREFIX)){
                 WebApi.createFarmer(new Callback<ResponseModel>() {
                     @Override
                     public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
@@ -329,7 +329,7 @@ public class WebApi {
                             }
                         }
 
-                        if (((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().success == true) || !errorMessage.isEmpty()) {
+                        if (((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().isSuccess() == true) || !errorMessage.isEmpty()) {
 
                             String newFarmerId = "";
 
@@ -341,21 +341,21 @@ public class WebApi {
                             }
 
                             if(newFarmerId.isEmpty()){
-                                newFarmerId = response.body().id;
+                                newFarmerId = response.body().getId();
                             }
 
                             Realm realm = Realm.getDefaultInstance();
                             realm.beginTransaction();
-                            farmer.farmerId = newFarmerId;
+                            farmer.setFarmerId(newFarmerId);
                             realm.commitTransaction();
 
                             addFarmWithFarmerId(farmer);
 
                             checkSyncComplete();
 
-                            if(farmer.isFarmerPicDirty)
+                            if(farmer.isFarmerPicDirty())
                                 attachFarmerImageToFarmerObject(farmer);
-                            if(farmer.isNatIdCardDirty)
+                            if(farmer.isNatIdCardDirty())
                                 attachFarmerIDImageToFarmerObject(farmer);
                         }
                         else if(response.code() == 401)
@@ -389,9 +389,9 @@ public class WebApi {
 
                             checkSyncComplete();
 
-                            if(farmer.isFarmerPicDirty)
+                            if(farmer.isFarmerPicDirty())
                                 attachFarmerImageToFarmerObject(farmer);
-                            if(farmer.isNatIdCardDirty)
+                            if(farmer.isNatIdCardDirty())
                                 attachFarmerIDImageToFarmerObject(farmer);
                         }
                         else if(response.code() == 401)
@@ -413,7 +413,7 @@ public class WebApi {
                         countFailedCalls++;
                         checkSyncComplete();
                     }
-                }, farmer.farmerId, farmerMap);
+                }, farmer.getFarmerId(), farmerMap);
             }
         }
         //endregion
@@ -482,13 +482,13 @@ public class WebApi {
     private static HashMap<String, Object> getFarmerMap(Farmer farmer) {
 
         final HashMap<String, Object> newFarmerMap = new HashMap<>();
-        newFarmerMap.put("First_Name__c", farmer.firstName);
-        newFarmerMap.put("Middle_Name__c", farmer.secondName);
-        newFarmerMap.put("Last_Name__c", farmer.surname);
-        newFarmerMap.put("Name", farmer.idNumber);
-        newFarmerMap.put("Mobile_Number__c", farmer.mobileNumber);
-        newFarmerMap.put("Gender__c", farmer.gender.trim().equalsIgnoreCase("male") ? "Male" : "Female");
-        newFarmerMap.put("Leader__c", farmer.isLeader ? 1 : 0);
+        newFarmerMap.put("First_Name__c", farmer.getFirstName());
+        newFarmerMap.put("Middle_Name__c", farmer.getSecondName());
+        newFarmerMap.put("Last_Name__c", farmer.getSurname());
+        newFarmerMap.put("Name", farmer.getIdNumber());
+        newFarmerMap.put("Mobile_Number__c", farmer.getMobileNumber());
+        newFarmerMap.put("Gender__c", farmer.getGender().trim().equalsIgnoreCase("male") ? "Male" : "Female");
+        newFarmerMap.put("Leader__c", farmer.isLeader() ? 1 : 0);
 
         return newFarmerMap;
     }
@@ -496,10 +496,10 @@ public class WebApi {
     private static HashMap<String, Object> getFarmMap(Farmer farmer) {
 
         final HashMap<String, Object> newFarmMap = new HashMap<>();
-        newFarmMap.put("LocationLookup__c", farmer.locationId);
-        newFarmMap.put("Sub_LocationLookup__c", farmer.subLocationId);
-        newFarmMap.put("Village__c", farmer.villageId);
-        newFarmMap.put("Tree_Specie__c", farmer.treeSpeciesId);
+        newFarmMap.put("LocationLookup__c", farmer.getLocationId());
+        newFarmMap.put("Sub_LocationLookup__c", farmer.getSubLocationId());
+        newFarmMap.put("Village__c", farmer.getVillageId());
+        newFarmMap.put("Tree_Specie__c", farmer.getTreeSpeciesId());
         newFarmMap.put("Is_Farmer_Home__c", farmer.isFarmerHome() ? true : false);
 
         if(PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FACILITATOR))
@@ -516,8 +516,8 @@ public class WebApi {
             newFarmMap.put("Field_Manager_Signup__c", PreferenceHelper.getInstance().readLoginUserId());
         }
 
-        if (farmer.signupStatus != null && !farmer.signupStatus.isEmpty()) {
-            newFarmMap.put("Sign_Up_Status__c", farmer.signupStatus);
+        if (farmer.getSignupStatus() != null && !farmer.getSignupStatus().isEmpty()) {
+            newFarmMap.put("Sign_Up_Status__c", farmer.getSignupStatus());
         }
 
         return newFarmMap;
@@ -525,17 +525,17 @@ public class WebApi {
 
     private static void addFarmWithFarmerId(final Farmer farmer) {
         HashMap<String, Object> farmMap = getFarmMap(farmer);
-        farmMap.put("Farmer__c", farmer.farmerId);
+        farmMap.put("Farmer__c", farmer.getFarmerId());
         countCalls++;
         WebApi.createFarm(new Callback<ResponseModel>() {
             @Override
             public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
                 countCalls--;
-                if (response.body() != null && response.body().success == true) {
+                if (response.body() != null && response.body().isSuccess() == true) {
                     checkSyncComplete();
                     Realm realm = Realm.getDefaultInstance();
                     realm.beginTransaction();
-                    final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                    final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.getFarmerId()).findFirst();
                     farmerDbObj.setDataDirty(false);
                     realm.commitTransaction();
                 }
@@ -564,7 +564,7 @@ public class WebApi {
     private static void editFarmWithFarmId(final Farmer farmer) {
 
         HashMap<String, Object> farmMap = getFarmMap(farmer);
-        farmMap.put("Farmer__c", farmer.farmerId);
+        farmMap.put("Farmer__c", farmer.getFarmerId());
         countCalls++;
         WebApi.editFarm(new Callback<ResponseBody>() {
             @Override
@@ -574,7 +574,7 @@ public class WebApi {
 
                     Realm realm = Realm.getDefaultInstance();
                     realm.beginTransaction();
-                    final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                    final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.getFarmerId()).findFirst();
                     farmerDbObj.setDataDirty(false);
                     realm.commitTransaction();
 
@@ -599,19 +599,19 @@ public class WebApi {
                 countFailedCalls++;
                 checkSyncComplete();
             }
-        }, farmer.farmId, farmMap);
+        }, farmer.getFarmId(), farmMap);
     }
 
     private static void attachFarmerImageToFarmerObject(final Farmer farmer) {
 
-        if (farmer.thumbUrl == null || farmer.thumbUrl.isEmpty())
+        if (farmer.getThumbUrl() == null || farmer.getThumbUrl().isEmpty())
             return;
 
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "picture");
         attachmentMap.put("Name", "profile_picture.png");
         if (farmer.getThumbAttachmentId() == null || farmer.getThumbAttachmentId().isEmpty()) {
-            attachmentMap.put("ParentId", farmer.farmerId);
+            attachmentMap.put("ParentId", farmer.getFarmerId());
         }
         else
         {
@@ -623,7 +623,7 @@ public class WebApi {
         byte[] byteArrayImage = null;
         Bitmap bmp = null;
 
-        String imagePath = NetworkHelper.getUploadPathFromUri(farmer.thumbUrl);
+        String imagePath = NetworkHelper.getUploadPathFromUri(farmer.getThumbUrl());
 //        bmp = PhotoUtils.decodeSampledBitmapFromResource(imagePath);
         bmp = PhotoUtils.getBitmapFromPath(imagePath);
 
@@ -657,7 +657,7 @@ public class WebApi {
                         Log.i("Fennel", "farmer profile picture uploaded successfully!");
                         Realm realm = Realm.getDefaultInstance();
                         realm.beginTransaction();
-                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.getFarmerId()).findFirst();
                         farmerDbObj.setFarmerPicDirty(false);
                         realm.commitTransaction();
                     } else {
@@ -682,10 +682,10 @@ public class WebApi {
                     countCalls--;
                     if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                         Log.i("Fennel", "farmer profile picture edited successfully!");
-                        Singleton.getInstance().farmerIdtoInvalidate = farmer.farmerId;
+                        Singleton.getInstance().farmerIdtoInvalidate = farmer.getFarmerId();
                         Realm realm = Realm.getDefaultInstance();
                         realm.beginTransaction();
-                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.getFarmerId()).findFirst();
                         farmerDbObj.setFarmerPicDirty(false);
                         realm.commitTransaction();
                     } else {
@@ -708,14 +708,14 @@ public class WebApi {
 
     private static void attachFarmerIDImageToFarmerObject(final Farmer farmer) {
 
-        if (farmer.nationalCardUrl == null || farmer.nationalCardUrl.isEmpty())
+        if (farmer.getNationalCardUrl() == null || farmer.getNationalCardUrl().isEmpty())
             return;
 
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "ID");
         attachmentMap.put("Name", "national_id.png");
         if(farmer.getNationalCardAttachmentId() == null || farmer.getNationalCardAttachmentId().isEmpty()) {
-            attachmentMap.put("ParentId", farmer.farmerId);
+            attachmentMap.put("ParentId", farmer.getFarmerId());
         }
         else
         {
@@ -727,7 +727,7 @@ public class WebApi {
         byte[] byteArrayImage = null;
         Bitmap bmp = null;
 
-        String imagePath = NetworkHelper.getUploadPathFromUri(farmer.nationalCardUrl);
+        String imagePath = NetworkHelper.getUploadPathFromUri(farmer.getNationalCardUrl());
 //        bmp = PhotoUtils.decodeSampledBitmapFromResource(imagePath);
         bmp = PhotoUtils.getBitmapFromPath(imagePath);
 
@@ -761,7 +761,7 @@ public class WebApi {
                         Log.i("Fennel", "farmer ID picture uploaded successfully!");
                         Realm realm = Realm.getDefaultInstance();
                         realm.beginTransaction();
-                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.getFarmerId()).findFirst();
                         farmerDbObj.setNatIdCardDirty(false);
                         realm.commitTransaction();
                     } else {
@@ -788,7 +788,7 @@ public class WebApi {
                         Log.i("Fennel", "farmer ID picture edited successfully!");
                         Realm realm = Realm.getDefaultInstance();
                         realm.beginTransaction();
-                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.getFarmerId()).findFirst();
                         farmerDbObj.setNatIdCardDirty(false);
                         realm.commitTransaction();
                     } else {
@@ -984,7 +984,7 @@ public class WebApi {
                     }
                 }
 
-                ArrayList<Farmer> allFarmerTasks = Singleton.getInstance().myFarmersTaskList;
+                ArrayList<Farmer> allFarmerTasks = Singleton.getInstance().myFarmersList;
 
                 for (int j = 0; j < allFarmerTasks.size(); j++) {
                     final Farmer farmer = allFarmerTasks.get(j);
@@ -1120,24 +1120,24 @@ public class WebApi {
                     } else {
                         farmingTasks = new RealmList<>();
                         farmingTasks.add(currentTask);
-                        currentFarmer.farmerTasks = farmingTasks;
+                        currentFarmer.setFarmerTasks(farmingTasks);
                     }
 
                 } else {
                     currentFarmer = new Farmer();
-                    currentFarmer.farmerId = farmerId;
-                    currentFarmer.farmId = farmId;
-                    currentFarmer.idNumber = farmerIdNumber;
-                    currentFarmer.fullName = farmerName;
-                    currentFarmer.mobileNumber = mobileNumber;
-                    currentFarmer.subLocation = subLocationName;
-                    currentFarmer.villageName = villageName;
-                    currentFarmer.isHeader = false;
+                    currentFarmer.setFarmerId(farmerId);
+                    currentFarmer.setFarmId(farmId);
+                    currentFarmer.setIdNumber(farmerIdNumber);
+                    currentFarmer.setFullName(farmerName);
+                    currentFarmer.setMobileNumber(mobileNumber);
+                    currentFarmer.setSubLocation(subLocationName);
+                    currentFarmer.setVillageName(villageName);
+                    currentFarmer.setHeader(false);
                     currentFarmer.setFarmerType(Constants.FarmerType.MYFARMERTASKS);
 
                     farmingTasks = new RealmList<>();
                     farmingTasks.add(currentTask);
-                    currentFarmer.farmerTasks = farmingTasks;
+                    currentFarmer.setFarmerTasks(farmingTasks);
 
                     farmersMap.put(farmerIdNumber, currentFarmer);
                 }
@@ -1149,7 +1149,7 @@ public class WebApi {
         }
 
         addFarmerTasksToDB(farmersTaskList);
-        Singleton.getInstance().myFarmersTaskList = (ArrayList<Farmer>) farmersTaskList;
+        Singleton.getInstance().myFarmersList = (ArrayList<Farmer>) farmersTaskList;
     }
 
     private static void addFarmerTasksToDB(List<Farmer> farmersTaskList) {

@@ -11,14 +11,14 @@ import io.realm.RealmObject;
  */
 public class Task extends RealmObject implements Parcelable {
 
-    public String taskId;
-    public String name;
-    public String startedDate;
-    public String completionDate;
-    public String dueDate;
-    public String status;
-    public boolean isHeader;
-    public RealmList<TaskItem> taskItems = new RealmList<>();
+    private String taskId;
+    private String name;
+    private String startedDate;
+    private String completionDate;
+    private String dueDate;
+    private String status;
+    private boolean isHeader;
+    private RealmList<TaskItem> taskItems = new RealmList<>();
 
     public Task(){
 

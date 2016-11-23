@@ -7,34 +7,34 @@ import com.google.gson.annotations.SerializedName;
  */
 public class Farm {
 
-    public String farmId;
+    private String farmId;
 
     @SerializedName("Name")
-    public String name = "";
+    private String name = "";
 
     @SerializedName("Facilitator__c")
-    public String facilitatorId;
+    private String facilitatorId;
 
     @SerializedName("Farmers__c")
-    public String farmerId;
+    private String farmerId;
 
     @SerializedName("Farmer_Enrollment_Date__c")
-    public String farmerEnrollmentDate;
+    private String farmerEnrollmentDate;
 
     @SerializedName("Location__c")
-    public String location;
+    private String location;
 
     @SerializedName("Sub_Location__c")
-    public String subLocation;
+    private String subLocation;
 
     @SerializedName("Village__c")
-    public String villageName;
+    private String villageName;
 
     @SerializedName("Tree__c")
-    public String treeSpecies;
+    private String treeSpecies;
 
     @SerializedName("Status__c")
-    public String farmerStatus;
+    private String farmerStatus;
 
     public void setFacilitatorId(String facilitatorId) {
         this.facilitatorId = facilitatorId;
@@ -68,4 +68,51 @@ public class Farm {
         this.farmerStatus = farmerStatus;
     }
 
+    public String getFarmId() {
+        return farmId;
+    }
+
+    public void setFarmId(String farmId) {
+        this.farmId = farmId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getFacilitatorId() {
+        return facilitatorId;
+    }
+
+    public String getFarmerId() {
+        return farmerId;
+    }
+
+    public String getFarmerEnrollmentDate() {
+        return farmerEnrollmentDate;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public String getSubLocation() {
+        return subLocation;
+    }
+
+    public String getVillageName() {
+        return villageName;
+    }
+
+    public String getTreeSpecies() {
+        return treeSpecies;
+    }
+
+    public String getFarmerStatus() {
+        return farmerStatus;
+    }
 }

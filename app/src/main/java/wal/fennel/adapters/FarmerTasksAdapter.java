@@ -137,7 +137,7 @@ public class FarmerTasksAdapter extends BaseAdapter {
             String thumbUrl = farmer.getThumbUrl();
             if(thumbUrl != null && !thumbUrl.isEmpty())
             {
-                if(Singleton.getInstance().farmerIdtoInvalidate.equalsIgnoreCase(farmer.farmerId)) {
+                if(Singleton.getInstance().farmerIdtoInvalidate.equalsIgnoreCase(farmer.getFarmerId())) {
                     MyPicassoInstance.getInstance().invalidate(thumbUrl);
                     Singleton.getInstance().farmerIdtoInvalidate = "";
                 }
