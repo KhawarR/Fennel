@@ -134,17 +134,17 @@ public class FarmerStatus extends BaseFragment {
 
     private void dummyDataPop(){
 
-        Task doing = new Task("", "DOING", "", "", "", "", true);
-        Task task1 = new Task("1", "DummyTask1", "2016-11-10", null, "2016-11-30", Constants.STR_IN_PROGRESS, false);
-        Task task2 = new Task("2", "DummyTask2", "2016-11-10", null, "2016-11-20", Constants.STR_IN_PROGRESS, false);
+        Task doing = new Task("", "DOING", "", "", "", "", true, null);
+        Task task1 = new Task("1", "DummyTask1", "2016-11-10", null, "2016-11-30", Constants.STR_IN_PROGRESS, false, null);
+        Task task2 = new Task("2", "DummyTask2", "2016-11-10", null, "2016-11-20", Constants.STR_IN_PROGRESS, false, null);
 
-        Task notStarted = new Task("", "NOT STARTED", "", "", "", "", true);
-        Task task3 = new Task("3", "DummyTask3", null, "2016-11-15", "2016-11-20", Constants.STR_NOT_STARTED, false);
-        Task task4 = new Task("4", "DummyTask4", null, null, "2016-11-20", Constants.STR_NOT_STARTED, false);
+        Task notStarted = new Task("", "NOT STARTED", "", "", "", "", true, null);
+        Task task3 = new Task("3", "DummyTask3", null, "2016-11-15", "2016-11-20", Constants.STR_NOT_STARTED, false, null);
+        Task task4 = new Task("4", "DummyTask4", null, null, "2016-11-20", Constants.STR_NOT_STARTED, false, null);
 
-        Task done = new Task("", "DONE", "", "", "", "", true);
-        Task task5 = new Task("5", "DummyTask5", "2016-11-10", "2016-11-15", "2016-11-20", Constants.STR_COMPLETED, false);
-        Task task6 = new Task("6", "DummyTask6", "2016-11-10", "2016-11-15", "2016-11-13", Constants.STR_COMPLETED, false);
+        Task done = new Task("", "DONE", "", "", "", "", true, null);
+        Task task5 = new Task("5", "DummyTask5", "2016-11-10", "2016-11-15", "2016-11-20", Constants.STR_COMPLETED, false, null);
+        Task task6 = new Task("6", "DummyTask6", "2016-11-10", "2016-11-15", "2016-11-13", Constants.STR_COMPLETED, false, null);
 
         dummyTaskList.add(doing);
         dummyTaskList.add(task1);
@@ -224,7 +224,7 @@ public class FarmerStatus extends BaseFragment {
     };
 
     private void parseData(String data) throws JSONException {
-
+        
     }
 
     @Override

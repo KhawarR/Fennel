@@ -4,12 +4,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import io.realm.RealmModel;
+import io.realm.RealmObject;
 
 /**
  * Created by Khawar on 22/11/2016.
  */
 
-public class TaskItemOption implements Parcelable, RealmModel {
+public class TaskItemOption extends RealmObject implements Parcelable{
 
     public String id = "";
     public String name = "";
