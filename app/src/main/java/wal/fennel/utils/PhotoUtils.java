@@ -105,6 +105,9 @@ public class PhotoUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        catch (NullPointerException e){
+            e.printStackTrace();
+        }
         return imageBitmap;
     }
 }

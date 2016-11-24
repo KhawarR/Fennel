@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -445,13 +447,20 @@ public class WebApi {
             byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(imagePath));
         }
 
-        RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
-        RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
+        if(byteArrayImage != null){
+            RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
+            RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
-        if (attAboutId == null || attAboutId.isEmpty()) {
-            WebApi.addAttachment(callback, entityBody, imageBody);
-        } else {
-            WebApi.editAttachment(callback, attAboutId, entityBody, imageBody);
+            if (attAboutId == null || attAboutId.isEmpty()) {
+                WebApi.addAttachment(callback, entityBody, imageBody);
+            } else {
+                WebApi.editAttachment(callback, attAboutId, entityBody, imageBody);
+            }
+        }
+        else {
+            Exception e = new Exception("ByteArrayImage: addAboutMeImage() - " + imagePath);
+            Crashlytics.logException(e);
+            Log.i("ByteArrayImage" , "addAboutMeImage() - " + imagePath);
         }
     }
 
@@ -620,65 +629,72 @@ public class WebApi {
             byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(imagePath));
         }
 
-        RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
-        RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
+        if(byteArrayImage != null){
+            RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
+            RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
-        countCalls++;
-        if (farmer.getThumbAttachmentId() == null || farmer.getThumbAttachmentId().isEmpty()) {
-            WebApi.addAttachment(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    countCalls--;
-                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                        Log.i("Fennel", "farmer profile picture uploaded successfully!");
-                        Realm realm = Realm.getDefaultInstance();
-                        realm.beginTransaction();
-                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
-                        farmerDbObj.setFarmerPicDirty(false);
-                        realm.commitTransaction();
-                    } else {
+            countCalls++;
+            if (farmer.getThumbAttachmentId() == null || farmer.getThumbAttachmentId().isEmpty()) {
+                WebApi.addAttachment(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        countCalls--;
+                        if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                            Log.i("Fennel", "farmer profile picture uploaded successfully!");
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                            farmerDbObj.setFarmerPicDirty(false);
+                            realm.commitTransaction();
+                        } else {
+                            countFailedCalls++;
+                            Log.i("Fennel", "farmer profile picture upload failed!");
+                        }
+                        checkSyncComplete();
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        countCalls--;
                         countFailedCalls++;
+                        checkSyncComplete();
                         Log.i("Fennel", "farmer profile picture upload failed!");
                     }
-                    checkSyncComplete();
-                }
+                }, entityBody, imageBody);
+            } else {
+                WebApi.editAttachment(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        countCalls--;
+                        if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                            Log.i("Fennel", "farmer profile picture edited successfully!");
+                            Singleton.getInstance().farmerIdtoInvalidate = farmer.farmerId;
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                            farmerDbObj.setFarmerPicDirty(false);
+                            realm.commitTransaction();
+                        } else {
+                            countFailedCalls++;
+                            Log.i("Fennel", "farmer profile picture edit failed!");
+                        }
+                        checkSyncComplete();
+                    }
 
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    countCalls--;
-                    countFailedCalls++;
-                    checkSyncComplete();
-                    Log.i("Fennel", "farmer profile picture upload failed!");
-                }
-            }, entityBody, imageBody);
-        } else {
-            WebApi.editAttachment(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    countCalls--;
-                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                        Log.i("Fennel", "farmer profile picture edited successfully!");
-                        Singleton.getInstance().farmerIdtoInvalidate = farmer.farmerId;
-                        Realm realm = Realm.getDefaultInstance();
-                        realm.beginTransaction();
-                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
-                        farmerDbObj.setFarmerPicDirty(false);
-                        realm.commitTransaction();
-                    } else {
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        countCalls--;
                         countFailedCalls++;
+                        checkSyncComplete();
                         Log.i("Fennel", "farmer profile picture edit failed!");
                     }
-                    checkSyncComplete();
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    countCalls--;
-                    countFailedCalls++;
-                    checkSyncComplete();
-                    Log.i("Fennel", "farmer profile picture edit failed!");
-                }
-            }, farmer.getThumbAttachmentId(), entityBody, imageBody);
+                }, farmer.getThumbAttachmentId(), entityBody, imageBody);
+            }
+        }
+        else {
+            Exception e = new Exception("ByteArrayImage: attachFarmerImageToFarmerObject() - " + imagePath);
+            Crashlytics.logException(e);
+            Log.i("ByteArrayImage" , "attachFarmerImageToFarmerObject() - " + imagePath);
         }
     }
 
@@ -724,64 +740,71 @@ public class WebApi {
             byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(imagePath));
         }
 
-        RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
-        RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
+        if(byteArrayImage != null){
+            RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
+            RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
-        countCalls++;
-        if (farmer.getNationalCardAttachmentId() == null || farmer.getNationalCardAttachmentId().isEmpty()) {
-            WebApi.addAttachment(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    countCalls--;
-                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                        Log.i("Fennel", "farmer ID picture uploaded successfully!");
-                        Realm realm = Realm.getDefaultInstance();
-                        realm.beginTransaction();
-                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
-                        farmerDbObj.setNatIdCardDirty(false);
-                        realm.commitTransaction();
-                    } else {
-                        countFailedCalls++;
+            countCalls++;
+            if (farmer.getNationalCardAttachmentId() == null || farmer.getNationalCardAttachmentId().isEmpty()) {
+                WebApi.addAttachment(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        countCalls--;
+                        if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                            Log.i("Fennel", "farmer ID picture uploaded successfully!");
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                            farmerDbObj.setNatIdCardDirty(false);
+                            realm.commitTransaction();
+                        } else {
+                            countFailedCalls++;
+                            Log.i("Fennel", "farmer ID picture upload failed!");
+                        }
+                        checkSyncComplete();
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
                         Log.i("Fennel", "farmer ID picture upload failed!");
-                    }
-                    checkSyncComplete();
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.i("Fennel", "farmer ID picture upload failed!");
-                    countCalls--;
-                    countFailedCalls++;
-                    checkSyncComplete();
-                }
-            }, entityBody, imageBody);
-        } else {
-            WebApi.editAttachment(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    countCalls--;
-                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                        Log.i("Fennel", "farmer ID picture edited successfully!");
-                        Realm realm = Realm.getDefaultInstance();
-                        realm.beginTransaction();
-                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
-                        farmerDbObj.setNatIdCardDirty(false);
-                        realm.commitTransaction();
-                    } else {
-                        Log.i("Fennel", "farmer ID picture edit failed!");
+                        countCalls--;
                         countFailedCalls++;
+                        checkSyncComplete();
                     }
-                    checkSyncComplete();
-                }
+                }, entityBody, imageBody);
+            } else {
+                WebApi.editAttachment(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        countCalls--;
+                        if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                            Log.i("Fennel", "farmer ID picture edited successfully!");
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.farmerId).findFirst();
+                            farmerDbObj.setNatIdCardDirty(false);
+                            realm.commitTransaction();
+                        } else {
+                            Log.i("Fennel", "farmer ID picture edit failed!");
+                            countFailedCalls++;
+                        }
+                        checkSyncComplete();
+                    }
 
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.i("Fennel", "farmer ID picture edit failed!");
-                    countCalls--;
-                    countFailedCalls++;
-                    checkSyncComplete();
-                }
-            }, farmer.getNationalCardAttachmentId(), entityBody, imageBody);
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.i("Fennel", "farmer ID picture edit failed!");
+                        countCalls--;
+                        countFailedCalls++;
+                        checkSyncComplete();
+                    }
+                }, farmer.getNationalCardAttachmentId(), entityBody, imageBody);
+            }
+        }
+        else {
+            Exception e = new Exception("ByteArrayImage: attachFarmerIDImageToFarmerObject() - " + imagePath);
+            Crashlytics.logException(e);
+            Log.i("ByteArrayImage" , "attachFarmerIDImageToFarmerObject() - " + imagePath);
         }
     }
 
