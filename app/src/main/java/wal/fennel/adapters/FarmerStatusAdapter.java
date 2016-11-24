@@ -1,14 +1,17 @@
 package wal.fennel.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.squareup.picasso.NetworkPolicy;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -19,6 +22,7 @@ import wal.fennel.models.Farmer;
 import wal.fennel.models.Task;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.utils.Constants;
+import wal.fennel.utils.FennelUtils;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.Singleton;
 import wal.fennel.views.FontTextView;
@@ -131,6 +135,38 @@ public class FarmerStatusAdapter extends BaseAdapter {
             // Set contact name and number
             FontTextView name = (FontTextView) view.findViewById(R.id.tvFarmerName);
             name.setText( task.getName());
+
+            LinearLayout llDueDate = (LinearLayout) view.findViewById(R.id.llDeadLineDate);
+            llDueDate.setVisibility(View.GONE);
+            View dueDateIndicator = view.findViewById(R.id.vDeadlineIndicator);
+            dueDateIndicator.setBackgroundColor(Color.TRANSPARENT);
+
+            String dueDate = task.getDueDate();
+            if(dueDate != null){
+                FontTextView tvDueDateDay = (FontTextView) view.findViewById(R.id.tvDeadlineDay);
+                FontTextView tvDueDateMonth = (FontTextView) view.findViewById(R.id.tvDeadlineMonth);
+
+                try {
+                    String dueDateDay = FennelUtils.getFormattedTime(dueDate, Constants.STR_TIME_FORMAT_YYYY_MM_DD, "dd");
+                    String dueDateMonth = FennelUtils.getFormattedTime(dueDate, Constants.STR_TIME_FORMAT_YYYY_MM_DD, "MMM");
+
+                    tvDueDateDay.setText(dueDateDay);
+                    tvDueDateMonth.setText(dueDateMonth);
+
+                    llDueDate.setVisibility(View.VISIBLE);
+                }
+                catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    long dueDateMillis = FennelUtils.getTimeInMillis(dueDate, Constants.STR_TIME_FORMAT_YYYY_MM_DD);
+                    if(dueDateMillis <= System.currentTimeMillis())
+                        dueDateIndicator.setBackgroundResource(R.color.dark_red);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         return view;
