@@ -5,9 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
-
-import com.squareup.picasso.NetworkPolicy;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,15 +28,11 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import wal.fennel.R;
-import wal.fennel.activities.LoginActivity;
-import wal.fennel.adapters.MySignupsAdapter;
+import wal.fennel.activities.SplashActivity;
 import wal.fennel.application.Fennel;
 import wal.fennel.datamodels.Auth;
-import wal.fennel.models.Farm;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.ResponseModel;
-import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PhotoUtils;
@@ -231,7 +224,7 @@ public class WebApi {
                         {
                             countFailedCalls++;
                             PreferenceHelper.getInstance().clearSession(false);
-                            Intent intent = new Intent(mContext, LoginActivity.class);
+                            Intent intent = new Intent(mContext, SplashActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             mContext.startActivity(intent);
                         } else {
@@ -263,7 +256,7 @@ public class WebApi {
                         } else if (response.code() == 401) {
                             countFailedCalls++;
                             PreferenceHelper.getInstance().clearSession(false);
-                            Intent intent = new Intent(mContext, LoginActivity.class);
+                            Intent intent = new Intent(mContext, SplashActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             mContext.startActivity(intent);
                         } else {
@@ -345,7 +338,7 @@ public class WebApi {
                         {
                             countFailedCalls++;
                             PreferenceHelper.getInstance().clearSession(false);
-                            Intent intent = new Intent(mContext, LoginActivity.class);
+                            Intent intent = new Intent(mContext, SplashActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             mContext.startActivity(intent);
                         } else {
@@ -381,7 +374,7 @@ public class WebApi {
                         {
                             countFailedCalls++;
                             PreferenceHelper.getInstance().clearSession(false);
-                            Intent intent = new Intent(mContext, LoginActivity.class);
+                            Intent intent = new Intent(mContext, SplashActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             mContext.startActivity(intent);
                         } else {
@@ -526,7 +519,7 @@ public class WebApi {
                 {
                     countFailedCalls++;
                     PreferenceHelper.getInstance().clearSession(false);
-                    Intent intent = new Intent(mContext, LoginActivity.class);
+                    Intent intent = new Intent(mContext, SplashActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(intent);
                 } else {
@@ -567,7 +560,7 @@ public class WebApi {
                 {
                     countFailedCalls++;
                     PreferenceHelper.getInstance().clearSession(false);
-                    Intent intent = new Intent(mContext, LoginActivity.class);
+                    Intent intent = new Intent(mContext, SplashActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(intent);
                 } else {

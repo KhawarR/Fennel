@@ -57,4 +57,8 @@
         <item>TREE SPECIES 2</item>
         <item>TREE SPECIES 3</item>
     </string-array>
+
+    <string name="title_activity_splash">SplashActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>
