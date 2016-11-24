@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.realm.RealmList;
 import wal.fennel.R;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.Task;
@@ -28,7 +29,7 @@ import wal.fennel.views.FontTextView;
 public class FarmerStatusAdapter extends BaseAdapter {
 
     private Context mContext;
-    private ArrayList<Task> mList = new ArrayList<>();
+    private RealmList<Task> mList = new RealmList<>();
 
     // View Type for Separators
     private static final int ITEM_VIEW_TYPE_SEPARATOR = 0;
@@ -38,7 +39,7 @@ public class FarmerStatusAdapter extends BaseAdapter {
     // -- Separators and Regular rows --
     private static final int ITEM_VIEW_TYPE_COUNT = 2;
 
-    public FarmerStatusAdapter(Context context, ArrayList<Task> list) {
+    public FarmerStatusAdapter(Context context, RealmList<Task> list) {
         mContext = context;
         mList.addAll(list);
     }

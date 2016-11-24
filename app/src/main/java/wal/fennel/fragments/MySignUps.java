@@ -57,6 +57,8 @@ import wal.fennel.models.Farmer;
 import wal.fennel.models.Location;
 import wal.fennel.models.SubLocation;
 import wal.fennel.models.Task;
+import wal.fennel.models.TaskItem;
+import wal.fennel.models.TaskItemOption;
 import wal.fennel.models.Tree;
 import wal.fennel.models.Village;
 import wal.fennel.network.NetworkHelper;
@@ -1274,8 +1276,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                     try {
                         responseStr = response.body().string();
-//                        PreferenceHelper.getInstance().writeFirstRun(false);
                         parseMyFarmersData(responseStr);
+                        getFarmerTaskItems();
                         WebApi.getMyFarmerAttachments(myFarmerTasksAttachments);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -1343,4 +1345,149 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
     };
 
+    private void getFarmerTaskItems(){
+
+        loadingStarted();
+
+        String farmingTaskIds = "";
+
+        for (int i = 0; i < Singleton.getInstance().myFarmersList.size(); i++) {
+
+            Farmer farmer = Singleton.getInstance().myFarmersList.get(i);
+
+            if(farmer.getFarmerTasks().size() > 0){
+                for (int j = 0; j < farmer.getFarmerTasks().size(); j++) {
+                    String id = farmer.getFarmerTasks().get(j).getTaskId();
+                    id = "'" + id + "'";
+
+                    farmingTaskIds = farmingTaskIds + id;
+
+                    if(j + 1 != farmer.getFarmerTasks().size()){
+                        farmingTaskIds = farmingTaskIds + ",";
+                    }
+                }
+            }
+        }
+
+        WebApi.getFarmingTaskItems(farmerStatusCallback, farmingTaskIds);
+    }
+
+    private Callback<ResponseBody> farmerStatusCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            loadingFinished();
+            if(isValid())
+            {
+                if (response.code() == 200) {
+                    String responseStr = "";
+
+                    try {
+                        responseStr = response.body().string();
+                        parseTaskItemData(responseStr);
+                        Log.i("Parsing" , "Complete" );
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if(response.code() == 401)
+                {
+                    PreferenceHelper.getInstance().clearSession(false);
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    getActivity().finish();
+                }
+                else
+                {
+                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
+    private void parseTaskItemData(String data) throws JSONException {
+
+        // clear old lists
+        for (int i = 0; i < Singleton.getInstance().myFarmersList.size(); i++) {
+
+            if(Singleton.getInstance().myFarmersList.get(i).getFarmerTasks() != null){
+
+                for (int j = 0; j < Singleton.getInstance().myFarmersList.get(i).getFarmerTasks().size(); j++) {
+
+                    if(Singleton.getInstance().myFarmersList.get(i).getFarmerTasks().get(j).getTaskItems() != null){
+
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        Singleton.getInstance().myFarmersList.get(i).getFarmerTasks().get(j).getTaskItems().clear();
+                        realm.commitTransaction();
+                    }
+                }
+            }
+        }
+
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        for (int i = 0; i < arrRecords.length(); i++) {
+
+            JSONObject objTask = arrRecords.getJSONObject(i);
+
+            String id = objTask.getString("Id");
+            String textValue = objTask.getString("Text_Value__c");
+            int sequence = objTask.getInt("Sequence__c");
+            String recordType = objTask.getJSONObject("RecordType").getString("Name");
+            String name = objTask.getString("Name");
+            double latitude = objTask.optDouble("Location__Latitude__s");
+            if(Double.isNaN(latitude))
+                latitude = 0;
+            double longitude = objTask.optDouble("Location__Longitude__s");
+            if(Double.isNaN(longitude))
+                longitude = 0;
+            String gpsTakenTime = objTask.getString("GPS_Taken_Time__c");
+            String fileType = objTask.getString("File_Type__c");
+            String farmingTaskId = objTask.getString("Farming_Task__c");
+            String description = objTask.getString("Description__c");
+
+            RealmList<TaskItemOption> options = new RealmList<>();
+
+            JSONObject objOptions = objTask.optJSONObject("Task_Item_Options__r");
+            if(objOptions != null){
+                JSONArray arrOptions = objOptions.getJSONArray("records");
+                for (int j = 0; j < arrOptions.length(); j++) {
+                    JSONObject objOption = arrOptions.getJSONObject(j);
+                    String optionId = objOption.getString("Id");
+                    String optionName = objOption.getString("Name");
+                    boolean isValue = objOption.getBoolean("Value__c");
+
+                    options.add(new TaskItemOption(optionId, optionName, isValue));
+                }
+            }
+
+            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, gpsTakenTime, latitude, longitude, options);
+
+            for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
+
+                if(Singleton.getInstance().myFarmersList.get(j).getFarmerTasks() != null){
+
+                    for (int k = 0; k < Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().size(); k++) {
+
+                        if (taskItem.getFarmingTaskId().equalsIgnoreCase(Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskId())){
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            if(Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskItems() == null)
+                                Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).setTaskItems(new RealmList<TaskItem>());
+                            Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskItems().add(taskItem);
+                            realm.commitTransaction();
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
