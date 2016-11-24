@@ -1,7 +1,6 @@
 package wal.fennel.activities;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -9,13 +8,10 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 
 import wal.fennel.R;
-import wal.fennel.application.Fennel;
 import wal.fennel.fragments.Login;
-import wal.fennel.fragments.SplashFragment;
-import wal.fennel.utils.PreferenceHelper;
 
 
-public class LoginActivity extends BaseActivity implements SplashFragment.CountDownListener {
+public class LoginActivity extends BaseActivity {
 
     private final int permsRequestCode = 200;
 
@@ -27,7 +23,9 @@ public class LoginActivity extends BaseActivity implements SplashFragment.CountD
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         if (savedInstanceState == null)
-            replaceFragment(new SplashFragment(), false);
+            replaceFragment(new Login(), false);
+
+        checkPermissions();
 
     }
 
@@ -83,21 +81,6 @@ public class LoginActivity extends BaseActivity implements SplashFragment.CountD
 
             // other 'case' lines to check for other
             // permissions this app might request
-        }
-    }
-
-    public void callLoginFragment() {
-
-        PreferenceHelper.getInstance().writeIsSyncInProgress(false);
-
-        if(!PreferenceHelper.getInstance().readToken().isEmpty() && !PreferenceHelper.getInstance().readLoginUserId().isEmpty())
-        {
-            Fennel.restClient.setApiBaseUrl(PreferenceHelper.getInstance().readInstanceUrl());
-            startActivity(new Intent(this, MainActivity.class));
-            this.finish();
-        } else {
-            replaceFragment(new Login(), false);
-            checkPermissions();
         }
     }
 }

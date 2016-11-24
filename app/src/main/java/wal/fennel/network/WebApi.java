@@ -7,6 +7,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,6 +34,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import wal.fennel.activities.SplashActivity;
 import wal.fennel.activities.LoginActivity;
 import wal.fennel.application.Fennel;
 import wal.fennel.datamodels.Auth;
@@ -251,7 +254,7 @@ public class WebApi {
                         {
                             countFailedCalls++;
                             PreferenceHelper.getInstance().clearSession(false);
-                            Intent intent = new Intent(mContext, LoginActivity.class);
+                            Intent intent = new Intent(mContext, SplashActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             mContext.startActivity(intent);
                         } else {
@@ -283,7 +286,7 @@ public class WebApi {
                         } else if (response.code() == 401) {
                             countFailedCalls++;
                             PreferenceHelper.getInstance().clearSession(false);
-                            Intent intent = new Intent(mContext, LoginActivity.class);
+                            Intent intent = new Intent(mContext, SplashActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             mContext.startActivity(intent);
                         } else {
@@ -365,7 +368,7 @@ public class WebApi {
                         {
                             countFailedCalls++;
                             PreferenceHelper.getInstance().clearSession(false);
-                            Intent intent = new Intent(mContext, LoginActivity.class);
+                            Intent intent = new Intent(mContext, SplashActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             mContext.startActivity(intent);
                         } else {
@@ -401,7 +404,7 @@ public class WebApi {
                         {
                             countFailedCalls++;
                             PreferenceHelper.getInstance().clearSession(false);
-                            Intent intent = new Intent(mContext, LoginActivity.class);
+                            Intent intent = new Intent(mContext, SplashActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                             mContext.startActivity(intent);
                         } else {
@@ -472,13 +475,20 @@ public class WebApi {
             byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(imagePath));
         }
 
-        RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
-        RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
+        if(byteArrayImage != null){
+            RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
+            RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
-        if (attAboutId == null || attAboutId.isEmpty()) {
-            WebApi.addAttachment(callback, entityBody, imageBody);
-        } else {
-            WebApi.editAttachment(callback, attAboutId, entityBody, imageBody);
+            if (attAboutId == null || attAboutId.isEmpty()) {
+                WebApi.addAttachment(callback, entityBody, imageBody);
+            } else {
+                WebApi.editAttachment(callback, attAboutId, entityBody, imageBody);
+            }
+        }
+        else {
+            Exception e = new Exception("ByteArrayImage: addAboutMeImage() - " + imagePath);
+            Crashlytics.logException(e);
+            Log.i("ByteArrayImage" , "addAboutMeImage() - " + imagePath);
         }
     }
 
@@ -546,7 +556,7 @@ public class WebApi {
                 {
                     countFailedCalls++;
                     PreferenceHelper.getInstance().clearSession(false);
-                    Intent intent = new Intent(mContext, LoginActivity.class);
+                    Intent intent = new Intent(mContext, SplashActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(intent);
                 } else {
@@ -587,7 +597,7 @@ public class WebApi {
                 {
                     countFailedCalls++;
                     PreferenceHelper.getInstance().clearSession(false);
-                    Intent intent = new Intent(mContext, LoginActivity.class);
+                    Intent intent = new Intent(mContext, SplashActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(intent);
                 } else {
@@ -647,8 +657,9 @@ public class WebApi {
             byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(imagePath));
         }
 
-        RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
-        RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
+        if(byteArrayImage != null){
+            RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
+            RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
         countCalls++;
         if (farmer.getThumbAttachmentId() == null || farmer.getThumbAttachmentId().isEmpty()) {
@@ -698,14 +709,20 @@ public class WebApi {
                     checkSyncComplete();
                 }
 
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    countCalls--;
-                    countFailedCalls++;
-                    checkSyncComplete();
-                    Log.i("Fennel", "farmer profile picture edit failed!");
-                }
-            }, farmer.getThumbAttachmentId(), entityBody, imageBody);
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        countCalls--;
+                        countFailedCalls++;
+                        checkSyncComplete();
+                        Log.i("Fennel", "farmer profile picture edit failed!");
+                    }
+                }, farmer.getThumbAttachmentId(), entityBody, imageBody);
+            }
+        }
+        else {
+            Exception e = new Exception("ByteArrayImage: attachFarmerImageToFarmerObject() - " + imagePath);
+            Crashlytics.logException(e);
+            Log.i("ByteArrayImage" , "attachFarmerImageToFarmerObject() - " + imagePath);
         }
     }
 
@@ -751,8 +768,9 @@ public class WebApi {
             byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(imagePath));
         }
 
-        RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
-        RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
+        if(byteArrayImage != null){
+            RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
+            RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
         countCalls++;
         if (farmer.getNationalCardAttachmentId() == null || farmer.getNationalCardAttachmentId().isEmpty()) {
@@ -801,14 +819,20 @@ public class WebApi {
                     checkSyncComplete();
                 }
 
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.i("Fennel", "farmer ID picture edit failed!");
-                    countCalls--;
-                    countFailedCalls++;
-                    checkSyncComplete();
-                }
-            }, farmer.getNationalCardAttachmentId(), entityBody, imageBody);
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.i("Fennel", "farmer ID picture edit failed!");
+                        countCalls--;
+                        countFailedCalls++;
+                        checkSyncComplete();
+                    }
+                }, farmer.getNationalCardAttachmentId(), entityBody, imageBody);
+            }
+        }
+        else {
+            Exception e = new Exception("ByteArrayImage: attachFarmerIDImageToFarmerObject() - " + imagePath);
+            Crashlytics.logException(e);
+            Log.i("ByteArrayImage" , "attachFarmerIDImageToFarmerObject() - " + imagePath);
         }
     }
 
