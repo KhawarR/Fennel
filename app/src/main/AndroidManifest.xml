@@ -2,41 +2,48 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="wal.fennel">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
-        android:name="wal.fennel.application.Fennel"
+        android:name=".application.Fennel"
         android:allowBackup="true"
         android:icon="@mipmap/ic_app_logo"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:largeHeap="true">
+        android:theme="@style/AppTheme">
         <activity
-            android:name="wal.fennel.activities.LoginActivity"
-            android:theme="@style/AppTheme.TranslucentStatusBar"
-            android:windowSoftInputMode="adjustPan"
-            android:screenOrientation="portrait">
+            android:name=".activities.SplashActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/FullscreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name="wal.fennel.activities.MainActivity"
-            android:theme="@style/AppTheme"
+            android:name=".activities.LoginActivity"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|adjustResize"/>
+            android:theme="@style/AppTheme.TranslucentStatusBar"
+            android:windowSoftInputMode="adjustPan">
+        </activity>
         <activity
-            android:name="wal.fennel.activities.AboutMe"
+            android:name=".activities.MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
-            android:screenOrientation="portrait"/>
-        <receiver android:name="wal.fennel.network.NetworkChangeReceiver" >
+            android:windowSoftInputMode="adjustPan|adjustResize" />
+        <activity
+            android:name=".activities.AboutMe"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
+
+        <receiver android:name=".network.NetworkChangeReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="d3e227cb7f57d1985242cf57557781227233f3fb" />

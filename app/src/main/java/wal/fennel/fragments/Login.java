@@ -25,8 +25,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import wal.fennel.R;
-import wal.fennel.activities.LoginActivity;
 import wal.fennel.activities.MainActivity;
+import wal.fennel.activities.SplashActivity;
 import wal.fennel.application.Fennel;
 import wal.fennel.datamodels.Auth;
 import wal.fennel.network.Session;
@@ -160,7 +160,7 @@ public class Login extends BaseFragment{
             else if(response.code() == 401)
             {
                 PreferenceHelper.getInstance().clearSession(false);
-                startActivity(new Intent(getActivity(), LoginActivity.class));
+                startActivity(new Intent(getActivity(), SplashActivity.class));
                 getActivity().finish();
             }
             else

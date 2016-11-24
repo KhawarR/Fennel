@@ -50,7 +50,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
-import wal.fennel.activities.LoginActivity;
+import wal.fennel.activities.SplashActivity;
 import wal.fennel.adapters.MySignupsAdapter;
 import wal.fennel.common.database.DatabaseHelper;
 import wal.fennel.models.Farmer;
@@ -338,7 +338,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 else if(response.code() == 401)
                 {
                     PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    startActivity(new Intent(getActivity(), SplashActivity.class));
                     getActivity().finish();
                 }
                 else
@@ -527,7 +527,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 else if(response.code() == 401)
                 {
                     PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    startActivity(new Intent(getActivity(), SplashActivity.class));
                     getActivity().finish();
                 }
                 else
@@ -730,7 +730,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 else if(response.code() == 401)
                 {
                     PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    startActivity(new Intent(getActivity(), SplashActivity.class));
                     getActivity().finish();
                 }
                 else
@@ -800,7 +800,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 else if(response.code() == 401)
                 {
                     PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    startActivity(new Intent(getActivity(), SplashActivity.class));
                     getActivity().finish();
                 }
                 else
@@ -874,7 +874,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 else if(response.code() == 401)
                 {
                     PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    startActivity(new Intent(getActivity(), SplashActivity.class));
                     getActivity().finish();
                 }
                 else
@@ -948,7 +948,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 else if(response.code() == 401)
                 {
                     PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    startActivity(new Intent(getActivity(), SplashActivity.class));
                     getActivity().finish();
                 }
                 else
