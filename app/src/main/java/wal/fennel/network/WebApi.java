@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 
@@ -35,7 +34,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import wal.fennel.activities.SplashActivity;
-import wal.fennel.activities.LoginActivity;
 import wal.fennel.application.Fennel;
 import wal.fennel.datamodels.Auth;
 import wal.fennel.models.Farmer;

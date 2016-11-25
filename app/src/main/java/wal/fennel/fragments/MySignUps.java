@@ -1289,7 +1289,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 else if(response.code() == 401)
                 {
                     PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    startActivity(new Intent(getActivity(), SplashActivity.class));
                     getActivity().finish();
                 }
                 else
@@ -1328,7 +1328,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 else if(response.code() == 401)
                 {
                     PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    startActivity(new Intent(getActivity(), SplashActivity.class));
                     getActivity().finish();
                 }
                 else
@@ -1394,7 +1394,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 else if(response.code() == 401)
                 {
                     PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    startActivity(new Intent(getActivity(), SplashActivity.class));
                     getActivity().finish();
                 }
                 else
