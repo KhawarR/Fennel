@@ -110,7 +110,27 @@ public class WebApi {
     }
 
     public static boolean getMyFarmerAttachments(Callback<ResponseBody> callback){
-        String query = NetworkHelper.QUERY_MY_SIGNUPS_ATTACHMENTS;
+
+        String farmerIds = "";
+
+        for (int i = 0; i < Singleton.getInstance().mySignupsList.size(); i++) {
+
+            Farmer farmer = Singleton.getInstance().mySignupsList.get(i);
+
+            if(!farmer.isHeader() && !farmer.getFarmerId().isEmpty()){
+                String id = farmer.getFarmerId();
+
+                id = "'" + id + "'";
+
+                farmerIds = farmerIds + id;
+
+                if(i+1 != Singleton.getInstance().mySignupsList.size()){
+                    farmerIds = farmerIds + ",";
+                }
+            }
+        }
+
+        String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS_ATTACHMENTS, farmerIds);
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         return processCall(apiCall, callback);
     }
