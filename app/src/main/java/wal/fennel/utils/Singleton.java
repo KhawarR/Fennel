@@ -3,6 +3,7 @@ package wal.fennel.utils;
 import java.util.ArrayList;
 
 import wal.fennel.models.Farmer;
+import wal.fennel.models.TaskItem;
 
 /**
  * Created by Khawar on 18/10/2016.
@@ -13,6 +14,7 @@ public class Singleton {
 
     public ArrayList<Farmer> mySignupsList = new ArrayList<>();
     public ArrayList<Farmer> myFarmersList = new ArrayList<>();
+    public ArrayList<TaskItem> taskItems = new ArrayList<>();
 
     private static Singleton instance;
 

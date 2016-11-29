@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -31,6 +32,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,8 +54,10 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
+import wal.fennel.activities.LoginActivity;
 import wal.fennel.activities.SplashActivity;
 import wal.fennel.adapters.MySignupsAdapter;
+import wal.fennel.application.Fennel;
 import wal.fennel.common.database.DatabaseHelper;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.Location;
@@ -62,6 +68,7 @@ import wal.fennel.models.TaskItemOption;
 import wal.fennel.models.Tree;
 import wal.fennel.models.Village;
 import wal.fennel.network.NetworkHelper;
+import wal.fennel.network.Session;
 import wal.fennel.network.WebApi;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
@@ -93,6 +100,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 //    RealmList<Farmer> myFarmers = new RealmList<>();
     int locationsResponseCounter = 0;
     //endregion
+
+    ArrayList<TaskItem> allTaskItems = null;
 
     @Nullable
     @Override
@@ -1362,7 +1371,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                     farmingTaskIds = farmingTaskIds + id;
 
-                    if(j + 1 != farmer.getFarmerTasks().size()){
+                    if(i+1 != Singleton.getInstance().myFarmersList.size() || j + 1 != farmer.getFarmerTasks().size()){
                         farmingTaskIds = farmingTaskIds + ",";
                     }
                 }
@@ -1383,7 +1392,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                     try {
                         responseStr = response.body().string();
-                        parseTaskItemData(responseStr);
+                        ArrayList<TaskItem> allTaskItems = parseTaskItemData(responseStr);
+                        Singleton.getInstance().taskItems = allTaskItems;
+                        getTaskItemAttachments(allTaskItems);
                         Log.i("Parsing" , "Complete" );
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -1411,7 +1422,11 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
     };
 
-    private void parseTaskItemData(String data) throws JSONException {
+
+
+    private ArrayList<TaskItem> parseTaskItemData(String data) throws JSONException {
+
+        ArrayList<TaskItem> taskItems = null;
 
         // clear old lists
         for (int i = 0; i < Singleton.getInstance().myFarmersList.size(); i++) {
@@ -1433,6 +1448,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if (arrRecords.length() > 0) {
+            taskItems = new ArrayList<>();
+        }
 
         for (int i = 0; i < arrRecords.length(); i++) {
 
@@ -1470,6 +1489,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             }
 
             TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, gpsTakenTime, latitude, longitude, options);
+            taskItems.add(taskItem);
 
             for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
 
@@ -1487,6 +1507,159 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         }
                     }
                 }
+            }
+        }
+
+        return taskItems;
+    }
+
+    private void getTaskItemAttachments(ArrayList<TaskItem> taskItems) {
+
+        WebApi.getAllTaskItemAttachments(taskItemsAttachments);
+    }
+
+    private Callback<ResponseBody> taskItemsAttachments = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            loadingFinished();
+            if(isValid())
+            {
+                if (response.code() == 200) {
+                    String responseStr = "";
+
+                    try {
+                        responseStr = response.body().string();
+                        parseAllTasksAttachments(responseStr);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if(response.code() == 401)
+                {
+                    PreferenceHelper.getInstance().clearSession(false);
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    getActivity().finish();
+                }
+                else
+                {
+                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
+    private void parseAllTasksAttachments(String responseStr) throws JSONException {
+        Log.i("FENNEL", responseStr);
+        JSONObject jsonObject = new JSONObject(responseStr);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if (arrRecords.length() > 0) {
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject taskAttachmentRecord = arrRecords.getJSONObject(i);
+                final String taskItemId = taskAttachmentRecord.getString("Id");
+                final String fileType = taskAttachmentRecord.optString("File_Type__c");
+                JSONObject attachments = taskAttachmentRecord.optJSONObject("Attachments");
+                if (attachments != null && fileType != null) {
+
+                    JSONArray attRecords = attachments.getJSONArray("records");
+                    for (int j = 0; j < attRecords.length(); j++) {
+                        JSONObject attachmentObj = attRecords.getJSONObject(j);
+                        final String attachmentId = attachmentObj.getString("Id");
+                        final String attachmentParentId = attachmentObj.getString("ParentId");
+                        final String filename = attachmentObj.optString("Name");
+                        String[] separated = filename.split("\\.");
+                        final String ext = separated[separated.length-1];
+
+                        Call<ResponseBody> apiCall = Fennel.getWebService().downloadAttachmentForTask(Session.getAuthToken(), NetworkHelper.API_VERSION, attachmentId);
+                        try {
+                            if(getActivity() == null)
+                                Fennel.initWebApi();
+                            if(NetworkHelper.isNetAvailable(getActivity())){
+                                apiCall.enqueue(new Callback<ResponseBody>() {
+                                    @Override
+                                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                        if (response.code() == Constants.RESPONSE_SUCCESS) {
+                                            String attachmentName = attachmentId + "." + ext;
+                                            try {
+                                                File path = Environment.getExternalStorageDirectory();
+//                                                File folder = new File(path + "/" + "Fennel", "TaskAttachments");
+//                                                if (!folder.exists()) {
+//                                                    folder.mkdirs();
+//                                                }
+//                                                File file = new File(Environment.getExternalStorageDirectory() + "/Fennel/TaskAttachments", attachmentName);
+                                                File file = new File(path, attachmentName);
+                                                FileOutputStream fileOutputStream = new FileOutputStream(file);
+                                                try {
+                                                    // Writes bytes from the specified byte array to this file output stream
+                                                    fileOutputStream.write(response.body().bytes());
+                                                }
+                                                catch (FileNotFoundException e) {
+                                                    System.out.println("File not found" + e);
+                                                }
+                                                catch (IOException ioe) {
+                                                    System.out.println("Exception while writing file " + ioe);
+                                                }
+                                                finally {
+                                                    // close the streams using close method
+                                                    try {
+                                                        if (fileOutputStream != null) {
+                                                            fileOutputStream.close();
+                                                            updateTaskItemWithAttachment(taskItemId, attachmentName);
+                                                        } else {
+                                                            file.delete();
+                                                        }
+                                                    }
+                                                    catch (IOException ioe) {
+                                                        System.out.println("Error while closing stream: " + ioe);
+                                                    }
+                                                }
+                                                Log.i("FENNEL", "Write Success!");
+                                            } catch (IOException e) {
+                                                Log.e("FENNEL", "Error while writing file!");
+                                                Log.e("FENNEL", e.toString());
+                                            }
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                        System.out.println(t.toString());
+                                    }
+                                });
+                            }
+                        }
+                        catch (NullPointerException e){
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+            }
+        }
+
+    }
+
+    private void updateTaskItemWithAttachment(String taskItemId, String filename) {
+        ArrayList<TaskItem> allTaskItems = Singleton.getInstance().taskItems;
+        for (TaskItem taskItem : allTaskItems) {
+            if (taskItem.getId().equals(taskItemId)) {
+                Realm realm = Realm.getDefaultInstance();
+                realm.beginTransaction();
+                taskItem.setAttachmentPath(filename);
+                realm.commitTransaction();
+
+                break;
             }
         }
     }

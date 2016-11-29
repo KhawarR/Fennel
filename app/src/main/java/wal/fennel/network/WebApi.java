@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 
@@ -35,7 +34,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import wal.fennel.activities.SplashActivity;
-import wal.fennel.activities.LoginActivity;
 import wal.fennel.application.Fennel;
 import wal.fennel.datamodels.Auth;
 import wal.fennel.models.Farmer;
@@ -194,6 +192,12 @@ public class WebApi {
 
     public static boolean getFarmingTaskItems(Callback<ResponseBody> callback, String farmingTaskIds){
         String query = String.format(NetworkHelper.GET_FARMER_TASK_ITEMS, farmingTaskIds);
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        return processCall(apiCall, callback);
+    }
+
+    public static boolean getAllTaskItemAttachments(Callback<ResponseBody> callback){
+        String query = NetworkHelper.QUERY_TASK_ITEM_ATTACHMENTS;
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         return processCall(apiCall, callback);
     }
@@ -1610,6 +1614,13 @@ public class WebApi {
             }
         }
     }
+
+    public static boolean downloadAttachmentForAttachmentId(String attachmentId, Callback<ResponseBody> callback) {
+
+        Call<ResponseBody> apiCall = Fennel.getWebService().downloadAttachmentForTask(Session.getAuthToken(), NetworkHelper.API_VERSION, attachmentId);
+        return processCall(apiCall, callback);
+    }
+
 
     public interface OnSyncCompleteListener{
         void syncCompleted();
