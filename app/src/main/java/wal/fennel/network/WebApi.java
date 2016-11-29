@@ -196,6 +196,12 @@ public class WebApi {
         return processCall(apiCall, callback);
     }
 
+    public static boolean getAllTaskItemAttachments(Callback<ResponseBody> callback){
+        String query = NetworkHelper.QUERY_TASK_ITEM_ATTACHMENTS;
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        return processCall(apiCall, callback);
+    }
+
     private static <T> boolean processCall(Call<T> call, Callback<T> callback){
         try {
             if(mContext == null)
@@ -1633,6 +1639,13 @@ public class WebApi {
             }
         }
     }
+
+    public static boolean downloadAttachmentForAttachmentId(String attachmentId, Callback<ResponseBody> callback) {
+
+        Call<ResponseBody> apiCall = Fennel.getWebService().downloadAttachmentForTask(Session.getAuthToken(), NetworkHelper.API_VERSION, attachmentId);
+        return processCall(apiCall, callback);
+    }
+
 
     public interface OnSyncCompleteListener{
         void syncCompleted();

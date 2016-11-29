@@ -25,6 +25,8 @@ public class TaskItem extends RealmObject implements Parcelable {
     private double longitude;
     private RealmList<TaskItemOption> options = new RealmList<>();
 
+    private String attachmentPath = "";
+
     public TaskItem(){
 
     }
@@ -197,6 +199,15 @@ public class TaskItem extends RealmObject implements Parcelable {
 
     public void setOptions(RealmList<TaskItemOption> options) {
         this.options = options;
+    }
+
+
+    public String getAttachmentPath() {
+        return attachmentPath;
+    }
+
+    public void setAttachmentPath(String attachmentPath) {
+        this.attachmentPath = attachmentPath;
     }
 
     @Override

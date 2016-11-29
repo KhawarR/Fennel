@@ -44,4 +44,7 @@ public interface WebService {
     @Multipart
     @PATCH ("/services/data/{apiVersion}/sobjects/Attachment/{attachmentId}")
     Call<ResponseBody> editAttachment(@Header("Authorization") String token, @Path("apiVersion") String apiVersion, @Path("attachmentId") String attachmentId, @Part("entity_document") RequestBody entityBody, @Part("Body\"; filename=\"image.png\" ") RequestBody imageBody);
+
+    @GET("/services/data/{apiVersion}/sobjects/Attachment/{attachmentId}/body")
+    Call<ResponseBody> downloadAttachmentForTask(@Header("Authorization") String token, @Path("apiVersion") String apiVersion, @Path("attachmentId") String attachmentId);
 }

@@ -145,20 +145,22 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
 
         for (Farmer currentFarmer : farmerList) {
             for (Task currentTask : currentFarmer.getFarmerTasks()) {
-                boolean taskFound = false;
-                for (List<Farmer> taskList : farmersTaskList) {
-                    Farmer taskObject = (Farmer) taskList.get(0);
-                    if (taskObject.getFarmerId().equals(currentTask.getTaskId())) {
-                        taskFound = true;
-                        taskList.add(currentFarmer);
-                        break;
+                if (currentTask.getStatus().equalsIgnoreCase(Constants.STR_NOT_STARTED)) {
+                    boolean taskFound = false;
+                    for (List<Farmer> taskList : farmersTaskList) {
+                        Farmer taskObject = (Farmer) taskList.get(0);
+                        if (taskObject.getFarmerId().equals(currentTask.getTaskId())) {
+                            taskFound = true;
+                            taskList.add(currentFarmer);
+                            break;
+                        }
                     }
-                }
-                if (!taskFound) {
-                    ArrayList<Farmer> newTaskList = new ArrayList<>();
-                    newTaskList.add(new Farmer(currentTask.getTaskId(), "", currentTask.getName(), "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYFARMERTASKS));
-                    newTaskList.add(currentFarmer);
-                    farmersTaskList.add(newTaskList);
+                    if (!taskFound) {
+                        ArrayList<Farmer> newTaskList = new ArrayList<>();
+                        newTaskList.add(new Farmer(currentTask.getTaskId(), "", currentTask.getName(), "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYFARMERTASKS));
+                        newTaskList.add(currentFarmer);
+                        farmersTaskList.add(newTaskList);
+                    }
                 }
             }
         }

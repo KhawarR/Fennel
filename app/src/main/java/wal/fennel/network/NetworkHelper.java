@@ -30,6 +30,7 @@ public class NetworkHelper {
 
     public static final String QUERY_MY_SIGNUPS_1 = "Select s.Status__c, s.Id, s.Field_Officer_Signup__c, s.Field_Manager_Signup__c, s.Farmer__r.Farmers_Home__c, s.Farmer__r.Mobile_Number__c, s.Farmer__r.Leader__c, s.Farmer__r.Status__c, s.Farmer__r.Middle_Name__c, s.Farmer__r.FullName__c, s.Farmer__r.Gender__c, s.Farmer__r.Last_Name__c, s.Farmer__r.First_Name__c, s.Farmer__r.Name, s.Farmer__c, s.Facilitator_Signup__c, s.Sign_Up_Status__c, s.LocationLookup__r.Id, s.LocationLookup__r.Name, s.Sub_LocationLookup__r.Id, s.Sub_LocationLookup__r.Name, Village__r.Id, Village__r.Name, Tree_Specie__r.Id, Tree_Specie__r.Name, Is_Farmer_Home__c From Shamba__c s WHERE Facilitator_Signup__c = '%s' OR Field_Manager_Signup__c = '%s'  OR Field_Officer_Signup__c = '%s'  Order By Status__c";
     public static final String QUERY_MY_SIGNUPS_ATTACHMENTS = "SELECT Id, Name, (SELECT Id, ParentId, Name, Description FROM Attachments) FROM Farmer__c";
+    public static final String QUERY_TASK_ITEM_ATTACHMENTS = "SELECT Id, File_Type__c, (SELECT Id, ParentId, Name, Description FROM Attachments) FROM Task_Item__c";
 
     public static final String GET_LOCATIONS = "SELECT Id, Name FROM Location__c";
     public static final String GET_SUB_LOCATIONS = "SELECT Id, Name, Location__c FROM Sub_Location__c";
