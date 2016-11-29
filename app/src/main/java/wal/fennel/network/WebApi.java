@@ -327,7 +327,7 @@ public class WebApi {
                         countCalls--;
 
                         String errorMessage = "";
-                        if(response.code() == 400) {
+                        if(response.code() == 400 || response.errorBody() != null) {
                             try {
                                 errorMessage = response.errorBody().string().toString();
                                 JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
@@ -351,22 +351,47 @@ public class WebApi {
                             }
 
                             if(newFarmerId.isEmpty()){
-                                newFarmerId = response.body().getId();
+
+                                try {
+                                    newFarmerId = response.body().getId();
+                                }
+                                catch (NullPointerException e){
+                                    e.printStackTrace();
+                                    String errorCrash = e.getMessage();
+
+                                    if(errorMessage.isEmpty()){
+                                        if(response.errorBody() != null){
+                                            try {
+                                                errorCrash = errorCrash + ": " + response.errorBody().string();
+                                            } catch (IOException e1) {
+                                                e1.printStackTrace();
+                                            }
+                                        }
+                                    }
+                                    else {
+                                        errorCrash = errorCrash + ": " + errorMessage;
+                                    }
+
+                                    Exception ee = new Exception("Farmer Create failed - " + errorCrash);
+                                    Crashlytics.logException(ee);
+                                }
                             }
 
-                            Realm realm = Realm.getDefaultInstance();
-                            realm.beginTransaction();
-                            farmer.setFarmerId(newFarmerId);
-                            realm.commitTransaction();
+                            if(!newFarmerId.isEmpty()){
+                                Realm realm = Realm.getDefaultInstance();
+                                realm.beginTransaction();
+                                farmer.setFarmerId(newFarmerId);
+                                realm.commitTransaction();
 
-                            addFarmWithFarmerId(farmer);
+                                addFarmWithFarmerId(farmer);
 
-                            checkSyncComplete();
+                                checkSyncComplete();
 
-                            if(farmer.isFarmerPicDirty())
-                                attachFarmerImageToFarmerObject(farmer);
-                            if(farmer.isNatIdCardDirty())
-                                attachFarmerIDImageToFarmerObject(farmer);
+                                if(farmer.isFarmerPicDirty())
+                                    attachFarmerImageToFarmerObject(farmer);
+                                if(farmer.isNatIdCardDirty())
+                                    attachFarmerIDImageToFarmerObject(farmer);
+                            }
                         }
                         else if(response.code() == 401)
                         {

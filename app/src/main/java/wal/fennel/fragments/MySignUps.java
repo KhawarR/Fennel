@@ -1593,12 +1593,12 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                                             String attachmentName = attachmentId + "." + ext;
                                             try {
                                                 File path = Environment.getExternalStorageDirectory();
-//                                                File folder = new File(path + "/" + "Fennel", "TaskAttachments");
-//                                                if (!folder.exists()) {
-//                                                    folder.mkdirs();
-//                                                }
-//                                                File file = new File(Environment.getExternalStorageDirectory() + "/Fennel/TaskAttachments", attachmentName);
-                                                File file = new File(path, attachmentName);
+                                                File folder = new File(path + "/" + "Fennel", "TaskAttachments");
+                                                if (!folder.exists()) {
+                                                    folder.mkdirs();
+                                                }
+                                                File file = new File(Environment.getExternalStorageDirectory() + "/Fennel/TaskAttachments", attachmentName);
+//                                                File file = new File(path, attachmentName);
                                                 FileOutputStream fileOutputStream = new FileOutputStream(file);
                                                 try {
                                                     // Writes bytes from the specified byte array to this file output stream
