@@ -327,7 +327,15 @@ public class WebApi {
                             }
                         }
 
-                        if (((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().success == true) || !errorMessage.isEmpty()) {
+                        if(response.code() == 401)
+                        {
+                            countFailedCalls++;
+                            PreferenceHelper.getInstance().clearSession(false);
+                            Intent intent = new Intent(mContext, SplashActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            mContext.startActivity(intent);
+                        }
+                        else if (((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().success == true) || !errorMessage.isEmpty()) {
 
                             String newFarmerId = "";
 
@@ -380,15 +388,7 @@ public class WebApi {
                                 if(farmer.isNatIdCardDirty)
                                     attachFarmerIDImageToFarmerObject(farmer);
                             }
-                        }
-                        else if(response.code() == 401)
-                        {
-                            countFailedCalls++;
-                            PreferenceHelper.getInstance().clearSession(false);
-                            Intent intent = new Intent(mContext, SplashActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            mContext.startActivity(intent);
-                        } else {
+                        }else {
                             countFailedCalls++;
                             checkSyncComplete();
                         }
