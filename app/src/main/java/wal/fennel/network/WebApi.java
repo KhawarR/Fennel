@@ -879,6 +879,26 @@ public class WebApi {
         return false;
     }
 
+    public static int getTotalSyncCallCount(){
+        RealmResults<Farmer> dataCalls = Realm.getDefaultInstance().where(Farmer.class).equalTo("isDataDirty", true).findAll();
+        RealmResults<Farmer> farmerPicCalls = Realm.getDefaultInstance().where(Farmer.class).equalTo("isFarmerPicDirty", true).findAll();
+        RealmResults<Farmer> natIdCalls = Realm.getDefaultInstance().where(Farmer.class).equalTo("isNatIdCardDirty", true).findAll();
+
+        int count = 0;
+
+        if(dataCalls != null)
+            count = count + dataCalls.size();
+        if(farmerPicCalls != null)
+            count = count + farmerPicCalls.size();
+        if(natIdCalls != null)
+            count = count + natIdCalls.size();
+
+        if(PreferenceHelper.getInstance().readAboutIsSyncReq())
+            count = count + 1;
+
+        return count;
+    }
+
     public static void saveSyncTimeStamp(){
         long yourMillis = System.currentTimeMillis();
         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");

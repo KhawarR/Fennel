@@ -1251,7 +1251,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             props.put(MixPanelConstants.Property.VILLAGE, villageName);
             props.put(MixPanelConstants.Property.TREE, treeSpeciesName);
 
-            if(farmerStatus.equalsIgnoreCase(Constants.STR_PENDING))
+            if(farmerStatus != null && farmerStatus.equalsIgnoreCase(Constants.STR_PENDING))
                 mixPanel.track(MixPanelConstants.Event.SUBMIT_FOR_APPROVAL_BUTTON, props);
             else
                 mixPanel.track(MixPanelConstants.Event.SAVE_FARMER_BUTTON, props);
@@ -1384,7 +1384,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             props.put(MixPanelConstants.Property.VILLAGE, villageName);
             props.put(MixPanelConstants.Property.TREE, treeSpeciesName);
 
-            if(farmerStatus.equalsIgnoreCase(Constants.STR_PENDING))
+            if(farmerStatus != null && farmerStatus.equalsIgnoreCase(Constants.STR_PENDING))
                 mixPanel.track(MixPanelConstants.Event.SUBMIT_FOR_APPROVAL_BUTTON, props);
             else
                 mixPanel.track(MixPanelConstants.Event.CREATE_FARMER_BUTTON, props);
