@@ -560,6 +560,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     final Farmer farmer = Singleton.getInstance().mySignupsList.get(j);
                     if(farmer.getFarmerId().equalsIgnoreCase(id))
                     {
+                        realm.beginTransaction();
                         farmer.setThumbAttachmentId(farmerPicId);
                         farmer.setNationalCardAttachmentId(farmerNatId);
 
@@ -574,6 +575,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         {
                             farmer.setNationalCardUrl(natIdUrl);
                         }
+                        realm.commitTransaction();
 
                         RealmResults<Farmer> farmerDbList = realm.where(Farmer.class).equalTo("farmerId", id).findAll();
                         if(farmerDbList != null && farmerDbList.size() > 0)
