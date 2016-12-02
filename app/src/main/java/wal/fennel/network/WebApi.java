@@ -243,7 +243,8 @@ public class WebApi {
 
     public static void syncAll(OnSyncCompleteListener onSyncCompleteListener){
 
-        countCalls = 0;
+//        countCalls = 0;
+        countCalls = getTotalSyncCallCount();
         countFailedCalls = 0;
 
         WebApi.getInstance().onSyncCompleteListener = onSyncCompleteListener;
@@ -251,7 +252,7 @@ public class WebApi {
         //region About Me portion
         if(PreferenceHelper.getInstance().readAboutIsSyncReq()){
             String imagePath = NetworkHelper.getUploadPathFromUri(PreferenceHelper.getInstance().readAboutAttUrl());
-            countCalls++;
+//            countCalls++;
 
             String attAboutId = PreferenceHelper.getInstance().readAboutAttId();
             if (attAboutId == null || attAboutId.isEmpty()) {
@@ -339,7 +340,7 @@ public class WebApi {
             final Farmer farmer = farmerDbList.get(i);
 
             final HashMap<String, Object> farmerMap = getFarmerMap(farmer);
-            countCalls++;
+//            countCalls++;
             if(farmer.getFarmerId().isEmpty() || farmer.getFarmerId().startsWith(Constants.STR_FARMER_ID_PREFIX)){
                 WebApi.createFarmer(new Callback<ResponseModel>() {
                     @Override
@@ -359,7 +360,15 @@ public class WebApi {
                             }
                         }
 
-                        if (((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().isSuccess() == true) || !errorMessage.isEmpty()) {
+                        if(response.code() == 401)
+                        {
+                            countFailedCalls++;
+                            PreferenceHelper.getInstance().clearSession(false);
+                            Intent intent = new Intent(mContext, SplashActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            mContext.startActivity(intent);
+                        }
+                        else if (((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().isSuccess() == true) || !errorMessage.isEmpty()) {
 
                             String newFarmerId = "";
 
@@ -412,15 +421,7 @@ public class WebApi {
                                 if(farmer.isNatIdCardDirty())
                                     attachFarmerIDImageToFarmerObject(farmer);
                             }
-                        }
-                        else if(response.code() == 401)
-                        {
-                            countFailedCalls++;
-                            PreferenceHelper.getInstance().clearSession(false);
-                            Intent intent = new Intent(mContext, SplashActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            mContext.startActivity(intent);
-                        } else {
+                        }else {
                             countFailedCalls++;
                             checkSyncComplete();
                         }
@@ -428,8 +429,9 @@ public class WebApi {
 
                     @Override
                     public void onFailure(Call<ResponseModel> call, Throwable t) {
-                        t.printStackTrace();
+                        countCalls--;
                         countFailedCalls++;
+                        t.printStackTrace();
                         checkSyncComplete();
                     }
                 }, farmerMap);
@@ -464,8 +466,9 @@ public class WebApi {
 
                     @Override
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        t.printStackTrace();
+                        countCalls--;
                         countFailedCalls++;
+                        t.printStackTrace();
                         checkSyncComplete();
                     }
                 }, farmer.getFarmerId(), farmerMap);
@@ -588,7 +591,7 @@ public class WebApi {
     private static void addFarmWithFarmerId(final Farmer farmer) {
         HashMap<String, Object> farmMap = getFarmMap(farmer);
         farmMap.put("Farmer__c", farmer.getFarmerId());
-        countCalls++;
+//        countCalls++;
         WebApi.createFarm(new Callback<ResponseModel>() {
             @Override
             public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
@@ -627,7 +630,7 @@ public class WebApi {
 
         HashMap<String, Object> farmMap = getFarmMap(farmer);
         farmMap.put("Farmer__c", farmer.getFarmerId());
-        countCalls++;
+//        countCalls++;
         WebApi.editFarm(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -657,8 +660,9 @@ public class WebApi {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                t.printStackTrace();
+                countCalls--;
                 countFailedCalls++;
+                t.printStackTrace();
                 checkSyncComplete();
             }
         }, farmer.getFarmId(), farmMap);
@@ -666,8 +670,11 @@ public class WebApi {
 
     private static void attachFarmerImageToFarmerObject(final Farmer farmer) {
 
-        if (farmer.getThumbUrl() == null || farmer.getThumbUrl().isEmpty())
+        if (farmer.getThumbUrl() == null || farmer.getThumbUrl().isEmpty()) {
+            countCalls--;
+            countFailedCalls++;
             return;
+        }
 
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "picture");
@@ -706,29 +713,29 @@ public class WebApi {
             byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(imagePath));
         }
 
+//        countCalls++;
         if(byteArrayImage != null){
             RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
             RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
-        countCalls++;
-        if (farmer.getThumbAttachmentId() == null || farmer.getThumbAttachmentId().isEmpty()) {
-            WebApi.addAttachment(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    countCalls--;
-                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                        Log.i("Fennel", "farmer profile picture uploaded successfully!");
-                        Realm realm = Realm.getDefaultInstance();
-                        realm.beginTransaction();
-                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.getFarmerId()).findFirst();
-                        farmerDbObj.setFarmerPicDirty(false);
-                        realm.commitTransaction();
-                    } else {
-                        countFailedCalls++;
-                        Log.i("Fennel", "farmer profile picture upload failed!");
+            if (farmer.getThumbAttachmentId() == null || farmer.getThumbAttachmentId().isEmpty()) {
+                WebApi.addAttachment(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        countCalls--;
+                        if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                            Log.i("Fennel", "farmer profile picture uploaded successfully!");
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.getFarmerId()).findFirst();
+                            farmerDbObj.setFarmerPicDirty(false);
+                            realm.commitTransaction();
+                        } else {
+                            countFailedCalls++;
+                            Log.i("Fennel", "farmer profile picture upload failed!");
+                        }
+                        checkSyncComplete();
                     }
-                    checkSyncComplete();
-                }
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
@@ -769,6 +776,8 @@ public class WebApi {
             }
         }
         else {
+            countCalls--;
+            countFailedCalls++;
             Exception e = new Exception("ByteArrayImage: attachFarmerImageToFarmerObject() - " + imagePath);
             Crashlytics.logException(e);
             Log.i("ByteArrayImage" , "attachFarmerImageToFarmerObject() - " + imagePath);
@@ -777,8 +786,11 @@ public class WebApi {
 
     private static void attachFarmerIDImageToFarmerObject(final Farmer farmer) {
 
-        if (farmer.getNationalCardUrl() == null || farmer.getNationalCardUrl().isEmpty())
+        if (farmer.getNationalCardUrl() == null || farmer.getNationalCardUrl().isEmpty()) {
+            countCalls--;
+            countFailedCalls++;
             return;
+        }
 
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "ID");
@@ -817,29 +829,29 @@ public class WebApi {
             byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(imagePath));
         }
 
+//        countCalls++;
         if(byteArrayImage != null){
             RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
             RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
-        countCalls++;
-        if (farmer.getNationalCardAttachmentId() == null || farmer.getNationalCardAttachmentId().isEmpty()) {
-            WebApi.addAttachment(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    countCalls--;
-                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                        Log.i("Fennel", "farmer ID picture uploaded successfully!");
-                        Realm realm = Realm.getDefaultInstance();
-                        realm.beginTransaction();
-                        final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.getFarmerId()).findFirst();
-                        farmerDbObj.setNatIdCardDirty(false);
-                        realm.commitTransaction();
-                    } else {
-                        countFailedCalls++;
-                        Log.i("Fennel", "farmer ID picture upload failed!");
+            if (farmer.getNationalCardAttachmentId() == null || farmer.getNationalCardAttachmentId().isEmpty()) {
+                WebApi.addAttachment(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        countCalls--;
+                        if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                            Log.i("Fennel", "farmer ID picture uploaded successfully!");
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            final Farmer farmerDbObj = realm.where(Farmer.class).equalTo("farmerId", farmer.getFarmerId()).findFirst();
+                            farmerDbObj.setNatIdCardDirty(false);
+                            realm.commitTransaction();
+                        } else {
+                            countFailedCalls++;
+                            Log.i("Fennel", "farmer ID picture upload failed!");
+                        }
+                        checkSyncComplete();
                     }
-                    checkSyncComplete();
-                }
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
@@ -879,6 +891,8 @@ public class WebApi {
             }
         }
         else {
+            countCalls--;
+            countFailedCalls++;
             Exception e = new Exception("ByteArrayImage: attachFarmerIDImageToFarmerObject() - " + imagePath);
             Crashlytics.logException(e);
             Log.i("ByteArrayImage" , "attachFarmerIDImageToFarmerObject() - " + imagePath);
@@ -909,6 +923,26 @@ public class WebApi {
         if(PreferenceHelper.getInstance().readAboutIsSyncReq() || farmerDbList.size() > 0)
             return true;
         return false;
+    }
+
+    public static int getTotalSyncCallCount(){
+        RealmResults<Farmer> dataCalls = Realm.getDefaultInstance().where(Farmer.class).equalTo("isDataDirty", true).findAll();
+        RealmResults<Farmer> farmerPicCalls = Realm.getDefaultInstance().where(Farmer.class).equalTo("isFarmerPicDirty", true).findAll();
+        RealmResults<Farmer> natIdCalls = Realm.getDefaultInstance().where(Farmer.class).equalTo("isNatIdCardDirty", true).findAll();
+
+        int count = 0;
+
+        if(dataCalls != null)
+            count = count + (dataCalls.size() * 2);
+        if(farmerPicCalls != null)
+            count = count + farmerPicCalls.size();
+        if(natIdCalls != null)
+            count = count + natIdCalls.size();
+
+        if(PreferenceHelper.getInstance().readAboutIsSyncReq())
+            count = count + 1;
+
+        return count;
     }
 
     public static void saveSyncTimeStamp(){

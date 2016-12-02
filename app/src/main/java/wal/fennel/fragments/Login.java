@@ -11,6 +11,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mixpanel.android.mpmetrics.MixpanelAPI;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,9 +34,12 @@ import wal.fennel.datamodels.Auth;
 import wal.fennel.network.Session;
 import wal.fennel.network.WebApi;
 import wal.fennel.utils.Constants;
+import wal.fennel.utils.MixPanelConstants;
 import wal.fennel.utils.PreferenceHelper;
 
 public class Login extends BaseFragment{
+
+    private MixpanelAPI mixPanel;
 
     @Bind(R.id.txtLogin)
     TextView txtLogin;
@@ -51,12 +56,16 @@ public class Login extends BaseFragment{
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_login, null);
         ButterKnife.bind(this, view);
+
         return view;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mixPanel = MixpanelAPI.getInstance(getActivity(), MixPanelConstants.MIXPANEL_TOKEN);
+        mixPanel.track(MixPanelConstants.PageView.LOGIN);
 
         // TODO Remove on release
         etId.setText("1211");
@@ -83,6 +92,17 @@ public class Login extends BaseFragment{
 
             if(!etId.getText().toString().trim().equalsIgnoreCase(PreferenceHelper.getInstance().readUserId()) || !etPassword.getText().toString().trim().equalsIgnoreCase(PreferenceHelper.getInstance().readPassword()))
                 PreferenceHelper.getInstance().clearSession(true);
+
+            try {
+                JSONObject props = new JSONObject();
+                props.put(MixPanelConstants.Property.USERNAME, etId.getText().toString().trim());
+                props.put(MixPanelConstants.Property.PASSWORD, etPassword.getText().toString().trim());
+
+                mixPanel.track(MixPanelConstants.Event.LOGIN_BUTTON, props);
+            }
+            catch (JSONException e){
+                e.printStackTrace();
+            }
 
             //TODO Test to Production
             String username = "waajay@westagilelabs.com.waldev";
@@ -191,6 +211,10 @@ public class Login extends BaseFragment{
             PreferenceHelper.getInstance().writeUserId(username);
             PreferenceHelper.getInstance().writePassword(password);
             PreferenceHelper.getInstance().writeUserEmployeeId(userEmpId);
+
+            mixPanel.identify(username);
+            mixPanel.getPeople().identify(username);
+            mixPanel.getPeople().set(MixPanelConstants.Property.EMPLOYEE_ID, username);
 
             WebApi.getAboutMeInfo(aboutMeCallback);
         }
@@ -315,6 +339,14 @@ public class Login extends BaseFragment{
         PreferenceHelper.getInstance().writeAboutLN(ln);
         PreferenceHelper.getInstance().writeAboutFOname(fo_name);
         PreferenceHelper.getInstance().writeAboutFMname(fm_name);
+
+        String fullName = fn;
+        fullName = fullName.trim() + " " + mn;
+        fullName = fullName.trim() + " " + ln;
+        fullName = fullName.trim();
+
+        mixPanel.getPeople().set(MixPanelConstants.Property.DEFAULT_NAME, PreferenceHelper.getInstance().readUserId()+ " - " + fullName);
+
     }
 
     private void getAndSaveId(JSONObject jsonObject, String type) throws JSONException {

@@ -19,6 +19,7 @@ import com.kbeanie.multipicker.api.ImagePicker;
 import com.kbeanie.multipicker.api.Picker;
 import com.kbeanie.multipicker.api.callbacks.ImagePickerCallback;
 import com.kbeanie.multipicker.api.entity.ChosenImage;
+import com.mixpanel.android.mpmetrics.MixpanelAPI;
 import com.squareup.picasso.NetworkPolicy;
 
 import org.json.JSONArray;
@@ -48,6 +49,7 @@ import wal.fennel.network.Session;
 import wal.fennel.network.WebApi;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
+import wal.fennel.utils.MixPanelConstants;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PhotoUtils;
 import wal.fennel.utils.PreferenceHelper;
@@ -59,6 +61,8 @@ import wal.fennel.views.TitleBarLayout;
  */
 public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClickListener,
         WebApi.OnSyncCompleteListener {
+
+    private MixpanelAPI mixPanel;
 
     @Bind(R.id.titleBar)
     TitleBarLayout titleBarLayout;
@@ -102,6 +106,9 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_about_me);
         ButterKnife.bind(this);
+
+        mixPanel = MixpanelAPI.getInstance(this, MixPanelConstants.MIXPANEL_TOKEN);
+        mixPanel.track(MixPanelConstants.PageView.ABOUT_ME);
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setCancelable(false);
@@ -252,6 +259,9 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
 
     @OnClick(R.id.txtSignOut)
     void onClickSignOut(View view) {
+
+        mixPanel.track(MixPanelConstants.Event.SIGNOUT_BUTTON);
+
         if(WebApi.isSyncRequired())
             Toast.makeText(getApplicationContext(), "Must sync data before Signout", Toast.LENGTH_SHORT).show();
         else
@@ -260,6 +270,9 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
 
     @OnClick(R.id.rl_pick_image)
     void onClickPickImage(View view) {
+
+        mixPanel.track(MixPanelConstants.Event.CHANGE_AVATAR_BUTTON);
+
         showPickerDialog();
     }
 
@@ -601,12 +614,16 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
 
     @Override
     public void onTitleBarLeftIconClicked(View view) {
+        mixPanel.track(MixPanelConstants.Event.BACK_BUTTON);
         finish();
     }
 
     private SwipeRefreshLayout.OnRefreshListener onRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
         @Override
         public void onRefresh() {
+
+            mixPanel.track(MixPanelConstants.Event.MANUAL_SYNC_ACTION);
+
             if(NetworkHelper.isNetAvailable(getApplicationContext())){
                 if(!PreferenceHelper.getInstance().readIsSyncInProgress()){
                     if(WebApi.isSyncRequired())
