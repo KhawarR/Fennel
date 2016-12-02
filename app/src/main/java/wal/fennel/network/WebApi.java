@@ -211,7 +211,8 @@ public class WebApi {
 
     public static void syncAll(OnSyncCompleteListener onSyncCompleteListener){
 
-        countCalls = 0;
+//        countCalls = 0;
+        countCalls = getTotalSyncCallCount();
         countFailedCalls = 0;
 
         WebApi.getInstance().onSyncCompleteListener = onSyncCompleteListener;
@@ -219,7 +220,7 @@ public class WebApi {
         //region About Me portion
         if(PreferenceHelper.getInstance().readAboutIsSyncReq()){
             String imagePath = NetworkHelper.getUploadPathFromUri(PreferenceHelper.getInstance().readAboutAttUrl());
-            countCalls++;
+//            countCalls++;
 
             String attAboutId = PreferenceHelper.getInstance().readAboutAttId();
             if (attAboutId == null || attAboutId.isEmpty()) {
@@ -307,7 +308,7 @@ public class WebApi {
             final Farmer farmer = farmerDbList.get(i);
 
             final HashMap<String, Object> farmerMap = getFarmerMap(farmer);
-            countCalls++;
+//            countCalls++;
             if(farmer.farmerId.isEmpty() || farmer.farmerId.startsWith(Constants.STR_FARMER_ID_PREFIX)){
                 WebApi.createFarmer(new Callback<ResponseModel>() {
                     @Override
@@ -396,8 +397,9 @@ public class WebApi {
 
                     @Override
                     public void onFailure(Call<ResponseModel> call, Throwable t) {
-                        t.printStackTrace();
+                        countCalls--;
                         countFailedCalls++;
+                        t.printStackTrace();
                         checkSyncComplete();
                     }
                 }, farmerMap);
@@ -432,8 +434,9 @@ public class WebApi {
 
                     @Override
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        t.printStackTrace();
+                        countCalls--;
                         countFailedCalls++;
+                        t.printStackTrace();
                         checkSyncComplete();
                     }
                 }, farmer.farmerId, farmerMap);
@@ -556,7 +559,7 @@ public class WebApi {
     private static void addFarmWithFarmerId(final Farmer farmer) {
         HashMap<String, Object> farmMap = getFarmMap(farmer);
         farmMap.put("Farmer__c", farmer.farmerId);
-        countCalls++;
+//        countCalls++;
         WebApi.createFarm(new Callback<ResponseModel>() {
             @Override
             public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
@@ -595,7 +598,7 @@ public class WebApi {
 
         HashMap<String, Object> farmMap = getFarmMap(farmer);
         farmMap.put("Farmer__c", farmer.farmerId);
-        countCalls++;
+//        countCalls++;
         WebApi.editFarm(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -625,8 +628,9 @@ public class WebApi {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                t.printStackTrace();
+                countCalls--;
                 countFailedCalls++;
+                t.printStackTrace();
                 checkSyncComplete();
             }
         }, farmer.farmId, farmMap);
@@ -634,8 +638,11 @@ public class WebApi {
 
     private static void attachFarmerImageToFarmerObject(final Farmer farmer) {
 
-        if (farmer.thumbUrl == null || farmer.thumbUrl.isEmpty())
+        if (farmer.thumbUrl == null || farmer.thumbUrl.isEmpty()) {
+            countCalls--;
+            countFailedCalls++;
             return;
+        }
 
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "picture");
@@ -674,11 +681,11 @@ public class WebApi {
             byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(imagePath));
         }
 
+//        countCalls++;
         if(byteArrayImage != null){
             RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
             RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
-            countCalls++;
             if (farmer.getThumbAttachmentId() == null || farmer.getThumbAttachmentId().isEmpty()) {
                 WebApi.addAttachment(new Callback<ResponseBody>() {
                     @Override
@@ -737,6 +744,8 @@ public class WebApi {
             }
         }
         else {
+            countCalls--;
+            countFailedCalls++;
             Exception e = new Exception("ByteArrayImage: attachFarmerImageToFarmerObject() - " + imagePath);
             Crashlytics.logException(e);
             Log.i("ByteArrayImage" , "attachFarmerImageToFarmerObject() - " + imagePath);
@@ -745,8 +754,11 @@ public class WebApi {
 
     private static void attachFarmerIDImageToFarmerObject(final Farmer farmer) {
 
-        if (farmer.nationalCardUrl == null || farmer.nationalCardUrl.isEmpty())
+        if (farmer.nationalCardUrl == null || farmer.nationalCardUrl.isEmpty()) {
+            countCalls--;
+            countFailedCalls++;
             return;
+        }
 
         HashMap<String, Object> attachmentMap = new HashMap<>();
         attachmentMap.put("Description", "ID");
@@ -785,11 +797,11 @@ public class WebApi {
             byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(imagePath));
         }
 
+//        countCalls++;
         if(byteArrayImage != null){
             RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
             RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
 
-            countCalls++;
             if (farmer.getNationalCardAttachmentId() == null || farmer.getNationalCardAttachmentId().isEmpty()) {
                 WebApi.addAttachment(new Callback<ResponseBody>() {
                     @Override
@@ -847,6 +859,8 @@ public class WebApi {
             }
         }
         else {
+            countCalls--;
+            countFailedCalls++;
             Exception e = new Exception("ByteArrayImage: attachFarmerIDImageToFarmerObject() - " + imagePath);
             Crashlytics.logException(e);
             Log.i("ByteArrayImage" , "attachFarmerIDImageToFarmerObject() - " + imagePath);
@@ -887,7 +901,7 @@ public class WebApi {
         int count = 0;
 
         if(dataCalls != null)
-            count = count + dataCalls.size();
+            count = count + (dataCalls.size() * 2);
         if(farmerPicCalls != null)
             count = count + farmerPicCalls.size();
         if(natIdCalls != null)
