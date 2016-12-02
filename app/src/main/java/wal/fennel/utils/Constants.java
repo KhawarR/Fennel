@@ -14,6 +14,7 @@ public class Constants {
      */
     public static final long TIME_DIFF = 2000;
 
+    public static final String MIXPANEL_TOKEN = "d484e812f6310fedd9c201f8ff9f46b6";
 
     public static final String STR_ENROLLED = "ENROLLED";
     public static final String STR_PENDING = "PENDING";

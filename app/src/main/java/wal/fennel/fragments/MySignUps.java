@@ -24,6 +24,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mixpanel.android.mpmetrics.MixpanelAPI;
 import com.squareup.picasso.NetworkPolicy;
 
 import org.json.JSONArray;
@@ -97,6 +98,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        MixpanelAPI mixpanel = MixpanelAPI.getInstance(getActivity(), Constants.MIXPANEL_TOKEN);
+        mixpanel.track("MySignups-PageView");
 
         titleBarLayout.setOnIconClickListener(this);
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);

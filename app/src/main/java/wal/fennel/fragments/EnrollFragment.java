@@ -31,6 +31,7 @@ import com.kbeanie.multipicker.api.ImagePicker;
 import com.kbeanie.multipicker.api.Picker;
 import com.kbeanie.multipicker.api.callbacks.ImagePickerCallback;
 import com.kbeanie.multipicker.api.entity.ChosenImage;
+import com.mixpanel.android.mpmetrics.MixpanelAPI;
 import com.squareup.picasso.NetworkPolicy;
 
 import org.json.JSONArray;
@@ -237,6 +238,10 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        MixpanelAPI mixpanel = MixpanelAPI.getInstance(getActivity(), Constants.MIXPANEL_TOKEN);
+        mixpanel.track("Enroll-PageView");
+
         System.out.println("ViewCreated Enroll ");
 
         titleBarLayout.setOnIconClickListener(this);

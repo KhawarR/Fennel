@@ -11,6 +11,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mixpanel.android.mpmetrics.MixpanelAPI;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,8 +35,11 @@ import wal.fennel.network.Session;
 import wal.fennel.network.WebApi;
 import wal.fennel.utils.Constants;
 import wal.fennel.utils.PreferenceHelper;
+import wal.fennel.utils.Singleton;
 
 public class Login extends BaseFragment{
+
+    private MixpanelAPI mixPanel;
 
     @Bind(R.id.txtLogin)
     TextView txtLogin;
@@ -51,12 +56,16 @@ public class Login extends BaseFragment{
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_login, null);
         ButterKnife.bind(this, view);
+
         return view;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mixPanel = MixpanelAPI.getInstance(getActivity(), Constants.MIXPANEL_TOKEN);
+        mixPanel.track("Login-PageView");
 
         // TODO Remove on release
         etId.setText("1211");
@@ -192,6 +201,10 @@ public class Login extends BaseFragment{
             PreferenceHelper.getInstance().writePassword(password);
             PreferenceHelper.getInstance().writeUserEmployeeId(userEmpId);
 
+            mixPanel.identify(username);
+            mixPanel.getPeople().identify(username);
+            mixPanel.getPeople().set("Employee ID", username);
+
             WebApi.getAboutMeInfo(aboutMeCallback);
         }
         else
@@ -315,6 +328,14 @@ public class Login extends BaseFragment{
         PreferenceHelper.getInstance().writeAboutLN(ln);
         PreferenceHelper.getInstance().writeAboutFOname(fo_name);
         PreferenceHelper.getInstance().writeAboutFMname(fm_name);
+
+        String fullName = fn;
+        fullName = fullName.trim() + " " + mn;
+        fullName = fullName.trim() + " " + ln;
+        fullName = fullName.trim();
+
+        mixPanel.getPeople().set("$name", PreferenceHelper.getInstance().readUserId()+ " - " + fullName);
+
     }
 
     private void getAndSaveId(JSONObject jsonObject, String type) throws JSONException {

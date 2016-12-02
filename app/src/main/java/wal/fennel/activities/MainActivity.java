@@ -9,12 +9,15 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TabHost;
 
+import com.mixpanel.android.mpmetrics.MixpanelAPI;
+
 import wal.fennel.R;
 import wal.fennel.fragments.BaseContainerFragment;
 import wal.fennel.fragments.MyDashboardContainerFragment;
 import wal.fennel.fragments.MyFarmerContainerFragment;
 import wal.fennel.fragments.MyLogbookContainerFragment;
 import wal.fennel.fragments.MySignUpsContainerFragment;
+import wal.fennel.utils.Constants;
 
 public class MainActivity extends BaseActivity implements TabHost.OnTabChangeListener {
 
@@ -84,5 +87,11 @@ public class MainActivity extends BaseActivity implements TabHost.OnTabChangeLis
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             view.clearFocus();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        MixpanelAPI.getInstance(this, Constants.MIXPANEL_TOKEN).flush();
+        super.onDestroy();
     }
 }
