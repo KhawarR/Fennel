@@ -59,7 +59,7 @@ public class Login extends BaseFragment{
         super.onViewCreated(view, savedInstanceState);
 
         // TODO Remove on release
-        etId.setText("1211");
+        etId.setText("3111");
         etPassword.setText("pass");
 
         if(!PreferenceHelper.getInstance().readToken().isEmpty() && !PreferenceHelper.getInstance().readLoginUserId().isEmpty())
