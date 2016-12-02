@@ -32,9 +32,6 @@ public class SplashActivity extends Activity
         setContentView(R.layout.activity_splash);
 
         mHandler.sendEmptyMessageDelayed(0,1500);
-
-        MixpanelAPI mixpanel = MixpanelAPI.getInstance(this, Constants.MIXPANEL_TOKEN);
-        mixpanel.track("Splash-PageView");
     }
 
     Handler mHandler = new Handler()

@@ -18,8 +18,11 @@ import wal.fennel.fragments.MyFarmerContainerFragment;
 import wal.fennel.fragments.MyLogbookContainerFragment;
 import wal.fennel.fragments.MySignUpsContainerFragment;
 import wal.fennel.utils.Constants;
+import wal.fennel.utils.MixPanelConstants;
 
 public class MainActivity extends BaseActivity implements TabHost.OnTabChangeListener {
+
+    private MixpanelAPI mixPanel;
 
     private static final String TAB_1_TAG = "tab_1";
     private static final String TAB_2_TAG = "tab_2";
@@ -31,6 +34,8 @@ public class MainActivity extends BaseActivity implements TabHost.OnTabChangeLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mixPanel = MixpanelAPI.getInstance(this, MixPanelConstants.MIXPANEL_TOKEN);
 
 //        getWindow().setSoftInputMode(
 //                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -81,6 +86,18 @@ public class MainActivity extends BaseActivity implements TabHost.OnTabChangeLis
 
     @Override
     public void onTabChanged(String tabId) {
+
+        String currentTabTag = mTabHost.getCurrentTabTag();
+        if (currentTabTag.equals(TAB_1_TAG)) {
+            mixPanel.track(MixPanelConstants.Event.TAB_MY_SIGNUPS);
+        } else if (currentTabTag.equals(TAB_2_TAG)) {
+            mixPanel.track(MixPanelConstants.Event.TAB_MY_FARMERS);
+        } else if (currentTabTag.equals(TAB_3_TAG)) {
+            mixPanel.track(MixPanelConstants.Event.TAB_MY_DASHBOARD);
+        } else if (currentTabTag.equals(TAB_4_TAG)) {
+            mixPanel.track(MixPanelConstants.Event.TAB_MY_LOGBOOK);
+        }
+
         View view = this.getCurrentFocus();
         if (view != null) {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -91,7 +108,7 @@ public class MainActivity extends BaseActivity implements TabHost.OnTabChangeLis
 
     @Override
     protected void onDestroy() {
-        MixpanelAPI.getInstance(this, Constants.MIXPANEL_TOKEN).flush();
+        mixPanel.flush();
         super.onDestroy();
     }
 }

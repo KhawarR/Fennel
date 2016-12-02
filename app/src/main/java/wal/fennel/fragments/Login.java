@@ -34,8 +34,8 @@ import wal.fennel.datamodels.Auth;
 import wal.fennel.network.Session;
 import wal.fennel.network.WebApi;
 import wal.fennel.utils.Constants;
+import wal.fennel.utils.MixPanelConstants;
 import wal.fennel.utils.PreferenceHelper;
-import wal.fennel.utils.Singleton;
 
 public class Login extends BaseFragment{
 
@@ -64,8 +64,8 @@ public class Login extends BaseFragment{
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mixPanel = MixpanelAPI.getInstance(getActivity(), Constants.MIXPANEL_TOKEN);
-        mixPanel.track("Login-PageView");
+        mixPanel = MixpanelAPI.getInstance(getActivity(), MixPanelConstants.MIXPANEL_TOKEN);
+        mixPanel.track(MixPanelConstants.PageView.LOGIN);
 
         // TODO Remove on release
         etId.setText("1211");
@@ -92,6 +92,17 @@ public class Login extends BaseFragment{
 
             if(!etId.getText().toString().trim().equalsIgnoreCase(PreferenceHelper.getInstance().readUserId()) || !etPassword.getText().toString().trim().equalsIgnoreCase(PreferenceHelper.getInstance().readPassword()))
                 PreferenceHelper.getInstance().clearSession(true);
+
+            try {
+                JSONObject props = new JSONObject();
+                props.put(MixPanelConstants.Property.USERNAME, etId.getText().toString().trim());
+                props.put(MixPanelConstants.Property.PASSWORD, etPassword.getText().toString().trim());
+
+                mixPanel.track(MixPanelConstants.Event.LOGIN_BUTTON, props);
+            }
+            catch (JSONException e){
+                e.printStackTrace();
+            }
 
             //TODO Test to Production
             String username = "waajay@westagilelabs.com.waldev";
@@ -203,7 +214,7 @@ public class Login extends BaseFragment{
 
             mixPanel.identify(username);
             mixPanel.getPeople().identify(username);
-            mixPanel.getPeople().set("Employee ID", username);
+            mixPanel.getPeople().set(MixPanelConstants.Property.EMPLOYEE_ID, username);
 
             WebApi.getAboutMeInfo(aboutMeCallback);
         }
@@ -334,7 +345,7 @@ public class Login extends BaseFragment{
         fullName = fullName.trim() + " " + ln;
         fullName = fullName.trim();
 
-        mixPanel.getPeople().set("$name", PreferenceHelper.getInstance().readUserId()+ " - " + fullName);
+        mixPanel.getPeople().set(MixPanelConstants.Property.DEFAULT_NAME, PreferenceHelper.getInstance().readUserId()+ " - " + fullName);
 
     }
 

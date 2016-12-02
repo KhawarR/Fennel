@@ -58,6 +58,7 @@ import wal.fennel.network.NetworkHelper;
 import wal.fennel.network.WebApi;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
+import wal.fennel.utils.MixPanelConstants;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PreferenceHelper;
 import wal.fennel.utils.Singleton;
@@ -67,6 +68,8 @@ import wal.fennel.views.TitleBarLayout;
  * Created by Faizan on 9/27/2016.
  */
 public class MySignUps extends BaseFragment implements View.OnClickListener {
+
+    private MixpanelAPI mixPanel;
 
     //region Class Variables & UI
     @Bind(R.id.titleBar)
@@ -99,8 +102,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        MixpanelAPI mixpanel = MixpanelAPI.getInstance(getActivity(), Constants.MIXPANEL_TOKEN);
-        mixpanel.track("MySignups-PageView");
+        mixPanel = MixpanelAPI.getInstance(getActivity(), MixPanelConstants.MIXPANEL_TOKEN);
+        mixPanel.track(MixPanelConstants.PageView.MY_SIGNUPS);
 
         titleBarLayout.setOnIconClickListener(this);
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
@@ -143,6 +146,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                 if(event.getAction() == MotionEvent.ACTION_UP) {
                     if(event.getRawX() >= (etSearch.getRight() - etSearch.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+
+                        try {
+                            String strSearchKey = etSearch.getText().toString().trim();
+                            JSONObject props = new JSONObject();
+                            props.put(MixPanelConstants.Property.SEARCH_KEY, strSearchKey);
+                            mixPanel.track(MixPanelConstants.Event.SEARCH_MYSIGNUP_ACTION, props);
+                        }
+                        catch (JSONException e){
+                            e.printStackTrace();
+                        }
+
                         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(etSearch.getWindowToken(), 0);
                         return true;
@@ -155,6 +169,16 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    try {
+                        String strSearchKey = etSearch.getText().toString().trim();
+                        JSONObject props = new JSONObject();
+                        props.put(MixPanelConstants.Property.SEARCH_KEY, strSearchKey);
+                        mixPanel.track(MixPanelConstants.Event.SEARCH_MYSIGNUP_ACTION, props);
+                    }
+                    catch (JSONException e){
+                        e.printStackTrace();
+                    }
+
                     InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(etSearch.getWindowToken(), 0);
                     return true;
@@ -174,6 +198,16 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 Farmer farmer = Singleton.getInstance().mySignupsList.get(position);
                 if(!farmer.isHeader())
                 {
+                    try {
+                        JSONObject props = new JSONObject();
+                        props.put(MixPanelConstants.Property.MYSIGNUP_STATUS, farmer.getSignupStatus());
+                        props.put(MixPanelConstants.Property.MYSIGNUP_NAME, farmer.getFullName());
+                        props.put(MixPanelConstants.Property.MYSIGNUP_ID, farmer.getFarmerId());
+                        mixPanel.track(MixPanelConstants.Event.MYSIGNUP_MENU_ITEM_ACTION, props);
+                    }
+                    catch (JSONException e){
+                        e.printStackTrace();
+                    }
                     ((BaseContainerFragment) getParentFragment()).replaceFragment(EnrollFragment.newInstance(Constants.STR_EDIT_FARMER, farmer), true);
                 }
             }
@@ -1001,6 +1035,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         {
             case R.id.rl_add:
             {
+                mixPanel.track(MixPanelConstants.Event.ENROLL_FARMER_BUTTON);
                 ((BaseContainerFragment) getParentFragment()).replaceFragment(EnrollFragment.newInstance(Constants.STR_ENROLL_FARMER, null), true);
             }
             break;

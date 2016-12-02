@@ -12,7 +12,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.mixpanel.android.mpmetrics.MixpanelAPI;
+
 import wal.fennel.R;
+import wal.fennel.utils.MixPanelConstants;
 
 
 public class TitleBarLayout extends RelativeLayout implements View.OnClickListener {
@@ -96,8 +99,16 @@ public class TitleBarLayout extends RelativeLayout implements View.OnClickListen
         int id = v.getId();
         switch (id) {
             case R.id.imgRight:
-                if (iconClickListener != null)
+                if (iconClickListener != null) {
+                    try {
+                        MixpanelAPI mixPanel = MixpanelAPI.getInstance(getContext(), MixPanelConstants.MIXPANEL_TOKEN);
+                        mixPanel.track(MixPanelConstants.Event.TITLE_BAR_AVATAR_CLICK);
+                    }
+                    catch (NullPointerException e){
+                        e.printStackTrace();
+                    }
                     iconClickListener.onTitleBarRightIconClicked(v);
+                }
                 break;
 
 //            case R.id.imgLeft:

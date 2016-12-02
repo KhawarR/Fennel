@@ -64,6 +64,7 @@ import wal.fennel.network.NetworkHelper;
 import wal.fennel.network.WebApi;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
+import wal.fennel.utils.MixPanelConstants;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PreferenceHelper;
 import wal.fennel.views.NothingSelectedSpinnerAdapter;
@@ -74,6 +75,8 @@ import wal.fennel.views.TitleBarLayout;
  * Created by Faizan on 9/27/2016.
  */
 public class EnrollFragment extends BaseContainerFragment implements AdapterView.OnItemSelectedListener, View.OnTouchListener {
+
+    private MixpanelAPI mixPanel;
 
     //region Class variables
     @Bind(R.id.scrollView)
@@ -239,8 +242,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        MixpanelAPI mixpanel = MixpanelAPI.getInstance(getActivity(), Constants.MIXPANEL_TOKEN);
-        mixpanel.track("Enroll-PageView");
+        mixPanel = MixpanelAPI.getInstance(getActivity(), MixPanelConstants.MIXPANEL_TOKEN);
 
         System.out.println("ViewCreated Enroll ");
 
@@ -312,6 +314,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         title = getArguments().getString("title");
         if (title.equalsIgnoreCase(Constants.STR_EDIT_FARMER)) {
+
+            mixPanel.track(MixPanelConstants.PageView.ENROLL_FARMER);
+
             farmer = (Farmer) getArguments().getParcelable("farmer");
             txtCreateFarmer.setText("SAVE");
 
@@ -327,6 +332,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             populateFarmer();
             setSpinnerBackgroundEnabled();
         } else {
+            mixPanel.track(MixPanelConstants.PageView.EDIT_FARMER);
+
             setSpinnerBackgroundDisbaled();
         }
 
@@ -886,12 +893,18 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     @OnClick(R.id.imgFarmerPhoto)
     void onClickFarmerPhoto(View view) {
+
+        mixPanel.track(MixPanelConstants.Event.FARMER_PHOTO_BUTTON);
+
         hideKeyboard();
         showPickerDialog(true);
     }
 
     @OnClick(R.id.imgNationalID)
     void onClickNationalID(View view) {
+
+        mixPanel.track(MixPanelConstants.Event.FARMER_ID_PHOTO_BUTTON);
+
         hideKeyboard();
         showPickerDialog(false);
     }
@@ -909,6 +922,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     @Override
     public void onTitleBarLeftIconClicked(View view) {
+        mixPanel.track(MixPanelConstants.Event.CANCEL_BUTTON);
         hideKeyboard();
         ((BaseContainerFragment) getParentFragment()).popFragment();
     }
@@ -1095,6 +1109,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                     locationName = "";
                 }
                 else {
+
+                    mixPanel.track(MixPanelConstants.Event.DROPDOWN_PICK_LOCATION);
+
                     location = arrLocations.get(position).id;
                     locationName = arrLocations.get(position).name;
 
@@ -1131,6 +1148,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                     subLocationName = "";
                 }
                 else {
+
+                    mixPanel.track(MixPanelConstants.Event.DROPDOWN_PICK_SUBLOCATION);
+
                     subLocation = arrSubLocations.get(position).id;
                     subLocationName = arrSubLocations.get(position).name;
 
@@ -1162,6 +1182,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                     villageName = "";
                 }
                 else {
+
+                    mixPanel.track(MixPanelConstants.Event.DROPDOWN_PICK_VILLAGE);
+
                     village = arrVillages.get(position).id;
                     villageName = arrVillages.get(position).name;
 
@@ -1177,6 +1200,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                     treeSpeciesName = "";
                 }
                 else {
+
+                    mixPanel.track(MixPanelConstants.Event.DROPDOWN_PICK_TREE);
+
                     treeSpecies = arrTrees.get(position).id;
                     treeSpeciesName = arrTrees.get(position).name;
 
@@ -1209,6 +1235,30 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         String fullName = (firstName + " " + secondName).trim();
         fullName = (fullName + " " + surname).trim();
+
+        try{
+            JSONObject props = new JSONObject();
+            props.put(MixPanelConstants.Property.FIRST_NAME, firstName);
+            props.put(MixPanelConstants.Property.SECOND_NAME, secondName);
+            props.put(MixPanelConstants.Property.SURNAME, surname);
+            props.put(MixPanelConstants.Property.ID_NUMBER, idNumber);
+            props.put(MixPanelConstants.Property.GENDER, gender);
+            props.put(MixPanelConstants.Property.IS_LEADER, leader ? "Yes" : "No");
+            props.put(MixPanelConstants.Property.IS_FARMER_HOME, isFarmerHome ? "Yes" : "No");
+            props.put(MixPanelConstants.Property.MOBILE_NUMBER, mobileNumber);
+            props.put(MixPanelConstants.Property.LOCATION, locationName);
+            props.put(MixPanelConstants.Property.SUBLOCATION, subLocationName);
+            props.put(MixPanelConstants.Property.VILLAGE, villageName);
+            props.put(MixPanelConstants.Property.TREE, treeSpeciesName);
+
+            if(farmerStatus.equalsIgnoreCase(Constants.STR_PENDING))
+                mixPanel.track(MixPanelConstants.Event.SUBMIT_FOR_APPROVAL_BUTTON, props);
+            else
+                mixPanel.track(MixPanelConstants.Event.SAVE_FARMER_BUTTON, props);
+        }
+        catch (JSONException e){
+            e.printStackTrace();
+        }
 
         if(farmerStatus == null)
             farmerStatus = farmer.signupStatus;
@@ -1318,6 +1368,30 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         String fullName = (firstName + " " + secondName).trim();
         fullName = (fullName + " " + surname).trim();
+
+        try{
+            JSONObject props = new JSONObject();
+            props.put(MixPanelConstants.Property.FIRST_NAME, firstName);
+            props.put(MixPanelConstants.Property.SECOND_NAME, secondName);
+            props.put(MixPanelConstants.Property.SURNAME, surname);
+            props.put(MixPanelConstants.Property.ID_NUMBER, idNumber);
+            props.put(MixPanelConstants.Property.GENDER, gender);
+            props.put(MixPanelConstants.Property.IS_LEADER, leader ? "Yes" : "No");
+            props.put(MixPanelConstants.Property.IS_FARMER_HOME, isFarmerHome ? "Yes" : "No");
+            props.put(MixPanelConstants.Property.MOBILE_NUMBER, mobileNumber);
+            props.put(MixPanelConstants.Property.LOCATION, locationName);
+            props.put(MixPanelConstants.Property.SUBLOCATION, subLocationName);
+            props.put(MixPanelConstants.Property.VILLAGE, villageName);
+            props.put(MixPanelConstants.Property.TREE, treeSpeciesName);
+
+            if(farmerStatus.equalsIgnoreCase(Constants.STR_PENDING))
+                mixPanel.track(MixPanelConstants.Event.SUBMIT_FOR_APPROVAL_BUTTON, props);
+            else
+                mixPanel.track(MixPanelConstants.Event.CREATE_FARMER_BUTTON, props);
+        }
+        catch (JSONException e){
+            e.printStackTrace();
+        }
 
         Realm.getDefaultInstance().beginTransaction();
 
@@ -1598,6 +1672,22 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+
+        switch (v.getId()){
+            case R.id.spLocation:
+                mixPanel.track(MixPanelConstants.Event.DROPDOWN_SHOW_LOCATION);
+                break;
+            case R.id.spSubLocation:
+                mixPanel.track(MixPanelConstants.Event.DROPDOWN_SHOW_SUBLOCATION);
+                break;
+            case R.id.spVillage:
+                mixPanel.track(MixPanelConstants.Event.DROPDOWN_SHOW_VILLAGE);
+                break;
+            case R.id.spTree:
+                mixPanel.track(MixPanelConstants.Event.DROPDOWN_SHOW_TREE);
+                break;
+        }
+
         if (event.getAction() == MotionEvent.ACTION_UP) {
             hideKeyboard();
         }

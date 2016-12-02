@@ -11,11 +11,13 @@ import android.view.ViewGroup;
 
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+import com.mixpanel.android.mpmetrics.MixpanelAPI;
 
 import butterknife.ButterKnife;
 import wal.fennel.R;
 import wal.fennel.application.Fennel;
 import wal.fennel.utils.Constants;
+import wal.fennel.utils.MixPanelConstants;
 import wal.fennel.views.TitleBarLayout;
 
 public abstract class BaseFragment extends Fragment implements TitleBarLayout.TitleBarIconClickListener {
