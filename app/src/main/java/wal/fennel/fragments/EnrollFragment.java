@@ -315,7 +315,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         title = getArguments().getString("title");
         if (title.equalsIgnoreCase(Constants.STR_EDIT_FARMER)) {
 
-            mixPanel.track(MixPanelConstants.PageView.ENROLL_FARMER);
+            mixPanel.track(MixPanelConstants.PageView.EDIT_FARMER);
 
             farmer = (Farmer) getArguments().getParcelable("farmer");
             txtCreateFarmer.setText("SAVE");
@@ -332,7 +332,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             populateFarmer();
             setSpinnerBackgroundEnabled();
         } else {
-            mixPanel.track(MixPanelConstants.PageView.EDIT_FARMER);
+            mixPanel.track(MixPanelConstants.PageView.ENROLL_FARMER);
 
             setSpinnerBackgroundDisbaled();
         }
@@ -1110,7 +1110,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 }
                 else {
 
-                    mixPanel.track(MixPanelConstants.Event.DROPDOWN_PICK_LOCATION);
+//                    mixPanel.track(MixPanelConstants.Event.DROPDOWN_PICK_LOCATION);
 
                     location = arrLocations.get(position).id;
                     locationName = arrLocations.get(position).name;
@@ -1149,7 +1149,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 }
                 else {
 
-                    mixPanel.track(MixPanelConstants.Event.DROPDOWN_PICK_SUBLOCATION);
+//                    mixPanel.track(MixPanelConstants.Event.DROPDOWN_PICK_SUBLOCATION);
 
                     subLocation = arrSubLocations.get(position).id;
                     subLocationName = arrSubLocations.get(position).name;
@@ -1183,7 +1183,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 }
                 else {
 
-                    mixPanel.track(MixPanelConstants.Event.DROPDOWN_PICK_VILLAGE);
+//                    mixPanel.track(MixPanelConstants.Event.DROPDOWN_PICK_VILLAGE);
 
                     village = arrVillages.get(position).id;
                     villageName = arrVillages.get(position).name;
@@ -1201,7 +1201,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 }
                 else {
 
-                    mixPanel.track(MixPanelConstants.Event.DROPDOWN_PICK_TREE);
+//                    mixPanel.track(MixPanelConstants.Event.DROPDOWN_PICK_TREE);
 
                     treeSpecies = arrTrees.get(position).id;
                     treeSpeciesName = arrTrees.get(position).name;
@@ -1673,23 +1673,22 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     @Override
     public boolean onTouch(View v, MotionEvent event) {
 
-        switch (v.getId()){
-            case R.id.spLocation:
-                mixPanel.track(MixPanelConstants.Event.DROPDOWN_SHOW_LOCATION);
-                break;
-            case R.id.spSubLocation:
-                mixPanel.track(MixPanelConstants.Event.DROPDOWN_SHOW_SUBLOCATION);
-                break;
-            case R.id.spVillage:
-                mixPanel.track(MixPanelConstants.Event.DROPDOWN_SHOW_VILLAGE);
-                break;
-            case R.id.spTree:
-                mixPanel.track(MixPanelConstants.Event.DROPDOWN_SHOW_TREE);
-                break;
-        }
-
         if (event.getAction() == MotionEvent.ACTION_UP) {
             hideKeyboard();
+//            switch (v.getId()){
+//                case R.id.spLocation:
+//                    mixPanel.track(MixPanelConstants.Event.DROPDOWN_SHOW_LOCATION);
+//                    break;
+//                case R.id.spSubLocation:
+//                    mixPanel.track(MixPanelConstants.Event.DROPDOWN_SHOW_SUBLOCATION);
+//                    break;
+//                case R.id.spVillage:
+//                    mixPanel.track(MixPanelConstants.Event.DROPDOWN_SHOW_VILLAGE);
+//                    break;
+//                case R.id.spTree:
+//                    mixPanel.track(MixPanelConstants.Event.DROPDOWN_SHOW_TREE);
+//                    break;
+//            }
         }
         return false;
     }

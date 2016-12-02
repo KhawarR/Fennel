@@ -6,7 +6,11 @@ package wal.fennel.utils;
 
 public class MixPanelConstants {
 
-    public static final String MIXPANEL_TOKEN = "d484e812f6310fedd9c201f8ff9f46b6";
+    // Khawar Test Fennel project
+//    public static final String MIXPANEL_TOKEN = "d484e812f6310fedd9c201f8ff9f46b6";
+
+    // Tiffany Fennel Project
+    public static final String MIXPANEL_TOKEN = "06ca76ee304364b63b5b6e1df4dfaf2e";
 
     public static class PageView{
         public static final String LOGIN = "Login-PageView";
