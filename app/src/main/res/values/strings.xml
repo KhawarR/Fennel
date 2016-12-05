@@ -34,6 +34,8 @@
     <string name="cancel_txt">CANCEL</string>
     <string name="done_txt">DONE</string>
     <string name="back_txt">BACK</string>
+    <string name="team">Team</string>
+    <string name="person">Person</string>
 
     <string-array name="optionsLocation">
         <item>LOCATION 1</item>

@@ -12,4 +12,44 @@
         android:layout_height="wrap_content"
         fennel:drawableRight="@drawable/dummy_profile"
         fennel:titleText="@string/my_logbook" />
+
+    <LinearLayout
+        android:id="@+id/tabview"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal"
+        android:background="@color/dark_green">
+        <wal.fennel.views.FontTextView
+            android:id="@+id/tvteam"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/padding_10"
+            android:layout_marginRight="@dimen/padding_10"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:background="@drawable/selector_radio_bg_white"
+            android:gravity="center"
+            android:text="@string/team"
+            android:textColor="@color/white_green_text_selector"
+            fennel:fontName="Avenir-Heavy.ttf" />
+        <wal.fennel.views.FontTextView
+            android:id="@+id/tvperson"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/padding_10"
+            android:layout_marginRight="@dimen/padding_10"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:background="@drawable/selector_radio_bg_white"
+            android:gravity="center"
+            android:text="@string/person"
+            android:textColor="@color/white_green_text_selector"
+            fennel:fontName="Avenir-Heavy.ttf" />
+    </LinearLayout>
+    <FrameLayout
+        android:id="@+id/logbook_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+
 </LinearLayout>
