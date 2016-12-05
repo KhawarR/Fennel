@@ -344,6 +344,7 @@ public class WebApi {
                                 Matcher m = Pattern.compile("\\((.*?)\\)").matcher(errorMessage);
                                 while(m.find()) {
                                     newFarmerId = m.group(1);
+                                    Log.i("Existing farmer", "Existing farmer ID: " + newFarmerId);
                                 }
                             }
 
@@ -565,6 +566,7 @@ public class WebApi {
             public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
                 countCalls--;
                 if (response.body() != null && response.body().success == true) {
+                    Log.i(farmer.getFullName(), "Farm Synced" );
                     checkSyncComplete();
                     Realm realm = Realm.getDefaultInstance();
                     realm.beginTransaction();
@@ -580,6 +582,15 @@ public class WebApi {
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(intent);
                 } else {
+                    String errorMessage = "-";
+
+                    try {
+                        errorMessage = response.errorBody().string();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    Log.i(farmer.getFullName(), "Farm Sync Failed: " +  errorMessage);
                     countFailedCalls++;
                     checkSyncComplete();
                 }
