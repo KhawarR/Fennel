@@ -5,10 +5,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.KeyEvent;
+
+import com.mixpanel.android.mpmetrics.MixpanelAPI;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import wal.fennel.R;
 import wal.fennel.application.Fennel;
+import wal.fennel.utils.Constants;
 import wal.fennel.utils.PreferenceHelper;
 
 /**
