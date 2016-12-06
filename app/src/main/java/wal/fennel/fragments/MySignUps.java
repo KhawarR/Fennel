@@ -40,6 +40,7 @@ import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
 import io.realm.RealmResults;
+import io.realm.Sort;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -274,7 +275,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         loadingStarted();
 
-        RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).findAll();
+        RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).findAll().sort("lastModifiedTime", Sort.ASCENDING);
 
         ArrayList<Farmer> incompleteFarmersList = new ArrayList<>();
         ArrayList<Farmer> pendingFarmersList = new ArrayList<>();
@@ -299,17 +300,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         if(incompleteFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
             Singleton.getInstance().mySignupsList.addAll(incompleteFarmersList);
         }
         if(pendingFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
             Singleton.getInstance().mySignupsList.addAll(pendingFarmersList);
         }
         if(approvedFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
             Singleton.getInstance().mySignupsList.addAll(approvedFarmersList);
         }
 
@@ -463,7 +464,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 //                String status = farmObj.getString("Status__c");
                 String status = farmObj.getString("Sign_Up_Status__c");
 
-                Farmer farmer = new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "");
+                Farmer farmer = new Farmer(null, id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "");
 
                 if(status.equalsIgnoreCase(Constants.STR_ENROLLED))
                 {
@@ -493,17 +494,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         if(incompleteFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
             Singleton.getInstance().mySignupsList.addAll(incompleteFarmersList);
         }
         if(pendingFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
             Singleton.getInstance().mySignupsList.addAll(pendingFarmersList);
         }
         if(approvedFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", ""));
             Singleton.getInstance().mySignupsList.addAll(approvedFarmersList);
         }
 

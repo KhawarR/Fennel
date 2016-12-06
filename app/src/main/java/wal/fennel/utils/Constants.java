@@ -30,6 +30,7 @@ public class Constants {
     public static final String MY_SIGNPS_BROADCAST_ACTION = "wal.fennel.action.MY_SIGUPS_UPDATED";
 
     public static final String STR_TIME_FORMAT_YYYY_MM_DD = "yyyy-MM-dd";
+    public static final String STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS = "yyyy-MM-dd'T'hh:mm:ss";
 
     public static final int TIMEOUT = 30;
     public static final int IMAGE_MAX_DIM = 500;
