@@ -54,11 +54,13 @@ import static io.realm.Realm.getDefaultInstance;
  */
 public class WebApi {
 
+    private static RealmList<Farmer> pendingFarmersList = new RealmList<>();
+
     private static Context mContext = null;
     private static WebApi sInstance = null;
 
-    private static int countCalls = 0;
     private static int countFailedCalls = 0;
+    private static int countCalls = 0;
 
     private OnSyncCompleteListener onSyncCompleteListener;
 
@@ -335,148 +337,165 @@ public class WebApi {
 
         //region Farmers
         RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).equalTo("isDataDirty", true).findAll();
-        for (int i = 0; i < farmerDbList.size(); i++) {
-
-            final Farmer farmer = farmerDbList.get(i);
-
-            final HashMap<String, Object> farmerMap = getFarmerMap(farmer);
-//            countCalls++;
-            if(farmer.getFarmerId().isEmpty() || farmer.getFarmerId().startsWith(Constants.STR_FARMER_ID_PREFIX)){
-                WebApi.createFarmer(new Callback<ResponseModel>() {
-                    @Override
-                    public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
-                        countCalls--;
-
-                        String errorMessage = "";
-                        if(response.code() == 400 || response.errorBody() != null) {
-                            try {
-                                errorMessage = response.errorBody().string().toString();
-                                JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
-                                errorMessage = objError.getString("message");
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        if(response.code() == 401)
-                        {
-                            countFailedCalls++;
-                            PreferenceHelper.getInstance().clearSession(false);
-                            Intent intent = new Intent(mContext, SplashActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            mContext.startActivity(intent);
-                        }
-                        else if (((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().isSuccess() == true) || !errorMessage.isEmpty()) {
-
-                            String newFarmerId = "";
-
-                            if(!errorMessage.isEmpty()) {
-                                Matcher m = Pattern.compile("\\((.*?)\\)").matcher(errorMessage);
-                                while(m.find()) {
-                                    newFarmerId = m.group(1);
-                                }
-                            }
-
-                            if(newFarmerId.isEmpty()){
-
-                                try {
-                                    newFarmerId = response.body().getId();
-                                }
-                                catch (NullPointerException e){
-                                    e.printStackTrace();
-                                    String errorCrash = e.getMessage();
-
-                                    if(errorMessage.isEmpty()){
-                                        if(response.errorBody() != null){
-                                            try {
-                                                errorCrash = errorCrash + ": " + response.errorBody().string();
-                                            } catch (IOException e1) {
-                                                e1.printStackTrace();
-                                            }
-                                        }
-                                    }
-                                    else {
-                                        errorCrash = errorCrash + ": " + errorMessage;
-                                    }
-
-                                    Exception ee = new Exception("Farmer Create failed - " + errorCrash);
-                                    Crashlytics.logException(ee);
-                                }
-                            }
-
-                            if(!newFarmerId.isEmpty()){
-                                Realm realm = Realm.getDefaultInstance();
-                                realm.beginTransaction();
-                                farmer.setFarmerId(newFarmerId);
-                                realm.commitTransaction();
-
-                                addFarmWithFarmerId(farmer);
-
-                                checkSyncComplete();
-
-                                if(farmer.isFarmerPicDirty())
-                                    attachFarmerImageToFarmerObject(farmer);
-                                if(farmer.isNatIdCardDirty())
-                                    attachFarmerIDImageToFarmerObject(farmer);
-                            }
-                        }else {
-                            countFailedCalls++;
-                            checkSyncComplete();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<ResponseModel> call, Throwable t) {
-                        countCalls--;
-                        countFailedCalls++;
-                        t.printStackTrace();
-                        checkSyncComplete();
-                    }
-                }, farmerMap);
-            }
-            else {
-                WebApi.editFarmer(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        countCalls--;
-                        if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                            editFarmWithFarmId(farmer);
-
-                            checkSyncComplete();
-
-                            if(farmer.isFarmerPicDirty())
-                                attachFarmerImageToFarmerObject(farmer);
-                            if(farmer.isNatIdCardDirty())
-                                attachFarmerIDImageToFarmerObject(farmer);
-                        }
-                        else if(response.code() == 401)
-                        {
-                            countFailedCalls++;
-                            PreferenceHelper.getInstance().clearSession(false);
-                            Intent intent = new Intent(mContext, SplashActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            mContext.startActivity(intent);
-                        } else {
-                            countFailedCalls++;
-                            checkSyncComplete();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        countCalls--;
-                        countFailedCalls++;
-                        t.printStackTrace();
-                        checkSyncComplete();
-                    }
-                }, farmer.getFarmerId(), farmerMap);
-            }
-        }
+        RealmList<Farmer> farmerRealmList = new RealmList<>();
+        farmerRealmList.addAll(farmerDbList);
+        processFarmerCalls(farmerRealmList);
         //endregion
 
         PreferenceHelper.getInstance().writeIsSyncInProgress(true);
+    }
+
+    private static void processFarmerCalls(RealmList<Farmer> incomingFarmerList) {
+//        pendingFarmersList.clear();
+        ArrayList<String> arrFarmerIds = new ArrayList<>();
+        RealmList<Farmer> iterativeFarmerList = new RealmList<>();
+        iterativeFarmerList.addAll(incomingFarmerList);
+        pendingFarmersList.clear();
+
+        for (int i = 0; i < iterativeFarmerList.size(); i++) {
+
+            final Farmer farmer = iterativeFarmerList.get(i);
+            if (arrFarmerIds.contains(farmer.getIdNumber())) {
+                int countToMinus = 2;
+                if (farmer.isFarmerPicDirty())
+                    countToMinus++;
+                if (farmer.isNatIdCardDirty())
+                    countToMinus++;
+                countCalls = countCalls - countToMinus;
+                pendingFarmersList.add(farmer);
+                checkSyncComplete();
+            } else {
+                arrFarmerIds.add(farmer.getIdNumber());
+
+                final HashMap<String, Object> farmerMap = getFarmerMap(farmer);
+                if (farmer.getFarmerId().isEmpty() || farmer.getFarmerId().startsWith(Constants.STR_FARMER_ID_PREFIX)) {
+                    WebApi.createFarmer(new Callback<ResponseModel>() {
+                        @Override
+                        public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
+                            countCalls--;
+
+                            String errorMessage = "";
+                            if (response.code() == 400 || response.errorBody() != null) {
+                                try {
+                                    errorMessage = response.errorBody().string().toString();
+                                    JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
+                                    errorMessage = objError.getString("message");
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            if (response.code() == 401) {
+                                countFailedCalls++;
+                                PreferenceHelper.getInstance().clearSession(false);
+                                Intent intent = new Intent(mContext, SplashActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                mContext.startActivity(intent);
+                            } else if (((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().isSuccess() == true) || !errorMessage.isEmpty()) {
+
+                                String newFarmerId = "";
+
+                                if (!errorMessage.isEmpty()) {
+                                    Matcher m = Pattern.compile("\\((.*?)\\)").matcher(errorMessage);
+                                    while (m.find()) {
+                                        newFarmerId = m.group(1);
+                                        Log.i("Existing farmer", "Existing farmer ID: " + newFarmerId);
+                                    }
+                                }
+
+                                if (newFarmerId.isEmpty()) {
+
+                                    try {
+                                        newFarmerId = response.body().getId();
+                                    } catch (NullPointerException e) {
+                                        e.printStackTrace();
+                                        String errorCrash = e.getMessage();
+
+                                        if (errorMessage.isEmpty()) {
+                                            if (response.errorBody() != null) {
+                                                try {
+                                                    errorCrash = errorCrash + ": " + response.errorBody().string();
+                                                } catch (IOException e1) {
+                                                    e1.printStackTrace();
+                                                }
+                                            }
+                                        } else {
+                                            errorCrash = errorCrash + ": " + errorMessage;
+                                        }
+
+                                        Exception ee = new Exception("Farmer Create failed - " + errorCrash);
+                                        Crashlytics.logException(ee);
+                                    }
+                                }
+
+                                if (!newFarmerId.isEmpty()) {
+                                    Realm realm = Realm.getDefaultInstance();
+                                    realm.beginTransaction();
+                                    farmer.setFarmerId(newFarmerId);
+                                    realm.commitTransaction();
+
+                                    addFarmWithFarmerId(farmer);
+
+                                    checkSyncComplete();
+
+                                    if (farmer.isFarmerPicDirty())
+                                        attachFarmerImageToFarmerObject(farmer);
+                                    if (farmer.isNatIdCardDirty())
+                                        attachFarmerIDImageToFarmerObject(farmer);
+                                }
+                            } else {
+                                countFailedCalls++;
+                                checkSyncComplete();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseModel> call, Throwable t) {
+                            countCalls--;
+                            countFailedCalls++;
+                            t.printStackTrace();
+                            checkSyncComplete();
+                        }
+                    }, farmerMap);
+                } else {
+                    WebApi.editFarmer(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            countCalls--;
+                            if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                                editFarmWithFarmId(farmer);
+
+                                checkSyncComplete();
+
+                                if (farmer.isFarmerPicDirty())
+                                    attachFarmerImageToFarmerObject(farmer);
+                                if (farmer.isNatIdCardDirty())
+                                    attachFarmerIDImageToFarmerObject(farmer);
+                            } else if (response.code() == 401) {
+                                countFailedCalls++;
+                                PreferenceHelper.getInstance().clearSession(false);
+                                Intent intent = new Intent(mContext, SplashActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                mContext.startActivity(intent);
+                            } else {
+                                countFailedCalls++;
+                                checkSyncComplete();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            countCalls--;
+                            countFailedCalls++;
+                            t.printStackTrace();
+                            checkSyncComplete();
+                        }
+                    }, farmer.getFarmerId(), farmerMap);
+                }
+            }
+        }
     }
 
     private static String getAttachmentIdFromUploadSuccess(String data) {
@@ -597,6 +616,7 @@ public class WebApi {
             public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
                 countCalls--;
                 if (response.body() != null && response.body().isSuccess() == true) {
+                    Log.i(farmer.getFullName(), "Farm Synced" );
                     checkSyncComplete();
                     Realm realm = Realm.getDefaultInstance();
                     realm.beginTransaction();
@@ -612,6 +632,15 @@ public class WebApi {
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(intent);
                 } else {
+                    String errorMessage = "-";
+
+                    try {
+                        errorMessage = response.errorBody().string();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    Log.i(farmer.getFullName(), "Farm Sync Failed: " +  errorMessage);
                     countFailedCalls++;
                     checkSyncComplete();
                 }
@@ -800,6 +829,8 @@ public class WebApi {
         }
         else
         {
+            String urlServer = NetworkHelper.makeAttachmentUrlFromId(farmer.getNationalCardAttachmentId());
+            MyPicassoInstance.getInstance().invalidate(urlServer);
             MyPicassoInstance.getInstance().invalidate(farmer.getNationalCardUrl());
         }
 
@@ -901,20 +932,35 @@ public class WebApi {
 
     private static void checkSyncComplete(){
         if(countCalls == 0) {
-            if(countFailedCalls == 0){
-                Log.i("Sync process: ", "Sync completed");
-            }
-            else{
-                Log.i("Sync process: ", "Sync finished, but some records failed to sync");
-            }
-            saveSyncTimeStamp();
-            getFullServerData();
-            PreferenceHelper.getInstance().writeSessionExpiredSyncReq(false);
-            if(WebApi.getInstance().onSyncCompleteListener != null) {
-                WebApi.getInstance().onSyncCompleteListener.syncCompleted();
-            }
 
-            PreferenceHelper.getInstance().writeIsSyncInProgress(false);
+            if(pendingFarmersList.size() > 0){
+                int countToAdd = pendingFarmersList.size() * 2;
+                for (int i = 0; i < pendingFarmersList.size(); i++) {
+                    Farmer pendingFarmer = pendingFarmersList.get(i);
+                    if(pendingFarmer.isFarmerPicDirty())
+                        countToAdd++;
+                    if(pendingFarmer.isNatIdCardDirty())
+                        countToAdd++;
+                }
+                countCalls = countToAdd;
+                processFarmerCalls(pendingFarmersList);
+            }
+            else {
+                if(countFailedCalls == 0){
+                    Log.i("Sync process: ", "Sync completed");
+                }
+                else{
+                    Log.i("Sync process: ", "Sync finished, but some records failed to sync");
+                }
+                saveSyncTimeStamp();
+                getFullServerData();
+                PreferenceHelper.getInstance().writeSessionExpiredSyncReq(false);
+                if(WebApi.getInstance().onSyncCompleteListener != null) {
+                    WebApi.getInstance().onSyncCompleteListener.syncCompleted();
+                }
+
+                PreferenceHelper.getInstance().writeIsSyncInProgress(false);
+            }
         }
     }
 
