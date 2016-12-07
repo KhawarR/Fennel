@@ -47,6 +47,10 @@ public class Constants {
     public static final int RESPONSE_SUCCESS_ADDED = 201;
     public static final int RESPONSE_SUCCESS_NO_CONTENT = 204;
     public static final int CORNER_RADIUS = 20;
+    public static final String TEAM_LOGBOOK_TAG = "9999";
+    public static final String PERSON_LOGBOOK_TAG = "9998";
+    public static final String PERSON_DETAIL_LOGBOOK_TAG = "9997";
+
 
     public enum FarmerType {
         MYSIGNUPS,

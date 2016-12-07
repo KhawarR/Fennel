@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/et_search"
+        android:layout_gravity="center_horizontal"
+        android:drawableRight="@drawable/ic_search"
+        android:layout_marginLeft="@dimen/padding_20"
+        android:layout_marginRight="@dimen/padding_20"
+        android:background="@drawable/rounded_border_text_view"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:hint="Search for Employee..."
+        android:gravity="center"
+        android:padding="10dp"
+        android:maxLines="1"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        />
+
+    <ListView
+        android:id="@+id/person_listview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+</LinearLayout>

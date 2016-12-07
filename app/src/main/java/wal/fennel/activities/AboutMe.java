@@ -88,9 +88,10 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
     @Bind(R.id.profile_image)
     CircleImageView cIvProfileMain;
 
-    CircleImageView cIvIconRight;
+    @Bind(R.id.pbSync)
+    ProgressBar pbSync;
 
-    private SwipeRefreshLayout mSwipeRefreshLayout;
+    CircleImageView cIvIconRight;
 
     private ImagePicker imagePicker;
     private ImagePickerCallback imagePickerCallback;
@@ -114,9 +115,6 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         mProgressDialog.setCancelable(false);
         mProgressDialog.setMessage(getString(R.string.loading));
 
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
-        mSwipeRefreshLayout.setOnRefreshListener(onRefreshListener);
-
 //        if(PreferenceHelper.getInstance().readIsSyncInProgress()){
 //            mSwipeRefreshLayout.setRefreshing(true);
 //        }
@@ -132,7 +130,8 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
 
         if(PreferenceHelper.getInstance().readIsSyncInProgress()){
             WebApi.setSyncCompleteListener(this);
-            mSwipeRefreshLayout.setRefreshing(true);
+//            mSwipeRefreshLayout.setRefreshing(true);
+            pbSync.setVisibility(View.VISIBLE);
         }
 
         populateView();
@@ -266,6 +265,35 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
             Toast.makeText(getApplicationContext(), "Must sync data before Signout", Toast.LENGTH_SHORT).show();
         else
             showLogoutDialog();
+    }
+
+    @OnClick(R.id.txtSyncData)
+    void onClickSyncData(View view) {
+
+        pbSync.setVisibility(View.VISIBLE);
+
+        mixPanel.track(MixPanelConstants.Event.MANUAL_SYNC_ACTION);
+
+        if(NetworkHelper.isNetAvailable(getApplicationContext())){
+            if(!PreferenceHelper.getInstance().readIsSyncInProgress()){
+                if(WebApi.isSyncRequired())
+                    WebApi.syncAll(AboutMe.this);
+                else {
+//                    mSwipeRefreshLayout.setRefreshing(false);
+                    pbSync.setVisibility(View.GONE);
+                    Toast.makeText(getApplicationContext(), "Data is already synced", Toast.LENGTH_SHORT).show();
+                    WebApi.getFullServerData();
+                }
+            }else {
+//                mSwipeRefreshLayout.setRefreshing(false);
+                pbSync.setVisibility(View.GONE);
+            }
+        }
+        else {
+            Toast.makeText(getApplicationContext(), "Network not available", Toast.LENGTH_SHORT).show();
+//            mSwipeRefreshLayout.setRefreshing(false);
+            pbSync.setVisibility(View.GONE);
+        }
     }
 
     @OnClick(R.id.rl_pick_image)
@@ -618,36 +646,38 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         finish();
     }
 
-    private SwipeRefreshLayout.OnRefreshListener onRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
-        @Override
-        public void onRefresh() {
-
-            mixPanel.track(MixPanelConstants.Event.MANUAL_SYNC_ACTION);
-
-            if(NetworkHelper.isNetAvailable(getApplicationContext())){
-                if(!PreferenceHelper.getInstance().readIsSyncInProgress()){
-                    if(WebApi.isSyncRequired())
-                        WebApi.syncAll(AboutMe.this);
-                    else {
-                        mSwipeRefreshLayout.setRefreshing(false);
-                        Toast.makeText(getApplicationContext(), "Data is already synced", Toast.LENGTH_SHORT).show();
-                        WebApi.getFullServerData();
-                    }
-                }else {
-                    mSwipeRefreshLayout.setRefreshing(false);
-                }
-            }
-            else {
-                Toast.makeText(getApplicationContext(), "Network not available", Toast.LENGTH_SHORT).show();
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
-        }
-    };
+//    private SwipeRefreshLayout.OnRefreshListener onRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
+//        @Override
+//        public void onRefresh() {
+//
+//            mixPanel.track(MixPanelConstants.Event.MANUAL_SYNC_ACTION);
+//
+//            if(NetworkHelper.isNetAvailable(getApplicationContext())){
+//                if(!PreferenceHelper.getInstance().readIsSyncInProgress()){
+//                    if(WebApi.isSyncRequired())
+//                        WebApi.syncAll(AboutMe.this);
+//                    else {
+//                        mSwipeRefreshLayout.setRefreshing(false);
+//                        Toast.makeText(getApplicationContext(), "Data is already synced", Toast.LENGTH_SHORT).show();
+//                        WebApi.getFullServerData();
+//                    }
+//                }else {
+//                    mSwipeRefreshLayout.setRefreshing(false);
+//                }
+//            }
+//            else {
+//                Toast.makeText(getApplicationContext(), "Network not available", Toast.LENGTH_SHORT).show();
+//                mSwipeRefreshLayout.setRefreshing(false);
+//            }
+//        }
+//    };
 
     @Override
     public void syncCompleted() {
-        if(mSwipeRefreshLayout != null)
-            mSwipeRefreshLayout.setRefreshing(false);
+//        if(mSwipeRefreshLayout != null)
+//            mSwipeRefreshLayout.setRefreshing(false);
+        if(pbSync != null)
+            pbSync.setVisibility(View.GONE);
 
         String syncTime = PreferenceHelper.getInstance().readLastSyncTime();
         if(syncTime == null || syncTime.isEmpty())

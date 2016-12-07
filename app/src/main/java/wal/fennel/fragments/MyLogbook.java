@@ -3,17 +3,22 @@ package wal.fennel.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.squareup.picasso.NetworkPolicy;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
+import wal.fennel.models.Farmer;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
@@ -21,14 +26,26 @@ import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PreferenceHelper;
 import wal.fennel.views.TitleBarLayout;
 
+import static wal.fennel.R.id.tvperson;
+import static wal.fennel.R.id.tvteam;
 
-public class MyLogbook extends BaseFragment {
+
+public class MyLogbook extends BaseFragment{
 
 
     @Bind(R.id.titleBar)
     TitleBarLayout titleBarLayout;
 
     CircleImageView cIvIconRight;
+
+    @Bind(R.id.tvteam)
+    TextView tvTeam;
+
+    @Bind(R.id.tvperson)
+    TextView tvPerson;
+
+    @Bind(R.id.tabview)
+    LinearLayout tabView;
 
     @Nullable
     @Override
@@ -53,6 +70,60 @@ public class MyLogbook extends BaseFragment {
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
             else
                 MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+        }
+        tvTeam.setSelected(true);
+//        tvPerson.setSelected(true);
+        String userType = PreferenceHelper.getInstance().readLoginUserType();
+//        if (userType.equalsIgnoreCase(Constants.STR_FACILITATOR)) {
+//            tabView.setVisibility(View.GONE);
+//        } else {
+//            tabView.setVisibility(View.VISIBLE);
+//        }
+        showTeamViewFragment();
+//        showPersonViewFragment();
+    }
+
+    public void showTeamViewFragment() {
+        BaseFragment teamLogBookFragment = (BaseFragment) getChildFragmentManager().findFragmentByTag(Constants.TEAM_LOGBOOK_TAG);
+        if (teamLogBookFragment == null) {
+            FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+            transaction.replace(R.id.logbook_layout, new TeamLogBookFragment());
+            transaction.commit();
+            getChildFragmentManager().executePendingTransactions();
+        }
+    }
+
+    public void showPersonViewFragment() {
+        BaseFragment personLogBookFragment = (BaseFragment) getChildFragmentManager().findFragmentByTag(Constants.PERSON_LOGBOOK_TAG);
+        if (personLogBookFragment == null) {
+            FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+            transaction.replace(R.id.logbook_layout, new PersonLogBookFragment());
+            transaction.commit();
+            getChildFragmentManager().executePendingTransactions();
+        }
+    }
+
+    public void addPersonDetailViewFragment(Farmer farmer) {
+        BaseFragment personDetailLogBookFragment = (BaseFragment) getChildFragmentManager().findFragmentByTag(Constants.PERSON_DETAIL_LOGBOOK_TAG);
+        if (personDetailLogBookFragment == null) {
+            FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+            transaction.add(R.id.logbook_layout, LogBookPersonDetailFragment.newInstance(farmer));
+            transaction.commit();
+            getChildFragmentManager().executePendingTransactions();
+        }
+    }
+
+
+    @OnClick({tvteam, tvperson})
+    void onClickViewSelection(View view) {
+        tvTeam.setSelected(false);
+        tvPerson.setSelected(false);
+        view.setSelected(true);
+
+        if (tvPerson.isSelected()) {
+            showPersonViewFragment();
+        } else if (tvTeam.isSelected()) {
+            showTeamViewFragment();
         }
     }
 

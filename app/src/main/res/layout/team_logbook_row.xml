@@ -1,0 +1,76 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fennel="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/grey_light">
+
+    <!--<View-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="0.5dp"-->
+        <!--android:background="@color/cell_separator_color"-->
+        <!--/>-->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/imgRight"
+        android:layout_width="@dimen/medium_avatar_size"
+        android:layout_height="@dimen/medium_avatar_size"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="5dp"
+        android:layout_marginRight="5dp"
+        android:src="@drawable/login_bg"
+        fennel:civ_border_color="@color/app_green"
+        fennel:civ_border_width="1dp" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content">
+
+        <wal.fennel.views.FontTextView
+            android:id="@+id/tv_desc"
+            android:layout_height="50dp"
+            android:gravity="center_vertical"
+            android:layout_marginLeft="15dp"
+            android:textSize="16sp"
+            android:lines="2"
+            android:textColor="@color/black_txt_color"
+            fennel:fontName="Avenir-Heavy.ttf"
+            android:layout_width="match_parent" />
+
+        <wal.fennel.views.FontTextView
+            android:id="@+id/tv_time"
+            android:text="19 minutes ago"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:layout_marginLeft="15dp"
+            android:layout_gravity="center_vertical"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            fennel:fontName="Avenir-Book.ttf"
+            android:layout_width="match_parent" />
+    </LinearLayout>
+
+    <ImageView
+        android:layout_marginLeft="15dp"
+        android:src="@drawable/dummy_profile"
+        android:layout_width="40dp"
+        android:layout_gravity="center_vertical"
+        android:layout_height="match_parent"/>
+
+    </LinearLayout>
+
+    <!--<View-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="0.5dp"-->
+        <!--android:background="@color/cell_separator_color"-->
+        <!--/>-->
+
+</LinearLayout>
