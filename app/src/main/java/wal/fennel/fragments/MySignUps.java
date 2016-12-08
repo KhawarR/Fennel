@@ -353,9 +353,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
                 else if(response.code() == 401)
                 {
-                    PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), SplashActivity.class));
-                    getActivity().finish();
+                    sessionExpireRedirect();
                 }
                 else
                 {
@@ -542,9 +540,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
                 else if(response.code() == 401)
                 {
-                    PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), SplashActivity.class));
-                    getActivity().finish();
+                    sessionExpireRedirect();
                 }
                 else
                 {
@@ -559,6 +555,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             t.printStackTrace();
         }
     };
+
+    private void sessionExpireRedirect(){
+        PreferenceHelper.getInstance().clearSession(false);
+        Intent intent = new Intent(getActivity(), SplashActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        getActivity().startActivity(intent);
+    }
 
     private void parseFarmerAttachmentData(String data) throws JSONException {
         JSONObject jsonObject = new JSONObject(data);
@@ -747,9 +750,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
                 else if(response.code() == 401)
                 {
-                    PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), SplashActivity.class));
-                    getActivity().finish();
+                    sessionExpireRedirect();
                 }
                 else
                 {
@@ -817,9 +818,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
                 else if(response.code() == 401)
                 {
-                    PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), SplashActivity.class));
-                    getActivity().finish();
+                    sessionExpireRedirect();
                 }
                 else
                 {
@@ -891,9 +890,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
                 else if(response.code() == 401)
                 {
-                    PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), SplashActivity.class));
-                    getActivity().finish();
+                    sessionExpireRedirect();
                 }
                 else
                 {
@@ -965,9 +962,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
                 else if(response.code() == 401)
                 {
-                    PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), SplashActivity.class));
-                    getActivity().finish();
+                    sessionExpireRedirect();
                 }
                 else
                 {
