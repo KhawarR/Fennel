@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 
@@ -249,11 +250,25 @@ public class WebApi {
                         else if(response.code() == 401)
                         {
                             countFailedCalls++;
-                            PreferenceHelper.getInstance().clearSession(false);
-                            Intent intent = new Intent(mContext, SplashActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            mContext.startActivity(intent);
+                            sessionExpireRedirect();
                         } else {
+                            String errorMessage = "";
+                            if(response.errorBody() != null) {
+                                try {
+                                    errorMessage = response.errorBody().string().toString();
+                                    JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
+                                    errorMessage = objError.getString("message");
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            Exception e = new Exception("AboutMeImage create failed - " + response.code() + " - "  + errorMessage);
+                            Crashlytics.logException(e);
+                            if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
+                                sessionExpireRedirect();
+                            }
                             countFailedCalls++;
                             checkSyncComplete();
                         }
@@ -281,11 +296,25 @@ public class WebApi {
 
                         } else if (response.code() == 401) {
                             countFailedCalls++;
-                            PreferenceHelper.getInstance().clearSession(false);
-                            Intent intent = new Intent(mContext, SplashActivity.class);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            mContext.startActivity(intent);
+                            sessionExpireRedirect();
                         } else {
+                            String errorMessage = "";
+                            if(response.errorBody() != null) {
+                                try {
+                                    errorMessage = response.errorBody().string().toString();
+                                    JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
+                                    errorMessage = objError.getString("message");
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            Exception e = new Exception("AboutMeImage Edit failed - " + response.code() + " - "  + errorMessage);
+                            Crashlytics.logException(e);
+                            if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
+                                sessionExpireRedirect();
+                            }
                             countFailedCalls++;
                             Log.i("Fennel", "facilitator profile picture edit failed!");
                         }
@@ -314,8 +343,15 @@ public class WebApi {
         PreferenceHelper.getInstance().writeIsSyncInProgress(true);
     }
 
+    private static void sessionExpireRedirect(){
+        PreferenceHelper.getInstance().clearSession(false);
+        Intent intent = new Intent(mContext, SplashActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        mContext.startActivity(intent);
+    }
+
     private static void processFarmerCalls(RealmList<Farmer> incomingFarmerList){
-//        pendingFarmersList.clear();
+
         ArrayList<String> arrFarmerIds = new ArrayList<>();
         RealmList<Farmer> iterativeFarmerList = new RealmList<>();
         iterativeFarmerList.addAll(incomingFarmerList);
@@ -344,12 +380,22 @@ public class WebApi {
                         public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
                             countCalls--;
 
+                            String newFarmerId = "";
                             String errorMessage = "";
-                            if(response.code() == 400 || response.errorBody() != null) {
+                            if(response.errorBody() != null) {
                                 try {
                                     errorMessage = response.errorBody().string().toString();
                                     JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
                                     errorMessage = objError.getString("message");
+
+                                    if(!errorMessage.isEmpty()) {
+                                        Matcher m = Pattern.compile("\\((.*?)\\)").matcher(errorMessage);
+                                        while(m.find()) {
+                                            newFarmerId = m.group(1);
+                                            Log.i("Existing farmer", "Existing farmer ID: " + newFarmerId);
+                                        }
+                                    }
+
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 } catch (JSONException e) {
@@ -360,51 +406,42 @@ public class WebApi {
                             if(response.code() == 401)
                             {
                                 countFailedCalls++;
-                                PreferenceHelper.getInstance().clearSession(false);
-                                Intent intent = new Intent(mContext, SplashActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                mContext.startActivity(intent);
+                                sessionExpireRedirect();
                             }
-                            else if (((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().success == true) || !errorMessage.isEmpty()) {
+                            else if (!newFarmerId.isEmpty() || ((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().success == true)) {
 
-                                String newFarmerId = "";
-
-                                if(!errorMessage.isEmpty()) {
-                                    Matcher m = Pattern.compile("\\((.*?)\\)").matcher(errorMessage);
-                                    while(m.find()) {
-                                        newFarmerId = m.group(1);
-                                        Log.i("Existing farmer", "Existing farmer ID: " + newFarmerId);
-                                    }
+                                if(newFarmerId.isEmpty() && response.body() != null){
+                                    newFarmerId = response.body().id;
+//                                    try {
+//                                        newFarmerId = response.body().id;
+//                                    }
+//                                    catch (NullPointerException e){
+//                                        e.printStackTrace();
+//                                        String errorCrash = e.getMessage();
+//
+//                                        if(errorMessage.isEmpty()){
+//                                            if(response.errorBody() != null){
+//                                                try {
+//                                                    errorCrash = errorCrash + ": " + response.errorBody().string();
+//                                                } catch (IOException e1) {
+//                                                    e1.printStackTrace();
+//                                                }
+//                                            }
+//                                        }
+//                                        else {
+//                                            errorCrash = errorCrash + ": " + errorMessage;
+//                                        }
+//
+//                                        Exception ee = new Exception("Farmer Create failed - " + errorCrash);
+//                                        Crashlytics.logException(ee);
+//                                    }
                                 }
 
                                 if(newFarmerId.isEmpty()){
-
-                                    try {
-                                        newFarmerId = response.body().id;
-                                    }
-                                    catch (NullPointerException e){
-                                        e.printStackTrace();
-                                        String errorCrash = e.getMessage();
-
-                                        if(errorMessage.isEmpty()){
-                                            if(response.errorBody() != null){
-                                                try {
-                                                    errorCrash = errorCrash + ": " + response.errorBody().string();
-                                                } catch (IOException e1) {
-                                                    e1.printStackTrace();
-                                                }
-                                            }
-                                        }
-                                        else {
-                                            errorCrash = errorCrash + ": " + errorMessage;
-                                        }
-
-                                        Exception ee = new Exception("Farmer Create failed - " + errorCrash);
-                                        Crashlytics.logException(ee);
-                                    }
+                                    countFailedCalls++;
+                                    adjustCountCallFailedFarmer(farmer);
                                 }
-
-                                if(!newFarmerId.isEmpty()){
+                                else {
                                     Realm realm = Realm.getDefaultInstance();
                                     realm.beginTransaction();
                                     farmer.farmerId = newFarmerId;
@@ -420,7 +457,13 @@ public class WebApi {
                                         attachFarmerIDImageToFarmerObject(farmer);
                                 }
                             }else {
+                                Exception e = new Exception("Farmer Create failed - " + response.code() + " - "  + errorMessage);
+                                Crashlytics.logException(e);
+                                if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
+                                    sessionExpireRedirect();
+                                }
                                 countFailedCalls++;
+                                adjustCountCallFailedFarmer(farmer);
                                 checkSyncComplete();
                             }
                         }
@@ -429,6 +472,7 @@ public class WebApi {
                         public void onFailure(Call<ResponseModel> call, Throwable t) {
                             countCalls--;
                             countFailedCalls++;
+                            adjustCountCallFailedFarmer(farmer);
                             t.printStackTrace();
                             checkSyncComplete();
                         }
@@ -449,15 +493,29 @@ public class WebApi {
                                 if(farmer.isNatIdCardDirty)
                                     attachFarmerIDImageToFarmerObject(farmer);
                             }
-                            else if(response.code() == 401)
-                            {
+                            else if(response.code() == 401){
                                 countFailedCalls++;
-                                PreferenceHelper.getInstance().clearSession(false);
-                                Intent intent = new Intent(mContext, SplashActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                mContext.startActivity(intent);
+                                sessionExpireRedirect();
                             } else {
+                                String errorMessage = "";
+                                if(response.errorBody() != null) {
+                                    try {
+                                        errorMessage = response.errorBody().string().toString();
+                                        JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
+                                        errorMessage = objError.getString("message");
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                Exception e = new Exception("Farmer Edit failed - " + response.code() + " - "  + errorMessage);
+                                Crashlytics.logException(e);
+                                if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
+                                    sessionExpireRedirect();
+                                }
                                 countFailedCalls++;
+                                adjustCountCallFailedFarmer(farmer);
                                 checkSyncComplete();
                             }
                         }
@@ -466,6 +524,7 @@ public class WebApi {
                         public void onFailure(Call<ResponseBody> call, Throwable t) {
                             countCalls--;
                             countFailedCalls++;
+                            adjustCountCallFailedFarmer(farmer);
                             t.printStackTrace();
                             checkSyncComplete();
                         }
@@ -473,6 +532,16 @@ public class WebApi {
                 }
             }
         }
+    }
+
+    private static void adjustCountCallFailedFarmer(Farmer farmer){
+        // -- for farm call
+        countCalls--;
+
+        if(farmer.isFarmerPicDirty())
+            countCalls--;
+        if(farmer.isNatIdCardDirty())
+            countCalls--;
     }
 
     private static String getAttachmentIdFromUploadSuccess(String data) {
@@ -604,10 +673,7 @@ public class WebApi {
                 else if(response.code() == 401)
                 {
                     countFailedCalls++;
-                    PreferenceHelper.getInstance().clearSession(false);
-                    Intent intent = new Intent(mContext, SplashActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(intent);
+                    sessionExpireRedirect();
                 } else {
                     String errorMessage = "-";
 
@@ -654,10 +720,7 @@ public class WebApi {
                 else if(response.code() == 401)
                 {
                     countFailedCalls++;
-                    PreferenceHelper.getInstance().clearSession(false);
-                    Intent intent = new Intent(mContext, SplashActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(intent);
+                    sessionExpireRedirect();
                 } else {
                     countFailedCalls++;
                     checkSyncComplete();
@@ -925,12 +988,14 @@ public class WebApi {
             else {
                 if(countFailedCalls == 0){
                     Log.i("Sync process: ", "Sync completed");
+                    Toast.makeText(mContext, "Sync completed", Toast.LENGTH_SHORT).show();
+                    getFullServerData();
                 }
                 else{
                     Log.i("Sync process: ", "Sync finished, but some records failed to sync");
+                    Toast.makeText(mContext, "Sync partially completed", Toast.LENGTH_SHORT).show();
                 }
                 saveSyncTimeStamp();
-                getFullServerData();
                 PreferenceHelper.getInstance().writeSessionExpiredSyncReq(false);
                 if(WebApi.getInstance().onSyncCompleteListener != null) {
                     WebApi.getInstance().onSyncCompleteListener.syncCompleted();
