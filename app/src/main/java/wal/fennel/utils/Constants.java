@@ -19,6 +19,7 @@ public class Constants {
     public static final String STR_APPROVED = "APPROVED";
     public static final String STR_ENROLL_FARMER = "ENROLL FARMER";
     public static final String STR_EDIT_FARMER = "EDIT FARMER";
+    public static final String STR_VISIT_LOG = "VISIT LOG";
     public static final String STR_FACILITATOR = "fac";
     public static final String STR_FIELD_OFFICER = "fo";
     public static final String STR_FIELD_MANAGER = "fm";

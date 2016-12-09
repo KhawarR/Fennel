@@ -1203,6 +1203,11 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     private void parseMyFarmersData(String data) throws JSONException {
 
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.delete(Task.class);
+        realm.commitTransaction();
+
         Log.i("FENNEL", data);
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
@@ -1239,7 +1244,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 if (tasksMap.containsKey(taskName)) {
                     currentTask = (Task) tasksMap.get(taskName);
                 } else {
-                    Realm realm = Realm.getDefaultInstance();
                     realm.beginTransaction();
 
                     currentTask = realm.createObject(Task.class);
@@ -1295,7 +1299,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         addFarmerTasksToDB(farmersTaskList);
         Singleton.getInstance().myFarmersList = (ArrayList<Farmer>) farmersTaskList;
-
     }
 
     private void addFarmerTasksToDB(List<Farmer> farmersTaskList) {
@@ -1462,6 +1465,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     private ArrayList<TaskItem> parseTaskItemData(String data) throws JSONException {
 
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.delete(TaskItem.class);
+        realm.delete(TaskItemOption.class);
+        realm.commitTransaction();
+
+
         ArrayList<TaskItem> taskItems = null;
 
         // clear old lists
@@ -1473,7 +1483,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                     if(Singleton.getInstance().myFarmersList.get(i).getFarmerTasks().get(j).getTaskItems() != null){
 
-                        Realm realm = Realm.getDefaultInstance();
                         realm.beginTransaction();
                         Singleton.getInstance().myFarmersList.get(i).getFarmerTasks().get(j).getTaskItems().clear();
                         realm.commitTransaction();
@@ -1534,7 +1543,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     for (int k = 0; k < Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().size(); k++) {
 
                         if (taskItem.getFarmingTaskId().equalsIgnoreCase(Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskId())){
-                            Realm realm = Realm.getDefaultInstance();
                             realm.beginTransaction();
                             if(Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskItems() == null)
                                 Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).setTaskItems(new RealmList<TaskItem>());
