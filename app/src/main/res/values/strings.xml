@@ -65,4 +65,9 @@
     <string name="title_activity_splash">SplashActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="str_user_pass_missing"><![CDATA[Please put username & password]]></string>
+    <string name="auth_username_test_env">waajay@westagilelabs.com.waldev</string>
+    <string name="auth_username_test_prod">waajay@westagilelabs.com</string>
+    <string name="auth_password">walshamba123</string>
+    <string name="str_error_code_message">"Error code: "</string>
 </resources>
