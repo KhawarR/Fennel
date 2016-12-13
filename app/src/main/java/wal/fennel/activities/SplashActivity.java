@@ -22,28 +22,31 @@ import wal.fennel.utils.PreferenceHelper;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class SplashActivity extends Activity
-{
+public class SplashActivity extends Activity {
+
+    private final int TIME_SPLASH = 1500;
+
     /** Called when the activity is first created. */
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        mHandler.sendEmptyMessageDelayed(0,1500);
+        mHandler.sendEmptyMessageDelayed(0, TIME_SPLASH);
     }
 
-    Handler mHandler = new Handler()
-    {
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        return false;
+    }
+
+    Handler mHandler = new Handler() {
         @Override
-        public void handleMessage(Message msg)
-        {
+        public void handleMessage(Message msg) {
             SplashActivity.this.finish();
             PreferenceHelper.getInstance().writeIsSyncInProgress(false);
 
-            if(!PreferenceHelper.getInstance().readToken().isEmpty() && !PreferenceHelper.getInstance().readLoginUserId().isEmpty())
-            {
+            if(!PreferenceHelper.getInstance().readToken().isEmpty() && !PreferenceHelper.getInstance().readLoginUserId().isEmpty()) {
                 Fennel.restClient.setApiBaseUrl(PreferenceHelper.getInstance().readInstanceUrl());
                 startActivity(new Intent(SplashActivity.this, MainActivity.class));
             } else {
@@ -51,10 +54,4 @@ public class SplashActivity extends Activity
             }
         }
     };
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)
-    {
-        return false;
-    }
 }
