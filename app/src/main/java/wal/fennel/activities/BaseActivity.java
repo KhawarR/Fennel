@@ -11,7 +11,6 @@ import com.google.android.gms.analytics.Tracker;
 import wal.fennel.R;
 import wal.fennel.application.Fennel;
 
-
 public abstract class BaseActivity extends AppCompatActivity {
 
     long lastClickedTime = -1;
@@ -29,34 +28,27 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     void replaceFragment(Fragment fragment, boolean isBackStack) {
-
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, fragment);
-        if (isBackStack)
-            ft.addToBackStack(null);
+        if (isBackStack) { ft.addToBackStack(null); }
         ft.commit();
     }
 
 
     @Override
     public void onBackPressed() {
-        if (getSupportFragmentManager().getBackStackEntryCount() == 0)
+        if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
             finish();
-        else
+        } else {
             super.onBackPressed();
-
+        }
     }
 
     public void loadingStarted() {
-
-        if (mProgressDialog != null && !mProgressDialog.isShowing()) {
-            mProgressDialog.show();
-        }
+        if (mProgressDialog != null && !mProgressDialog.isShowing()) { mProgressDialog.show(); }
     }
 
     public void loadingFinished() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.dismiss();
-        }
+        if (mProgressDialog != null && mProgressDialog.isShowing()) { mProgressDialog.dismiss(); }
     }
 }
