@@ -174,5 +174,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    public void deleteAll() {
+        LocationTable.deleteAll(this);
+        SubLocationTable.deleteAll(this);
+        VillageTable.deleteAll(this);
+        TreeTable.deleteAll(this);
+    }
     //endregion
 }

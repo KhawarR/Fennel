@@ -111,4 +111,11 @@ public class VillageTable {
 
         return allLocations;
     }
+
+    public static void deleteAll(DatabaseHelper dbHelper)
+    {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        db.execSQL("delete from " + TABLE_VILLAGE);
+        db.close();
+    }
 }

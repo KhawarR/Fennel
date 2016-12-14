@@ -725,6 +725,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     }
 
     private void getDropDownsData() {
+
+        DatabaseHelper.getInstance().deleteAll();
+
         WebApi.getLocations(getLocationsCallback);
         WebApi.getSubLocations(getSubLocationsCallback);
         WebApi.getVillages(getVillagesCallback);
