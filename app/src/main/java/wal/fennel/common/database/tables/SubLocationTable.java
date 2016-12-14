@@ -111,4 +111,11 @@ public class SubLocationTable {
 
         return allLocations;
     }
+
+    public static void deleteAll(DatabaseHelper dbHelper)
+    {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        db.execSQL("delete from " + TABLE_SUB_LOCATION);
+        db.close();
+    }
 }
