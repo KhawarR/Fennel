@@ -85,4 +85,11 @@ public class LocationTable {
 
         return allLocations;
     }
+
+    public static void deleteAll(DatabaseHelper dbHelper)
+    {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        db.execSQL("delete from " + TABLE_LOCATION);
+        db.close();
+    }
 }

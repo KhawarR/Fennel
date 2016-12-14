@@ -38,6 +38,7 @@ import wal.fennel.datamodels.Auth;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.ResponseModel;
 import wal.fennel.utils.Constants;
+import wal.fennel.utils.FennelUtils;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PhotoUtils;
 import wal.fennel.utils.PreferenceHelper;
@@ -215,9 +216,12 @@ public class WebApi {
 
     public static void syncAll(OnSyncCompleteListener onSyncCompleteListener){
 
+        FennelUtils.appendLog("--------------------------------------------- sync started");
 //        countCalls = 0;
         countCalls = getTotalSyncCallCount();
         countFailedCalls = 0;
+
+        FennelUtils.appendLog("Total Count calls: " + countCalls);
 
         WebApi.getInstance().onSyncCompleteListener = onSyncCompleteListener;
 
@@ -361,6 +365,7 @@ public class WebApi {
 
             final Farmer farmer = iterativeFarmerList.get(i);
             if(arrFarmerIds.contains(farmer.getIdNumber())){
+                FennelUtils.appendLog("Farmer ID goes pending: " + farmer.getIdNumber());
                 int countToMinus = 2;
                 if(farmer.isFarmerPicDirty())
                     countToMinus++;
@@ -380,11 +385,14 @@ public class WebApi {
                         public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
                             countCalls--;
 
+                            FennelUtils.appendLog("Farmer create response: " + farmer.getIdNumber() + " - " + response.code());
+
                             String newFarmerId = "";
                             String errorMessage = "";
                             if(response.errorBody() != null) {
                                 try {
                                     errorMessage = response.errorBody().string().toString();
+                                    FennelUtils.appendLog("Farmer create error response: " + farmer.getIdNumber() + " - " + response.code() + " - " + errorMessage);
                                     JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
                                     errorMessage = objError.getString("message");
 
@@ -393,6 +401,7 @@ public class WebApi {
                                         while(m.find()) {
                                             newFarmerId = m.group(1);
                                             Log.i("Existing farmer", "Existing farmer ID: " + newFarmerId);
+                                            FennelUtils.appendLog("Existing farmer ID: " + farmer.getIdNumber());
                                         }
                                     }
 
@@ -405,6 +414,7 @@ public class WebApi {
 
                             if(response.code() == 401)
                             {
+                                FennelUtils.appendLog("Farmer create Session Expired, redirected: " + farmer.getIdNumber());
                                 countFailedCalls++;
                                 sessionExpireRedirect();
                             }
@@ -438,6 +448,7 @@ public class WebApi {
                                 }
 
                                 if(newFarmerId.isEmpty()){
+                                    FennelUtils.appendLog("Farmer create failed, ID empty: " + farmer.getIdNumber());
                                     countFailedCalls++;
                                     adjustCountCallFailedFarmer(farmer);
                                 }
@@ -446,6 +457,8 @@ public class WebApi {
                                     realm.beginTransaction();
                                     farmer.farmerId = newFarmerId;
                                     realm.commitTransaction();
+
+                                    FennelUtils.appendLog("Farmer create finished: " + farmer.getIdNumber());
 
                                     addFarmWithFarmerId(farmer);
 
@@ -457,6 +470,7 @@ public class WebApi {
                                         attachFarmerIDImageToFarmerObject(farmer);
                                 }
                             }else {
+                                FennelUtils.appendLog("Farmer Create failed - " + response.code() + " - "  + errorMessage);
                                 Exception e = new Exception("Farmer Create failed - " + response.code() + " - "  + errorMessage);
                                 Crashlytics.logException(e);
                                 if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
@@ -472,6 +486,7 @@ public class WebApi {
                         public void onFailure(Call<ResponseModel> call, Throwable t) {
                             countCalls--;
                             countFailedCalls++;
+                            FennelUtils.appendLog("Farmer create Failed: " + t.getMessage());
                             adjustCountCallFailedFarmer(farmer);
                             t.printStackTrace();
                             checkSyncComplete();
@@ -483,8 +498,18 @@ public class WebApi {
                         @Override
                         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                             countCalls--;
+
+                            FennelUtils.appendLog("Farmer edit response: " + farmer.getIdNumber() + " - " + response.code());
+
                             if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
-                                editFarmWithFarmId(farmer);
+
+                                FennelUtils.appendLog("Farmer edit finished: " + farmer.getIdNumber());
+
+                                if(farmer.farmId.isEmpty() || farmer.farmId == null){
+                                    addFarmWithFarmerId(farmer);
+                                } else {
+                                    editFarmWithFarmId(farmer);
+                                }
 
                                 checkSyncComplete();
 
@@ -494,6 +519,7 @@ public class WebApi {
                                     attachFarmerIDImageToFarmerObject(farmer);
                             }
                             else if(response.code() == 401){
+                                FennelUtils.appendLog("Farmer edit Session Expired, redirected: " + farmer.getIdNumber());
                                 countFailedCalls++;
                                 sessionExpireRedirect();
                             } else {
@@ -509,6 +535,7 @@ public class WebApi {
                                         e.printStackTrace();
                                     }
                                 }
+                                FennelUtils.appendLog("Farmer edit failed - " + response.code() + " - "  + errorMessage);
                                 Exception e = new Exception("Farmer Edit failed - " + response.code() + " - "  + errorMessage);
                                 Crashlytics.logException(e);
                                 if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
@@ -524,6 +551,7 @@ public class WebApi {
                         public void onFailure(Call<ResponseBody> call, Throwable t) {
                             countCalls--;
                             countFailedCalls++;
+                            FennelUtils.appendLog("Farmer edit Failed: " + t.getMessage());
                             adjustCountCallFailedFarmer(farmer);
                             t.printStackTrace();
                             checkSyncComplete();
@@ -663,6 +691,7 @@ public class WebApi {
                 countCalls--;
                 if (response.body() != null && response.body().success == true) {
                     Log.i(farmer.getFullName(), "Farm Synced" );
+                    FennelUtils.appendLog("Farm created: " + farmer.getIdNumber());
                     checkSyncComplete();
                     Realm realm = Realm.getDefaultInstance();
                     realm.beginTransaction();
@@ -672,6 +701,7 @@ public class WebApi {
                 }
                 else if(response.code() == 401)
                 {
+                    FennelUtils.appendLog("Farm create session expired, redirected: " + farmer.getIdNumber());
                     countFailedCalls++;
                     sessionExpireRedirect();
                 } else {
@@ -683,7 +713,9 @@ public class WebApi {
                         e.printStackTrace();
                     }
 
-                    Log.i(farmer.getFullName(), "Farm Sync Failed: " +  errorMessage);
+                    FennelUtils.appendLog("Farm create Sync Failed: " + farmer.getIdNumber() + " - " + errorMessage);
+                    FennelUtils.appendLog("Farm create Sync Failed village: " + farmer.getVillageId() + " - " + farmer.getVillageName());
+                    Log.i(farmer.getFullName(), "Farm create Sync Failed: " +  errorMessage);
                     countFailedCalls++;
                     checkSyncComplete();
                 }
@@ -693,6 +725,7 @@ public class WebApi {
             public void onFailure(Call<ResponseModel> call, Throwable t) {
                 countCalls--;
                 countFailedCalls++;
+                FennelUtils.appendLog("Farm create Sync Failed: " + t.getMessage());
                 t.printStackTrace();
             }
         }, farmMap);
@@ -707,7 +740,12 @@ public class WebApi {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 countCalls--;
+
+                FennelUtils.appendLog("Farm edit response: " + farmer.getIdNumber() + " - " + response.code());
+
                 if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+
+                    FennelUtils.appendLog("Farm edited: " + farmer.getIdNumber());
 
                     Realm realm = Realm.getDefaultInstance();
                     realm.beginTransaction();
@@ -719,9 +757,20 @@ public class WebApi {
                 }
                 else if(response.code() == 401)
                 {
+                    FennelUtils.appendLog("Farm edit session expired, redirected: " + farmer.getIdNumber());
                     countFailedCalls++;
                     sessionExpireRedirect();
                 } else {
+                    String errorMessage = "-";
+
+                    try {
+                        errorMessage = response.errorBody().string();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    FennelUtils.appendLog("Farm edit Sync Failed: " + farmer.getIdNumber() + " - " + errorMessage);
+                    Log.i(farmer.getFullName(), "Farm edit Sync Failed: " +  errorMessage);
                     countFailedCalls++;
                     checkSyncComplete();
                 }
@@ -731,6 +780,7 @@ public class WebApi {
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 countCalls--;
                 countFailedCalls++;
+                FennelUtils.appendLog("Farm edit Sync Failed: " + t.getMessage());
                 t.printStackTrace();
                 checkSyncComplete();
             }
