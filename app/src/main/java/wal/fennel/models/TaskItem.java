@@ -26,6 +26,7 @@ public class TaskItem extends RealmObject implements Parcelable {
     private RealmList<TaskItemOption> options = new RealmList<>();
 
     private String attachmentPath = "";
+    private boolean isTaskDone = false;
 
     public TaskItem(){
 
@@ -44,9 +45,10 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.latitude = other.latitude;
         this.longitude = other.longitude;
         this.options = other.options;
+        this.isTaskDone = other.isTaskDone;
     }
 
-    public TaskItem(int sequence, String id, String farmingTaskId, String name, String recordType, String description, String textValue, String fileType, String gpsTakenTime, double latitude, double longitude, RealmList<TaskItemOption> options) {
+    public TaskItem(int sequence, String id, String farmingTaskId, String name, String recordType, String description, String textValue, String fileType, String gpsTakenTime, double latitude, double longitude, RealmList<TaskItemOption> options, boolean isTaskDone) {
         this.sequence = sequence;
         this.id = id;
         this.farmingTaskId = farmingTaskId;
@@ -59,6 +61,7 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.latitude = latitude;
         this.longitude = longitude;
         this.options = options;
+        this.isTaskDone = isTaskDone;
     }
 
     @Override
@@ -75,6 +78,7 @@ public class TaskItem extends RealmObject implements Parcelable {
         dest.writeDouble(this.latitude);
         dest.writeDouble(this.longitude);
         dest.writeTypedList(options);
+        dest.writeInt(this.isTaskDone ? 1 : 0);
     }
 
     protected TaskItem(Parcel in) {
@@ -90,6 +94,7 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.latitude = in.readDouble();
         this.longitude = in.readDouble();
         options = new RealmList<>();
+        this.isTaskDone = in.readInt() == 1 ? true : false;
         in.readTypedList(options, TaskItemOption.CREATOR);
     }
 
@@ -201,13 +206,20 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.options = options;
     }
 
-
     public String getAttachmentPath() {
         return attachmentPath;
     }
 
     public void setAttachmentPath(String attachmentPath) {
         this.attachmentPath = attachmentPath;
+    }
+
+    public boolean isTaskDone() {
+        return isTaskDone;
+    }
+
+    public void setTaskDone(boolean taskDone) {
+        isTaskDone = taskDone;
     }
 
     @Override

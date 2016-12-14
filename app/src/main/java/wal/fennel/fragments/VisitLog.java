@@ -9,7 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.squareup.picasso.NetworkPolicy;
 
@@ -44,6 +49,8 @@ public class VisitLog extends BaseFragment {
     TitleBarLayout titleBarLayout;
     @Bind(R.id.tvTaskHeader)
     FontTextView tvTaskHeader;
+    @Bind(R.id.llTaskItemContainer)
+    LinearLayout llTaskItemContainer;
 
     private CircleImageView cIvIconRight;
 
@@ -113,6 +120,55 @@ public class VisitLog extends BaseFragment {
         tvMobile.setText("MOBILE " + farmer.getMobileNumber());
 
         tvTaskHeader.setText(task.getName());
+
+        populateTaskItems();
+    }
+
+    private void populateTaskItems(){
+
+        llTaskItemContainer.removeAllViews();
+
+        for (int i = 0; i < taskItems.size(); i++) {
+
+            View vTaskItem;
+
+            if(taskItems.get(i).isTaskDone()){
+                vTaskItem = getActivity().getLayoutInflater().inflate(R.layout.template_visit_log_completed, null);
+            } else {
+                vTaskItem = getActivity().getLayoutInflater().inflate(R.layout.template_visit_log, null);
+            }
+
+            FontTextView tvTitle = (FontTextView) vTaskItem.findViewById(R.id.tvTitle);
+            FontTextView tvDescription = (FontTextView) vTaskItem.findViewById(R.id.tvDescription);
+            EditText etHoleCount = (EditText) vTaskItem.findViewById(R.id.etInput);
+            RelativeLayout rlBlockButton = (RelativeLayout) vTaskItem.findViewById(R.id.rlBlockButton);
+            ImageView ivBlockIcon = (ImageView) vTaskItem.findViewById(R.id.ivBlockIcon);
+
+            if(taskItems.get(i).getRecordType().equalsIgnoreCase(Constants.TaskItemType.Gps.toString())){
+
+                tvTitle.setText(taskItems.get(i).getName());
+                tvDescription.setText(taskItems.get(i).getDescription());
+                tvDescription.setVisibility(View.VISIBLE);
+                etHoleCount.setVisibility(View.GONE);
+
+                if(!taskItems.get(i).isTaskDone()) {
+                    ivBlockIcon.setImageResource(R.drawable.ic_gps);
+                    rlBlockButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getActivity(), "GPS Clicked", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+
+            } else if(taskItems.get(i).getRecordType().equalsIgnoreCase(Constants.TaskItemType.Text.toString())){
+
+            } else if(taskItems.get(i).getRecordType().equalsIgnoreCase(Constants.TaskItemType.File.toString())){
+
+            }
+
+            llTaskItemContainer.addView(vTaskItem);
+        }
     }
 
     @Override

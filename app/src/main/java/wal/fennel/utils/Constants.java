@@ -59,4 +59,11 @@ public class Constants {
         MYSIGNUPS,
         MYFARMERTASKS,
     }
+
+    public enum TaskItemType {
+        Gps,
+        File,
+        Text,
+        Pic
+    }
 }

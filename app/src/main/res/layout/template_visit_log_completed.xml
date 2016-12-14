@@ -62,6 +62,7 @@
         </LinearLayout>
 
         <RelativeLayout
+            android:id="@+id/rlBlockButton"
             android:layout_width="@dimen/enroll_pic_size"
             android:layout_height="@dimen/enroll_pic_size">
 

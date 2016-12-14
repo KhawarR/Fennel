@@ -1533,7 +1533,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
 
-            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, gpsTakenTime, latitude, longitude, options);
+            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, gpsTakenTime, latitude, longitude, options, false);
             taskItems.add(taskItem);
 
             for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
