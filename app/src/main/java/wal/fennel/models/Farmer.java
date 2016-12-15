@@ -6,6 +6,8 @@ import android.os.Parcelable;
 import com.google.gson.annotations.SerializedName;
 
 import io.realm.RealmList;
+import java.util.Date;
+
 import io.realm.RealmObject;
 import wal.fennel.utils.Constants;
 
@@ -14,8 +16,10 @@ import wal.fennel.utils.Constants;
  */
 public class Farmer extends RealmObject implements Parcelable{
 
-    private String farmerId = null;
-    private String farmId = null;
+    public Date lastModifiedTime;
+
+    public String farmerId = null;
+    public String farmId = null;
 
     @SerializedName("FullName__c")
     private String fullName;
@@ -77,6 +81,7 @@ public class Farmer extends RealmObject implements Parcelable{
     public Farmer() {}
 
     public Farmer(Farmer other) {
+        this.lastModifiedTime = other.lastModifiedTime;
         this.farmerId = other.farmerId;
         this.farmId = other.farmId;
         this.fullName = other.fullName;
@@ -109,11 +114,12 @@ public class Farmer extends RealmObject implements Parcelable{
         this.farmerType = other.farmerType;
     }
 
-    public Farmer(String farmerId, String farmId, String fullName, String firstName, String secondName, String surname,
+    public Farmer(Date lastModifiedTime, String farmerId, String farmId, String fullName, String firstName, String secondName, String surname,
                   String idNumber, String gender, boolean isLeader, String location, String locationId,
                   String subLocation, String subLocationId, String villageName, String villageId, String treeSpecies, String treeSpeciesId, boolean farmerHome,
                   String mobileNumber, String nationalCardAttachmentId, String thumbAttachmentId,
                   String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl, RealmList<Task> tasks, Constants.FarmerType type) {
+        this.lastModifiedTime = lastModifiedTime;
         this.farmerId = farmerId;
         this.farmId = farmId;
         this.fullName = fullName;
@@ -143,11 +149,12 @@ public class Farmer extends RealmObject implements Parcelable{
         this.farmerType = type.toString();
     }
 
-    public void setAllValues(String farmerId, String farmId, String fullName, String firstName, String secondName, String surname,
+    public void setAllValues(Date lastModifiedTime, String farmerId, String farmId, String fullName, String firstName, String secondName, String surname,
                              String idNumber, String gender, boolean isLeader, String location, String locationId,
                              String subLocation, String subLocationId, String villageName, String villageId, String treeSpecies, String treeSpeciesId, boolean farmerHome,
                              String mobileNumber, String nationalCardAttachmentId, String thumbAttachmentId,
                              String signupStatus, boolean isHeader, String thumbUrl, String nationalCardUrl, RealmList<Task> tasks, Constants.FarmerType type) {
+        this.lastModifiedTime = lastModifiedTime;
         this.farmerId = farmerId;
         this.farmId = farmId;
         this.fullName = fullName;
@@ -178,6 +185,7 @@ public class Farmer extends RealmObject implements Parcelable{
     }
 
     public void setAllValues(Farmer other) {
+        this.lastModifiedTime = other.lastModifiedTime;
         this.farmerId = other.farmerId;
         this.farmId = other.farmId;
         this.fullName = other.fullName;
@@ -448,11 +456,20 @@ public class Farmer extends RealmObject implements Parcelable{
         this.farmerType = farmerType.toString();
     }
 
+    public Date getLastModifiedTime() {
+        return lastModifiedTime;
+    }
+
+    public void setLastModifiedTime(Date lastModifiedTime) {
+        this.lastModifiedTime = lastModifiedTime;
+    }
+
     public int describeContents() {
         return 0;
     }
 
     public void writeToParcel(Parcel out, int flags) {
+        out.writeLong(lastModifiedTime == null ? 0 : lastModifiedTime.getTime());
         out.writeString(farmerId);
         out.writeString(farmId);
         out.writeString(fullName);
@@ -497,6 +514,7 @@ public class Farmer extends RealmObject implements Parcelable{
     };
 
     private Farmer(Parcel in) {
+        lastModifiedTime = new Date(in.readLong());
         farmerId = in.readString();
         farmId = in.readString();
         fullName = in.readString();

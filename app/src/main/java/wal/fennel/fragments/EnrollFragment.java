@@ -38,6 +38,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import butterknife.Bind;
@@ -1258,14 +1260,16 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         Realm.getDefaultInstance().beginTransaction();
 
         final Farmer farmerDbObj = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerId", farmer.getFarmerId()).findFirst();
-        farmerDbObj.setAllValues(farmer.getFarmerId(), farmer.getFarmId(), fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, location, subLocationName, subLocation, villageName, village, treeSpeciesName, treeSpecies, isFarmerHome, mobileNumber, farmer.getThumbAttachmentId(), farmer.getNationalCardAttachmentId(), farmerStatus, false, farmerImageUrl, farmerIdImageUrl, null, Constants.FarmerType.MYSIGNUPS);
+        farmerDbObj.setAllValues(new Date(System.currentTimeMillis()), farmer.getFarmerId(), farmer.getFarmId(), fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, location, subLocationName, subLocation, villageName, village, treeSpeciesName, treeSpecies, isFarmerHome, mobileNumber, farmer.getThumbAttachmentId(), farmer.getNationalCardAttachmentId(), farmerStatus, false, farmerImageUrl, farmerIdImageUrl, null, Constants.FarmerType.MYSIGNUPS);
         farmerDbObj.setDataDirty(true);
 
         if(isFarmerPhotoEdited){
             farmerDbObj.setFarmerPicDirty(true);
+            farmerDbObj.setLastModifiedTime(new Date(System.currentTimeMillis()));
         }
         if(isNationalIdPhotoEdited){
             farmerDbObj.setNatIdCardDirty(true);
+            farmerDbObj.setLastModifiedTime(new Date(System.currentTimeMillis()));
         }
 
         Realm.getDefaultInstance().commitTransaction();
@@ -1388,16 +1392,18 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         Realm.getDefaultInstance().beginTransaction();
 
         final Farmer farmerDbObj = Realm.getDefaultInstance().createObject(Farmer.class);
-        farmerDbObj.setAllValues(id, "", fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, location, subLocationName, subLocation, villageName, village, treeSpeciesName, treeSpecies, isFarmerHome, mobileNumber, "", "", farmerStatus, false, "", "",null, Constants.FarmerType.MYSIGNUPS);
+        farmerDbObj.setAllValues(new Date(System.currentTimeMillis()), id, "", fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, location, subLocationName, subLocation, villageName, village, treeSpeciesName, treeSpecies, isFarmerHome, mobileNumber, "", "", farmerStatus, false, "", "",null, Constants.FarmerType.MYSIGNUPS);
         farmerDbObj.setDataDirty(true);
 
         if(farmerImageUrl != null && !farmerImageUrl.isEmpty()){
             farmerDbObj.setThumbUrl(farmerImageUrl);
             farmerDbObj.setFarmerPicDirty(true);
+            farmerDbObj.setLastModifiedTime(new Date(System.currentTimeMillis()));
         }
         if(farmerIdImageUrl != null && !farmerIdImageUrl.isEmpty()){
             farmerDbObj.setNationalCardUrl(farmerIdImageUrl);
             farmerDbObj.setNatIdCardDirty(true);
+            farmerDbObj.setLastModifiedTime(new Date(System.currentTimeMillis()));
         }
 
         Realm.getDefaultInstance().commitTransaction();

@@ -10,6 +10,7 @@ import io.fabric.sdk.android.Fabric;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import wal.fennel.common.database.DatabaseHelper;
+import wal.fennel.models.FennelRealmMigrations;
 import wal.fennel.network.RestClient;
 import wal.fennel.network.WebApi;
 import wal.fennel.network.WebService;
@@ -55,6 +56,12 @@ public class Fennel extends Application {
                 .deleteRealmIfMigrationNeeded()
                 .build();
         Realm.setDefaultConfiguration(config);
+
+//        RealmConfiguration config = new RealmConfiguration.Builder()
+//                .schemaVersion(1) // Must be bumped when the schema changes
+//                .migration(new FennelRealmMigrations()) // Migration to run
+//                .build();
+//        Realm.setDefaultConfiguration(config);
 
         WebApi.initializeInstance(getApplicationContext());
         MyPicassoInstance.initializeInstance(getApplicationContext());
