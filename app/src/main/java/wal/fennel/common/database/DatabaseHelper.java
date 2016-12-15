@@ -174,6 +174,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    public void deleteAllLocations() {
+        LocationTable.deleteAll(this);
+    }
+
+    public void deleteAllSubLocations() {
+        SubLocationTable.deleteAll(this);
+    }
+
+    public void deleteAllVillages() {
+        VillageTable.deleteAll(this);
+    }
+
+    public void deleteAllTrees() {
+        TreeTable.deleteAll(this);
+    }
+
     public void deleteAll() {
         LocationTable.deleteAll(this);
         SubLocationTable.deleteAll(this);

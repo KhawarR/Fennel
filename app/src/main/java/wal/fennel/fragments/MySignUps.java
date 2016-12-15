@@ -49,6 +49,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmResults;
+import io.realm.Sort;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -295,7 +296,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         loadingStarted();
 
-        RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerType", Constants.FarmerType.MYSIGNUPS.toString()).findAll();
+        RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerType", Constants.FarmerType.MYSIGNUPS.toString()).findAll().sort("lastModifiedTime", Sort.ASCENDING);
 
         ArrayList<Farmer> incompleteFarmersList = new ArrayList<>();
         ArrayList<Farmer> pendingFarmersList = new ArrayList<>();
@@ -320,17 +321,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         if(incompleteFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(incompleteFarmersList);
         }
         if(pendingFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(pendingFarmersList);
         }
         if(approvedFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(approvedFarmersList);
         }
 
@@ -495,7 +496,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 //                String status = farmObj.getString("Status__c");
                 String status = farmObj.getString("Sign_Up_Status__c");
 
-                Farmer farmer = new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "", null, Constants.FarmerType.MYSIGNUPS);
+                Farmer farmer = new Farmer(null, id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "", null, Constants.FarmerType.MYSIGNUPS);
 
                 if(status.equalsIgnoreCase(Constants.STR_ENROLLED))
                 {
@@ -525,17 +526,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         if(incompleteFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(incompleteFarmersList);
         }
         if(pendingFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(pendingFarmersList);
         }
         if(approvedFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(approvedFarmersList);
         }
 
@@ -759,8 +760,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     private void getDropDownsData() {
 
-        DatabaseHelper.getInstance().deleteAll();
-
         WebApi.getLocations(getLocationsCallback);
         WebApi.getSubLocations(getSubLocationsCallback);
         WebApi.getVillages(getVillagesCallback);
@@ -810,6 +809,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         if(arrRecords.length() > 0) {
+            DatabaseHelper.getInstance().deleteAllLocations();
             ArrayList<Location> allLocations = new ArrayList<>();
             for (int i = 0; i < arrRecords.length(); i++) {
 
@@ -878,6 +878,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         if(arrRecords.length() > 0) {
+            DatabaseHelper.getInstance().deleteAllSubLocations();
             ArrayList<SubLocation> allSubLocations = new ArrayList<>();
             for (int i = 0; i < arrRecords.length(); i++) {
 
@@ -950,6 +951,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         if(arrRecords.length() > 0) {
+            DatabaseHelper.getInstance().deleteAllVillages();
             ArrayList<Village> allVillages = new ArrayList<>();
             for (int i = 0; i < arrRecords.length(); i++) {
 
@@ -1022,6 +1024,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         if(arrRecords.length() > 0) {
+            DatabaseHelper.getInstance().deleteAllTrees();
             for (int i = 0; i < arrRecords.length(); i++) {
 
                 JSONObject treeObj = arrRecords.getJSONObject(i).getJSONObject("Tree_Species__r");
