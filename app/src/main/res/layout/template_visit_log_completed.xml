@@ -9,12 +9,12 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/enroll_pic_size"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1.0"
             android:orientation="vertical"
             android:padding="@dimen/padding_main_template_visit_log">
@@ -38,13 +38,12 @@
                 <wal.fennel.views.FontTextView
                     android:id="@+id/tvDescription"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:maxLines="3"
-                    android:text="Add up to 3 lines of instructions below the title of this task below"
+                    android:text="Add up to 3 lines of instructions below the title of this task below. Test line for 3rd line"
                     android:textColor="@color/black"
                     android:textSize="@dimen/font_desc_template_visit_log"
-                    fennel:fontName="Avenir-Heavy.ttf"
-                    android:visibility="gone" />
+                    fennel:fontName="Avenir-Medium.ttf" />
 
                 <EditText
                     android:id="@+id/etInput"
@@ -55,7 +54,8 @@
                     android:textSize="@dimen/font_edittext_template_visit_log"
                     android:gravity="center"
                     android:textColorHint="@color/black"
-                    android:textColor="@color/grey_box_color"/>
+                    android:textColor="@color/grey_box_color"
+                    android:visibility="gone"/>
 
             </RelativeLayout>
 

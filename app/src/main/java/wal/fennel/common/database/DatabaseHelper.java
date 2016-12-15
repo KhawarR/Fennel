@@ -160,7 +160,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public void inserVillage(Village newVillage) {
+    public void insertVillage(Village newVillage) {
         long rowInserted = VillageTable.insert(this, newVillage);
         if (rowInserted != -1) {
 //            Log.i("FENNEL", "Village inserted!");

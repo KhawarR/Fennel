@@ -43,21 +43,19 @@ import wal.fennel.views.TitleBarLayout;
 
 public class VisitLog extends BaseFragment {
 
-    @Bind(R.id.stub_farmer_header)
-    ViewStub stubFarmerHeader;
-    @Bind(R.id.titleBar)
-    TitleBarLayout titleBarLayout;
-    @Bind(R.id.tvTaskHeader)
-    FontTextView tvTaskHeader;
+    private CircleImageView cIvIconRight;
     @Bind(R.id.llTaskItemContainer)
     LinearLayout llTaskItemContainer;
-
-    private CircleImageView cIvIconRight;
+    @Bind(R.id.titleBar)
+    TitleBarLayout titleBarLayout;
+    @Bind(R.id.stub_farmer_header)
+    ViewStub stubFarmerHeader;
+    @Bind(R.id.tvTaskHeader)
+    FontTextView tvTaskHeader;
 
     private RealmResults<TaskItem> taskItems;
     private Farmer farmer;
     private Task task;
-
 
     public static VisitLog newInstance(String title, Farmer farmer, Task task) {
         VisitLog fragment = new VisitLog();
@@ -91,24 +89,22 @@ public class VisitLog extends BaseFragment {
 
         String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
         if (!thumbUrl.isEmpty()) {
-            if (NetworkHelper.isNetAvailable(getActivity()))
+            if (NetworkHelper.isNetAvailable(getActivity())) {
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
-            else
+            } else {
                 MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+            }
         }
 
         View farmerHeader = stubFarmerHeader.inflate();
-
         farmerHeader.setEnabled(false);
         farmerHeader.setOnClickListener(null);
 
         CircleImageView ivFarmerThumb = (CircleImageView) farmerHeader.findViewById(R.id.ivFarmerThumb);
-        {
-            if (NetworkHelper.isNetAvailable(getActivity()))
-                MyPicassoInstance.getInstance().load(farmer.getThumbUrl()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
-            else
-                MyPicassoInstance.getInstance().load(farmer.getThumbUrl()).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
-
+        if (NetworkHelper.isNetAvailable(getActivity())) {
+            MyPicassoInstance.getInstance().load(farmer.getThumbUrl()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
+        } else {
+            MyPicassoInstance.getInstance().load(farmer.getThumbUrl()).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
         }
 
         FontTextView tvFarmerName = (FontTextView) farmerHeader.findViewById(R.id.tvFullName);
@@ -131,8 +127,9 @@ public class VisitLog extends BaseFragment {
         for (int i = 0; i < taskItems.size(); i++) {
 
             View vTaskItem;
+            final TaskItem taskItem = taskItems.get(i);
 
-            if(taskItems.get(i).isTaskDone()){
+            if(taskItem.isTaskDone()){
                 vTaskItem = getActivity().getLayoutInflater().inflate(R.layout.template_visit_log_completed, null);
             } else {
                 vTaskItem = getActivity().getLayoutInflater().inflate(R.layout.template_visit_log, null);
@@ -144,31 +141,70 @@ public class VisitLog extends BaseFragment {
             RelativeLayout rlBlockButton = (RelativeLayout) vTaskItem.findViewById(R.id.rlBlockButton);
             ImageView ivBlockIcon = (ImageView) vTaskItem.findViewById(R.id.ivBlockIcon);
 
-            if(taskItems.get(i).getRecordType().equalsIgnoreCase(Constants.TaskItemType.Gps.toString())){
+            if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Gps.toString())){
 
-                tvTitle.setText(taskItems.get(i).getName());
-                tvDescription.setText(taskItems.get(i).getDescription());
+                tvTitle.setText(taskItem.getName());
+                tvDescription.setText(taskItem.getDescription());
+                tvDescription.setVisibility(View.VISIBLE);
+                etHoleCount.setVisibility(View.GONE);
+                rlBlockButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        setTaskDone(taskItem);
+                    }
+                });
+                if(!taskItem.isTaskDone()) {
+                    ivBlockIcon.setImageResource(R.drawable.ic_gps);
+                }
+
+            } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Text.toString())){
+
+                tvTitle.setText(taskItem.getName());
+                tvDescription.setText(taskItem.getDescription());
                 tvDescription.setVisibility(View.VISIBLE);
                 etHoleCount.setVisibility(View.GONE);
 
-                if(!taskItems.get(i).isTaskDone()) {
-                    ivBlockIcon.setImageResource(R.drawable.ic_gps);
-                    rlBlockButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Toast.makeText(getActivity(), "GPS Clicked", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                rlBlockButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        setTaskDone(taskItem);
+                    }
+                });
+                if(!taskItem.isTaskDone()) {
+                    ivBlockIcon.setImageResource(R.drawable.ic_tick_white);
                 }
 
-            } else if(taskItems.get(i).getRecordType().equalsIgnoreCase(Constants.TaskItemType.Text.toString())){
+            } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.File.toString())){
 
-            } else if(taskItems.get(i).getRecordType().equalsIgnoreCase(Constants.TaskItemType.File.toString())){
+                tvTitle.setText(taskItem.getName());
+                tvDescription.setText(taskItem.getDescription());
+                tvDescription.setVisibility(View.VISIBLE);
+                etHoleCount.setVisibility(View.GONE);
+
+                rlBlockButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        setTaskDone(taskItem);
+                    }
+                });
+                if(!taskItem.isTaskDone()) {
+                    ivBlockIcon.setImageResource(R.drawable.ic_eye);
+                }
 
             }
 
             llTaskItemContainer.addView(vTaskItem);
         }
+    }
+
+    private void setTaskDone(final TaskItem taskItem) {
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+//        taskItem.setTaskDone(true);
+        taskItem.setTaskDone(!taskItem.isTaskDone());
+        realm.commitTransaction();
+
+        populateTaskItems();
     }
 
     @Override

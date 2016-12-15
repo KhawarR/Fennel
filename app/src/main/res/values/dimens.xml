@@ -16,9 +16,9 @@
     <dimen name="margin_main_template_visit_log">15dp</dimen>
     <dimen name="padding_main_template_visit_log">10dp</dimen>
     <dimen name="font_title_template_visit_log">18sp</dimen>
-    <dimen name="font_desc_template_visit_log">17sp</dimen>
+    <dimen name="font_desc_template_visit_log">16sp</dimen>
     <dimen name="font_edittext_template_visit_log">34sp</dimen>
     <dimen name="width_edittext_template_visit_log">180dp</dimen>
-    <dimen name="size_icon_template_visit_log">45dp</dimen>
+    <dimen name="size_icon_template_visit_log">35dp</dimen>
 
 </resources>

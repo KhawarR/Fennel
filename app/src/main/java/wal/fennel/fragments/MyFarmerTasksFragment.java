@@ -45,24 +45,16 @@ import wal.fennel.views.TitleBarLayout;
  */
 public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.OnItemClickListener, TextWatcher {
 
+    private CircleImageView cIvIconRight;
     @Bind(R.id.titleBar)
     TitleBarLayout titleBarLayout;
-
+    @Bind(R.id.lv_farmer_tasks)
+    ListView farmerTasks;
     @Bind(R.id.et_search)
     EditText searchText;
 
-    @Bind(R.id.lv_farmer_tasks)
-    ListView farmerTasks;
-
-//    @Bind(R.id.swipeRefreshLayout)
-//    SwipeRefreshLayout mSwipeRefreshLayout;
-
-    private CircleImageView cIvIconRight;
-
     private ArrayList<Farmer> allFarmerTasks;
-
     private FarmerTasksAdapter tasksAdapter;
-
 
     @Nullable
     @Override
@@ -70,7 +62,6 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_my_farmer_tasks, null);
         ButterKnife.bind(this, view);
-
         return view;
     }
 
@@ -81,8 +72,6 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
         farmerTasks.setOnItemClickListener(this);
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
         searchText.addTextChangedListener(this);
-
-//        mSwipeRefreshLayout.setOnRefreshListener(mSwipeRefreshListener);
         getMyFarmerTasks();
     }
 
@@ -105,12 +94,12 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
 
     private void loadAttachment() {
         String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
-        if(!thumbUrl.isEmpty())
-        {
-            if(NetworkHelper.isNetAvailable(getActivity()))
+        if(!thumbUrl.isEmpty()) {
+            if(NetworkHelper.isNetAvailable(getActivity())) {
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
-            else
+            } else {
                 MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+            }
         }
     }
 
@@ -121,8 +110,9 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if(allFarmerTasks.get(position).getFarmerTasks().size() > 0)
+        if(allFarmerTasks.get(position).getFarmerTasks().size() > 0) {
             ((BaseContainerFragment) getParentFragment()).replaceFragment(FarmerStatus.newInstance(Constants.STR_EDIT_FARMER, allFarmerTasks.get(position)), true);
+        }
     }
 
     @Override
@@ -130,12 +120,10 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
         startActivity(new Intent(getActivity(), AboutMe.class));
     }
 
-
     private void getMyFarmerTasks() {
         ArrayList<Farmer> allFarmerTasks = Singleton.getInstance().myFarmersList;
         parseDataForMyFarmers(allFarmerTasks);
     }
-
 
     private void parseDataForMyFarmers(List<Farmer> farmerList) {
 
@@ -174,16 +162,10 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
             tasksAdapter = new FarmerTasksAdapter(getActivity(), allFarmerTasks);
             farmerTasks.setAdapter(tasksAdapter);
         }
-//      else {
-//            tasksAdapter.setTaskList(allFarmerTasks);
-//      }
-
     }
 
     @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-    }
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -192,7 +174,5 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
     }
 
     @Override
-    public void afterTextChanged(Editable s) {
-
-    }
+    public void afterTextChanged(Editable s) { }
 }
