@@ -725,8 +725,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     private void getDropDownsData() {
 
-        DatabaseHelper.getInstance().deleteAll();
-
         WebApi.getLocations(getLocationsCallback);
         WebApi.getSubLocations(getSubLocationsCallback);
         WebApi.getVillages(getVillagesCallback);
@@ -776,6 +774,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         if(arrRecords.length() > 0) {
+            DatabaseHelper.getInstance().deleteAllLocations();
             ArrayList<Location> allLocations = new ArrayList<>();
             for (int i = 0; i < arrRecords.length(); i++) {
 
@@ -844,6 +843,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         if(arrRecords.length() > 0) {
+            DatabaseHelper.getInstance().deleteAllSubLocations();
             ArrayList<SubLocation> allSubLocations = new ArrayList<>();
             for (int i = 0; i < arrRecords.length(); i++) {
 
@@ -916,6 +916,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         if(arrRecords.length() > 0) {
+            DatabaseHelper.getInstance().deleteAllVillages();
             ArrayList<Village> allVillages = new ArrayList<>();
             for (int i = 0; i < arrRecords.length(); i++) {
 
@@ -988,6 +989,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         if(arrRecords.length() > 0) {
+            DatabaseHelper.getInstance().deleteAllTrees();
             for (int i = 0; i < arrRecords.length(); i++) {
 
                 JSONObject treeObj = arrRecords.getJSONObject(i).getJSONObject("Tree_Species__r");
