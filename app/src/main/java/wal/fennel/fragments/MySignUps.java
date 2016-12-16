@@ -1409,7 +1409,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
             Farmer farmer = Singleton.getInstance().myFarmersList.get(i);
 
-            if(farmer.getFarmerTasks().size() > 0){
+            if(farmer.getFarmerTasks().size() > 0) {
                 for (int j = 0; j < farmer.getFarmerTasks().size(); j++) {
                     String id = farmer.getFarmerTasks().get(j).getTaskId();
                     id = "'" + id + "'";
