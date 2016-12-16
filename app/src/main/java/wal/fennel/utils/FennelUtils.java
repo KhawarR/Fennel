@@ -83,4 +83,18 @@ public class FennelUtils {
             e.printStackTrace();
         }
     }
+
+    public static Date getDateFromString(String dueDateStr) {
+
+        Date dueDate = null;
+        if (dueDateStr != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                dueDate= dateFormat.parse(dueDateStr);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        return dueDate;
+    }
 }

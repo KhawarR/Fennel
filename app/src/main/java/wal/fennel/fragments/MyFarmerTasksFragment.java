@@ -19,6 +19,7 @@ import android.widget.ListView;
 import com.squareup.picasso.NetworkPolicy;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -35,6 +36,7 @@ import wal.fennel.models.Task;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
+import wal.fennel.utils.FennelUtils;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PreferenceHelper;
 import wal.fennel.utils.Singleton;
@@ -128,34 +130,61 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
     private void parseDataForMyFarmers(List<Farmer> farmerList) {
 
         Map<String,Farmer> farmersMap = new HashMap<>();
-        Map<String,Task> tasksMap = new HashMap<>();
+
         List<List<Farmer>> farmersTaskList = new ArrayList<List<Farmer>>();
 
         for (Farmer currentFarmer : farmerList) {
             for (Task currentTask : currentFarmer.getFarmerTasks()) {
-                if (currentTask.getStatus().equalsIgnoreCase(Constants.STR_NOT_STARTED)) {
+                if (currentTask.getStatus().equalsIgnoreCase(Constants.STR_NOT_STARTED) || currentTask.getStatus().equalsIgnoreCase(Constants.STR_IN_PROGRESS)) {
                     boolean taskFound = false;
                     for (List<Farmer> taskList : farmersTaskList) {
                         Farmer taskObject = (Farmer) taskList.get(0);
                         if (taskObject.getFarmerId().equals(currentTask.getTaskId())) {
                             taskFound = true;
-                            taskList.add(currentFarmer);
+                            if (farmersMap.get(currentFarmer.getFarmerId()) == null) {
+                                taskList.add(currentFarmer);
+                                farmersMap.put(currentFarmer.getFarmerId(), currentFarmer);
+                            }
                             break;
                         }
                     }
                     if (!taskFound) {
                         ArrayList<Farmer> newTaskList = new ArrayList<>();
-                        newTaskList.add(new Farmer(null, currentTask.getTaskId(), "", currentTask.getName(), "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYFARMERTASKS));
-                        newTaskList.add(currentFarmer);
-                        farmersTaskList.add(newTaskList);
+                        if (farmersMap.get(currentFarmer.getFarmerId()) == null) {
+                            Date dueDate = FennelUtils.getDateFromString(currentTask.getDueDate());
+                            newTaskList.add(new Farmer(dueDate, currentTask.getTaskId(), "", currentTask.getName(), "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYFARMERTASKS));
+                            newTaskList.add(currentFarmer);
+                            farmersMap.put(currentFarmer.getFarmerId(), currentFarmer);
+                            farmersTaskList.add(newTaskList);
+                        }
                     }
                 }
             }
         }
 
+        // add all the lists to a single list and sort based on due date
         allFarmerTasks = new ArrayList<Farmer>();
         for (List<Farmer> listOfFarmer : farmersTaskList) {
-            allFarmerTasks.addAll(listOfFarmer);
+            boolean isAdded = false;
+            Date currentDate = listOfFarmer.get(0).getLastModifiedTime();
+            if (currentDate != null) {
+                long currentDueDate = listOfFarmer.get(0).getLastModifiedTime().getTime();
+                for (int i = 0; i < allFarmerTasks.size(); i++) {
+                    Farmer taskFarmer = (Farmer) allFarmerTasks.get(i);
+                    if (!taskFarmer.isHeader()) {
+                        continue;
+                    }
+                    Date dueDate = taskFarmer.getLastModifiedTime();
+                        if ( dueDate == null || currentDueDate < dueDate.getTime()) {
+                            isAdded = true;
+                            allFarmerTasks.addAll(i, listOfFarmer);
+                            break;
+                        }
+                }
+            }
+            if (!isAdded) {
+                allFarmerTasks.addAll(listOfFarmer);
+            }
         }
 
         if (farmerTasks != null) {
