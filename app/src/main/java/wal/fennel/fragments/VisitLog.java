@@ -22,6 +22,7 @@ import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
 import io.realm.RealmList;
@@ -53,6 +54,7 @@ public class VisitLog extends BaseFragment {
     @Bind(R.id.tvTaskHeader)
     FontTextView tvTaskHeader;
 
+    private ArrayList<TaskItem> localTaskItems;
     private RealmResults<TaskItem> taskItems;
     private Farmer farmer;
     private Task task;
@@ -83,6 +85,10 @@ public class VisitLog extends BaseFragment {
         this.farmer = getArguments().getParcelable("farmer");
         this.task = getArguments().getParcelable("task");
         this.taskItems = Realm.getDefaultInstance().where(TaskItem.class).equalTo("farmingTaskId", task.getTaskId()).findAll().sort("sequence", Sort.ASCENDING);
+        this.localTaskItems = new ArrayList<>();
+        for (int i = 0; i < taskItems.size(); i++) {
+            this.localTaskItems.add(new TaskItem(taskItems.get(i)));
+        }
 
         titleBarLayout.setOnIconClickListener(this);
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
@@ -124,10 +130,10 @@ public class VisitLog extends BaseFragment {
 
         llTaskItemContainer.removeAllViews();
 
-        for (int i = 0; i < taskItems.size(); i++) {
+        for (int i = 0; i < localTaskItems.size(); i++) {
 
             View vTaskItem;
-            final TaskItem taskItem = taskItems.get(i);
+            final TaskItem taskItem = localTaskItems.get(i);
 
             if(taskItem.isTaskDone()){
                 vTaskItem = getActivity().getLayoutInflater().inflate(R.layout.template_visit_log_completed, null);
@@ -198,13 +204,33 @@ public class VisitLog extends BaseFragment {
     }
 
     private void setTaskDone(final TaskItem taskItem) {
+//        Realm realm = Realm.getDefaultInstance();
+//        realm.beginTransaction();
+//        taskItem.setTaskDone(!taskItem.isTaskDone());
+//        realm.commitTransaction();
+        taskItem.setTaskDone(!taskItem.isTaskDone());
+        populateTaskItems();
+    }
+
+    @OnClick(R.id.txtSave)
+    void onClickSaveTask() {
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
-//        taskItem.setTaskDone(true);
-        taskItem.setTaskDone(!taskItem.isTaskDone());
+        task.setStatus(Constants.STR_IN_PROGRESS);
+        for (int i = 0; i < localTaskItems.size(); i++) {
+            taskItems.get(i).setTaskDone(localTaskItems.get(i).isTaskDone());
+        }
         realm.commitTransaction();
+        ((BaseContainerFragment) getParentFragment()).popFragment();
+    }
 
-        populateTaskItems();
+    @OnClick(R.id.txtSubmitApproval)
+    void onClickSubmitForApprovalTask() {
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        task.setStatus(Constants.STR_COMPLETED);
+        realm.commitTransaction();
+        ((BaseContainerFragment) getParentFragment()).popFragment();
     }
 
     @Override
