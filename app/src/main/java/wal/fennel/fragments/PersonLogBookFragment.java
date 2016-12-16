@@ -46,11 +46,11 @@ public class PersonLogBookFragment extends BaseFragment implements AdapterView.O
         logbookListView.setOnItemClickListener(this);
 
         personsList = new ArrayList();
-        personsList.add(new Farmer("", "", "FIELD OFFICERS", "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
-        personsList.add(new Farmer("", "", "Bahati Kenga Kahindi", "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", false, "", "", null, Constants.FarmerType.MYSIGNUPS));
-        personsList.add(new Farmer("", "", "Bahati Kenga Kahindi", "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", false, "", "", null, Constants.FarmerType.MYSIGNUPS));
-        personsList.add(new Farmer("", "", "FACILITATORS", "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
-        personsList.add(new Farmer("", "", "Bahati Kenga Kahindi", "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", false, "", "", null, Constants.FarmerType.MYSIGNUPS));
+        personsList.add(new Farmer(null, "", "", "FIELD OFFICERS", "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
+        personsList.add(new Farmer(null, "", "", "Bahati Kenga Kahindi", "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", false, "", "", null, Constants.FarmerType.MYSIGNUPS));
+        personsList.add(new Farmer(null, "", "", "Bahati Kenga Kahindi", "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", false, "", "", null, Constants.FarmerType.MYSIGNUPS));
+        personsList.add(new Farmer(null, "", "", "FACILITATORS", "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
+        personsList.add(new Farmer(null, "", "", "Bahati Kenga Kahindi", "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", false, "", "", null, Constants.FarmerType.MYSIGNUPS));
 
         logBookAdapter = new PersonLogBookAdapter(getActivity(), personsList);
         logbookListView.setAdapter(logBookAdapter);
