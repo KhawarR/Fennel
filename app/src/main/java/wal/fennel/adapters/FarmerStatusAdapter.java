@@ -32,8 +32,8 @@ import wal.fennel.views.FontTextView;
  */
 public class FarmerStatusAdapter extends BaseAdapter {
 
-    private Context mContext;
     private RealmList<Task> mList = new RealmList<>();
+    private Context mContext;
 
     // View Type for Separators
     private static final int ITEM_VIEW_TYPE_SEPARATOR = 0;
@@ -99,35 +99,26 @@ public class FarmerStatusAdapter extends BaseAdapter {
             if (itemViewType == ITEM_VIEW_TYPE_SEPARATOR) {
                 // If its a section ?
                 view = inflater.inflate(R.layout.row_section_header, null);
-            }
-            else {
+            } else {
                 // Regular row
                 view = inflater.inflate(R.layout.row_my_farmers, null);
             }
-        }
-        else {
+        } else {
             view = convertView;
         }
 
-
         if (itemViewType == ITEM_VIEW_TYPE_SEPARATOR) {
             // If separator
-
             FontTextView separatorView = (FontTextView) view.findViewById(R.id.tv_header);
             separatorView.setText(task.getName());
-        }
-        else {
+        } else {
             // If regular
-
             ImageView ivIconRight = (ImageView) view.findViewById(R.id.ivIconRight);
 
-            if(task.getStatus().equalsIgnoreCase(Constants.STR_NOT_STARTED) || task.getStatus().equalsIgnoreCase(Constants.STR_NOT_STARTED))
-            {
+            if(task.getStatus().equalsIgnoreCase(Constants.STR_NOT_STARTED) || task.getStatus().equalsIgnoreCase(Constants.STR_IN_PROGRESS)) {
                 ivIconRight.setImageResource(R.drawable.ic_arrow_right);
                 ivIconRight.setVisibility(View.VISIBLE);
-            }
-            else if(task.getStatus().equalsIgnoreCase(Constants.STR_COMPLETED))
-            {
+            } else if(task.getStatus().equalsIgnoreCase(Constants.STR_COMPLETED)) {
                 ivIconRight.setImageResource(R.drawable.ic_approved);
                 ivIconRight.setVisibility(View.VISIBLE);
             }

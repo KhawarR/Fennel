@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.realm.RealmList;
 import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
 import wal.fennel.adapters.FarmerStatusAdapter;
@@ -35,16 +36,13 @@ import wal.fennel.views.TitleBarLayout;
  */
 public class FarmerStatus extends BaseFragment {
 
-    @Bind(R.id.titleBar)
-    TitleBarLayout titleBarLayout;
-
-    @Bind(R.id.lvFarmers)
-    ListView mLvFarmers;
-
     @Bind(R.id.swipeRefreshLayout)
     SwipeRefreshLayout swipeRefreshLayout;
-
+    @Bind(R.id.titleBar)
+    TitleBarLayout titleBarLayout;
     CircleImageView cIvIconRight;
+    @Bind(R.id.lvFarmers)
+    ListView mLvFarmers;
 
     private Farmer farmer;
 
@@ -76,12 +74,12 @@ public class FarmerStatus extends BaseFragment {
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
 
         String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
-        if(!thumbUrl.isEmpty())
-        {
-            if(NetworkHelper.isNetAvailable(getActivity()))
+        if(!thumbUrl.isEmpty()) {
+            if(NetworkHelper.isNetAvailable(getActivity())) {
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
-            else
+            } else {
                 MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+            }
         }
 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -96,12 +94,10 @@ public class FarmerStatus extends BaseFragment {
         myHeader.setOnClickListener(null);
 
         CircleImageView ivFarmerThumb = (CircleImageView) myHeader.findViewById(R.id.ivFarmerThumb);
-        {
-            if(NetworkHelper.isNetAvailable(getActivity()))
-                MyPicassoInstance.getInstance().load(farmer.getThumbUrl()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
-            else
-                MyPicassoInstance.getInstance().load(farmer.getThumbUrl()).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
-
+        if(NetworkHelper.isNetAvailable(getActivity())) {
+            MyPicassoInstance.getInstance().load(farmer.getThumbUrl()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
+        } else {
+            MyPicassoInstance.getInstance().load(farmer.getThumbUrl()).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
         }
 
         FontTextView tvFarmerName = (FontTextView) myHeader.findViewById(R.id.tvFullName);
@@ -114,14 +110,47 @@ public class FarmerStatus extends BaseFragment {
 
         mLvFarmers.addHeaderView(myHeader);
 
-        FarmerStatusAdapter adapter = new FarmerStatusAdapter(getActivity(), farmer.getFarmerTasks());
+        RealmList<Task> completedTasks = new RealmList<>();
+        RealmList<Task> inProgressTasks = new RealmList<>();
+        RealmList<Task> notStartedTasks = new RealmList<>();
+
+        final RealmList<Task> allTasks = new RealmList<>();
+
+        for (int i = 0; i < farmer.getFarmerTasks().size(); i++) {
+            Task task = farmer.getFarmerTasks().get(i);
+            if(task.getStatus().equalsIgnoreCase(Constants.STR_COMPLETED)){
+                completedTasks.add(task);
+            } else if(task.getStatus().equalsIgnoreCase(Constants.STR_IN_PROGRESS)){
+                inProgressTasks.add(task);
+            } else if(task.getStatus().equalsIgnoreCase(Constants.STR_NOT_STARTED)){
+                notStartedTasks.add(task);
+            }
+        }
+
+        if(inProgressTasks.size() > 0){
+            allTasks.add(new Task("", Constants.STR_IN_PROGRESS, "", "", "", "", true, null));
+            allTasks.addAll(inProgressTasks);
+        }
+
+        if(notStartedTasks.size() > 0){
+            allTasks.add(new Task("", Constants.STR_NOT_STARTED, "", "", "", "", true, null));
+            allTasks.addAll(notStartedTasks);
+        }
+
+        if(completedTasks.size() > 0){
+            allTasks.add(new Task("", Constants.STR_COMPLETED, "", "", "", "", true, null));
+            allTasks.addAll(completedTasks);
+        }
+
+        FarmerStatusAdapter adapter = new FarmerStatusAdapter(getActivity(), allTasks);
         // Create the list view and bind the adapter
         mLvFarmers.setAdapter(adapter);
         mLvFarmers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 position -= mLvFarmers.getHeaderViewsCount();
-                ((BaseContainerFragment) getParentFragment()).replaceFragment(VisitLog.newInstance(Constants.STR_VISIT_LOG, farmer, farmer.getFarmerTasks().get(position)), true);
+                if(!allTasks.get(position).isHeader())
+                    ((BaseContainerFragment) getParentFragment()).replaceFragment(VisitLog.newInstance(Constants.STR_VISIT_LOG, farmer, allTasks.get(position)), true);
             }
         });
     }

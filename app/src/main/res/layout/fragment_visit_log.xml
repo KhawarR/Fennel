@@ -103,7 +103,6 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/padding_20"
                 android:background="@drawable/selector_red_button"
-                android:enabled="false"
                 android:gravity="center"
                 android:padding="@dimen/padding_15"
                 android:text="@string/submit_for_approval"
