@@ -14,8 +14,9 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import wal.fennel.R;
 import wal.fennel.adapters.PersonLogBookAdapter;
-import wal.fennel.models.Farmer;
+import wal.fennel.models.FieldAgent;
 import wal.fennel.utils.Constants;
+import wal.fennel.utils.Singleton;
 
 /**
  * Created by irfanayaz on 12/2/16.
@@ -26,7 +27,7 @@ public class PersonLogBookFragment extends BaseFragment implements AdapterView.O
     ListView logbookListView;
     PersonLogBookAdapter logBookAdapter;
 
-    ArrayList<Farmer> personsList;
+    ArrayList<FieldAgent> personsList;
 
     @Nullable
     @Override
@@ -45,15 +46,33 @@ public class PersonLogBookFragment extends BaseFragment implements AdapterView.O
 
         logbookListView.setOnItemClickListener(this);
 
-        personsList = new ArrayList();
-        personsList.add(new Farmer("", "", "FIELD OFFICERS", "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
-        personsList.add(new Farmer("", "", "Bahati Kenga Kahindi", "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", false, "", "", null, Constants.FarmerType.MYSIGNUPS));
-        personsList.add(new Farmer("", "", "Bahati Kenga Kahindi", "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", false, "", "", null, Constants.FarmerType.MYSIGNUPS));
-        personsList.add(new Farmer("", "", "FACILITATORS", "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
-        personsList.add(new Farmer("", "", "Bahati Kenga Kahindi", "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", false, "", "", null, Constants.FarmerType.MYSIGNUPS));
+        personsList = getPersonLogbookData();
 
         logBookAdapter = new PersonLogBookAdapter(getActivity(), personsList);
         logbookListView.setAdapter(logBookAdapter);
+    }
+
+    private ArrayList<FieldAgent> getPersonLogbookData() {
+        ArrayList<FieldAgent> fieldAgents = Singleton.getInstance().fieldAgentsVisitLogs;
+        ArrayList<FieldAgent> fieldOfficers = new ArrayList<>();
+        ArrayList<FieldAgent> facilitators = new ArrayList<>();
+        for (FieldAgent fieldAgent : fieldAgents) {
+            if (fieldAgent.getAgentType().equalsIgnoreCase(Constants.STR_FIELD_OFFICER)) {
+                fieldOfficers.add(fieldAgent);
+            } else if (fieldAgent.getAgentType().equalsIgnoreCase(Constants.STR_FACILITATOR)) {
+                facilitators.add(fieldAgent);
+            }
+        }
+        ArrayList<FieldAgent> allAgents = new ArrayList<>();
+        if (fieldOfficers.size() > 0) {
+            allAgents.add(new FieldAgent("FIELD OFFICERS", "", "", "", "", null, true));
+            allAgents.addAll(fieldOfficers);
+        }
+        if (facilitators.size() > 0) {
+            allAgents.add(new FieldAgent("FACILITATORS", "", "", "", "", null, true));
+            allAgents.addAll(facilitators);
+        }
+        return allAgents;
     }
 
     @Override
@@ -63,7 +82,7 @@ public class PersonLogBookFragment extends BaseFragment implements AdapterView.O
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Farmer clickedFarmer = personsList.get(position - logbookListView.getHeaderViewsCount());
-        ((MyLogbook)getParentFragment()).addPersonDetailViewFragment(clickedFarmer);
+        FieldAgent clickedAgent = personsList.get(position - logbookListView.getHeaderViewsCount());
+        ((MyLogbook)getParentFragment()).addPersonDetailViewFragment(clickedAgent);
     }
 }

@@ -3,6 +3,8 @@ package wal.fennel.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Date;
+
 import io.realm.RealmList;
 import io.realm.RealmObject;
 
@@ -26,6 +28,9 @@ public class TaskItem extends RealmObject implements Parcelable {
     private RealmList<TaskItemOption> options = new RealmList<>();
 
     private String attachmentPath = "";
+    private Date dateModified = null;
+    private String agentName = "";
+    private String farmerName = "";
 
     public TaskItem(){
 
@@ -44,9 +49,12 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.latitude = other.latitude;
         this.longitude = other.longitude;
         this.options = other.options;
+        this.dateModified = other.dateModified;
+        this.agentName = other.agentName;
+        this.farmerName = other.farmerName;
     }
 
-    public TaskItem(int sequence, String id, String farmingTaskId, String name, String recordType, String description, String textValue, String fileType, String gpsTakenTime, double latitude, double longitude, RealmList<TaskItemOption> options) {
+    public TaskItem(int sequence, String id, String farmingTaskId, String name, String recordType, String description, String textValue, String fileType, String gpsTakenTime, double latitude, double longitude, RealmList<TaskItemOption> options, Date lastModified, String agent, String farmer) {
         this.sequence = sequence;
         this.id = id;
         this.farmingTaskId = farmingTaskId;
@@ -59,6 +67,9 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.latitude = latitude;
         this.longitude = longitude;
         this.options = options;
+        this.dateModified = lastModified;
+        this.agentName = agent;
+        this.farmerName = farmer;
     }
 
     @Override
@@ -75,6 +86,9 @@ public class TaskItem extends RealmObject implements Parcelable {
         dest.writeDouble(this.latitude);
         dest.writeDouble(this.longitude);
         dest.writeTypedList(options);
+        dest.writeLong(dateModified.getTime());
+        dest.writeString(this.agentName);
+        dest.writeString(this.farmerName);
     }
 
     protected TaskItem(Parcel in) {
@@ -91,6 +105,9 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.longitude = in.readDouble();
         options = new RealmList<>();
         in.readTypedList(options, TaskItemOption.CREATOR);
+        this.dateModified = new Date(in.readLong());
+        this.agentName = in.readString();
+        this.farmerName = in.readString();
     }
 
     public static final Parcelable.Creator<TaskItem> CREATOR = new Parcelable.Creator<TaskItem>() {
@@ -210,8 +227,32 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.attachmentPath = attachmentPath;
     }
 
+    public String getFarmerName() {
+        return farmerName;
+    }
+
+    public void setFarmerName(String farmerName) {
+        this.farmerName = farmerName;
+    }
+
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    public Date getDateModified() {
+        return dateModified;
+    }
+
+    public void setDateModified(Date dateModified) {
+        this.dateModified = dateModified;
+    }
+
+    public String getAgentName() {
+        return agentName;
+    }
+
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
     }
 }

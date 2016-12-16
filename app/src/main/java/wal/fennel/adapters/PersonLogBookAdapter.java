@@ -11,7 +11,7 @@ import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import wal.fennel.R;
-import wal.fennel.models.Farmer;
+import wal.fennel.models.FieldAgent;
 import wal.fennel.views.FontTextView;
 
 /**
@@ -19,8 +19,8 @@ import wal.fennel.views.FontTextView;
  */
 public class PersonLogBookAdapter extends BaseAdapter {
     private Context mContext;
-    private ArrayList<Farmer> mList = new ArrayList<>();
-    private ArrayList<Farmer> allTasks = new ArrayList<>();
+    private ArrayList<FieldAgent> mList = new ArrayList<>();
+    private ArrayList<FieldAgent> allTasks = new ArrayList<>();
 
     // View Type for Separators
     private static final int ITEM_VIEW_TYPE_SEPARATOR = 0;
@@ -76,7 +76,7 @@ public class PersonLogBookAdapter extends BaseAdapter {
 
         View view;
 
-        Farmer farmer = mList.get(position);
+        FieldAgent agent = mList.get(position);
         int itemViewType = getItemViewType(position);
 
         if (convertView == null) {
@@ -100,7 +100,7 @@ public class PersonLogBookAdapter extends BaseAdapter {
             // If separator
 
             FontTextView separatorView = (FontTextView) view.findViewById(R.id.tv_header);
-            separatorView.setText(farmer.getFullName());
+            separatorView.setText(agent.getName());
         }
         else {
             // If regular
@@ -110,7 +110,7 @@ public class PersonLogBookAdapter extends BaseAdapter {
 
             // Set contact name and number
             FontTextView name = (FontTextView) view.findViewById(R.id.tv_name);
-            name.setText( farmer.getFullName());
+            name.setText( agent.getName());
 
 //            FontTextView village = (FontTextView) view.findViewById(R.id.tv_village);
 //            FontTextView sublocation = (FontTextView) view.findViewById(R.id.tv_sublocation);
@@ -165,11 +165,11 @@ public class PersonLogBookAdapter extends BaseAdapter {
         }
         else
         {
-            for (Farmer farmer : allTasks)
+            for (FieldAgent agent : allTasks)
             {
-                if (farmer.getFullName().toLowerCase(Locale.getDefault()).contains(charText) || farmer.isHeader())
+                if (agent.getName().toLowerCase(Locale.getDefault()).contains(charText) || agent.isHeader())
                 {
-                    mList.add(farmer);
+                    mList.add(agent);
                 }
             }
         }

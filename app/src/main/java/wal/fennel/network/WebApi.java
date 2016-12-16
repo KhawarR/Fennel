@@ -37,6 +37,7 @@ import wal.fennel.activities.SplashActivity;
 import wal.fennel.application.Fennel;
 import wal.fennel.datamodels.Auth;
 import wal.fennel.models.Farmer;
+import wal.fennel.models.FieldAgent;
 import wal.fennel.models.ResponseModel;
 import wal.fennel.models.Task;
 import wal.fennel.models.TaskItem;
@@ -109,13 +110,36 @@ public class WebApi {
         return processCall(apiCall, callback);
     }
 
+    public static boolean getMyLogbookData(Callback<ResponseBody> callback, String fieldOffiers, String facilitators){
+
+        String query = null;
+        String userType = PreferenceHelper.getInstance().readLoginUserType();
+        if (userType.equalsIgnoreCase(Constants.STR_FIELD_MANAGER)) {
+            query = String.format(NetworkHelper.GET_MY_LOGBOOK_DATA_FIELD_MANAGER, PreferenceHelper.getInstance().readLoginUserId(), fieldOffiers, facilitators);
+        } else if (userType.equalsIgnoreCase(Constants.STR_FIELD_OFFICER)) {
+            query = String.format(NetworkHelper.GET_MY_LOGBOOK_DATA_FIELD_OFFICER, PreferenceHelper.getInstance().readLoginUserId(), facilitators);
+        } else {
+            query = String.format(NetworkHelper.GET_MY_LOGBOOK_DATA_FACILITATOR, PreferenceHelper.getInstance().readLoginUserId());
+        }
+
+//        String query = String.format(NetworkHelper.GET_MY_LOGBOOK_DATA, PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId());
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        return processCall(apiCall, callback);
+    }
+
+    public static boolean getFOAndFacDataForLogbook(Callback<ResponseBody> callback, String queryStr) {
+        String query = String.format(queryStr, PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId());
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        return processCall(apiCall, callback);
+    }
+
     public static boolean getMyFarmerAttachments(Callback<ResponseBody> callback){
 
         String farmerIds = "";
 
-        for (int i = 0; i < Singleton.getInstance().mySignupsList.size(); i++) {
+        for (int i = 0; i < Singleton.getInstance().myFarmersList.size(); i++) {
 
-            Farmer farmer = Singleton.getInstance().mySignupsList.get(i);
+            Farmer farmer = Singleton.getInstance().myFarmersList.get(i);
 
             if(!farmer.isHeader() && !farmer.getFarmerId().isEmpty()){
                 String id = farmer.getFarmerId();
@@ -124,7 +148,7 @@ public class WebApi {
 
                 farmerIds = farmerIds + id;
 
-                if(i+1 != Singleton.getInstance().mySignupsList.size()){
+                if(i+1 != Singleton.getInstance().myFarmersList.size()){
                     farmerIds = farmerIds + ",";
                 }
             }
@@ -1672,7 +1696,7 @@ public class WebApi {
                 }
             }
 
-            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, gpsTakenTime, latitude, longitude, options);
+            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, gpsTakenTime, latitude, longitude, options, null, null, null);
 
             for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
 
@@ -1697,6 +1721,38 @@ public class WebApi {
     public static boolean downloadAttachmentForAttachmentId(String attachmentId, Callback<ResponseBody> callback) {
 
         Call<ResponseBody> apiCall = Fennel.getWebService().downloadAttachmentForTask(Session.getAuthToken(), NetworkHelper.API_VERSION, attachmentId);
+        return processCall(apiCall, callback);
+    }
+
+    public static boolean getAllVisitLogsForMyLogbook(Callback<ResponseBody> allVisitLogsCallback, String farmingTaskIds) {
+        String query = String.format(NetworkHelper.GET_ALL_LOGBOOK_DATA, farmingTaskIds);
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        return processCall(apiCall, allVisitLogsCallback);
+    }
+
+    public static boolean getMyLogBookAttachments(Callback<ResponseBody> callback){
+
+        String agentIds = "";
+
+        for (int i = 0; i < Singleton.getInstance().fieldAgentsVisitLogs.size(); i++) {
+
+            FieldAgent fieldAgent = Singleton.getInstance().fieldAgentsVisitLogs.get(i);
+
+            if(!fieldAgent.isHeader() && !fieldAgent.getAgentId().isEmpty()){
+                String id = fieldAgent.getAgentId();
+
+                id = "'" + id + "'";
+
+                agentIds = agentIds + id;
+
+                if(i+1 != Singleton.getInstance().myFarmersList.size()){
+                    agentIds = agentIds + ",";
+                }
+            }
+        }
+
+        String query = String.format(NetworkHelper.QUERY_MY_LOGBOOK_ATTACHMENTS, agentIds);
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         return processCall(apiCall, callback);
     }
 

@@ -32,6 +32,7 @@ public class NetworkHelper {
     public static final String QUERY_MY_SIGNUPS_ATTACHMENTS = "SELECT Id, Name, (SELECT Id, ParentId, Name, Description FROM Attachments) FROM Farmer__c WHERE Id IN (%s)";
     public static final String QUERY_TASK_ITEM_ATTACHMENTS = "SELECT Id, File_Type__c, (SELECT Id, ParentId, Name, Description FROM Attachments) FROM Task_Item__c";
 
+
     public static final String GET_LOCATIONS = "SELECT Id, Name FROM Location__c";
     public static final String GET_SUB_LOCATIONS = "SELECT Id, Name, Location__c FROM Sub_Location__c";
     public static final String GET_VILLAGES = "SELECT Id, Name, Sub_Location__c FROM Village__c";
@@ -43,9 +44,20 @@ public class NetworkHelper {
 //    public static final String GET_FARMER_TASK_ITEMS = "Select t.Text_Value__c, t.Sequence__c, t.RecordType.Name, t.RecordTypeId, t.Name, t.Location__c, t.Location__Longitude__s, t.Location__Latitude__s, t.GPS_Taken_Time__c, t.File_Type__c, t.Farming_Task__c, t.Description__c, (Select Name, Value__c From Task_Item_Options__r) From Task_Item__c t WHERE Farming_Task__c = '%s' order by Sequence__c";
     public static final String GET_FARMER_TASK_ITEMS = "Select t.Id, t.Text_Value__c, t.Sequence__c, t.RecordType.Name, t.RecordTypeId, t.Name, t.Location__c, t.Location__Longitude__s, t.Location__Latitude__s, t.GPS_Taken_Time__c, t.File_Type__c, t.Farming_Task__c, t.Description__c, (Select Id, Name, Value__c From Task_Item_Options__r) From Task_Item__c t WHERE Farming_Task__c IN (%s) order by Sequence__c";
 
+    public static final String GET_MY_LOGBOOK_DATA_FIELD_MANAGER = "Select v.Farm_Visit__r.Visited_Date__c, v.Farm_Visit__r.Field_Manager__r.Id, v.Farm_Visit__r.Field_Manager__r.Name, v.Farm_Visit__r.Field_Officer__r.Id, v.Farm_Visit__r.Field_Officer__r.Name, v.Farm_Visit__r.Field_Officer__r.Phone__c, v.Farm_Visit__r.Facilitator__r.Id, v.Farm_Visit__r.Facilitator__r.Name, v.Farm_Visit__r.Facilitator__r.Phone__c, v.Farm_Visit__r.Farmer__c, Farm_Visit__r.Farmer__r.Name, Farm_Visit__r.Farmer__r.FullName__c, v.Farm_Visit__r.Shamba__c, Farm_Visit__r.Shamba__r.Name, v.Farm_Visit__c, Farming_Task__c  From Visit_Log__c v WHERE Farm_Visit__r.Field_Manager__c = '%s' OR Farm_Visit__r.Field_Officer__c IN (%s) OR Farm_Visit__r.Facilitator__c IN (%s)";
+    public static final String GET_MY_LOGBOOK_DATA_FIELD_OFFICER = "Select v.Farm_Visit__r.Visited_Date__c, v.Farm_Visit__r.Field_Manager__c, v.Farm_Visit__r.Field_Officer__r.Name, v.Farm_Visit__r.Field_Officer__r.Phone__c, v.Farm_Visit__r.Facilitator__r.Name, v.Farm_Visit__r.Facilitator__r.Phone__c, v.Farm_Visit__r.Farmer__c, Farm_Visit__r.Farmer__r.Name, Farm_Visit__r.Farmer__r.First_Name__c, v.Farm_Visit__r.Shamba__c, Farm_Visit__r.Shamba__r.Name, v.Farm_Visit__c, Farming_Task__c  From Visit_Log__c v WHERE Farm_Visit__r.Field_Officer__c = '%s' OR Farm_Visit__r.Facilitator__c IN (%s)";
+    public static final String GET_MY_LOGBOOK_DATA_FACILITATOR = "Select v.Farm_Visit__r.Visited_Date__c, v.Farm_Visit__r.Field_Manager__c, v.Farm_Visit__r.Field_Officer____r.Name, v.Farm_Visit__r.Field_Officer__r.Phone__c, v.Farm_Visit__r.Facilitator__r.Name, v.Farm_Visit__r.Facilitator__r.Phone__c, v.Farm_Visit__r.Farmer__c, Farm_Visit__r.Farmer__r.Name, Farm_Visit__r.Farmer__r.First_Name__c, v.Farm_Visit__r.Shamba__c, Farm_Visit__r.Shamba__r.Name, v.Farm_Visit__c, Farming_Task__c  From Visit_Log__c v WHERE Farm_Visit__r.Facilitator__c = '%s'";
 
+
+    public static final String GET_FO_FAC_FOR_FM = "Select f.Id, f.Field_Manager__c, (Select Id From Facilitators__r) From Field_Officer__c f WHERE Field_Manager__c = '%s'";
+    public static final String GET_FAC_FOR_FO = "Select f.Id From Facilitator__c f WHERE Field_Officer__c = '%s'";
+
+    public static final String GET_ALL_LOGBOOK_DATA = "Select f.Shamba__r.Id, f.Shamba__r.Village_Name__c, f.Shamba__r.Farmer__r.FullName__c, f.Status__c, f.Started_Date__c, f.Name, f.Id, f.Due_Date__c, f.Completion_Date__c, (Select Id, Name, LastModifiedDate, RecordTypeId, RecordType.Name, GPS_Taken_Time__c, Sequence__c, Location__Latitude__s, Location__Longitude__s, Location__c, Text_Value__c, File_Type__c, Description__c From Task_Items__r) From Farming_Task__c f  WHERE Id IN (%s)";
 
     private static final String STR_FILE_PREFIX = "file://";
+
+    public static final String QUERY_MY_LOGBOOK_ATTACHMENTS = "SELECT Id, Name, (SELECT Id, ParentId, Name, Description FROM Attachments) FROM Employee__c WHERE Id IN (%s)";
+
 
     public static boolean isNetAvailable(Context context){
         ConnectivityManager cm =

@@ -7,13 +7,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import java.util.ArrayList;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import io.realm.RealmList;
 import wal.fennel.R;
 import wal.fennel.adapters.TeamLogBookAdapter;
-import wal.fennel.models.Farmer;
+import wal.fennel.models.FieldAgent;
+import wal.fennel.models.TaskItem;
 import wal.fennel.views.FontTextView;
 
 /**
@@ -24,11 +24,12 @@ public class LogBookPersonDetailFragment extends BaseFragment {
     @Bind(R.id.logbook_listview)
     ListView logbookListView;
     TeamLogBookAdapter logBookAdapter;
+    FieldAgent fieldAgent = null;
 
-    public static LogBookPersonDetailFragment newInstance(Farmer clickedFarmer) {
+    public static LogBookPersonDetailFragment newInstance(FieldAgent clickedAgent) {
         LogBookPersonDetailFragment fragment = new LogBookPersonDetailFragment();
         Bundle args = new Bundle();
-        args.putParcelable("person", clickedFarmer);
+        args.putParcelable("fieldAgent", clickedAgent);
         fragment.setArguments(args);
         return fragment;
     }
@@ -48,12 +49,9 @@ public class LogBookPersonDetailFragment extends BaseFragment {
 
         super.onViewCreated(view, savedInstanceState);
 
-        ArrayList<String> descriptionList = new ArrayList<>();
+        fieldAgent = (FieldAgent) getArguments().getParcelable("fieldAgent");
 
-        descriptionList.add("Alex checked out of Bahati Kahandi's farm");
-        descriptionList.add("Alex updated Bahati Kahandi's hole count to 122");
-        descriptionList.add("Alex completed a survey at Bahati Kahandi's farm");
-        descriptionList.add("Alex checked into Bahati Kahandi's farm");
+        RealmList<TaskItem> descriptionList = fieldAgent.getVisitLogs();
 
         logBookAdapter = new TeamLogBookAdapter(getActivity(), descriptionList);
         logbookListView.setAdapter(logBookAdapter);
@@ -63,13 +61,16 @@ public class LogBookPersonDetailFragment extends BaseFragment {
         myHeader.setOnClickListener(null);
 
         FontTextView tvFarmerName = (FontTextView) myHeader.findViewById(R.id.tvFullName);
-        tvFarmerName.setText("Alex Ferguson");
+        tvFarmerName.setText(fieldAgent.getName());
         FontTextView tvLocation = (FontTextView) myHeader.findViewById(R.id.tvLocation);
         tvLocation.setVisibility(View.GONE);
         FontTextView tvMobile = (FontTextView) myHeader.findViewById(R.id.tvMobile);
-        tvMobile.setText("090078601");
+        tvMobile.setText(fieldAgent.getPhoneNumber() != null ? fieldAgent.getPhoneNumber() : "-");
 
         logbookListView.addHeaderView(myHeader);
+
+        ((MyLogbook)(getParentFragment())).titleBarLayout.setTxtLeft("Back");
+        ((MyLogbook)(getParentFragment())).titleBarLayout.setOnIconClickListener(this);
 
 
 //        CircleImageView ivFarmerThumb = (CircleImageView) myHeader.findViewById(R.id.ivFarmerThumb);
@@ -85,5 +86,11 @@ public class LogBookPersonDetailFragment extends BaseFragment {
     @Override
     protected String getTrackerScreenName() {
         return null;
+    }
+
+    @Override
+    public void onTitleBarLeftIconClicked(View view) {
+        ((MyLogbook)(getParentFragment())).titleBarLayout.setTxtLeft("");
+        ((MyLogbook)(getParentFragment())).popFragment();
     }
 }

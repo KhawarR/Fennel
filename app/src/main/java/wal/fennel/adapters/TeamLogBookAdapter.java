@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import wal.fennel.R;
+import wal.fennel.models.TaskItem;
+import wal.fennel.utils.FennelUtils;
 
 /**
  * Created by irfanayaz on 12/2/16.
@@ -18,9 +20,9 @@ import wal.fennel.R;
 public class TeamLogBookAdapter extends BaseAdapter {
 
     private Context mContext;
-    private List<String> mList;
+    private List<TaskItem> mList;
 
-    public TeamLogBookAdapter(Context context, ArrayList list) {
+    public TeamLogBookAdapter(Context context, List<TaskItem> list) {
         mContext = context;
         mList = new ArrayList<>();
         mList.addAll(list);
@@ -44,7 +46,7 @@ public class TeamLogBookAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        String text = mList.get(position);
+        TaskItem taskItem = mList.get(position);
         View view;
 
         int itemViewType = getItemViewType(position);
@@ -58,7 +60,10 @@ public class TeamLogBookAdapter extends BaseAdapter {
         }
 
         TextView descriptionText = (TextView) view.findViewById(R.id.tv_desc);
-        descriptionText.setText(text);
+        String logText = taskItem.getAgentName() + " did " + taskItem.getFarmerName()+ "'s task " + taskItem.getName();
+        descriptionText.setText(logText);
+        TextView timeText = (TextView)view.findViewById(R.id.tv_time);
+        timeText.setText(FennelUtils.getTimeAgo(taskItem.getDateModified().getTime()));
 
         return view;
     }

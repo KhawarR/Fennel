@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +19,7 @@ import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
-import wal.fennel.models.Farmer;
+import wal.fennel.models.FieldAgent;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
@@ -30,7 +31,7 @@ import static wal.fennel.R.id.tvperson;
 import static wal.fennel.R.id.tvteam;
 
 
-public class MyLogbook extends BaseFragment{
+public class MyLogbook extends BaseFragment {
 
 
     @Bind(R.id.titleBar)
@@ -91,6 +92,7 @@ public class MyLogbook extends BaseFragment{
             transaction.commit();
             getChildFragmentManager().executePendingTransactions();
         }
+        titleBarLayout.setTxtLeft("");
     }
 
     public void showPersonViewFragment() {
@@ -101,16 +103,28 @@ public class MyLogbook extends BaseFragment{
             transaction.commit();
             getChildFragmentManager().executePendingTransactions();
         }
+        titleBarLayout.setTxtLeft("");
     }
 
-    public void addPersonDetailViewFragment(Farmer farmer) {
+    public void addPersonDetailViewFragment(FieldAgent fieldAgent) {
         BaseFragment personDetailLogBookFragment = (BaseFragment) getChildFragmentManager().findFragmentByTag(Constants.PERSON_DETAIL_LOGBOOK_TAG);
         if (personDetailLogBookFragment == null) {
             FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-            transaction.add(R.id.logbook_layout, LogBookPersonDetailFragment.newInstance(farmer));
+            transaction.addToBackStack(null);
+            transaction.add(R.id.logbook_layout, LogBookPersonDetailFragment.newInstance(fieldAgent));
             transaction.commit();
             getChildFragmentManager().executePendingTransactions();
         }
+    }
+
+    public boolean popFragment() {
+        Log.e("fennel", "pop fragment: " + getChildFragmentManager().getBackStackEntryCount());
+        boolean isPop = false;
+        if (getChildFragmentManager().getBackStackEntryCount() > 0) {
+            isPop = true;
+            getChildFragmentManager().popBackStack();
+        }
+        return isPop;
     }
 
 

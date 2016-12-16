@@ -22,9 +22,11 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:layout_gravity="center_vertical"
+        android:layout_marginStart="5dp"
+        android:layout_marginLeft="5dp"
         android:layout_marginEnd="5dp"
         android:layout_marginRight="5dp"
-        android:src="@drawable/login_bg"
+        android:src="@drawable/dummy_profile"
         fennel:civ_border_color="@color/app_green"
         fennel:civ_border_width="1dp" />
 
@@ -36,21 +38,23 @@
 
         <wal.fennel.views.FontTextView
             android:id="@+id/tv_desc"
-            android:layout_height="50dp"
+            android:minHeight="30dp"
+            android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:layout_marginLeft="15dp"
+            android:layout_marginTop="5dp"
             android:textSize="16sp"
-            android:lines="2"
             android:textColor="@color/black_txt_color"
             fennel:fontName="Avenir-Heavy.ttf"
             android:layout_width="match_parent" />
 
         <wal.fennel.views.FontTextView
             android:id="@+id/tv_time"
-            android:text="19 minutes ago"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:layout_marginLeft="15dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             android:layout_gravity="center_vertical"
             android:textSize="14sp"
             android:textColor="@color/black"
@@ -62,6 +66,8 @@
         android:layout_marginLeft="15dp"
         android:src="@drawable/dummy_profile"
         android:layout_width="40dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginRight="5dp"
         android:layout_gravity="center_vertical"
         android:layout_height="match_parent"/>
 
