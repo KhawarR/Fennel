@@ -2063,6 +2063,11 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     private void parseVisitLogsFromTasks(ArrayList<Task> allTasks) {
 
         Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.delete(FieldAgent.class);
+        realm.commitTransaction();
+
+        realm.beginTransaction();
         Map<String, FieldAgent> agentsMap = new HashMap<>();
         ArrayList<FieldAgent> allAgentsList = new ArrayList<>();
         realm.beginTransaction();

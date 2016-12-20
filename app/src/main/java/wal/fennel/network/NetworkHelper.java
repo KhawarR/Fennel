@@ -52,7 +52,7 @@ public class NetworkHelper {
     public static final String GET_FO_FAC_FOR_FM = "Select f.Id, f.Field_Manager__c, (Select Id From Facilitators__r) From Field_Officer__c f WHERE Field_Manager__c = '%s'";
     public static final String GET_FAC_FOR_FO = "Select f.Id From Facilitator__c f WHERE Field_Officer__c = '%s'";
 
-    public static final String GET_ALL_LOGBOOK_DATA = "Select f.Shamba__r.Id, f.Shamba__r.Village_Name__c, f.Shamba__r.Farmer__r.FullName__c, f.Status__c, f.Started_Date__c, f.Name, f.Id, f.Due_Date__c, f.Completion_Date__c, (Select Id, Name, LastModifiedDate, RecordTypeId, RecordType.Name, GPS_Taken_Time__c, Sequence__c, Location__Latitude__s, Location__Longitude__s, Location__c, Text_Value__c, File_Type__c, Description__c From Task_Items__r) From Farming_Task__c f  WHERE Id IN (%s)";
+    public static final String GET_ALL_LOGBOOK_DATA = "Select f.Shamba__r.Id, f.Shamba__r.Village_Name__c, f.Shamba__r.Farmer__r.FullName__c, f.Status__c, f.Started_Date__c, f.Name, f.Id, f.Due_Date__c, f.Completion_Date__c, (Select Id, Name, LastModifiedDate, RecordTypeId, RecordType.Name, GPS_Taken_Time__c, Sequence__c, Location__Latitude__s, Location__Longitude__s, Location__c, Text_Value__c, File_Type__c, Description__c From Task_Items__r WHERE Is_Modified__c = true) From Farming_Task__c f  WHERE Id IN (%s)";
 
     private static final String STR_FILE_PREFIX = "file://";
 
