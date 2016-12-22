@@ -4,16 +4,14 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.widget.SwipeRefreshLayout;
+import android.os.Environment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.kbeanie.multipicker.api.CameraImagePicker;
 import com.kbeanie.multipicker.api.ImagePicker;
 import com.kbeanie.multipicker.api.Picker;
@@ -22,36 +20,22 @@ import com.kbeanie.multipicker.api.entity.ChosenImage;
 import com.mixpanel.android.mpmetrics.MixpanelAPI;
 import com.squareup.picasso.NetworkPolicy;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import wal.fennel.R;
-import wal.fennel.application.Fennel;
+import wal.fennel.dropbox.DropboxClient;
+import wal.fennel.dropbox.UploadTask;
 import wal.fennel.network.NetworkHelper;
-import wal.fennel.network.Session;
 import wal.fennel.network.WebApi;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
 import wal.fennel.utils.MixPanelConstants;
 import wal.fennel.utils.MyPicassoInstance;
-import wal.fennel.utils.PhotoUtils;
 import wal.fennel.utils.PreferenceHelper;
 import wal.fennel.views.FontTextView;
 import wal.fennel.views.TitleBarLayout;
@@ -275,25 +259,67 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         mixPanel.track(MixPanelConstants.Event.MANUAL_SYNC_ACTION);
 
         if(NetworkHelper.isNetAvailable(getApplicationContext())){
+
+            uploadLogFiles();
+
             if(!PreferenceHelper.getInstance().readIsSyncInProgress()){
                 if(WebApi.isSyncRequired())
                     WebApi.syncAll(AboutMe.this);
                 else {
-//                    mSwipeRefreshLayout.setRefreshing(false);
                     pbSync.setVisibility(View.GONE);
                     Toast.makeText(getApplicationContext(), "Data is already synced", Toast.LENGTH_SHORT).show();
                     WebApi.getFullServerData();
                 }
             }else {
-//                mSwipeRefreshLayout.setRefreshing(false);
                 pbSync.setVisibility(View.GONE);
             }
         }
         else {
             Toast.makeText(getApplicationContext(), "Network not available", Toast.LENGTH_SHORT).show();
-//            mSwipeRefreshLayout.setRefreshing(false);
             pbSync.setVisibility(View.GONE);
         }
+    }
+
+    private void uploadLogFiles() {
+        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        if(downloadsDirectory.exists()){
+            uploadFarmerLogFile(downloadsDirectory);
+            uploadDebugLogFile(downloadsDirectory);
+        }
+        else {
+            Crashlytics.logException(new Throwable("Download directory doesn't exist"));
+        }
+    }
+
+    private void uploadDebugLogFile(File downloadsDirectory){
+        String downloadDirPath = downloadsDirectory.getAbsolutePath();
+        String debugLogFileName = PreferenceHelper.getInstance().readUserId() + Constants.DropboxConstants.DEBUG_LOGS_FILE_NAME;
+
+        File debugLogsFile = new File(downloadDirPath + File.separator + debugLogFileName);
+        if(debugLogsFile.exists()) {
+            uploadDropboxFile(debugLogsFile, Constants.DropboxConstants.DEBUG_LOGS_DROPBOX_PATH);
+        }
+        else {
+            Crashlytics.logException(new Throwable("Debug log file doesn't exist - " + PreferenceHelper.getInstance().readUserId()));
+        }
+    }
+
+    private void uploadFarmerLogFile(File downloadsDirectory){
+
+        String downloadDirPath = downloadsDirectory.getAbsolutePath();
+        String farmerLogFileName = PreferenceHelper.getInstance().readUserId() + Constants.DropboxConstants.FARMER_LOGS_FILE_NAME;
+
+        File farmerLogsFile = new File(downloadDirPath + File.separator + farmerLogFileName);
+        if(farmerLogsFile.exists()) {
+            uploadDropboxFile(farmerLogsFile, Constants.DropboxConstants.FARMER_LOGS_DROPBOX_PATH);
+        }
+        else {
+            Crashlytics.logException(new Throwable("Farmer log file doesn't exist - " + PreferenceHelper.getInstance().readUserId()));
+        }
+    }
+
+    private void uploadDropboxFile(File file, String fileDropboxPath){
+        new UploadTask(DropboxClient.getClient(Constants.DropboxConstants.ACCESS_TOKEN), file, getApplicationContext(), fileDropboxPath).execute();
     }
 
     @OnClick(R.id.rl_pick_image)

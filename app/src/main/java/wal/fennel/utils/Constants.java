@@ -41,4 +41,13 @@ public class Constants {
     public static final int RESPONSE_SUCCESS_NO_CONTENT = 204;
     public static final int RESPONSE_SESSION_EXPIRE = 401;
     public static final int CORNER_RADIUS = 20;
+
+    public static class DropboxConstants {
+        public static final String ACCESS_TOKEN = "fLeIQ1T-kdAAAAAAAAAAC6uQ_f83xp0g0L-GMEFWZmMeXJiya6kGN3atE37KGm7x";
+        public static final String FENNEL_DROPBOX_PATH = "dropbox/Fennel";
+        public static final String DEBUG_LOGS_DROPBOX_PATH = "/DebugLogs/";
+        public static final String FARMER_LOGS_DROPBOX_PATH = "/FarmerLogs/";
+        public static final String FARMER_LOGS_FILE_NAME = "_FarmerLogs.csv";
+        public static final String DEBUG_LOGS_FILE_NAME = "_DebugLogs.txt";
+    }
 }
