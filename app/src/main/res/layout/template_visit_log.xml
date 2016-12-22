@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fennel="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:padding="@dimen/margin_main_template_visit_log">
 
@@ -43,7 +43,8 @@
                     android:text="Add up to 3 lines of instructions below the title of this task below. Let have on more line test"
                     android:textColor="@color/black"
                     android:textSize="@dimen/font_desc_template_visit_log"
-                    fennel:fontName="Avenir-Medium.ttf" />
+                    fennel:fontName="Avenir-Medium.ttf"
+                    android:visibility="gone"/>
 
                 <EditText
                     android:id="@+id/etInput"
@@ -56,6 +57,15 @@
                     android:textColorHint="@color/black"
                     android:textColor="@color/black"
                     android:visibility="gone"/>
+
+                <Spinner
+                    android:id="@+id/spOptions"
+                    android:layout_width="@dimen/width_edittext_template_visit_log"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:background="@drawable/spinner_bg"
+                    android:spinnerMode="dialog"
+                    tools:entries="@array/optionsLocation" />
 
             </RelativeLayout>
 
