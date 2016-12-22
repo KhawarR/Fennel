@@ -2,6 +2,8 @@ package wal.fennel.utils;
 
 import android.os.Environment;
 
+import com.opencsv.CSVWriter;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -45,11 +47,11 @@ public class FennelUtils {
         return date;
     }
 
-    public static void appendLog(String text) {
+    public static void appendDebugLog(String text) {
         text = getFormattedTime(System.currentTimeMillis(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_HH_MM_SS) + " - " + text;
 
         File rootPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        File logFile = new File(rootPath.getPath() + "/FennelLogs.txt");
+        File logFile = new File(rootPath.getPath() + File.separator + PreferenceHelper.getInstance().readUserId() + Constants.DropboxConstants.DEBUG_LOGS_FILE_NAME);
 
         try {
             logFile.createNewFile();
@@ -66,5 +68,23 @@ public class FennelUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void appendFarmerLog(String [] data) throws IOException {
+        File rootPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        String filePath = rootPath + File.separator + PreferenceHelper.getInstance().readUserId() + Constants.DropboxConstants.FARMER_LOGS_FILE_NAME;
+        File f = new File(filePath);
+        CSVWriter writer;
+        FileWriter mFileWriter;
+        // File exist
+        if(f.exists() && !f.isDirectory()){
+            mFileWriter = new FileWriter(filePath , true);
+            writer = new CSVWriter(mFileWriter);
+        }
+        else {
+            writer = new CSVWriter(new FileWriter(filePath));
+        }
+        writer.writeNext(data);
+        writer.close();
     }
 }

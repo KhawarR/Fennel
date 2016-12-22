@@ -77,4 +77,6 @@ dependencies {
 
     //Dropbox
     compile 'com.dropbox.core:dropbox-core-sdk:2.0.1'
+
+    compile files('../libs/opencsv-3.8.jar')
 }
