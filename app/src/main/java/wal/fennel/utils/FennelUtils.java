@@ -78,11 +78,12 @@ public class FennelUtils {
         FileWriter mFileWriter;
         // File exist
         if(f.exists() && !f.isDirectory()){
-            mFileWriter = new FileWriter(filePath , true);
+            mFileWriter = new FileWriter(filePath, true);
             writer = new CSVWriter(mFileWriter);
         }
         else {
             writer = new CSVWriter(new FileWriter(filePath));
+            data = new String[]{"Timestamp", "UserID", "RecordType", "ID Number", "Full name", "First Name", "Middle Name", "Last Name", "Location", "SubLocation", "Village", "Tree Specie", "Mobile", "Is Leader?", "Is Farmer Home?", "Farmer ID", "Location ID", "Sub Location ID", "Village ID", "Tree specie ID"};
         }
         writer.writeNext(data);
         writer.close();

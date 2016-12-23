@@ -24,6 +24,10 @@ public class Constants {
     public static final String TOAST_NO_INTERNET = "Network problem, please check your connection & try again";
     public static final String TOAST_LOGIN_ERROR = "Login Error: Check network connection or verify login credentials";
 
+    public static final String STR_FARMER_LOG_TYPE_CREATED = "Created";
+    public static final String STR_FARMER_LOG_TYPE_EDITED = "Edited";
+    public static final String STR_FARMER_LOG_TYPE_SUBMITTED = "Submitted";
+
     public static final String URL_NOT_SET_ERROR_MESSAGE = "Destination URL not reset. The URL returned from login must be set";
 
     public static final String STR_FARMER_ID_PREFIX = "off-";

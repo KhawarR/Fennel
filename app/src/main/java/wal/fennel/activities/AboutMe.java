@@ -260,7 +260,7 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
 
         if(NetworkHelper.isNetAvailable(getApplicationContext())){
 
-            uploadLogFiles();
+            uploadFarmerLogFile();
 
             if(!PreferenceHelper.getInstance().readIsSyncInProgress()){
                 if(WebApi.isSyncRequired())
@@ -280,41 +280,43 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
         }
     }
 
-    private void uploadLogFiles() {
+    private void uploadDebugLogFile(){
+
         File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         if(downloadsDirectory.exists()){
-            uploadFarmerLogFile(downloadsDirectory);
-            uploadDebugLogFile(downloadsDirectory);
+            String downloadDirPath = downloadsDirectory.getAbsolutePath();
+            String debugLogFileName = PreferenceHelper.getInstance().readUserId() + Constants.DropboxConstants.DEBUG_LOGS_FILE_NAME;
+
+            File debugLogsFile = new File(downloadDirPath + File.separator + debugLogFileName);
+            if(debugLogsFile.exists()) {
+                uploadDropboxFile(debugLogsFile, Constants.DropboxConstants.DEBUG_LOGS_DROPBOX_PATH);
+            }
+            else {
+                Crashlytics.logException(new Throwable("Debug log file doesn't exist - " + PreferenceHelper.getInstance().readUserId()));
+            }
         }
         else {
             Crashlytics.logException(new Throwable("Download directory doesn't exist"));
         }
     }
 
-    private void uploadDebugLogFile(File downloadsDirectory){
-        String downloadDirPath = downloadsDirectory.getAbsolutePath();
-        String debugLogFileName = PreferenceHelper.getInstance().readUserId() + Constants.DropboxConstants.DEBUG_LOGS_FILE_NAME;
+    private void uploadFarmerLogFile(){
 
-        File debugLogsFile = new File(downloadDirPath + File.separator + debugLogFileName);
-        if(debugLogsFile.exists()) {
-            uploadDropboxFile(debugLogsFile, Constants.DropboxConstants.DEBUG_LOGS_DROPBOX_PATH);
+        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        if(downloadsDirectory.exists()){
+            String downloadDirPath = downloadsDirectory.getAbsolutePath();
+            String farmerLogFileName = PreferenceHelper.getInstance().readUserId() + Constants.DropboxConstants.FARMER_LOGS_FILE_NAME;
+
+            File farmerLogsFile = new File(downloadDirPath + File.separator + farmerLogFileName);
+            if(farmerLogsFile.exists()) {
+                uploadDropboxFile(farmerLogsFile, Constants.DropboxConstants.FARMER_LOGS_DROPBOX_PATH);
+            }
+            else {
+                Crashlytics.logException(new Throwable("Farmer log file doesn't exist - " + PreferenceHelper.getInstance().readUserId()));
+            }
         }
         else {
-            Crashlytics.logException(new Throwable("Debug log file doesn't exist - " + PreferenceHelper.getInstance().readUserId()));
-        }
-    }
-
-    private void uploadFarmerLogFile(File downloadsDirectory){
-
-        String downloadDirPath = downloadsDirectory.getAbsolutePath();
-        String farmerLogFileName = PreferenceHelper.getInstance().readUserId() + Constants.DropboxConstants.FARMER_LOGS_FILE_NAME;
-
-        File farmerLogsFile = new File(downloadDirPath + File.separator + farmerLogFileName);
-        if(farmerLogsFile.exists()) {
-            uploadDropboxFile(farmerLogsFile, Constants.DropboxConstants.FARMER_LOGS_DROPBOX_PATH);
-        }
-        else {
-            Crashlytics.logException(new Throwable("Farmer log file doesn't exist - " + PreferenceHelper.getInstance().readUserId()));
+            Crashlytics.logException(new Throwable("Download directory doesn't exist"));
         }
     }
 
@@ -710,5 +712,7 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
             syncTime = "-";
 
         tvSyncTime.setText(syncTime);
+
+        uploadDebugLogFile();
     }
 }
