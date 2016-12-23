@@ -16,7 +16,7 @@
         android:layout_height="match_parent">
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/imgRight"
+        android:id="@+id/imgLeft"
         android:layout_width="@dimen/medium_avatar_size"
         android:layout_height="@dimen/medium_avatar_size"
         android:layout_alignParentLeft="true"
@@ -63,13 +63,15 @@
     </LinearLayout>
 
     <ImageView
+        android:id="@+id/right_icon"
         android:layout_marginLeft="15dp"
         android:src="@drawable/dummy_profile"
-        android:layout_width="40dp"
+        android:layout_width="50dp"
         android:layout_marginEnd="5dp"
         android:layout_marginRight="5dp"
+        android:adjustViewBounds="true"
         android:layout_gravity="center_vertical"
-        android:layout_height="match_parent"/>
+        android:layout_height="50dp"/>
 
     </LinearLayout>
 

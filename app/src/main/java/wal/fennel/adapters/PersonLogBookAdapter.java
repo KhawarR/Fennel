@@ -6,12 +6,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import com.squareup.picasso.NetworkPolicy;
+
 import java.util.ArrayList;
 import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import wal.fennel.R;
 import wal.fennel.models.FieldAgent;
+import wal.fennel.network.NetworkHelper;
+import wal.fennel.utils.Constants;
+import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.views.FontTextView;
 
 /**
@@ -105,40 +110,23 @@ public class PersonLogBookAdapter extends BaseAdapter {
         else {
             // If regular
 
-//            ImageView ivLeftIcon = (ImageView) view.findViewById(R.id.iv_mysignups_icon_left);
-//            ivLeftIcon.setImageResource(R.drawable.ic_arrow_right);
-
             // Set contact name and number
             FontTextView name = (FontTextView) view.findViewById(R.id.tv_name);
             name.setText( agent.getName());
 
-//            FontTextView village = (FontTextView) view.findViewById(R.id.tv_village);
-//            FontTextView sublocation = (FontTextView) view.findViewById(R.id.tv_sublocation);
-//
-//            if(!farmer.getSubLocation().isEmpty())
-//                sublocation.setText(farmer.getSubLocation());
-//            else
-//                sublocation.setText("");
-//
-//            if(!farmer.getVillageName().isEmpty())
-//                village.setText(farmer.getVillageName() + ", ");
-//            else
-//                village.setText("");
 
             CircleImageView thumb = (CircleImageView) view.findViewById(R.id.profile_image);
-//            String thumbUrl = farmer.getThumbUrl();
-//            if(thumbUrl != null && !thumbUrl.isEmpty())
-//            {
-//                if(Singleton.getInstance().farmerIdtoInvalidate.equalsIgnoreCase(farmer.getFarmerId())) {
-//                    MyPicassoInstance.getInstance().invalidate(thumbUrl);
-//                    Singleton.getInstance().farmerIdtoInvalidate = "";
-//                }
-//                if(NetworkHelper.isNetAvailable(mContext))
-//                    MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).onlyScaleDown().centerCrop().into(thumb);
-//                else
-//                    MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).onlyScaleDown().centerCrop().into(thumb);
-//            }
-//            else
+
+            String attachmentUrl = NetworkHelper.makeAttachmentUrlFromId(agent.getAgentAttachmentUrl());
+
+            if(attachmentUrl != null && !attachmentUrl.isEmpty())
+            {
+                if(NetworkHelper.isNetAvailable(mContext))
+                    MyPicassoInstance.getInstance().load(attachmentUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).onlyScaleDown().centerCrop().into(thumb);
+                else
+                    MyPicassoInstance.getInstance().load(attachmentUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).onlyScaleDown().centerCrop().into(thumb);
+            }
+            else
             {
                 thumb.setImageResource(R.drawable.dummy_profile);
             }

@@ -1678,6 +1678,7 @@ public class WebApi {
                 longitude = 0;
             String gpsTakenTime = objTask.getString("GPS_Taken_Time__c");
             String fileType = objTask.getString("File_Type__c");
+            String fileAction = objTask.optString("File_Action__c");
             String farmingTaskId = objTask.getString("Farming_Task__c");
             String description = objTask.getString("Description__c");
 
@@ -1696,7 +1697,7 @@ public class WebApi {
                 }
             }
 
-            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, gpsTakenTime, latitude, longitude, options, null, null, null);
+            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileAction, gpsTakenTime, latitude, longitude, options, null, null, null, null);
 
             for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
 
@@ -1739,7 +1740,7 @@ public class WebApi {
             FieldAgent fieldAgent = Singleton.getInstance().fieldAgentsVisitLogs.get(i);
 
             if(!fieldAgent.isHeader() && !fieldAgent.getAgentId().isEmpty()){
-                String id = fieldAgent.getAgentId();
+                String id = fieldAgent.getAgentEmployeeId();
 
                 id = "'" + id + "'";
 

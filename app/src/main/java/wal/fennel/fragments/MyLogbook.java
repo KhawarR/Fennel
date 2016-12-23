@@ -39,11 +39,11 @@ public class MyLogbook extends BaseFragment {
 
     CircleImageView cIvIconRight;
 
-    @Bind(R.id.tvteam)
-    TextView tvTeam;
-
     @Bind(R.id.tvperson)
     TextView tvPerson;
+
+    @Bind(R.id.tvteam)
+    TextView tvTeam;
 
     @Bind(R.id.tabview)
     LinearLayout tabView;

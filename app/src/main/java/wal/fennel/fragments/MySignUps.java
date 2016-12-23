@@ -1528,6 +1528,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 longitude = 0;
             String gpsTakenTime = objTask.getString("GPS_Taken_Time__c");
             String fileType = objTask.getString("File_Type__c");
+            String fileAction = objTask.optString("File_Action__c");
             String farmingTaskId = objTask.getString("Farming_Task__c");
             String description = objTask.getString("Description__c");
 
@@ -1546,7 +1547,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
 
-            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, gpsTakenTime, latitude, longitude, options, null, null, null);
+            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileAction, gpsTakenTime, latitude, longitude, options, null, null, null, null);
             taskItems.add(taskItem);
 
             for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
@@ -1840,27 +1841,36 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 String agentType = null;
                 String agentId = null;
                 String agentPhone = null;
+                String agentEmployeeId = null;
+                JSONObject employeeObj = null;
+
                 if (fieldManager != null) {
                     name = fieldManager.getString("Name");
                     agentType = Constants.STR_FIELD_MANAGER;
                     agentId = fieldManager.getString("Id");
                     agentPhone = fieldManager.getString("Phone__c");
+                    employeeObj = fieldOfficer.optJSONObject("Employee__r");
+                    agentEmployeeId = employeeObj.optString("Name");
                 } else if(fieldOfficer != null) {
                     name = fieldOfficer.getString("Name");
                     agentType = Constants.STR_FIELD_OFFICER;
                     agentId = fieldOfficer.getString("Id");
-                    agentPhone = fieldManager.getString("Phone__c");
+                    agentPhone = fieldOfficer.getString("Phone__c");
+                    employeeObj = fieldOfficer.optJSONObject("Employee__r");
+                    agentEmployeeId = employeeObj.optString("Name");
                 } else if (facilitator != null) {
                     name = facilitator.getString("Name");
                     agentType = STR_FACILITATOR;
                     agentId = facilitator.getString("Id");
-                    agentPhone = fieldManager.getString("Phone__c");
+                    agentPhone = facilitator.optString("Phone__c");
+                    agentEmployeeId = facilitator.optString("Employee_ID__c");
                 }
                 taskMap.put("agentName", name);
                 taskMap.put("agentType", agentType);
                 taskMap.put("Id", taskId);
                 taskMap.put("agentId" , agentId);
                 taskMap.put("agentPhone", agentPhone);
+                taskMap.put("agentEmployeeId", agentEmployeeId);
 //                newTask.setAgentName(name);
 //                newTask.setAgentType(agentType);
 //                newTask.setTaskId(taskId);
@@ -2000,6 +2010,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 visitLogTask.setAgentName(taskMap.get("agentName"));
                 visitLogTask.setAgentType(taskMap.get("agentType"));
                 visitLogTask.setAgentPhoneNumber(taskMap.get("agentPhone"));
+                visitLogTask.setAgentEmployeeId(taskMap.get("agentEmployeeId"));
                 visitLogTask.setTaskId(taskMap.get("Id"));
                 visitLogTask.setStatus(farmingTaskObj.optString("Status__c"));
                 visitLogTask.setStartedDate(farmingTaskObj.optString("Started_Date__c"));
@@ -2043,12 +2054,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         }
                         String gpsTakenTime = taskItem.getString("GPS_Taken_Time__c");
                         String fileType = taskItem.getString("File_Type__c");
+                        String fileAction = taskItem.optString("File_Action__c");
 //                        String taskId = taskItem.getString("Farming_Task__c");
                         String description = taskItem.getString("Description__c");
 
                         RealmList<TaskItemOption> options = new RealmList<>();
 
-                        TaskItem newTaskItem = new TaskItem(sequence, id, taskMap.get("Id"), name, recordType, description, textValue, fileType, gpsTakenTime, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName);
+                        TaskItem newTaskItem = new TaskItem(sequence, id, taskMap.get("Id"), name, recordType, description, textValue, fileType, fileAction, gpsTakenTime, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null);
                         visitLogTask.getTaskItems().add(newTaskItem);
                     }
                 }
@@ -2067,7 +2079,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         realm.delete(FieldAgent.class);
         realm.commitTransaction();
 
-        realm.beginTransaction();
         Map<String, FieldAgent> agentsMap = new HashMap<>();
         ArrayList<FieldAgent> allAgentsList = new ArrayList<>();
         realm.beginTransaction();
@@ -2082,6 +2093,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 agent.setAgentId(taskObj.getAgentId());
                 agent.setName(taskObj.getAgentName());
                 agent.setAgentType(taskObj.getAgentType());
+                agent.setAgentEmployeeId(taskObj.getAgentEmployeeId());
                 agentsMap.put(agentId, agent);
                 allAgentsList.add(agent);
             }
@@ -2139,7 +2151,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
-//        Realm realm = getDefaultInstance();
+        Realm realm = getDefaultInstance();
 
         if(arrRecords.length() > 0)
         {
@@ -2147,6 +2159,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                 JSONObject agentObj = arrRecords.getJSONObject(i);
                 String id = agentObj.getString("Id");
+                String name = agentObj.getString("Name");
                 String agentAttachmentId  = null;
 
                 JSONObject attachmentObj = agentObj.optJSONObject("Attachments");
@@ -2165,15 +2178,18 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 for (int j = 0; j < allAgentsList.size(); j++) {
                     final FieldAgent fieldAgent = allAgentsList.get(j);
 
-                    if(fieldAgent.getAgentId().equalsIgnoreCase(id))
+                    if(fieldAgent.getAgentEmployeeId().equalsIgnoreCase(name))
                     {
-                        fieldAgent.setAgentAttachmentUrl(agentAttachmentId);
                         String attachmentUrl = NetworkHelper.makeAttachmentUrlFromId(agentAttachmentId);
 
 //                        Farmer farmerDb = realm.where(Farmer.class).equalTo("farmerId", id).findFirst();
 //                        if(farmerDb != null)
 //                        {
-//                            realm.beginTransaction();
+                            realm.beginTransaction();
+                            fieldAgent.setAgentAttachmentUrl(agentAttachmentId);
+                            for (TaskItem item : fieldAgent.getVisitLogs()) {
+                                item.setAgentAttachmentId(agentAttachmentId);
+                            }
 //                            farmerDb.setThumbAttachmentId(farmerPicId);
 //                            farmerDb.setNationalCardAttachmentId(farmerNatId);
 //                            if(!farmerPicId.isEmpty())
@@ -2184,7 +2200,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 //                            {
 //                                farmerDb.setNationalCardUrl(natIdUrl);
 //                            }
-//                            realm.commitTransaction();
+                            realm.commitTransaction();
 //                        }
 
                         MyPicassoInstance.getInstance().load(attachmentUrl).fetch();

@@ -7,13 +7,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import com.squareup.picasso.NetworkPolicy;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.RealmList;
 import wal.fennel.R;
 import wal.fennel.adapters.TeamLogBookAdapter;
 import wal.fennel.models.FieldAgent;
 import wal.fennel.models.TaskItem;
+import wal.fennel.network.NetworkHelper;
+import wal.fennel.utils.CircleViewTransformation;
+import wal.fennel.utils.Constants;
+import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.views.FontTextView;
 
 /**
@@ -73,14 +80,14 @@ public class LogBookPersonDetailFragment extends BaseFragment {
         ((MyLogbook)(getParentFragment())).titleBarLayout.setOnIconClickListener(this);
 
 
-//        CircleImageView ivFarmerThumb = (CircleImageView) myHeader.findViewById(R.id.ivFarmerThumb);
-//        {
-//            if(NetworkHelper.isNetAvailable(getActivity()))
-//                MyPicassoInstance.getInstance().load(farmer.getThumbUrl()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
-//            else
-//                MyPicassoInstance.getInstance().load(farmer.getThumbUrl()).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
-//
-//        }
+        CircleImageView ivFarmerThumb = (CircleImageView) myHeader.findViewById(R.id.ivFarmerThumb);
+        {
+            if(NetworkHelper.isNetAvailable(getActivity()))
+                MyPicassoInstance.getInstance().load(NetworkHelper.makeAttachmentUrlFromId(fieldAgent.getAgentAttachmentUrl())).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
+            else
+                MyPicassoInstance.getInstance().load(NetworkHelper.makeAttachmentUrlFromId(fieldAgent.getAgentAttachmentUrl())).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
+
+        }
     }
 
     @Override
