@@ -1849,12 +1849,12 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     name = fieldOfficer.getString("Name");
                     agentType = Constants.STR_FIELD_OFFICER;
                     agentId = fieldOfficer.getString("Id");
-                    agentPhone = fieldManager.getString("Phone__c");
+                    agentPhone = fieldOfficer.getString("Phone__c");
                 } else if (facilitator != null) {
                     name = facilitator.getString("Name");
                     agentType = STR_FACILITATOR;
                     agentId = facilitator.getString("Id");
-                    agentPhone = fieldManager.getString("Phone__c");
+                    agentPhone = facilitator.getString("Phone__c");
                 }
                 taskMap.put("agentName", name);
                 taskMap.put("agentType", agentType);
@@ -2070,7 +2070,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         realm.beginTransaction();
         Map<String, FieldAgent> agentsMap = new HashMap<>();
         ArrayList<FieldAgent> allAgentsList = new ArrayList<>();
-        realm.beginTransaction();
+
         for (Task taskObj : allTasks) {
             FieldAgent agent = null;
             String agentId = taskObj.getAgentId();
