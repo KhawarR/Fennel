@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 
 import com.squareup.picasso.NetworkPolicy;
 
@@ -113,6 +114,8 @@ public class PersonLogBookAdapter extends BaseAdapter {
             // Set contact name and number
             FontTextView name = (FontTextView) view.findViewById(R.id.tv_name);
             name.setText( agent.getName());
+            LinearLayout villageLayout = (LinearLayout)view.findViewById(R.id.village_view);
+            villageLayout.setVisibility(View.GONE);
 
 
             CircleImageView thumb = (CircleImageView) view.findViewById(R.id.profile_image);
