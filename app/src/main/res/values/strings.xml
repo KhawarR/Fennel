@@ -23,11 +23,14 @@
     <string name="managing_field_manager">MANAGING FIELD MANAGER</string>
     <string name="managing_field_officer">MANAGING FIELD OFFICER</string>
     <string name="sign_out">SIGN OUT</string>
+    <string name="sync_data">SYNC DATA</string>
+    <string name="save">SAVE</string>
     <string name="my_sign_ups">MY SIGN UPS</string>
     <string name="my_farmers">MY FARMERS</string>
     <string name="my_logbook">MY LOGBOOK</string>
     <string name="my_dashboard">MY DASHBOARD</string>
     <string name="farmer_status">FARMER STATUS</string>
+    <string name="visit_log">VISIT LOG</string>
     <string name="employee_id_number">Employee ID Number</string>
     <string name="password">Password</string>
     <string name="sign_in">SIGN IN</string>
@@ -64,4 +67,13 @@
     <string name="title_activity_splash">SplashActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="str_user_pass_missing"><![CDATA[Please put username & password]]></string>
+    <string name="auth_username_test_env">waajay@westagilelabs.com.waldev</string>
+    <string name="auth_username_test_prod">waajay@westagilelabs.com</string>
+    <string name="auth_password">walshamba123</string>
+    <string name="str_error_code_message">"Error code: "</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="task_is_complete">TASK IS COMPLETE</string>
 </resources>

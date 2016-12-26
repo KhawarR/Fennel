@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import com.squareup.picasso.NetworkPolicy;
 
@@ -15,7 +14,6 @@ import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
-import wal.fennel.models.Farmer;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
@@ -23,12 +21,10 @@ import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PreferenceHelper;
 import wal.fennel.views.TitleBarLayout;
 
-
 public class MyFarmers extends BaseFragment {
 
     @Bind(R.id.titleBar)
     TitleBarLayout titleBarLayout;
-
     CircleImageView cIvIconRight;
 
     @Nullable
@@ -48,12 +44,12 @@ public class MyFarmers extends BaseFragment {
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
 
         String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
-        if(!thumbUrl.isEmpty())
-        {
-            if(NetworkHelper.isNetAvailable(getActivity()))
+        if(!thumbUrl.isEmpty()) {
+            if(NetworkHelper.isNetAvailable(getActivity())) {
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
-            else
+            } else {
                 MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
+            }
         }
     }
 

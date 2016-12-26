@@ -23,6 +23,7 @@ public class Task extends RealmObject implements Parcelable {
     public String agentId;
     public String agentName;
     public String agentPhoneNumber;
+    public String agentEmployeeId;
     public String agentType;
     public String farmerName;
     public String shambaName;
@@ -165,6 +166,14 @@ public class Task extends RealmObject implements Parcelable {
         this.shambaName = shambaName;
     }
 
+    public String getAgentEmployeeId() {
+        return agentEmployeeId;
+    }
+
+    public void setAgentEmployeeId(String agentEmployeeId) {
+        this.agentEmployeeId = agentEmployeeId;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -184,6 +193,7 @@ public class Task extends RealmObject implements Parcelable {
         dest.writeString(this.agentId);
         dest.writeString(this.agentName);
         dest.writeString(this.agentPhoneNumber);
+        dest.writeString(this.agentEmployeeId);
         dest.writeString(this.agentType);
         dest.writeString(this.farmerName);
         dest.writeString(this.shambaName);
@@ -204,6 +214,7 @@ public class Task extends RealmObject implements Parcelable {
         this.agentId = in.readString();
         this.agentName = in.readString();
         this.agentPhoneNumber = in.readString();
+        this.agentEmployeeId = in.readString();
         this.agentType = in.readString();
         this.farmerName = in.readString();
         this.shambaName = in.readString();

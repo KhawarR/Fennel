@@ -21,6 +21,7 @@
             android:theme="@style/FullscreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -28,8 +29,7 @@
             android:name=".activities.LoginActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.TranslucentStatusBar"
-            android:windowSoftInputMode="adjustPan">
-        </activity>
+            android:windowSoftInputMode="adjustPan"></activity>
         <activity
             android:name=".activities.MainActivity"
             android:screenOrientation="portrait"
@@ -49,6 +49,7 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="d3e227cb7f57d1985242cf57557781227233f3fb" />
+
     </application>
 
 </manifest>

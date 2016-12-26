@@ -16,6 +16,7 @@ public class FieldAgent extends RealmObject implements Parcelable {
     public String phoneNumber;
     public String agentType;
     public String agentId;
+    public String agentEmployeeId;
     public String agentAttachmentUrl;
 
     RealmList<TaskItem> visitLogs = new RealmList<>();
@@ -25,11 +26,12 @@ public class FieldAgent extends RealmObject implements Parcelable {
 
     }
 
-    public FieldAgent(String name, String phoneNumber, String agentType, String agentId, String attachmentUrl, RealmList<TaskItem> visitLogs, boolean isHeader) {
+    public FieldAgent(String name, String phoneNumber, String agentType, String agentId, String agentEmployeeId, String attachmentUrl, RealmList<TaskItem> visitLogs, boolean isHeader) {
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.agentType = agentType;
         this.agentId = agentId;
+        this.agentEmployeeId = agentEmployeeId;
         this.agentAttachmentUrl = attachmentUrl;
         this.visitLogs = visitLogs;
         this.isHeader = isHeader;
@@ -91,6 +93,14 @@ public class FieldAgent extends RealmObject implements Parcelable {
         this.agentAttachmentUrl = agentAttachmentUrl;
     }
 
+    public String getAgentEmployeeId() {
+        return agentEmployeeId;
+    }
+
+    public void setAgentEmployeeId(String agentEmployeeId) {
+        this.agentEmployeeId = agentEmployeeId;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -102,6 +112,7 @@ public class FieldAgent extends RealmObject implements Parcelable {
         dest.writeString(this.phoneNumber);
         dest.writeString(this.agentType);
         dest.writeString(this.agentId);
+        dest.writeString(this.agentEmployeeId);
         dest.writeString(this.agentAttachmentUrl);
         dest.writeTypedList(this.visitLogs);
         dest.writeByte(this.isHeader ? (byte) 1 : (byte) 0);
@@ -112,6 +123,7 @@ public class FieldAgent extends RealmObject implements Parcelable {
         this.phoneNumber = in.readString();
         this.agentType = in.readString();
         this.agentId = in.readString();
+        this.agentEmployeeId = in.readString();
         this.agentAttachmentUrl = in.readString();
         this.visitLogs = new RealmList<>();
         in.readTypedList(this.visitLogs, TaskItem.CREATOR);

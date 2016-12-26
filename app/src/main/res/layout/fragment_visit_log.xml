@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:fennel="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+
+    <wal.fennel.views.TitleBarLayout
+        android:id="@+id/titleBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        fennel:drawableRight="@drawable/dummy_profile"
+        fennel:txtLeft="@string/back_txt"
+        fennel:titleText="@string/visit_log" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ViewStub
+                android:id="@+id/stub_farmer_header"
+                android:layout="@layout/header_farmer_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="@color/cell_separator_color"
+                />
+
+            <wal.fennel.views.FontTextView
+                android:id="@+id/tvTaskHeader"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:textColor="@color/black_txt_color"
+                fennel:fontName="Avenir-Heavy.ttf"
+                android:background="@color/grey_light"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="@color/cell_separator_color"
+                />
+
+            <LinearLayout
+                android:id="@+id/llTaskItemContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="@dimen/padding_10"
+                android:paddingBottom="@dimen/padding_10"/>
+
+            <wal.fennel.views.FontTextView
+                android:id="@+id/txtSave"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/padding_20"
+                android:background="@drawable/selector_green_button"
+                android:gravity="center"
+                android:padding="@dimen/padding_15"
+                android:text="@string/save"
+                android:textColor="@color/white"
+                fennel:fontName="Avenir-Heavy.ttf"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="@color/cell_separator_color"
+                />
+
+            <wal.fennel.views.FontTextView
+                android:id="@+id/tvTaskComplete"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:textColor="@color/black_txt_color"
+                fennel:fontName="Avenir-Heavy.ttf"
+                android:text="@string/task_is_complete"
+                android:background="@color/grey_light"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="@color/cell_separator_color"
+                />
+
+            <wal.fennel.views.FontTextView
+                android:id="@+id/txtSubmitApproval"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/padding_20"
+                android:background="@drawable/selector_red_button"
+                android:gravity="center"
+                android:padding="@dimen/padding_15"
+                android:text="@string/submit_for_approval"
+                android:textColor="@color/white"
+                fennel:fontName="Avenir-Heavy.ttf" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>
