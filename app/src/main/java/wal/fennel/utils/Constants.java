@@ -31,12 +31,6 @@ public class Constants {
     public static final String STR_IN_PROGRESS = "IN PROGRESS";
     public static final String STR_COMPLETED = "COMPLETED";
 
-    public static final String STR_CHECKBOX = "CHECKBOX";
-    public static final String STR_TEXT = "TEXT";
-    public static final String STR_OPTIONS = "OPTIONS";
-    public static final String STR_GPS = "GPS";
-    public static final String STR_FILE = "FILE";
-
     public static final String STR_FARMER_ID_PREFIX = "off-";
 
     public static final String MY_SIGNPS_BROADCAST_ACTION = "wal.fennel.action.MY_SIGUPS_UPDATED";
@@ -56,6 +50,9 @@ public class Constants {
     public static final String PERSON_LOGBOOK_TAG = "9998";
     public static final String PERSON_DETAIL_LOGBOOK_TAG = "9997";
 
+    public static final String STR_VIEW_MEDIA = "View Media";
+    public static final String STR_ATTACH_MEDIA = "Attach Media";
+
 
     public enum FarmerType {
         MYSIGNUPS,
@@ -66,6 +63,7 @@ public class Constants {
         Gps,
         File,
         Text,
-        Pic
+        Checkbox,
+        Options
     }
 }

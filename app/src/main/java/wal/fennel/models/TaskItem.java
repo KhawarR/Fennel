@@ -20,6 +20,8 @@ public class TaskItem extends RealmObject implements Parcelable {
     private String description = "";
     private String textValue = "";
     private String fileType = "";
+    private String fileActionType = "";
+    private String fileActionPerformed = "";
     private String gpsTakenTime = "";
     private double latitude;
     private double longitude;
@@ -41,6 +43,8 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.description = other.description;
         this.textValue = other.textValue;
         this.fileType = other.fileType;
+        this.fileActionType = other.fileActionType;
+        this.fileActionPerformed = other.fileActionPerformed;
         this.gpsTakenTime = other.gpsTakenTime;
         this.latitude = other.latitude;
         this.longitude = other.longitude;
@@ -48,7 +52,7 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.isTaskDone = other.isTaskDone;
     }
 
-    public TaskItem(int sequence, String id, String farmingTaskId, String name, String recordType, String description, String textValue, String fileType, String gpsTakenTime, double latitude, double longitude, RealmList<TaskItemOption> options, boolean isTaskDone) {
+    public TaskItem(int sequence, String id, String farmingTaskId, String name, String recordType, String description, String textValue, String fileType, String fileActionType, String fileActionPerformed, String gpsTakenTime, double latitude, double longitude, RealmList<TaskItemOption> options, boolean isTaskDone) {
         this.sequence = sequence;
         this.id = id;
         this.farmingTaskId = farmingTaskId;
@@ -57,6 +61,8 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.description = description;
         this.textValue = textValue;
         this.fileType = fileType;
+        this.fileActionType = fileActionType;
+        this.fileActionPerformed = fileActionPerformed;
         this.gpsTakenTime = gpsTakenTime;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -74,6 +80,8 @@ public class TaskItem extends RealmObject implements Parcelable {
         dest.writeString(this.description);
         dest.writeString(this.textValue);
         dest.writeString(this.fileType);
+        dest.writeString(this.fileActionType);
+        dest.writeString(this.fileActionPerformed);
         dest.writeString(this.gpsTakenTime);
         dest.writeDouble(this.latitude);
         dest.writeDouble(this.longitude);
@@ -90,6 +98,8 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.description = in.readString();
         this.textValue = in.readString();
         this.fileType = in.readString();
+        this.fileActionType = in.readString();
+        this.fileActionPerformed = in.readString();
         this.gpsTakenTime = in.readString();
         this.latitude = in.readDouble();
         this.longitude = in.readDouble();
@@ -220,6 +230,22 @@ public class TaskItem extends RealmObject implements Parcelable {
 
     public void setTaskDone(boolean taskDone) {
         isTaskDone = taskDone;
+    }
+
+    public String getFileActionType() {
+        return fileActionType;
+    }
+
+    public void setFileActionType(String fileActionType) {
+        this.fileActionType = fileActionType;
+    }
+
+    public String getFileActionPerformed() {
+        return fileActionPerformed;
+    }
+
+    public void setFileActionPerformed(String fileActionPerformed) {
+        this.fileActionPerformed = fileActionPerformed;
     }
 
     @Override

@@ -1825,6 +1825,8 @@ public class WebApi {
                 longitude = 0;
             String gpsTakenTime = objTask.getString("GPS_Taken_Time__c");
             String fileType = objTask.getString("File_Type__c");
+            String fileActionType = objTask.getString("File_Action__c");
+            String fileActionPerformed = objTask.getString("Action_Performed__c");
             String farmingTaskId = objTask.getString("Farming_Task__c");
             String description = objTask.getString("Description__c");
 
@@ -1843,7 +1845,7 @@ public class WebApi {
                 }
             }
 
-            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, gpsTakenTime, latitude, longitude, options, false);
+            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, false);
 
             for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
 

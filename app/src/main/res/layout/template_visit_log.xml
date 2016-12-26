@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fennel="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:padding="@dimen/margin_main_template_visit_log">
 
@@ -56,7 +57,8 @@
                     android:gravity="center"
                     android:textColorHint="@color/black"
                     android:textColor="@color/black"
-                    android:visibility="gone"/>
+                    android:visibility="gone"
+                    android:inputType="number"/>
 
                 <Spinner
                     android:id="@+id/spOptions"
@@ -65,7 +67,8 @@
                     android:layout_marginTop="@dimen/padding_10"
                     android:background="@drawable/spinner_bg"
                     android:spinnerMode="dialog"
-                    tools:entries="@array/optionsLocation" />
+                    tools:entries="@array/optionsLocation"
+                    android:visibility="gone"/>
 
             </RelativeLayout>
 

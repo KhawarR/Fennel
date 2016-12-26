@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.squareup.picasso.NetworkPolicy;
@@ -143,16 +144,18 @@ public class VisitLog extends BaseFragment {
 
             FontTextView tvTitle = (FontTextView) vTaskItem.findViewById(R.id.tvTitle);
             FontTextView tvDescription = (FontTextView) vTaskItem.findViewById(R.id.tvDescription);
-            EditText etHoleCount = (EditText) vTaskItem.findViewById(R.id.etInput);
+            final EditText etHoleCount = (EditText) vTaskItem.findViewById(R.id.etInput);
             RelativeLayout rlBlockButton = (RelativeLayout) vTaskItem.findViewById(R.id.rlBlockButton);
             ImageView ivBlockIcon = (ImageView) vTaskItem.findViewById(R.id.ivBlockIcon);
+            Spinner spOption = (Spinner) vTaskItem.findViewById(R.id.spOptions);
 
             if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Gps.toString())){
 
                 tvTitle.setText(taskItem.getName());
-                tvDescription.setText(taskItem.getDescription());
-                tvDescription.setVisibility(View.VISIBLE);
+                tvDescription.setVisibility(View.GONE);
                 etHoleCount.setVisibility(View.GONE);
+                spOption.setVisibility(View.GONE);
+
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -163,12 +166,15 @@ public class VisitLog extends BaseFragment {
                     ivBlockIcon.setImageResource(R.drawable.ic_gps);
                 }
 
-            } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Text.toString())){
+            } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Checkbox.toString())){
 
                 tvTitle.setText(taskItem.getName());
-                tvDescription.setText(taskItem.getDescription());
+                if(taskItem.getOptions() != null && taskItem.getOptions().size() > 0){
+                    tvDescription.setText(taskItem.getOptions().get(0).getName());
+                }
                 tvDescription.setVisibility(View.VISIBLE);
                 etHoleCount.setVisibility(View.GONE);
+                spOption.setVisibility(View.GONE);
 
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -180,12 +186,32 @@ public class VisitLog extends BaseFragment {
                     ivBlockIcon.setImageResource(R.drawable.ic_tick_white);
                 }
 
-            } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.File.toString())){
+            } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Text.toString())){
+
+                tvTitle.setText(taskItem.getName());
+                tvDescription.setVisibility(View.GONE);
+                etHoleCount.setText(taskItem.getTextValue());
+                etHoleCount.setVisibility(View.VISIBLE);
+                spOption.setVisibility(View.GONE);
+
+                rlBlockButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        taskItem.setTextValue(etHoleCount.getText().toString());
+                        setTaskDone(taskItem);
+                    }
+                });
+                if(!taskItem.isTaskDone()) {
+                    ivBlockIcon.setImageResource(R.drawable.ic_pencil);
+                }
+
+            }  else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.File.toString())){
 
                 tvTitle.setText(taskItem.getName());
                 tvDescription.setText(taskItem.getDescription());
                 tvDescription.setVisibility(View.VISIBLE);
                 etHoleCount.setVisibility(View.GONE);
+                spOption.setVisibility(View.GONE);
 
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -194,9 +220,28 @@ public class VisitLog extends BaseFragment {
                     }
                 });
                 if(!taskItem.isTaskDone()) {
-                    ivBlockIcon.setImageResource(R.drawable.ic_eye);
+                    if(taskItem.getFileActionType().equalsIgnoreCase(Constants.STR_VIEW_MEDIA)){
+                        ivBlockIcon.setImageResource(R.drawable.ic_eye);
+                    } else {
+                        ivBlockIcon.setImageResource(R.drawable.ic_camera_white);
+                    }
                 }
+            } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Options.toString())){
 
+                tvTitle.setText(taskItem.getName());
+                tvDescription.setVisibility(View.GONE);
+                etHoleCount.setVisibility(View.GONE);
+                spOption.setVisibility(View.VISIBLE);
+
+                rlBlockButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        setTaskDone(taskItem);
+                    }
+                });
+                if(!taskItem.isTaskDone()) {
+                    ivBlockIcon.setImageResource(R.drawable.ic_pencil);
+                }
             }
 
             llTaskItemContainer.addView(vTaskItem);
@@ -218,7 +263,15 @@ public class VisitLog extends BaseFragment {
         realm.beginTransaction();
         task.setStatus(Constants.STR_IN_PROGRESS);
         for (int i = 0; i < localTaskItems.size(); i++) {
-            taskItems.get(i).setTaskDone(localTaskItems.get(i).isTaskDone());
+
+            TaskItem taskItem = localTaskItems.get(i);
+
+            taskItems.get(i).setTaskDone(taskItem.isTaskDone());
+
+            if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Text.toString())){
+                taskItems.get(i).setTextValue(taskItem.getTextValue());
+            }
+
         }
         realm.commitTransaction();
         ((BaseContainerFragment) getParentFragment()).popFragment();
