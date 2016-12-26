@@ -37,7 +37,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -62,6 +65,7 @@ import wal.fennel.adapters.MySignupsAdapter;
 import wal.fennel.application.Fennel;
 import wal.fennel.common.database.DatabaseHelper;
 import wal.fennel.models.Farmer;
+import wal.fennel.models.FieldAgent;
 import wal.fennel.models.Location;
 import wal.fennel.models.SubLocation;
 import wal.fennel.models.Task;
@@ -81,6 +85,7 @@ import wal.fennel.utils.Singleton;
 import wal.fennel.views.TitleBarLayout;
 
 import static io.realm.Realm.getDefaultInstance;
+import static wal.fennel.utils.Constants.STR_FACILITATOR;
 
 /**
  * Created by Faizan on 9/27/2016.
@@ -106,7 +111,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     int locationsResponseCounter = 0;
     //endregion
 
-    ArrayList<TaskItem> allTaskItems = null;
+//    ArrayList<TaskItem> allTaskItems = null;
+
+    Map<String, Map<String, String>> visitLogFarmingTasks = null;
+
 
     @Nullable
     @Override
@@ -279,11 +287,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         {
             getMySignupsFromServer();
             getMyFarmerTasksData();
+            getFOAndFacilitatorsDataForLogbook();
         }
         else
         {
             getMySignupsFromDB();
             getMyFarmerTasksFromDB();
+            getMyLogbookDataFromDB();
             if(PreferenceHelper.getInstance().isSessionExpiredSyncReq())
                 WebApi.syncAll(null);
         }
@@ -1100,6 +1110,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         WebApi.getMyfarmerTasks(myFarmerTasksCallback);
     }
 
+    public void getMyLogbookData(String fieldOfficers, String facilitators) {
+
+        if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
+        loadingStarted();
+        WebApi.getMyLogbookData(myLogbookDataCallback, fieldOfficers, facilitators);
+    }
+
     private void parseMyFarmersAttachmentData(String data) throws JSONException {
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
@@ -1521,6 +1538,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 longitude = 0;
             String gpsTakenTime = objTask.getString("GPS_Taken_Time__c");
             String fileType = objTask.getString("File_Type__c");
+            String fileAction = objTask.optString("File_Action__c");
             String farmingTaskId = objTask.getString("Farming_Task__c");
             String description = objTask.getString("Description__c");
 
@@ -1539,7 +1557,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
 
-            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, gpsTakenTime, latitude, longitude, options, false);
+            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileAction, gpsTakenTime, latitude, longitude, options, null, null, null, null, false);
             taskItems.add(taskItem);
 
             for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
@@ -1713,4 +1731,509 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             }
         }
     }
+
+    private Callback<ResponseBody> myLogbookDataCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            loadingFinished();
+            if(isValid())
+            {
+                if (response.code() == 200) {
+                    String responseStr = "";
+
+                    try {
+                        responseStr = response.body().string();
+                        parseMyLogbookData(responseStr);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if(response.code() == 401)
+                {
+                    PreferenceHelper.getInstance().clearSession(false);
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    getActivity().finish();
+                }
+                else
+                {
+                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
+    private Callback<ResponseBody> myLogbookFOAndFacDataCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            loadingFinished();
+            if(isValid())
+            {
+                if (response.code() == 200) {
+                    String responseStr = "";
+
+                    try {
+                        responseStr = response.body().string();
+                        if (PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FIELD_MANAGER)) {
+                            parseMyLogbookFOFacData(responseStr);
+                        } else if (PreferenceHelper.getInstance().readLoginUserType().equalsIgnoreCase(Constants.STR_FIELD_OFFICER)) {
+                            parseMyLogbookFacData(responseStr);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if(response.code() == 401)
+                {
+                    PreferenceHelper.getInstance().clearSession(false);
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    getActivity().finish();
+                }
+                else
+                {
+                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
+    private void getFOAndFacilitatorsDataForLogbook() {
+        String query = null;
+        String userType = PreferenceHelper.getInstance().readLoginUserType();
+        if (userType.equalsIgnoreCase(Constants.STR_FIELD_MANAGER)) {
+            query = NetworkHelper.GET_FO_FAC_FOR_FM;
+        } else if (userType.equalsIgnoreCase(Constants.STR_FIELD_OFFICER)) {
+            query = NetworkHelper.GET_FAC_FOR_FO;
+        } else {
+            WebApi.getMyLogbookData(myLogbookDataCallback, "", "");
+            return;
+        }
+        WebApi.getFOAndFacDataForLogbook(myLogbookFOAndFacDataCallback, query);
+    }
+
+    private void parseMyLogbookData(String responseStr) throws JSONException {
+        Log.i("FENNEL", responseStr);
+        JSONObject jsonObject = new JSONObject(responseStr);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        String farmingTaskIds = "";
+        if(arrRecords.length() > 0) {
+            for (int i = 0; i < arrRecords.length(); i++) {
+                visitLogFarmingTasks = new HashMap<>();
+//                Task newTask = new Task();
+                Map<String, String> taskMap = new HashMap<>();
+
+                JSONObject farmingTaskObj = arrRecords.getJSONObject(i);
+                String taskId = farmingTaskObj.getString("Farming_Task__c");
+                JSONObject farmVisit = farmingTaskObj.getJSONObject("Farm_Visit__r");
+                JSONObject fieldManager = farmVisit.optJSONObject("Field_Manager__r");
+                JSONObject fieldOfficer = farmVisit.optJSONObject("Field_Officer__r");
+                JSONObject facilitator = farmVisit.optJSONObject("Facilitator__r");
+                String name = null;
+                String agentType = null;
+                String agentId = null;
+                String agentPhone = null;
+                String agentEmployeeId = null;
+                JSONObject employeeObj = null;
+
+                if (fieldManager != null) {
+                    name = fieldManager.getString("Name");
+                    agentType = Constants.STR_FIELD_MANAGER;
+                    agentId = fieldManager.getString("Id");
+                    agentPhone = fieldManager.getString("Phone__c");
+                    employeeObj = fieldOfficer.optJSONObject("Employee__r");
+                    agentEmployeeId = employeeObj.optString("Name");
+                } else if(fieldOfficer != null) {
+                    name = fieldOfficer.getString("Name");
+                    agentType = Constants.STR_FIELD_OFFICER;
+                    agentId = fieldOfficer.getString("Id");
+                    agentPhone = fieldOfficer.getString("Phone__c");
+                    employeeObj = fieldOfficer.optJSONObject("Employee__r");
+                    agentEmployeeId = employeeObj.optString("Name");
+                } else if (facilitator != null) {
+                    name = facilitator.getString("Name");
+                    agentType = STR_FACILITATOR;
+                    agentId = facilitator.getString("Id");
+                    agentPhone = facilitator.optString("Phone__c");
+                    agentEmployeeId = facilitator.optString("Employee_ID__c");
+                }
+                taskMap.put("agentName", name);
+                taskMap.put("agentType", agentType);
+                taskMap.put("Id", taskId);
+                taskMap.put("agentId" , agentId);
+                taskMap.put("agentPhone", agentPhone);
+                taskMap.put("agentEmployeeId", agentEmployeeId);
+//                newTask.setAgentName(name);
+//                newTask.setAgentType(agentType);
+//                newTask.setTaskId(taskId);
+                visitLogFarmingTasks.put(taskId, taskMap);
+                farmingTaskIds = farmingTaskIds + "'" + taskId + "'";
+                if (i < arrRecords.length() - 1) {
+                    farmingTaskIds = farmingTaskIds + ",";
+                }
+            }
+        }
+
+        getAllVisitLogsData(farmingTaskIds);
+    }
+
+    private void parseMyLogbookFOFacData(String responseStr) throws JSONException {
+        Log.i("FENNEL", responseStr);
+        JSONObject jsonObject = new JSONObject(responseStr);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        String fieldOfficers = "";
+        String facilitators = "";
+        if(arrRecords.length() > 0) {
+
+            for (int i = 0; i < arrRecords.length(); i++) {
+                JSONObject fieldOfficerObj = arrRecords.getJSONObject(i);
+                String foId = fieldOfficerObj.getString("Id");
+                fieldOfficers = fieldOfficers + "'" + foId + "'";
+                if (i < arrRecords.length()-1) {
+                    fieldOfficers = fieldOfficers + ",";
+                }
+
+                JSONObject facilitatorsObj = fieldOfficerObj.getJSONObject("Facilitators__r");
+                JSONArray facilitatorsArray = facilitatorsObj.getJSONArray("records");
+
+                if(facilitatorsArray.length() > 0) {
+
+                    for (int j = 0; j < facilitatorsArray.length(); j++) {
+                        JSONObject facilitatorObj = facilitatorsArray.getJSONObject(j);
+                        String facId = facilitatorObj.getString("Id");
+                        facilitators = facilitators + "'" + facId + "'";
+                        if (i < arrRecords.length() - 1 || j < facilitatorsArray.length() - 1) {
+                            facilitators = facilitators + ",";
+                        }
+                    }
+                }
+            }
+        }
+
+        getMyLogbookData(fieldOfficers, facilitators);
+    }
+
+    private void parseMyLogbookFacData(String responseStr) throws JSONException {
+
+        Log.i("FENNEL", responseStr);
+        JSONObject jsonObject = new JSONObject(responseStr);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        String facilitators = "";
+        if(arrRecords.length() > 0) {
+            for (int i = 0; i < arrRecords.length(); i++) {
+                JSONObject facilitatorsObj = arrRecords.getJSONObject(i);
+                String facId = facilitatorsObj.getString("Id");
+                facilitators = facilitators + "'" + facId + "'";
+                if (i < arrRecords.length() - 1) {
+                    facilitators = facilitators + ",";
+                }
+            }
+        }
+
+        getMyLogbookData("", facilitators);
+
+    }
+
+    private void getAllVisitLogsData(String farmingTaskIds) {
+
+        if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
+        loadingStarted();
+        WebApi.getAllVisitLogsForMyLogbook(allVisitLogsCallback, farmingTaskIds);
+    }
+
+    private Callback<ResponseBody> allVisitLogsCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            loadingFinished();
+            if(isValid())
+            {
+                if (response.code() == 200) {
+                    String responseStr = "";
+
+                    try {
+                        responseStr = response.body().string();
+                        parseAllVisitLogsDataForLogbook(responseStr);
+                        WebApi.getMyLogBookAttachments(myLogbookAttachmentCallback);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if(response.code() == 401)
+                {
+                    PreferenceHelper.getInstance().clearSession(false);
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    getActivity().finish();
+                }
+                else
+                {
+                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
+    private void parseAllVisitLogsDataForLogbook(String responseStr) throws JSONException {
+
+        JSONObject jsonObject = new JSONObject(responseStr);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+        ArrayList<Task> allTasks = null;
+
+        if(arrRecords.length() > 0) {
+            for (int i = 0; i < arrRecords.length(); i++) {
+                JSONObject farmingTaskObj = (JSONObject) arrRecords.get(i);
+                String farmingTaskId = farmingTaskObj.getString("Id");
+//                Task visitLogTask = visitLogFarmingTasks.get(farmingTaskId);
+                Map<String, String> taskMap= visitLogFarmingTasks.get(farmingTaskId);
+                allTasks = new ArrayList<>();
+
+                Task visitLogTask = new Task();
+                visitLogTask.setAgentId(taskMap.get("agentId"));
+                visitLogTask.setAgentName(taskMap.get("agentName"));
+                visitLogTask.setAgentType(taskMap.get("agentType"));
+                visitLogTask.setAgentPhoneNumber(taskMap.get("agentPhone"));
+                visitLogTask.setAgentEmployeeId(taskMap.get("agentEmployeeId"));
+                visitLogTask.setTaskId(taskMap.get("Id"));
+                visitLogTask.setStatus(farmingTaskObj.optString("Status__c"));
+                visitLogTask.setStartedDate(farmingTaskObj.optString("Started_Date__c"));
+                visitLogTask.setName(farmingTaskObj.optString("Name"));
+                visitLogTask.setDueDate(farmingTaskObj.optString("Due_Date__c"));
+                visitLogTask.setCompletionDate(farmingTaskObj.optString("Completion_Date__c"));
+
+
+                JSONObject shambaObj = (JSONObject) farmingTaskObj.getJSONObject("Shamba__r");
+                String shambaName = shambaObj.optString("Village_Name__c");
+                if (shambaName != null) {
+                    visitLogTask.setShambaName(shambaName);
+                }
+                String farmerName = shambaObj.getJSONObject("Farmer__r").getString("FullName__c");
+                visitLogTask.setFarmerName(farmerName);
+
+                JSONObject taskItemObj =  farmingTaskObj.getJSONObject("Task_Items__r");
+                JSONArray taskItemRecords = taskItemObj.getJSONArray("records");
+                if (taskItemRecords.length() > 0) {
+                    for (int j=0;j<taskItemRecords.length();j++) {
+
+                        JSONObject taskItem = (JSONObject) taskItemRecords.get(j);
+                        String id = taskItem.optString("Id");
+                        String textValue = taskItem.optString("Text_Value__c");
+                        int sequence = taskItem.optInt("Sequence__c");
+                        String recordType = taskItem.optJSONObject("RecordType").getString("Name");
+                        String name = taskItem.optString("Name");
+                        double latitude = taskItem.optDouble("Location__Latitude__s");
+                        if(Double.isNaN(latitude))
+                            latitude = 0;
+                        double longitude = taskItem.optDouble("Location__Longitude__s");
+                        if(Double.isNaN(longitude))
+                            longitude = 0;
+                        String lastModifiedDate = taskItem.optString("LastModifiedDate");
+                        SimpleDateFormat serverFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+                        Date lastModified = null;
+                        try {
+                            lastModified = serverFormat.parse(lastModifiedDate);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        String gpsTakenTime = taskItem.getString("GPS_Taken_Time__c");
+                        String fileType = taskItem.getString("File_Type__c");
+                        String fileAction = taskItem.optString("File_Action__c");
+//                        String taskId = taskItem.getString("Farming_Task__c");
+                        String description = taskItem.getString("Description__c");
+
+                        RealmList<TaskItemOption> options = new RealmList<>();
+
+                        TaskItem newTaskItem = new TaskItem(sequence, id, taskMap.get("Id"), name, recordType, description, textValue, fileType, fileAction, gpsTakenTime, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false);
+                        visitLogTask.getTaskItems().add(newTaskItem);
+                    }
+                }
+                allTasks.add(visitLogTask);
+            }
+        }
+
+        parseVisitLogsFromTasks(allTasks);
+
+    }
+
+    private void parseVisitLogsFromTasks(ArrayList<Task> allTasks) {
+
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.delete(FieldAgent.class);
+        realm.commitTransaction();
+
+        realm.beginTransaction();
+        Map<String, FieldAgent> agentsMap = new HashMap<>();
+        ArrayList<FieldAgent> allAgentsList = new ArrayList<>();
+
+        for (Task taskObj : allTasks) {
+            FieldAgent agent = null;
+            String agentId = taskObj.getAgentId();
+            if (agentsMap.get(agentId) != null) {
+                agent = agentsMap.get(agentId);
+            } else {
+                agent = realm.createObject(FieldAgent.class);
+//                agent = new FieldAgent();
+                agent.setAgentId(taskObj.getAgentId());
+                agent.setName(taskObj.getAgentName());
+                agent.setAgentType(taskObj.getAgentType());
+                agent.setAgentEmployeeId(taskObj.getAgentEmployeeId());
+                agentsMap.put(agentId, agent);
+                allAgentsList.add(agent);
+            }
+            RealmList<TaskItem> allItems = taskObj.getTaskItems();
+            for (TaskItem item : allItems) {
+                item.setAgentName(taskObj.getAgentName());
+                agent.getVisitLogs().add(item);
+            }
+        }
+        realm.commitTransaction();
+        Singleton.getInstance().fieldAgentsVisitLogs = allAgentsList;
+    }
+
+    private Callback<ResponseBody> myLogbookAttachmentCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            loadingFinished();
+            if(isValid())
+            {
+                if (response.code() == 200) {
+                    String responseStr = "";
+
+                    try {
+                        responseStr = response.body().string();
+                        parseMyLogbookAttachments(responseStr);
+                    }catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if(response.code() == 401)
+                {
+                    PreferenceHelper.getInstance().clearSession(false);
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    getActivity().finish();
+                }
+                else
+                {
+                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
+
+    private void parseMyLogbookAttachments(String data) throws JSONException {
+
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        Realm realm = getDefaultInstance();
+
+        if(arrRecords.length() > 0)
+        {
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject agentObj = arrRecords.getJSONObject(i);
+                String id = agentObj.getString("Id");
+                String name = agentObj.getString("Name");
+                String agentAttachmentId  = null;
+
+                JSONObject attachmentObj = agentObj.optJSONObject("Attachments");
+                if(attachmentObj != null)
+                {
+
+                    JSONArray attRecords = attachmentObj.getJSONArray("records");
+                    for (int j = 0; j < attRecords.length(); j++) {
+                        JSONObject objAttachment = attRecords.getJSONObject(j);
+                        agentAttachmentId = objAttachment.getString("Id");
+                    }
+                }
+
+                ArrayList<FieldAgent> allAgentsList = Singleton.getInstance().fieldAgentsVisitLogs;
+
+                for (int j = 0; j < allAgentsList.size(); j++) {
+                    final FieldAgent fieldAgent = allAgentsList.get(j);
+
+                    if(fieldAgent.getAgentEmployeeId().equalsIgnoreCase(name))
+                    {
+                        String attachmentUrl = NetworkHelper.makeAttachmentUrlFromId(agentAttachmentId);
+
+//                        Farmer farmerDb = realm.where(Farmer.class).equalTo("farmerId", id).findFirst();
+//                        if(farmerDb != null)
+//                        {
+                            realm.beginTransaction();
+                            fieldAgent.setAgentAttachmentUrl(agentAttachmentId);
+                            for (TaskItem item : fieldAgent.getVisitLogs()) {
+                                item.setAgentAttachmentId(agentAttachmentId);
+                            }
+//                            farmerDb.setThumbAttachmentId(farmerPicId);
+//                            farmerDb.setNationalCardAttachmentId(farmerNatId);
+//                            if(!farmerPicId.isEmpty())
+//                            {
+//                                farmerDb.setThumbUrl(thumbUrl);
+//                            }
+//                            if(!farmerNatId.isEmpty())
+//                            {
+//                                farmerDb.setNationalCardUrl(natIdUrl);
+//                            }
+                            realm.commitTransaction();
+//                        }
+
+                        MyPicassoInstance.getInstance().load(attachmentUrl).fetch();
+                        break;
+                    }
+                }
+            }
+
+//            tasksAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void getMyLogbookDataFromDB() {
+
+        Singleton.getInstance().fieldAgentsVisitLogs.clear();
+
+        if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
+        loadingStarted();
+
+        RealmResults<FieldAgent> visitLogsList = Realm.getDefaultInstance().where(FieldAgent.class).findAll();
+        Singleton.getInstance().fieldAgentsVisitLogs.addAll(visitLogsList);
+
+        loadingFinished();
+    }
+
 }

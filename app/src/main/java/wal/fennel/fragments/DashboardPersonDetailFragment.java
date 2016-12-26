@@ -7,34 +7,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import com.squareup.picasso.NetworkPolicy;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.RealmList;
 import wal.fennel.R;
-import wal.fennel.adapters.TeamLogBookAdapter;
+import wal.fennel.adapters.TeamDashboardAdapter;
 import wal.fennel.models.FieldAgent;
 import wal.fennel.models.TaskItem;
-import wal.fennel.network.NetworkHelper;
-import wal.fennel.utils.CircleViewTransformation;
-import wal.fennel.utils.Constants;
-import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.views.FontTextView;
 
 /**
- * Created by irfanayaz on 12/5/16.
+ * Created by irfanayaz on 12/25/16.
  */
-public class LogBookPersonDetailFragment extends BaseFragment {
 
+public class DashboardPersonDetailFragment extends BaseFragment {
     @Bind(R.id.logbook_listview)
     ListView logbookListView;
-    TeamLogBookAdapter logBookAdapter;
+    TeamDashboardAdapter dashboardAdapter;
     FieldAgent fieldAgent = null;
 
-    public static LogBookPersonDetailFragment newInstance(FieldAgent clickedAgent) {
-        LogBookPersonDetailFragment fragment = new LogBookPersonDetailFragment();
+    public static DashboardPersonDetailFragment newInstance(FieldAgent clickedAgent) {
+        DashboardPersonDetailFragment fragment = new DashboardPersonDetailFragment();
         Bundle args = new Bundle();
         args.putParcelable("fieldAgent", clickedAgent);
         fragment.setArguments(args);
@@ -60,8 +53,8 @@ public class LogBookPersonDetailFragment extends BaseFragment {
 
         RealmList<TaskItem> descriptionList = fieldAgent.getVisitLogs();
 
-        logBookAdapter = new TeamLogBookAdapter(getActivity(), descriptionList);
-        logbookListView.setAdapter(logBookAdapter);
+        dashboardAdapter = new TeamDashboardAdapter(getActivity(), null);
+        logbookListView.setAdapter(dashboardAdapter);
 
         ViewGroup myHeader = (ViewGroup)getActivity().getLayoutInflater().inflate(R.layout.header_farmer_info, logbookListView, false);
         myHeader.setEnabled(false);
@@ -76,18 +69,18 @@ public class LogBookPersonDetailFragment extends BaseFragment {
 
         logbookListView.addHeaderView(myHeader);
 
-        ((MyLogbook)(getParentFragment())).titleBarLayout.setTxtLeft("Back");
-        ((MyLogbook)(getParentFragment())).titleBarLayout.setOnIconClickListener(this);
+        ((MyDashboard)(getParentFragment())).titleBarLayout.setTxtLeft("Back");
+        ((MyDashboard)(getParentFragment())).titleBarLayout.setOnIconClickListener(this);
 
 
-        CircleImageView ivFarmerThumb = (CircleImageView) myHeader.findViewById(R.id.ivFarmerThumb);
-        {
-            if(NetworkHelper.isNetAvailable(getActivity()))
-                MyPicassoInstance.getInstance().load(NetworkHelper.makeAttachmentUrlFromId(fieldAgent.getAgentAttachmentUrl())).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
-            else
-                MyPicassoInstance.getInstance().load(NetworkHelper.makeAttachmentUrlFromId(fieldAgent.getAgentAttachmentUrl())).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
-
-        }
+//        CircleImageView ivFarmerThumb = (CircleImageView) myHeader.findViewById(R.id.ivFarmerThumb);
+//        {
+//            if(NetworkHelper.isNetAvailable(getActivity()))
+//                MyPicassoInstance.getInstance().load(farmer.getThumbUrl()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
+//            else
+//                MyPicassoInstance.getInstance().load(farmer.getThumbUrl()).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
+//
+//        }
     }
 
     @Override
@@ -97,7 +90,8 @@ public class LogBookPersonDetailFragment extends BaseFragment {
 
     @Override
     public void onTitleBarLeftIconClicked(View view) {
-        ((MyLogbook)(getParentFragment())).titleBarLayout.setTxtLeft("");
-        ((MyLogbook)(getParentFragment())).popFragment();
+        ((MyDashboard)(getParentFragment())).titleBarLayout.setTxtLeft("");
+        ((MyDashboard)(getParentFragment())).popFragment();
     }
+
 }

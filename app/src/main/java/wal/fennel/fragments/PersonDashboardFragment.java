@@ -19,9 +19,10 @@ import wal.fennel.utils.Constants;
 import wal.fennel.utils.Singleton;
 
 /**
- * Created by irfanayaz on 12/2/16.
+ * Created by irfanayaz on 12/25/16.
  */
-public class PersonLogBookFragment extends BaseFragment implements AdapterView.OnItemClickListener {
+
+public class PersonDashboardFragment extends BaseFragment implements AdapterView.OnItemClickListener {
 
     @Bind(R.id.person_listview)
     ListView logbookListView;
@@ -65,11 +66,11 @@ public class PersonLogBookFragment extends BaseFragment implements AdapterView.O
         }
         ArrayList<FieldAgent> allAgents = new ArrayList<>();
         if (fieldOfficers.size() > 0) {
-            allAgents.add(new FieldAgent("FIELD OFFICERS", "", "", "", "", "", null, true));
+            allAgents.add(new FieldAgent("FIELD OFFICERS", "", "", "", "", null, true));
             allAgents.addAll(fieldOfficers);
         }
         if (facilitators.size() > 0) {
-            allAgents.add(new FieldAgent("FACILITATORS", "", "", "", "", "", null, true));
+            allAgents.add(new FieldAgent("FACILITATORS", "", "", "", "", null, true));
             allAgents.addAll(facilitators);
         }
         return allAgents;
