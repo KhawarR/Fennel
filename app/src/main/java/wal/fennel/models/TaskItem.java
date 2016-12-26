@@ -33,6 +33,7 @@ public class TaskItem extends RealmObject implements Parcelable {
     private String agentName = "";
     private String farmerName = "";
     private String agentAttachmentId = "";
+    private boolean isTaskDone = false;
 
     public TaskItem(){
 
@@ -52,13 +53,15 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.latitude = other.latitude;
         this.longitude = other.longitude;
         this.options = other.options;
+        this.isTaskDone = other.isTaskDone;
+
         this.dateModified = other.dateModified;
         this.agentName = other.agentName;
         this.farmerName = other.farmerName;
         this.agentAttachmentId = other.agentAttachmentId;
     }
 
-    public TaskItem(int sequence, String id, String farmingTaskId, String name, String recordType, String description, String textValue, String fileType, String fileAction, String gpsTakenTime, double latitude, double longitude, RealmList<TaskItemOption> options, Date lastModified, String agent, String farmer, String attachmentId) {
+    public TaskItem(int sequence, String id, String farmingTaskId, String name, String recordType, String description, String textValue, String fileType, String fileAction, String gpsTakenTime, double latitude, double longitude, RealmList<TaskItemOption> options, Date lastModified, String agent, String farmer, String attachmentId, boolean isTaskDone) {
         this.sequence = sequence;
         this.id = id;
         this.farmingTaskId = farmingTaskId;
@@ -72,6 +75,8 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.latitude = latitude;
         this.longitude = longitude;
         this.options = options;
+        this.isTaskDone = isTaskDone;
+
         this.dateModified = lastModified;
         this.agentName = agent;
         this.farmerName = farmer;
@@ -92,11 +97,14 @@ public class TaskItem extends RealmObject implements Parcelable {
         dest.writeString(this.gpsTakenTime);
         dest.writeDouble(this.latitude);
         dest.writeDouble(this.longitude);
+        dest.writeInt(this.isTaskDone ? 1 : 0);
         dest.writeTypedList(options);
+
         dest.writeLong(dateModified.getTime());
         dest.writeString(this.agentName);
         dest.writeString(this.farmerName);
         dest.writeString(this.agentAttachmentId);
+
     }
 
     protected TaskItem(Parcel in) {
@@ -112,8 +120,10 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.gpsTakenTime = in.readString();
         this.latitude = in.readDouble();
         this.longitude = in.readDouble();
+        this.isTaskDone = in.readInt() == 1 ? true : false;
         options = new RealmList<>();
         in.readTypedList(options, TaskItemOption.CREATOR);
+
         this.dateModified = new Date(in.readLong());
         this.agentName = in.readString();
         this.farmerName = in.readString();
@@ -228,7 +238,6 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.options = options;
     }
 
-
     public String getAttachmentPath() {
         return attachmentPath;
     }
@@ -259,6 +268,14 @@ public class TaskItem extends RealmObject implements Parcelable {
 
     public void setAgentAttachmentId(String attachmentId) {
         this.agentAttachmentId = attachmentId;
+    }
+
+    public boolean isTaskDone() {
+        return isTaskDone;
+    }
+
+    public void setTaskDone(boolean taskDone) {
+        isTaskDone = taskDone;
     }
 
     @Override

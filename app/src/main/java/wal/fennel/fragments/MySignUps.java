@@ -52,6 +52,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmResults;
+import io.realm.Sort;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -305,7 +306,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         loadingStarted();
 
-        RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerType", Constants.FarmerType.MYSIGNUPS.toString()).findAll();
+        RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerType", Constants.FarmerType.MYSIGNUPS.toString()).findAll().sort("lastModifiedTime", Sort.ASCENDING);
 
         ArrayList<Farmer> incompleteFarmersList = new ArrayList<>();
         ArrayList<Farmer> pendingFarmersList = new ArrayList<>();
@@ -330,17 +331,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         if(incompleteFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(incompleteFarmersList);
         }
         if(pendingFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(pendingFarmersList);
         }
         if(approvedFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(approvedFarmersList);
         }
 
@@ -396,9 +397,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
                 else if(response.code() == 401)
                 {
-                    PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), SplashActivity.class));
-                    getActivity().finish();
+                    sessionExpireRedirect();
                 }
                 else
                 {
@@ -507,7 +506,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 //                String status = farmObj.getString("Status__c");
                 String status = farmObj.getString("Sign_Up_Status__c");
 
-                Farmer farmer = new Farmer(id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "", null, Constants.FarmerType.MYSIGNUPS);
+                Farmer farmer = new Farmer(null, id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "", null, Constants.FarmerType.MYSIGNUPS);
 
                 if(status.equalsIgnoreCase(Constants.STR_ENROLLED))
                 {
@@ -537,17 +536,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         if(incompleteFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(incompleteFarmersList);
         }
         if(pendingFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(pendingFarmersList);
         }
         if(approvedFarmersList.size() > 0)
         {
-            Singleton.getInstance().mySignupsList.add(new Farmer("", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
+            Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(approvedFarmersList);
         }
 
@@ -585,9 +584,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
                 else if(response.code() == 401)
                 {
-                    PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), SplashActivity.class));
-                    getActivity().finish();
+                    sessionExpireRedirect();
                 }
                 else
                 {
@@ -602,6 +599,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             t.printStackTrace();
         }
     };
+
+    private void sessionExpireRedirect(){
+        PreferenceHelper.getInstance().clearSession(false);
+        Intent intent = new Intent(getActivity(), SplashActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        getActivity().startActivity(intent);
+    }
 
     private void parseFarmerAttachmentData(String data) throws JSONException {
         JSONObject jsonObject = new JSONObject(data);
@@ -765,6 +769,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     }
 
     private void getDropDownsData() {
+
         WebApi.getLocations(getLocationsCallback);
         WebApi.getSubLocations(getSubLocationsCallback);
         WebApi.getVillages(getVillagesCallback);
@@ -790,9 +795,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
                 else if(response.code() == 401)
                 {
-                    PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), SplashActivity.class));
-                    getActivity().finish();
+                    sessionExpireRedirect();
                 }
                 else
                 {
@@ -816,6 +819,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         if(arrRecords.length() > 0) {
+            DatabaseHelper.getInstance().deleteAllLocations();
             ArrayList<Location> allLocations = new ArrayList<>();
             for (int i = 0; i < arrRecords.length(); i++) {
 
@@ -860,9 +864,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
                 else if(response.code() == 401)
                 {
-                    PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), SplashActivity.class));
-                    getActivity().finish();
+                    sessionExpireRedirect();
                 }
                 else
                 {
@@ -886,6 +888,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         if(arrRecords.length() > 0) {
+            DatabaseHelper.getInstance().deleteAllSubLocations();
             ArrayList<SubLocation> allSubLocations = new ArrayList<>();
             for (int i = 0; i < arrRecords.length(); i++) {
 
@@ -934,9 +937,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
                 else if(response.code() == 401)
                 {
-                    PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), SplashActivity.class));
-                    getActivity().finish();
+                    sessionExpireRedirect();
                 }
                 else
                 {
@@ -960,6 +961,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         if(arrRecords.length() > 0) {
+            DatabaseHelper.getInstance().deleteAllVillages();
             ArrayList<Village> allVillages = new ArrayList<>();
             for (int i = 0; i < arrRecords.length(); i++) {
 
@@ -980,7 +982,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                 Village village = new Village(id, name, subLocationId);
                 allVillages.add(village);
-                DatabaseHelper.getInstance().inserVillage(village);
+                DatabaseHelper.getInstance().insertVillage(village);
             }
         }
         else
@@ -1008,9 +1010,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
                 else if(response.code() == 401)
                 {
-                    PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), SplashActivity.class));
-                    getActivity().finish();
+                    sessionExpireRedirect();
                 }
                 else
                 {
@@ -1034,6 +1034,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         if(arrRecords.length() > 0) {
+            DatabaseHelper.getInstance().deleteAllTrees();
             for (int i = 0; i < arrRecords.length(); i++) {
 
                 JSONObject treeObj = arrRecords.getJSONObject(i).getJSONObject("Tree_Species__r");
@@ -1225,6 +1226,11 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     private void parseMyFarmersData(String data) throws JSONException {
 
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.delete(Task.class);
+        realm.commitTransaction();
+
         Log.i("FENNEL", data);
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
@@ -1261,7 +1267,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 if (tasksMap.containsKey(taskName)) {
                     currentTask = (Task) tasksMap.get(taskName);
                 } else {
-                    Realm realm = Realm.getDefaultInstance();
                     realm.beginTransaction();
 
                     currentTask = realm.createObject(Task.class);
@@ -1317,7 +1322,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         addFarmerTasksToDB(farmersTaskList);
         Singleton.getInstance().myFarmersList = (ArrayList<Farmer>) farmersTaskList;
-
     }
 
     private void addFarmerTasksToDB(List<Farmer> farmersTaskList) {
@@ -1356,7 +1360,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 else if(response.code() == 401)
                 {
                     PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    startActivity(new Intent(getActivity(), SplashActivity.class));
                     getActivity().finish();
                 }
                 else
@@ -1395,7 +1399,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 else if(response.code() == 401)
                 {
                     PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    startActivity(new Intent(getActivity(), SplashActivity.class));
                     getActivity().finish();
                 }
                 else
@@ -1422,7 +1426,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
             Farmer farmer = Singleton.getInstance().myFarmersList.get(i);
 
-            if(farmer.getFarmerTasks().size() > 0){
+            if(farmer.getFarmerTasks().size() > 0) {
                 for (int j = 0; j < farmer.getFarmerTasks().size(); j++) {
                     String id = farmer.getFarmerTasks().get(j).getTaskId();
                     id = "'" + id + "'";
@@ -1463,7 +1467,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 else if(response.code() == 401)
                 {
                     PreferenceHelper.getInstance().clearSession(false);
-                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    startActivity(new Intent(getActivity(), SplashActivity.class));
                     getActivity().finish();
                 }
                 else
@@ -1484,6 +1488,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     private ArrayList<TaskItem> parseTaskItemData(String data) throws JSONException {
 
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.delete(TaskItem.class);
+        realm.delete(TaskItemOption.class);
+        realm.commitTransaction();
+
+
         ArrayList<TaskItem> taskItems = null;
 
         // clear old lists
@@ -1495,7 +1506,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                     if(Singleton.getInstance().myFarmersList.get(i).getFarmerTasks().get(j).getTaskItems() != null){
 
-                        Realm realm = Realm.getDefaultInstance();
                         realm.beginTransaction();
                         Singleton.getInstance().myFarmersList.get(i).getFarmerTasks().get(j).getTaskItems().clear();
                         realm.commitTransaction();
@@ -1547,7 +1557,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
 
-            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileAction, gpsTakenTime, latitude, longitude, options, null, null, null, null);
+            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileAction, gpsTakenTime, latitude, longitude, options, null, null, null, null, false);
             taskItems.add(taskItem);
 
             for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
@@ -1557,7 +1567,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     for (int k = 0; k < Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().size(); k++) {
 
                         if (taskItem.getFarmingTaskId().equalsIgnoreCase(Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskId())){
-                            Realm realm = Realm.getDefaultInstance();
                             realm.beginTransaction();
                             if(Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskItems() == null)
                                 Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).setTaskItems(new RealmList<TaskItem>());

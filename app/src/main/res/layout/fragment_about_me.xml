@@ -14,8 +14,7 @@
         fennel:titleText="@string/about_me"
         fennel:txtLeft="@string/back_txt" />
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefreshLayout"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -29,6 +28,18 @@
                 android:background="@color/white"
                 android:orientation="vertical"
                 android:padding="@dimen/padding_15">
+
+                <wal.fennel.views.FontTextView
+                    android:id="@+id/txtSyncData"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_10"
+                    android:background="@drawable/selector_green_button"
+                    android:gravity="center"
+                    android:padding="@dimen/padding_15"
+                    android:text="@string/sync_data"
+                    android:textColor="@color/white"
+                    fennel:fontName="Avenir-Heavy.ttf" />
 
                 <wal.fennel.views.FontTextView
                     android:layout_width="match_parent"
@@ -166,7 +177,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/padding_10"
-                    android:background="@drawable/selector_green_button"
+                    android:background="@drawable/selector_red_button"
                     android:gravity="center"
                     android:padding="@dimen/padding_15"
                     android:text="@string/sign_out"
@@ -176,6 +187,14 @@
             </LinearLayout>
         </ScrollView>
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+        <ProgressBar
+            android:id="@+id/pbSync"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            style="@android:style/Widget.ProgressBar.Large"
+            android:visibility="gone"/>
+
+    </RelativeLayout>
 
 </LinearLayout>

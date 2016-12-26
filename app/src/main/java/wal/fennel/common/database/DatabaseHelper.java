@@ -160,7 +160,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public void inserVillage(Village newVillage) {
+    public void insertVillage(Village newVillage) {
         long rowInserted = VillageTable.insert(this, newVillage);
         if (rowInserted != -1) {
 //            Log.i("FENNEL", "Village inserted!");
@@ -174,5 +174,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    public void deleteAllLocations() {
+        LocationTable.deleteAll(this);
+    }
+
+    public void deleteAllSubLocations() {
+        SubLocationTable.deleteAll(this);
+    }
+
+    public void deleteAllVillages() {
+        VillageTable.deleteAll(this);
+    }
+
+    public void deleteAllTrees() {
+        TreeTable.deleteAll(this);
+    }
+
+    public void deleteAll() {
+        LocationTable.deleteAll(this);
+        SubLocationTable.deleteAll(this);
+        VillageTable.deleteAll(this);
+        TreeTable.deleteAll(this);
+    }
     //endregion
 }
