@@ -20,6 +20,14 @@ public class Task extends RealmObject implements Parcelable {
     private boolean isHeader;
     private RealmList<TaskItem> taskItems = new RealmList<>();
 
+    public String agentId;
+    public String agentName;
+    public String agentPhoneNumber;
+    public String agentEmployeeId;
+    public String agentType;
+    public String farmerName;
+    public String shambaName;
+
     public Task(){
 
     }
@@ -110,6 +118,62 @@ public class Task extends RealmObject implements Parcelable {
         this.taskItems = taskItems;
     }
 
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agenntId) {
+        this.agentId = agenntId;
+    }
+
+    public String getAgentName() {
+        return agentName;
+    }
+
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
+    }
+
+    public String getAgentPhoneNumber() {
+        return agentPhoneNumber;
+    }
+
+    public void setAgentPhoneNumber(String agentPhoneNumber) {
+        this.agentPhoneNumber = agentPhoneNumber;
+    }
+
+    public String getAgentType() {
+        return agentType;
+    }
+
+    public void setAgentType(String agentType) {
+        this.agentType = agentType;
+    }
+
+    public String getFarmerName() {
+        return farmerName;
+    }
+
+    public void setFarmerName(String farmerName) {
+        this.farmerName = farmerName;
+    }
+
+    public String getShambaName() {
+        return shambaName;
+    }
+
+    public void setShambaName(String shambaName) {
+        this.shambaName = shambaName;
+    }
+
+    public String getAgentEmployeeId() {
+        return agentEmployeeId;
+    }
+
+    public void setAgentEmployeeId(String agentEmployeeId) {
+        this.agentEmployeeId = agentEmployeeId;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -125,6 +189,14 @@ public class Task extends RealmObject implements Parcelable {
         dest.writeString(this.status);
         dest.writeInt(isHeader ? 1 : 0);
         dest.writeTypedList(taskItems);
+
+        dest.writeString(this.agentId);
+        dest.writeString(this.agentName);
+        dest.writeString(this.agentPhoneNumber);
+        dest.writeString(this.agentEmployeeId);
+        dest.writeString(this.agentType);
+        dest.writeString(this.farmerName);
+        dest.writeString(this.shambaName);
     }
 
     protected Task(Parcel in) {
@@ -138,6 +210,14 @@ public class Task extends RealmObject implements Parcelable {
 
         taskItems = new RealmList<>();
         in.readTypedList(taskItems, TaskItem.CREATOR);
+
+        this.agentId = in.readString();
+        this.agentName = in.readString();
+        this.agentPhoneNumber = in.readString();
+        this.agentEmployeeId = in.readString();
+        this.agentType = in.readString();
+        this.farmerName = in.readString();
+        this.shambaName = in.readString();
     }
 
     public static final Parcelable.Creator<Task> CREATOR = new Parcelable.Creator<Task>() {

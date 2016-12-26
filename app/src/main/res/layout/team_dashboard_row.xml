@@ -1,0 +1,109 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fennel="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/grey_light">
+
+    <!--<View-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="0.5dp"-->
+        <!--android:background="@color/cell_separator_color"-->
+        <!--/>-->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/imgRight"
+                android:layout_width="@dimen/medium_avatar_size"
+                android:layout_height="@dimen/medium_avatar_size"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginRight="5dp"
+                android:src="@drawable/dummy_profile"
+                fennel:civ_border_color="@color/app_green"
+                fennel:civ_border_width="5dp" />
+
+            <TextView
+                android:id="@+id/count_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="20"
+                android:textSize="16sp"
+                android:layout_centerInParent="true"/>
+
+        </RelativeLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"
+        android:layout_height="wrap_content">
+
+        <wal.fennel.views.FontTextView
+            android:id="@+id/tv_desc"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="5dp"
+            android:textSize="16sp"
+            android:layout_marginBottom="5dp"
+            android:text="Farmer's Signed Up"
+            android:textColor="@color/black_txt_color"
+            fennel:fontName="Avenir-Heavy.ttf"
+            android:layout_width="match_parent" />
+
+        <ProgressBar
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="5dp"
+            android:progressTint="@color/app_green"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:progress="80"/>
+    </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/due_date"
+            android:textSize="26sp"
+            android:text="19"
+            android:layout_marginTop="5dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/due_date_month"
+            android:textSize="15sp"
+            android:text="AUG"
+            android:layout_gravity="center_horizontal"
+
+            android:layout_marginBottom="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!--<View-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="0.5dp"-->
+        <!--android:background="@color/cell_separator_color"-->
+        <!--/>-->
+
+</LinearLayout>

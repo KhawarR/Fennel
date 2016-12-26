@@ -12,19 +12,16 @@ import java.util.ArrayList;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import wal.fennel.R;
-import wal.fennel.adapters.TeamLogBookAdapter;
-import wal.fennel.models.FieldAgent;
-import wal.fennel.models.TaskItem;
-import wal.fennel.utils.Singleton;
+import wal.fennel.adapters.TeamDashboardAdapter;
 
 /**
- * Created by irfanayaz on 12/2/16.
+ * Created by irfanayaz on 12/22/16.
  */
-public class TeamLogBookFragment extends BaseFragment {
+public class TeamDashboardFragment extends BaseFragment {
 
     @Bind(R.id.logbook_listview)
-    ListView logbookListView;
-    TeamLogBookAdapter logBookAdapter;
+    ListView dashboardListView;
+    TeamDashboardAdapter logBookAdapter;
 
     @Nullable
     @Override
@@ -40,24 +37,24 @@ public class TeamLogBookFragment extends BaseFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 
         super.onViewCreated(view, savedInstanceState);
-        ArrayList<TaskItem> logsList = getDataForTeamLogbook();
+//        ArrayList<TaskItem> logsList = getDataForTeamLogbook();
 
-        logBookAdapter = new TeamLogBookAdapter(getActivity(), logsList);
-        logbookListView.setAdapter(logBookAdapter);
+        logBookAdapter = new TeamDashboardAdapter(getActivity(), null);
+        dashboardListView.setAdapter(logBookAdapter);
     }
 
-    private ArrayList getDataForTeamLogbook() {
-        ArrayList<TaskItem> allLogs = new ArrayList<>();
-        ArrayList<FieldAgent> agentsData = Singleton.getInstance().fieldAgentsVisitLogs;
-        for (FieldAgent agent : agentsData) {
-            allLogs.addAll(agent.getVisitLogs());
-        }
-        return allLogs;
+    private ArrayList getDataForTeamDashboard() {
+//        ArrayList<TaskItem> allLogs = new ArrayList<>();
+//        ArrayList<FieldAgent> agentsData = Singleton.getInstance().fieldAgentsVisitLogs;
+//        for (FieldAgent agent : agentsData) {
+//            allLogs.addAll(agent.getVisitLogs());
+//        }
+//        return allLogs;
+        return null;
     }
 
     @Override
     protected String getTrackerScreenName() {
         return null;
     }
-
 }

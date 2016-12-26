@@ -16,8 +16,6 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,6 +38,7 @@ import wal.fennel.activities.SplashActivity;
 import wal.fennel.application.Fennel;
 import wal.fennel.datamodels.Auth;
 import wal.fennel.models.Farmer;
+import wal.fennel.models.FieldAgent;
 import wal.fennel.models.ResponseModel;
 import wal.fennel.models.Task;
 import wal.fennel.models.TaskItem;
@@ -115,13 +114,36 @@ public class WebApi {
         return processCall(apiCall, callback);
     }
 
+    public static boolean getMyLogbookData(Callback<ResponseBody> callback, String fieldOffiers, String facilitators){
+
+        String query = null;
+        String userType = PreferenceHelper.getInstance().readLoginUserType();
+        if (userType.equalsIgnoreCase(Constants.STR_FIELD_MANAGER)) {
+            query = String.format(NetworkHelper.GET_MY_LOGBOOK_DATA_FIELD_MANAGER, PreferenceHelper.getInstance().readLoginUserId(), fieldOffiers, facilitators);
+        } else if (userType.equalsIgnoreCase(Constants.STR_FIELD_OFFICER)) {
+            query = String.format(NetworkHelper.GET_MY_LOGBOOK_DATA_FIELD_OFFICER, PreferenceHelper.getInstance().readLoginUserId(), facilitators);
+        } else {
+            query = String.format(NetworkHelper.GET_MY_LOGBOOK_DATA_FACILITATOR, PreferenceHelper.getInstance().readLoginUserId());
+        }
+
+//        String query = String.format(NetworkHelper.GET_MY_LOGBOOK_DATA, PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId());
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        return processCall(apiCall, callback);
+    }
+
+    public static boolean getFOAndFacDataForLogbook(Callback<ResponseBody> callback, String queryStr) {
+        String query = String.format(queryStr, PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId());
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        return processCall(apiCall, callback);
+    }
+
     public static boolean getMyFarmerAttachments(Callback<ResponseBody> callback){
 
         String farmerIds = "";
 
-        for (int i = 0; i < Singleton.getInstance().mySignupsList.size(); i++) {
+        for (int i = 0; i < Singleton.getInstance().myFarmersList.size(); i++) {
 
-            Farmer farmer = Singleton.getInstance().mySignupsList.get(i);
+            Farmer farmer = Singleton.getInstance().myFarmersList.get(i);
 
             if(!farmer.isHeader() && !farmer.getFarmerId().isEmpty()){
                 String id = farmer.getFarmerId();
@@ -130,7 +152,7 @@ public class WebApi {
 
                 farmerIds = farmerIds + id;
 
-                if(i+1 != Singleton.getInstance().mySignupsList.size()){
+                if(i+1 != Singleton.getInstance().myFarmersList.size()){
                     farmerIds = farmerIds + ",";
                 }
             }
@@ -249,12 +271,12 @@ public class WebApi {
 
     public static void syncAll(OnSyncCompleteListener onSyncCompleteListener){
 
-        FennelUtils.appendLog("--------------------------------------------- sync started");
+        FennelUtils.appendDebugLog("--------------------------------------------- sync started");
 //        countCalls = 0;
         countCalls = getTotalSyncCallCount();
         countFailedCalls = 0;
 
-        FennelUtils.appendLog("Total Count calls: " + countCalls);
+        FennelUtils.appendDebugLog("Total Count calls: " + countCalls);
 
         WebApi.getInstance().onSyncCompleteListener = onSyncCompleteListener;
 
@@ -398,7 +420,7 @@ public class WebApi {
 
             final Farmer farmer = iterativeFarmerList.get(i);
             if(arrFarmerIds.contains(farmer.getIdNumber())){
-                FennelUtils.appendLog("Farmer ID goes pending: " + farmer.getIdNumber());
+                FennelUtils.appendDebugLog("Farmer ID goes pending: " + farmer.getIdNumber());
                 int countToMinus = 2;
                 if (farmer.isFarmerPicDirty())
                     countToMinus++;
@@ -417,14 +439,14 @@ public class WebApi {
                         public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
                             countCalls--;
 
-                            FennelUtils.appendLog("Farmer create response: " + farmer.getIdNumber() + " - " + response.code());
+                            FennelUtils.appendDebugLog("Farmer create response: " + farmer.getIdNumber() + " - " + response.code());
 
                             String newFarmerId = "";
                             String errorMessage = "";
                             if(response.errorBody() != null) {
                                 try {
                                     errorMessage = response.errorBody().string().toString();
-                                    FennelUtils.appendLog("Farmer create error response: " + farmer.getIdNumber() + " - " + response.code() + " - " + errorMessage);
+                                    FennelUtils.appendDebugLog("Farmer create error response: " + farmer.getIdNumber() + " - " + response.code() + " - " + errorMessage);
                                     JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
                                     errorMessage = objError.getString("message");
 
@@ -433,7 +455,7 @@ public class WebApi {
                                         while(m.find()) {
                                             newFarmerId = m.group(1);
                                             Log.i("Existing farmer", "Existing farmer ID: " + newFarmerId);
-                                            FennelUtils.appendLog("Existing farmer ID: " + farmer.getIdNumber());
+                                            FennelUtils.appendDebugLog("Existing farmer ID: " + farmer.getIdNumber());
                                         }
                                     }
 
@@ -445,7 +467,7 @@ public class WebApi {
                             }
 
                             if(response.code() == 401) {
-                                FennelUtils.appendLog("Farmer create Session Expired, redirected: " + farmer.getIdNumber());
+                                FennelUtils.appendDebugLog("Farmer create Session Expired, redirected: " + farmer.getIdNumber());
                                 countFailedCalls++;
                                 sessionExpireRedirect();
                             }
@@ -479,7 +501,7 @@ public class WebApi {
                                 }
 
                                 if(newFarmerId.isEmpty()){
-                                    FennelUtils.appendLog("Farmer create failed, ID empty: " + farmer.getIdNumber());
+                                    FennelUtils.appendDebugLog("Farmer create failed, ID empty: " + farmer.getIdNumber());
                                     countFailedCalls++;
                                     adjustCountCallFailedFarmer(farmer);
                                 }
@@ -489,7 +511,7 @@ public class WebApi {
                                     farmer.setFarmerId(newFarmerId);
                                     realm.commitTransaction();
 
-                                    FennelUtils.appendLog("Farmer create finished: " + farmer.getIdNumber());
+                                    FennelUtils.appendDebugLog("Farmer create finished: " + farmer.getIdNumber());
 
                                     addFarmWithFarmerId(farmer);
 
@@ -501,7 +523,7 @@ public class WebApi {
                                         attachFarmerIDImageToFarmerObject(farmer);
                                 }
                             }else {
-                                FennelUtils.appendLog("Farmer Create failed - " + response.code() + " - "  + errorMessage);
+                                FennelUtils.appendDebugLog("Farmer Create failed - " + response.code() + " - "  + errorMessage);
                                 Exception e = new Exception("Farmer Create failed - " + response.code() + " - "  + errorMessage);
                                 Crashlytics.logException(e);
                                 if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
@@ -517,7 +539,7 @@ public class WebApi {
                         public void onFailure(Call<ResponseModel> call, Throwable t) {
                             countCalls--;
                             countFailedCalls++;
-                            FennelUtils.appendLog("Farmer create Failed: " + t.getMessage());
+                            FennelUtils.appendDebugLog("Farmer create Failed: " + t.getMessage());
                             adjustCountCallFailedFarmer(farmer);
                             t.printStackTrace();
                             checkSyncComplete();
@@ -529,11 +551,11 @@ public class WebApi {
                         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                             countCalls--;
 
-                            FennelUtils.appendLog("Farmer edit response: " + farmer.getIdNumber() + " - " + response.code());
+                            FennelUtils.appendDebugLog("Farmer edit response: " + farmer.getIdNumber() + " - " + response.code());
 
                             if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
 
-                                FennelUtils.appendLog("Farmer edit finished: " + farmer.getIdNumber());
+                                FennelUtils.appendDebugLog("Farmer edit finished: " + farmer.getIdNumber());
 
                                 if(farmer.getFarmId().isEmpty() || farmer.getFarmId() == null){
                                     addFarmWithFarmerId(farmer);
@@ -549,7 +571,7 @@ public class WebApi {
                                     attachFarmerIDImageToFarmerObject(farmer);
                             }
                             else if(response.code() == 401){
-                                FennelUtils.appendLog("Farmer edit Session Expired, redirected: " + farmer.getIdNumber());
+                                FennelUtils.appendDebugLog("Farmer edit Session Expired, redirected: " + farmer.getIdNumber());
                                 countFailedCalls++;
                                 sessionExpireRedirect();
                             } else {
@@ -565,7 +587,7 @@ public class WebApi {
                                         e.printStackTrace();
                                     }
                                 }
-                                FennelUtils.appendLog("Farmer edit failed - " + response.code() + " - "  + errorMessage);
+                                FennelUtils.appendDebugLog("Farmer edit failed - " + response.code() + " - "  + errorMessage);
                                 Exception e = new Exception("Farmer Edit failed - " + response.code() + " - "  + errorMessage);
                                 Crashlytics.logException(e);
                                 if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
@@ -581,7 +603,7 @@ public class WebApi {
                         public void onFailure(Call<ResponseBody> call, Throwable t) {
                             countCalls--;
                             countFailedCalls++;
-                            FennelUtils.appendLog("Farmer edit Failed: " + t.getMessage());
+                            FennelUtils.appendDebugLog("Farmer edit Failed: " + t.getMessage());
                             adjustCountCallFailedFarmer(farmer);
                             t.printStackTrace();
                             checkSyncComplete();
@@ -721,7 +743,7 @@ public class WebApi {
                 countCalls--;
                 if (response.body() != null && response.body().isSuccess() == true) {
                     Log.i(farmer.getFullName(), "Farm Synced" );
-                    FennelUtils.appendLog("Farm created: " + farmer.getIdNumber());
+                    FennelUtils.appendDebugLog("Farm created: " + farmer.getIdNumber());
                     checkSyncComplete();
                     Realm realm = Realm.getDefaultInstance();
                     realm.beginTransaction();
@@ -731,7 +753,7 @@ public class WebApi {
                 }
                 else if(response.code() == 401)
                 {
-                    FennelUtils.appendLog("Farm create session expired, redirected: " + farmer.getIdNumber());
+                    FennelUtils.appendDebugLog("Farm create session expired, redirected: " + farmer.getIdNumber());
                     countFailedCalls++;
                     sessionExpireRedirect();
                 } else {
@@ -743,8 +765,8 @@ public class WebApi {
                         e.printStackTrace();
                     }
 
-                    FennelUtils.appendLog("Farm create Sync Failed: " + farmer.getIdNumber() + " - " + errorMessage);
-                    FennelUtils.appendLog("Farm create Sync Failed village: " + farmer.getVillageId() + " - " + farmer.getVillageName());
+                    FennelUtils.appendDebugLog("Farm create Sync Failed: " + farmer.getIdNumber() + " - " + errorMessage);
+                    FennelUtils.appendDebugLog("Farm create Sync Failed village: " + farmer.getVillageId() + " - " + farmer.getVillageName());
                     Log.i(farmer.getFullName(), "Farm create Sync Failed: " +  errorMessage);
                     countFailedCalls++;
                     checkSyncComplete();
@@ -755,7 +777,7 @@ public class WebApi {
             public void onFailure(Call<ResponseModel> call, Throwable t) {
                 countCalls--;
                 countFailedCalls++;
-                FennelUtils.appendLog("Farm create Sync Failed: " + t.getMessage());
+                FennelUtils.appendDebugLog("Farm create Sync Failed: " + t.getMessage());
                 t.printStackTrace();
             }
         }, farmMap);
@@ -771,11 +793,11 @@ public class WebApi {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 countCalls--;
 
-                FennelUtils.appendLog("Farm edit response: " + farmer.getIdNumber() + " - " + response.code());
+                FennelUtils.appendDebugLog("Farm edit response: " + farmer.getIdNumber() + " - " + response.code());
 
                 if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
 
-                    FennelUtils.appendLog("Farm edited: " + farmer.getIdNumber());
+                    FennelUtils.appendDebugLog("Farm edited: " + farmer.getIdNumber());
 
                     Realm realm = Realm.getDefaultInstance();
                     realm.beginTransaction();
@@ -787,7 +809,7 @@ public class WebApi {
                 }
                 else if(response.code() == 401)
                 {
-                    FennelUtils.appendLog("Farm edit session expired, redirected: " + farmer.getIdNumber());
+                    FennelUtils.appendDebugLog("Farm edit session expired, redirected: " + farmer.getIdNumber());
                     countFailedCalls++;
                     sessionExpireRedirect();
                 } else {
@@ -799,7 +821,7 @@ public class WebApi {
                         e.printStackTrace();
                     }
 
-                    FennelUtils.appendLog("Farm edit Sync Failed: " + farmer.getIdNumber() + " - " + errorMessage);
+                    FennelUtils.appendDebugLog("Farm edit Sync Failed: " + farmer.getIdNumber() + " - " + errorMessage);
                     Log.i(farmer.getFullName(), "Farm edit Sync Failed: " +  errorMessage);
                     countFailedCalls++;
                     checkSyncComplete();
@@ -810,7 +832,7 @@ public class WebApi {
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 countCalls--;
                 countFailedCalls++;
-                FennelUtils.appendLog("Farm edit Sync Failed: " + t.getMessage());
+                FennelUtils.appendDebugLog("Farm edit Sync Failed: " + t.getMessage());
                 t.printStackTrace();
                 checkSyncComplete();
             }
@@ -1845,7 +1867,8 @@ public class WebApi {
                 }
             }
 
-            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, false);
+            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, null, null, null, null, false);
+//            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, gpsTakenTime, latitude, longitude, options, false);
 
             for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
 
@@ -1870,6 +1893,38 @@ public class WebApi {
     public static boolean downloadAttachmentForAttachmentId(String attachmentId, Callback<ResponseBody> callback) {
 
         Call<ResponseBody> apiCall = Fennel.getWebService().downloadAttachmentForTask(Session.getAuthToken(), NetworkHelper.API_VERSION, attachmentId);
+        return processCall(apiCall, callback);
+    }
+
+    public static boolean getAllVisitLogsForMyLogbook(Callback<ResponseBody> allVisitLogsCallback, String farmingTaskIds) {
+        String query = String.format(NetworkHelper.GET_ALL_LOGBOOK_DATA, farmingTaskIds);
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        return processCall(apiCall, allVisitLogsCallback);
+    }
+
+    public static boolean getMyLogBookAttachments(Callback<ResponseBody> callback){
+
+        String agentIds = "";
+
+        for (int i = 0; i < Singleton.getInstance().fieldAgentsVisitLogs.size(); i++) {
+
+            FieldAgent fieldAgent = Singleton.getInstance().fieldAgentsVisitLogs.get(i);
+
+            if(!fieldAgent.isHeader() && !fieldAgent.getAgentId().isEmpty()){
+                String id = fieldAgent.getAgentEmployeeId();
+
+                id = "'" + id + "'";
+
+                agentIds = agentIds + id;
+
+                if(i+1 != Singleton.getInstance().myFarmersList.size()){
+                    agentIds = agentIds + ",";
+                }
+            }
+        }
+
+        String query = String.format(NetworkHelper.QUERY_MY_LOGBOOK_ATTACHMENTS, agentIds);
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         return processCall(apiCall, callback);
     }
 

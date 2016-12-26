@@ -126,6 +126,10 @@ public class TitleBarLayout extends RelativeLayout implements View.OnClickListen
         tvTitle.setText(title);
     }
 
+    public void setTxtLeft(String leftText) {
+        txtLeft.setText(leftText);
+    }
+
     public void setRightImage(Bitmap bitmap) {
         imgRight.setImageBitmap(bitmap);
     }

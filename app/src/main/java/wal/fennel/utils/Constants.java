@@ -25,6 +25,10 @@ public class Constants {
     public static final String TOAST_NO_INTERNET = "Network problem, please check your connection & try again";
     public static final String TOAST_LOGIN_ERROR = "Login Error: Check network connection or verify login credentials";
 
+    public static final String STR_FARMER_LOG_TYPE_CREATED = "Created";
+    public static final String STR_FARMER_LOG_TYPE_EDITED = "Edited";
+    public static final String STR_FARMER_LOG_TYPE_SUBMITTED = "Submitted";
+
     public static final String URL_NOT_SET_ERROR_MESSAGE = "Destination URL not reset. The URL returned from login must be set";
 
     public static final String STR_NOT_STARTED = "NOT STARTED";
@@ -49,6 +53,9 @@ public class Constants {
     public static final String TEAM_LOGBOOK_TAG = "9999";
     public static final String PERSON_LOGBOOK_TAG = "9998";
     public static final String PERSON_DETAIL_LOGBOOK_TAG = "9997";
+    public static final String TEAM_DASHBOARD_TAG = "9996";
+    public static final String PERSON_DASHBOARD_TAG = "9995";
+    public static final String PERSON_DETAIL_DASHBOARD_TAG = "9994";
 
     public static final String STR_VIEW_MEDIA = "View Media";
     public static final String STR_ATTACH_MEDIA = "Attach Media";
@@ -65,5 +72,14 @@ public class Constants {
         Text,
         Checkbox,
         Options
+    }
+
+    public static class DropboxConstants {
+        public static final String ACCESS_TOKEN = "fLeIQ1T-kdAAAAAAAAAAC6uQ_f83xp0g0L-GMEFWZmMeXJiya6kGN3atE37KGm7x";
+        public static final String FENNEL_DROPBOX_PATH = "dropbox/Fennel";
+        public static final String DEBUG_LOGS_DROPBOX_PATH = "/DebugLogs/";
+        public static final String FARMER_LOGS_DROPBOX_PATH = "/FarmerLogs/";
+        public static final String FARMER_LOGS_FILE_NAME = "_FarmerLogs.csv";
+        public static final String DEBUG_LOGS_FILE_NAME = "_DebugLogs.txt";
     }
 }

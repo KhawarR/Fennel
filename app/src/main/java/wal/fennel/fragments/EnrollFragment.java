@@ -26,6 +26,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.kbeanie.multipicker.api.CameraImagePicker;
 import com.kbeanie.multipicker.api.ImagePicker;
 import com.kbeanie.multipicker.api.Picker;
@@ -37,6 +38,7 @@ import com.squareup.picasso.NetworkPolicy;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -58,6 +60,7 @@ import wal.fennel.models.Village;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
+import wal.fennel.utils.FennelUtils;
 import wal.fennel.utils.MixPanelConstants;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PreferenceHelper;
@@ -520,6 +523,30 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         farmerStatus = "Enrolled";
         createOrEditFarmer();
+    }
+
+    private void saveFarmerLog(String recordType, Farmer farmer) {
+
+        if(farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_PENDING)) {
+            recordType = Constants.STR_FARMER_LOG_TYPE_SUBMITTED;
+        }
+
+//        data = new String[]{"Timestamp", "UserID", "RecordType", "ID Number", "Full name", "First Name", "Middle Name", "Last Name", "Location", "SubLocation", "Village", "Tree Specie", "Mobile", "Is Leader?", "Is Farmer Home?", "Farmer ID", "Location ID", "Sub Location ID", "Village ID", "Tree specie ID"};
+        String timestamp = FennelUtils.getFormattedTime(farmer.getLastModifiedTime().getTime(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_HH_MM_SS);
+        String [] data = {timestamp, PreferenceHelper.getInstance().readUserId(), recordType,
+                farmer.getIdNumber(), farmer.getFullName(), farmer.getFirstName(),
+                farmer.getSecondName(), farmer.getSurname(), farmer.getLocation(),
+                farmer.getSubLocation(), farmer.getVillageName(), farmer.getTreeSpecies(),
+                farmer.getMobileNumber(), farmer.isLeader() ? "Yes" : "No",
+                farmer.isFarmerHome() ? "Yes" : "No", farmer.getFarmerId(), farmer.getLocationId(),
+                farmer.getSubLocationId(), farmer.getVillageId(), farmer.getTreeSpeciesId()};
+
+        try {
+            FennelUtils.appendFarmerLog(data);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
+        }
     }
 
     private void createOrEditFarmer() {
@@ -1274,6 +1301,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         Realm.getDefaultInstance().commitTransaction();
 
+        saveFarmerLog(Constants.STR_FARMER_LOG_TYPE_EDITED, farmerDbObj);
+
         loadingFinished();
         Log.i("LP", "Farmer Edited Successfully");
         if(shouldPopFragment){
@@ -1407,6 +1436,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         }
 
         Realm.getDefaultInstance().commitTransaction();
+
+        saveFarmerLog(Constants.STR_FARMER_LOG_TYPE_CREATED, farmerDbObj);
 
         loadingFinished();
         Log.i("LP", "Farm Added To DB");
