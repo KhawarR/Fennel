@@ -63,10 +63,6 @@ public class Constants {
     public static final String PERSON_DASHBOARD_TAG = "9995";
     public static final String PERSON_DETAIL_DASHBOARD_TAG = "9994";
 
-    public static final String TEAM_DASHBOARD_TAG = "9996";
-    public static final String PERSON_DASHBOARD_TAG = "9995";
-    public static final String PERSON_DETAIL_DASHBOARD_TAG = "9996";
-
 
     public enum FarmerType {
         MYSIGNUPS,

@@ -66,11 +66,11 @@ public class PersonDashboardFragment extends BaseFragment implements AdapterView
         }
         ArrayList<FieldAgent> allAgents = new ArrayList<>();
         if (fieldOfficers.size() > 0) {
-            allAgents.add(new FieldAgent("FIELD OFFICERS", "", "", "", "", null, true));
+            allAgents.add(new FieldAgent("FIELD OFFICERS", "", "", "", "", "", null, true));
             allAgents.addAll(fieldOfficers);
         }
         if (facilitators.size() > 0) {
-            allAgents.add(new FieldAgent("FACILITATORS", "", "", "", "", null, true));
+            allAgents.add(new FieldAgent("FACILITATORS", "", "", "", "", "", null, true));
             allAgents.addAll(facilitators);
         }
         return allAgents;
