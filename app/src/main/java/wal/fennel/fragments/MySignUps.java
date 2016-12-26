@@ -2091,9 +2091,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         realm.delete(FieldAgent.class);
         realm.commitTransaction();
 
+        realm.beginTransaction();
         Map<String, FieldAgent> agentsMap = new HashMap<>();
         ArrayList<FieldAgent> allAgentsList = new ArrayList<>();
-        realm.beginTransaction();
+
         for (Task taskObj : allTasks) {
             FieldAgent agent = null;
             String agentId = taskObj.getAgentId();

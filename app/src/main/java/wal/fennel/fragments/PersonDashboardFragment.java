@@ -19,9 +19,10 @@ import wal.fennel.utils.Constants;
 import wal.fennel.utils.Singleton;
 
 /**
- * Created by irfanayaz on 12/2/16.
+ * Created by irfanayaz on 12/25/16.
  */
-public class PersonLogBookFragment extends BaseFragment implements AdapterView.OnItemClickListener {
+
+public class PersonDashboardFragment extends BaseFragment implements AdapterView.OnItemClickListener {
 
     @Bind(R.id.person_listview)
     ListView logbookListView;
