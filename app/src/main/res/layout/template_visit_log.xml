@@ -41,11 +41,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:maxLines="3"
-                    android:text="Add up to 3 lines of instructions below the title of this task below. Let have on more line test"
                     android:textColor="@color/black"
                     android:textSize="@dimen/font_desc_template_visit_log"
-                    fennel:fontName="Avenir-Medium.ttf"
-                    android:visibility="gone"/>
+                    fennel:fontName="Avenir-Medium.ttf"/>
 
                 <EditText
                     android:id="@+id/etInput"

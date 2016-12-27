@@ -32,12 +32,14 @@ import io.realm.Sort;
 import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
 import wal.fennel.adapters.FarmerStatusAdapter;
+import wal.fennel.location.GPSTracker;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.Task;
 import wal.fennel.models.TaskItem;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
+import wal.fennel.utils.FennelUtils;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PreferenceHelper;
 import wal.fennel.views.FontTextView;
@@ -59,6 +61,8 @@ public class VisitLog extends BaseFragment {
     private RealmResults<TaskItem> taskItems;
     private Farmer farmer;
     private Task task;
+
+    private GPSTracker gps;
 
     public static VisitLog newInstance(String title, Farmer farmer, Task task) {
         VisitLog fragment = new VisitLog();
@@ -127,6 +131,18 @@ public class VisitLog extends BaseFragment {
         populateTaskItems();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        gps = new GPSTracker(getActivity());
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        gps.stopUsingGPS();
+    }
+
     private void populateTaskItems(){
 
         llTaskItemContainer.removeAllViews();
@@ -143,7 +159,7 @@ public class VisitLog extends BaseFragment {
             }
 
             FontTextView tvTitle = (FontTextView) vTaskItem.findViewById(R.id.tvTitle);
-            FontTextView tvDescription = (FontTextView) vTaskItem.findViewById(R.id.tvDescription);
+            final FontTextView tvDescription = (FontTextView) vTaskItem.findViewById(R.id.tvDescription);
             final EditText etHoleCount = (EditText) vTaskItem.findViewById(R.id.etInput);
             RelativeLayout rlBlockButton = (RelativeLayout) vTaskItem.findViewById(R.id.rlBlockButton);
             ImageView ivBlockIcon = (ImageView) vTaskItem.findViewById(R.id.ivBlockIcon);
@@ -152,13 +168,23 @@ public class VisitLog extends BaseFragment {
             if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Gps.toString())){
 
                 tvTitle.setText(taskItem.getName());
-                tvDescription.setVisibility(View.GONE);
+                tvDescription.setVisibility(View.VISIBLE);
+                String description = taskItem.getDescription() == null ? "" : taskItem.getDescription().trim();
+                description = description.equalsIgnoreCase("null") ? "" : description;
+                tvDescription.setText(description);
                 etHoleCount.setVisibility(View.GONE);
                 spOption.setVisibility(View.GONE);
 
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        if(!taskItem.isTaskDone()){
+                            double latitude = gps.getLatitude();
+                            double longitude = gps.getLongitude();
+
+                            String gpsStamp = getGpsStamp(latitude, longitude);
+                            taskItem.setDescription(gpsStamp);
+                        }
                         setTaskDone(taskItem);
                     }
                 });
@@ -248,6 +274,16 @@ public class VisitLog extends BaseFragment {
         }
     }
 
+    private String getGpsStamp(double latitude, double longitude) {
+        String strLatitude = String.valueOf(latitude);
+        String strLongitude = String.valueOf(longitude);
+        String time = FennelUtils.getFormattedTime(System.currentTimeMillis(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_HH_MM_SS);
+        String gpsStamp = "Latitude: %s\nLongitude: %s\nTime: %s";
+
+        gpsStamp = String.format(gpsStamp, strLatitude, strLongitude, time);
+        return gpsStamp;
+    }
+
     private void setTaskDone(final TaskItem taskItem) {
 //        Realm realm = Realm.getDefaultInstance();
 //        realm.beginTransaction();
@@ -270,6 +306,8 @@ public class VisitLog extends BaseFragment {
 
             if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Text.toString())){
                 taskItems.get(i).setTextValue(taskItem.getTextValue());
+            } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Gps.toString())){
+                taskItems.get(i).setDescription(taskItem.getDescription());
             }
 
         }
@@ -284,11 +322,6 @@ public class VisitLog extends BaseFragment {
         task.setStatus(Constants.STR_COMPLETED);
         realm.commitTransaction();
         ((BaseContainerFragment) getParentFragment()).popFragment();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
     }
 
     @Override

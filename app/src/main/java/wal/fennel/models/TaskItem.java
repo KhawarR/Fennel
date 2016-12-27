@@ -104,7 +104,7 @@ public class TaskItem extends RealmObject implements Parcelable {
         dest.writeInt(this.isTaskDone ? 1 : 0);
         dest.writeTypedList(options);
 
-        dest.writeLong(dateModified.getTime());
+        dest.writeLong(dateModified == null ? 0 : dateModified.getTime());
         dest.writeString(this.agentName);
         dest.writeString(this.farmerName);
         dest.writeString(this.agentAttachmentId);
