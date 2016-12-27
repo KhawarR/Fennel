@@ -1836,8 +1836,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         String farmingTaskIds = "";
         if(arrRecords.length() > 0) {
+            visitLogFarmingTasks = new HashMap<>();
             for (int i = 0; i < arrRecords.length(); i++) {
-                visitLogFarmingTasks = new HashMap<>();
+
 //                Task newTask = new Task();
                 Map<String, String> taskMap = new HashMap<>();
 
@@ -2007,13 +2008,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
         ArrayList<Task> allTasks = null;
 
-        if(arrRecords.length() > 0) {
+        if (arrRecords.length() > 0) {
+            allTasks = new ArrayList<>();
             for (int i = 0; i < arrRecords.length(); i++) {
                 JSONObject farmingTaskObj = (JSONObject) arrRecords.get(i);
                 String farmingTaskId = farmingTaskObj.getString("Id");
 //                Task visitLogTask = visitLogFarmingTasks.get(farmingTaskId);
-                Map<String, String> taskMap= visitLogFarmingTasks.get(farmingTaskId);
-                allTasks = new ArrayList<>();
+                Map<String, String> taskMap = visitLogFarmingTasks.get(farmingTaskId);
 
                 Task visitLogTask = new Task();
                 visitLogTask.setAgentId(taskMap.get("agentId"));
@@ -2037,50 +2038,52 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 String farmerName = shambaObj.getJSONObject("Farmer__r").getString("FullName__c");
                 visitLogTask.setFarmerName(farmerName);
 
-                JSONObject taskItemObj =  farmingTaskObj.getJSONObject("Task_Items__r");
-                JSONArray taskItemRecords = taskItemObj.getJSONArray("records");
-                if (taskItemRecords.length() > 0) {
-                    for (int j=0;j<taskItemRecords.length();j++) {
+                JSONObject taskItemObj = farmingTaskObj.optJSONObject("Task_Items__r");
+                if (taskItemObj != null) {
+                    JSONArray taskItemRecords = taskItemObj.getJSONArray("records");
+                    if (taskItemRecords.length() > 0) {
+                        for (int j = 0; j < taskItemRecords.length(); j++) {
 
-                        JSONObject taskItem = (JSONObject) taskItemRecords.get(j);
-                        String id = taskItem.optString("Id");
-                        String textValue = taskItem.optString("Text_Value__c");
-                        int sequence = taskItem.optInt("Sequence__c");
-                        String recordType = taskItem.optJSONObject("RecordType").getString("Name");
-                        String name = taskItem.optString("Name");
-                        double latitude = taskItem.optDouble("Location__Latitude__s");
-                        if(Double.isNaN(latitude))
-                            latitude = 0;
-                        double longitude = taskItem.optDouble("Location__Longitude__s");
-                        if(Double.isNaN(longitude))
-                            longitude = 0;
-                        String lastModifiedDate = taskItem.optString("LastModifiedDate");
-                        SimpleDateFormat serverFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-                        Date lastModified = null;
-                        try {
-                            lastModified = serverFormat.parse(lastModifiedDate);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-                        String gpsTakenTime = taskItem.getString("GPS_Taken_Time__c");
-                        String fileType = taskItem.getString("File_Type__c");
-                        String fileActionType = taskItem.getString("File_Action__c");
-                        String fileActionPerformed = taskItem.getString("Action_Performed__c");
+                            JSONObject taskItem = (JSONObject) taskItemRecords.get(j);
+                            String id = taskItem.optString("Id");
+                            String textValue = taskItem.optString("Text_Value__c");
+                            int sequence = taskItem.optInt("Sequence__c");
+                            String recordType = taskItem.optJSONObject("RecordType").getString("Name");
+                            String name = taskItem.optString("Name");
+                            double latitude = taskItem.optDouble("Location__Latitude__s");
+                            if (Double.isNaN(latitude))
+                                latitude = 0;
+                            double longitude = taskItem.optDouble("Location__Longitude__s");
+                            if (Double.isNaN(longitude))
+                                longitude = 0;
+                            String lastModifiedDate = taskItem.optString("LastModifiedDate");
+                            SimpleDateFormat serverFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+                            Date lastModified = null;
+                            try {
+                                lastModified = serverFormat.parse(lastModifiedDate);
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            String gpsTakenTime = taskItem.getString("GPS_Taken_Time__c");
+                            String fileType = taskItem.getString("File_Type__c");
+                            String fileActionType = taskItem.getString("File_Action__c");
+                            String fileActionPerformed = taskItem.getString("Action_Performed__c");
 //                        String taskId = taskItem.getString("Farming_Task__c");
-                        String description = taskItem.getString("Description__c");
+                            String description = taskItem.getString("Description__c");
 
-                        RealmList<TaskItemOption> options = new RealmList<>();
+                            RealmList<TaskItemOption> options = new RealmList<>();
 
-                        TaskItem newTaskItem = new TaskItem(sequence, id, taskMap.get("Id"), name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false);
-                        visitLogTask.getTaskItems().add(newTaskItem);
+                            TaskItem newTaskItem = new TaskItem(sequence, id, taskMap.get("Id"), name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false);
+                            visitLogTask.getTaskItems().add(newTaskItem);
+                        }
                     }
+                    allTasks.add(visitLogTask);
                 }
-                allTasks.add(visitLogTask);
             }
+
+            parseVisitLogsFromTasks(allTasks);
+
         }
-
-        parseVisitLogsFromTasks(allTasks);
-
     }
 
     private void parseVisitLogsFromTasks(ArrayList<Task> allTasks) {
