@@ -1558,7 +1558,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
 
-            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, null, null, null, null, false);
+            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, null, null, null, null, false, "");
             taskItems.add(taskItem);
 
             for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
@@ -1569,8 +1569,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                         if (taskItem.getFarmingTaskId().equalsIgnoreCase(Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskId())){
                             realm.beginTransaction();
-                            if(Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskItems() == null)
+                            if(Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskItems() == null) {
                                 Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).setTaskItems(new RealmList<TaskItem>());
+                            }
                             Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskItems().add(taskItem);
                             realm.commitTransaction();
                         }
@@ -1720,6 +1721,34 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     }
 
     private void updateTaskItemWithAttachment(String taskItemId, String filename) {
+
+        for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
+
+            Farmer farmer = Singleton.getInstance().myFarmersList.get(j);
+            if(farmer.getFarmerTasks() != null){
+
+                for (int k = 0; k < farmer.getFarmerTasks().size(); k++) {
+                    Task task = farmer.getFarmerTasks().get(k);
+                    if(task.getTaskItems() != null) {
+
+                        for (int i = 0; i < task.getTaskItems().size(); i++) {
+                            TaskItem taskItem = task.getTaskItems().get(i);
+                            if (taskItem.getId().equals(taskItemId)) {
+                                Realm realm = Realm.getDefaultInstance();
+                                realm.beginTransaction();
+                                taskItem.setAttachmentPath(filename);
+                                realm.commitTransaction();
+
+                                break;
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+        // TODO Check if we need to remove it later
         ArrayList<TaskItem> allTaskItems = Singleton.getInstance().taskItems;
         for (TaskItem taskItem : allTaskItems) {
             if (taskItem.getId().equals(taskItemId)) {
@@ -2073,7 +2102,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                             RealmList<TaskItemOption> options = new RealmList<>();
 
-                            TaskItem newTaskItem = new TaskItem(sequence, id, taskMap.get("Id"), name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false);
+                            TaskItem newTaskItem = new TaskItem(sequence, id, taskMap.get("Id"), name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false, "");
                             visitLogTask.getTaskItems().add(newTaskItem);
                         }
                     }

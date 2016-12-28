@@ -73,9 +73,9 @@ import wal.fennel.views.TitleBarLayout;
  */
 public class EnrollFragment extends BaseContainerFragment implements AdapterView.OnItemSelectedListener, View.OnTouchListener {
 
+    //region Class variables
     private MixpanelAPI mixPanel;
 
-    //region Class variables
     @Bind(R.id.scrollView)
     ScrollView scrollView;
 
@@ -172,45 +172,40 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     @Bind(R.id.ll_main_container)
     LinearLayout ll_main_container;
 
-    CircleImageView cIvIconRight;
-
-    private String title;
-    private Farmer farmer;
-    boolean isEdit = false;
-
     private CameraImagePicker cameraImagePicker;
+    private CircleImageView cIvIconRight;
     private ImagePicker imagePicker;
-    private String location;
-    private String subLocation;
-    private String village;
-    private String treeSpecies;
-    private String locationName;
-    private String subLocationName;
-    private String villageName;
-    private String treeSpeciesName;
+    private Farmer farmer;
 
-    private boolean isFarmerPhotoSet = false;
-    private boolean isNationalIdPhotoSet = false;
-
-    private boolean isFarmerPhotoEdited = false;
     private boolean isNationalIdPhotoEdited = false;
+    private boolean isNationalIdPhotoSet = false;
+    private boolean isFarmerPhotoEdited = false;
+    private boolean isFarmerPhotoSet = false;
+    private boolean isEdit = false;
 
-    private String farmerStatus = null;
-
-    private String farmerImageUri = null;
-    private String farmerIdImageUri = null;
-
-    private String farmerImageUrl = null;
     private String farmerIdImageUrl = null;
+    private String farmerIdImageUri = null;
+    private String farmerImageUri = null;
+    private String farmerImageUrl = null;
+    private String farmerStatus = null;
+    private String subLocationName;
+    private String treeSpeciesName;
+    private String locationName;
+    private String subLocation;
+    private String treeSpecies;
+    private String villageName;
+    private String location;
+    private String village;
+    private String title;
 
-    private ArrayList<Location> arrLocations = new ArrayList<>();
-    private ArrayList<String> strArrLocations = new ArrayList<>();
     private ArrayList<SubLocation> arrSubLocations = new ArrayList<>();
     private ArrayList<String> strArrSubLocations = new ArrayList<>();
-    private ArrayList<Village> arrVillages = new ArrayList<>();
+    private ArrayList<String> strArrLocations = new ArrayList<>();
+    private ArrayList<Location> arrLocations = new ArrayList<>();
     private ArrayList<String> strArrVillages = new ArrayList<>();
-    private ArrayList<Tree> arrTrees = new ArrayList<>();
+    private ArrayList<Village> arrVillages = new ArrayList<>();
     private ArrayList<String> strArrTrees = new ArrayList<>();
+    private ArrayList<Tree> arrTrees = new ArrayList<>();
     //endregion
 
     public static EnrollFragment newInstance(String title, Farmer farmer) {

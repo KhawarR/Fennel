@@ -1,14 +1,24 @@
 package wal.fennel.fragments;
 
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.webkit.MimeTypeMap;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -17,9 +27,17 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.kbeanie.multipicker.api.CameraImagePicker;
+import com.kbeanie.multipicker.api.ImagePicker;
+import com.kbeanie.multipicker.api.Picker;
+import com.kbeanie.multipicker.api.callbacks.ImagePickerCallback;
+import com.kbeanie.multipicker.api.entity.ChosenImage;
+import com.makeramen.roundedimageview.RoundedImageView;
 import com.squareup.picasso.NetworkPolicy;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -43,11 +61,11 @@ import wal.fennel.utils.FennelUtils;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PreferenceHelper;
 import wal.fennel.views.FontTextView;
+import wal.fennel.views.NothingSelectedSpinnerAdapter;
 import wal.fennel.views.TitleBarLayout;
 
-public class VisitLog extends BaseFragment {
+public class VisitLog extends BaseFragment implements AdapterView.OnItemSelectedListener  {
 
-    private CircleImageView cIvIconRight;
     @Bind(R.id.llTaskItemContainer)
     LinearLayout llTaskItemContainer;
     @Bind(R.id.titleBar)
@@ -57,12 +75,15 @@ public class VisitLog extends BaseFragment {
     @Bind(R.id.tvTaskHeader)
     FontTextView tvTaskHeader;
 
+    private CameraImagePicker cameraImagePicker;
+    private CircleImageView cIvIconRight;
+    private ImagePicker imagePicker;
+
     private ArrayList<TaskItem> localTaskItems;
     private RealmResults<TaskItem> taskItems;
+    private GPSTracker gps;
     private Farmer farmer;
     private Task task;
-
-    private GPSTracker gps;
 
     public static VisitLog newInstance(String title, Farmer farmer, Task task) {
         VisitLog fragment = new VisitLog();
@@ -111,6 +132,9 @@ public class VisitLog extends BaseFragment {
         farmerHeader.setEnabled(false);
         farmerHeader.setOnClickListener(null);
 
+        imagePicker = new ImagePicker(VisitLog.this);
+        cameraImagePicker = new CameraImagePicker(VisitLog.this);
+
         CircleImageView ivFarmerThumb = (CircleImageView) farmerHeader.findViewById(R.id.ivFarmerThumb);
         if (NetworkHelper.isNetAvailable(getActivity())) {
             MyPicassoInstance.getInstance().load(farmer.getThumbUrl()).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
@@ -152,7 +176,7 @@ public class VisitLog extends BaseFragment {
             View vTaskItem;
             final TaskItem taskItem = localTaskItems.get(i);
 
-            if(taskItem.isTaskDone()){
+            if(taskItem.isTaskDone() && !taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.File.toString()) && !taskItem.getFileActionType().equalsIgnoreCase(Constants.STR_ATTACH_MEDIA)){
                 vTaskItem = getActivity().getLayoutInflater().inflate(R.layout.template_visit_log_completed, null);
             } else {
                 vTaskItem = getActivity().getLayoutInflater().inflate(R.layout.template_visit_log, null);
@@ -162,7 +186,8 @@ public class VisitLog extends BaseFragment {
             final FontTextView tvDescription = (FontTextView) vTaskItem.findViewById(R.id.tvDescription);
             final EditText etHoleCount = (EditText) vTaskItem.findViewById(R.id.etInput);
             RelativeLayout rlBlockButton = (RelativeLayout) vTaskItem.findViewById(R.id.rlBlockButton);
-            ImageView ivBlockIcon = (ImageView) vTaskItem.findViewById(R.id.ivBlockIcon);
+            final ImageView ivBlockIcon = (ImageView) vTaskItem.findViewById(R.id.ivBlockIcon);
+            final RoundedImageView roundedImageView = (RoundedImageView) vTaskItem.findViewById(R.id.ivBlockBackground);
             Spinner spOption = (Spinner) vTaskItem.findViewById(R.id.spOptions);
 
             if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Gps.toString())){
@@ -205,6 +230,12 @@ public class VisitLog extends BaseFragment {
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        if(taskItem.getOptions() != null && taskItem.getOptions().size() > 0) {
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            taskItem.getOptions().get(0).setValue(!taskItem.getOptions().get(0).isValue());
+                            realm.commitTransaction();
+                        }
                         setTaskDone(taskItem);
                     }
                 });
@@ -242,13 +273,52 @@ public class VisitLog extends BaseFragment {
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        setTaskDone(taskItem);
+                        if(taskItem.getFileActionType().equalsIgnoreCase(Constants.STR_VIEW_MEDIA)){
+                            String path = taskItem.getAttachmentPath();
+                            if(path != null && !path.trim().isEmpty()) {
+                                MimeTypeMap myMime = MimeTypeMap.getSingleton();
+                                Intent newIntent = new Intent(Intent.ACTION_VIEW);
+                                String mimeType = myMime.getMimeTypeFromExtension(FennelUtils.fileExt(path));
+                                newIntent.setDataAndType(Uri.fromFile(new File(path)),mimeType);
+                                newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                try {
+                                    getActivity().startActivity(newIntent);
+                                    setTaskDone(taskItem);
+                                } catch (ActivityNotFoundException e) {
+                                    Toast.makeText(getActivity(), "No handler for this type of file.", Toast.LENGTH_LONG).show();
+                                }
+                            } else {
+                                Toast.makeText(getActivity(), "File is not available", Toast.LENGTH_SHORT).show();
+                            }
+
+                        } else {
+                            showPickerDialog(roundedImageView, ivBlockIcon, taskItem);
+                        }
                     }
                 });
-                if(!taskItem.isTaskDone()) {
-                    if(taskItem.getFileActionType().equalsIgnoreCase(Constants.STR_VIEW_MEDIA)){
-                        ivBlockIcon.setImageResource(R.drawable.ic_eye);
+                if(taskItem.getFileActionType().equalsIgnoreCase(Constants.STR_VIEW_MEDIA)){
+                    if(taskItem.isTaskDone()) {
+
                     } else {
+                        ivBlockIcon.setImageResource(R.drawable.ic_eye);
+                    }
+                } else {
+                    if(taskItem.isTaskDone()) {
+                        String path = taskItem.getAttachmentPath();
+                        if(path != null && !path.isEmpty()) {
+
+                            if(NetworkHelper.isNetAvailable(getActivity()))
+                            {
+                                MyPicassoInstance.getInstance().load(path).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(roundedImageView);
+                            }
+                            else
+                            {
+                                MyPicassoInstance.getInstance().load(path).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(roundedImageView);
+                            }
+                            ivBlockIcon.setVisibility(View.GONE);
+                        }
+                    } else {
+                        roundedImageView.setBackgroundResource(R.drawable.green_rounded_rect);
                         ivBlockIcon.setImageResource(R.drawable.ic_camera_white);
                     }
                 }
@@ -258,6 +328,9 @@ public class VisitLog extends BaseFragment {
                 tvDescription.setVisibility(View.GONE);
                 etHoleCount.setVisibility(View.GONE);
                 spOption.setVisibility(View.VISIBLE);
+                ArrayAdapter<String> arrayAdapterLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, new String[] {"1", "2", "3"});
+                spOption.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterLoc, R.layout.spinner_nothing_selected, getContext(), "LOCATION"));
+                spOption.setOnItemSelectedListener(this);
 
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -271,6 +344,83 @@ public class VisitLog extends BaseFragment {
             }
 
             llTaskItemContainer.addView(vTaskItem);
+        }
+    }
+
+    private void showPickerDialog(final RoundedImageView roundedImageView, final ImageView ivIcon, final TaskItem taskItem) {
+        AlertDialog.Builder pickerDialog = new AlertDialog.Builder(getActivity());
+        pickerDialog.setTitle("Choose image from?");
+        pickerDialog.setPositiveButton("Gallery",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        pickFarmerImage(true, roundedImageView, ivIcon, taskItem);
+                        dialog.dismiss();
+                    }
+                });
+        pickerDialog.setNegativeButton("Camera",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        pickFarmerImage(false, roundedImageView, ivIcon, taskItem);
+                        dialog.dismiss();
+                    }
+                });
+        pickerDialog.show();
+    }
+
+    private void pickFarmerImage(boolean isDevice, final RoundedImageView roundedImageView, final ImageView ivIcon, final TaskItem taskItem) {
+        ImagePickerCallback imagePickerCallback = new ImagePickerCallback() {
+            @Override
+            public void onImagesChosen(List<ChosenImage> images) {
+                // Display images
+                roundedImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+                String originalPath = images.get(0).getOriginalPath();
+                String uri = NetworkHelper.getUriFromPath(originalPath);
+
+                taskItem.setAttachmentPath(uri);
+
+                MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(roundedImageView);
+                ivIcon.setVisibility(View.GONE);
+
+                taskItem.setTaskDone(true);
+
+//                farmerImageUri = originalPath;
+//                isFarmerPhotoSet = true;
+//                isFarmerPhotoEdited = true;
+//                farmerImageUrl = uri;
+//                if (isEdit) {
+////                    if(NetworkHelper.isNetAvailable(getActivity()))
+////                        attachFarmerImageToFarmerObject(farmer);
+////                    else
+//                    editFarmerInDB(false);
+//                }
+//                checkEnableSubmit();
+            }
+
+            @Override
+            public void onError(String message) {
+                // Do error handling
+                Log.i("LP", message);
+            }
+        };
+        if (isDevice) {
+            imagePicker.setImagePickerCallback(imagePickerCallback);
+            imagePicker.pickImage();
+        } else {
+            cameraImagePicker.setImagePickerCallback(imagePickerCallback);
+            cameraImagePicker.pickImage();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == Picker.PICK_IMAGE_DEVICE) {
+                imagePicker.submit(data);
+            } else if (requestCode == Picker.PICK_IMAGE_CAMERA) {
+                cameraImagePicker.submit(data);
+            }
         }
     }
 
@@ -308,8 +458,20 @@ public class VisitLog extends BaseFragment {
                 taskItems.get(i).setTextValue(taskItem.getTextValue());
             } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Gps.toString())){
                 taskItems.get(i).setDescription(taskItem.getDescription());
-            }
+            } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Checkbox.toString())){
+                if(taskItem.getOptions() != null
+                        && taskItem.getOptions().size() > 0
+                        && taskItems.get(i).getOptions() != null
+                        && taskItems.get(i).getOptions().size() > 0) {
+                    taskItems.get(i).getOptions().get(0).setValue(taskItem.getOptions().get(0).isValue());
+                }
+            } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.File.toString())){
+                if(taskItem.getFileActionType().equalsIgnoreCase(Constants.STR_VIEW_MEDIA)){
 
+                } else {
+                    taskItems.get(i).setAttachmentPath(taskItem.getAttachmentPath());
+                }
+            }
         }
         realm.commitTransaction();
         ((BaseContainerFragment) getParentFragment()).popFragment();
@@ -337,5 +499,24 @@ public class VisitLog extends BaseFragment {
     @Override
     public void onTitleBarLeftIconClicked(View view) {
         ((BaseContainerFragment) getParentFragment()).popFragment();
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        Spinner spinnerView = (Spinner) parent;
+        int position = pos - 1;
+
+        switch (spinnerView.getId()) {
+            case R.id.spOptions: {
+                if(position >= 0) {
+
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 }

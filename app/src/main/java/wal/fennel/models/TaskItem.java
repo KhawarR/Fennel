@@ -57,13 +57,14 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.options = other.options;
         this.isTaskDone = other.isTaskDone;
 
+        this.attachmentPath = other.attachmentPath;
         this.dateModified = other.dateModified;
         this.agentName = other.agentName;
         this.farmerName = other.farmerName;
         this.agentAttachmentId = other.agentAttachmentId;
     }
 
-    public TaskItem(int sequence, String id, String farmingTaskId, String name, String recordType, String description, String textValue, String fileType, String fileActionType, String fileActionPerformed, String gpsTakenTime, double latitude, double longitude, RealmList<TaskItemOption> options, Date lastModified, String agent, String farmer, String attachmentId, boolean isTaskDone) {
+    public TaskItem(int sequence, String id, String farmingTaskId, String name, String recordType, String description, String textValue, String fileType, String fileActionType, String fileActionPerformed, String gpsTakenTime, double latitude, double longitude, RealmList<TaskItemOption> options, Date lastModified, String agent, String farmer, String attachmentId, boolean isTaskDone, String attachmentPath) {
         this.sequence = sequence;
         this.id = id;
         this.farmingTaskId = farmingTaskId;
@@ -80,6 +81,7 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.options = options;
         this.isTaskDone = isTaskDone;
 
+        this.attachmentPath = attachmentPath;
         this.dateModified = lastModified;
         this.agentName = agent;
         this.farmerName = farmer;
