@@ -176,7 +176,7 @@ public class VisitLog extends BaseFragment implements AdapterView.OnItemSelected
             View vTaskItem;
             final TaskItem taskItem = localTaskItems.get(i);
 
-            if(taskItem.isTaskDone() && !taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.File.toString()) && !taskItem.getFileActionType().equalsIgnoreCase(Constants.STR_ATTACH_MEDIA)){
+            if(taskItem.isTaskDone() && !taskItem.getFileActionType().equalsIgnoreCase(Constants.STR_ATTACH_MEDIA)){
                 vTaskItem = getActivity().getLayoutInflater().inflate(R.layout.template_visit_log_completed, null);
             } else {
                 vTaskItem = getActivity().getLayoutInflater().inflate(R.layout.template_visit_log, null);
@@ -329,7 +329,7 @@ public class VisitLog extends BaseFragment implements AdapterView.OnItemSelected
                 etHoleCount.setVisibility(View.GONE);
                 spOption.setVisibility(View.VISIBLE);
                 ArrayAdapter<String> arrayAdapterLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, new String[] {"1", "2", "3"});
-                spOption.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterLoc, R.layout.spinner_nothing_selected, getContext(), "LOCATION"));
+                spOption.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterLoc, R.layout.spinner_nothing_selected, getContext(), "OPTIONS"));
                 spOption.setOnItemSelectedListener(this);
 
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {

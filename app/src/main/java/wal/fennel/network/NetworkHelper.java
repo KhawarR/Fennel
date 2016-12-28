@@ -58,6 +58,11 @@ public class NetworkHelper {
 
     public static final String QUERY_MY_LOGBOOK_ATTACHMENTS = "SELECT Id, Name, (SELECT Id, ParentId, Name, Description FROM Attachments) FROM Employee__c WHERE Name IN (%s)";
 
+    public static final String GET_MY_DASHBOARD_DATA_FIELD_MANAGER = "Select f.Status__c, f.Started_Date__c, f.Shamba__c, f.Shamba__r.Farmer_Phone__c, f.Shamba__r.Facilitator_Signup__c, f.Shamba__r.Field_Officer_Signup__c, f.Shamba__r.Field_Manager_Signup__c, f.Name, f.Id, f.Farmer__c, f.Due_Date__c From Farming_Task__c f WHERE f.Shamba__r.Field_Manager_Signup__c = '%s' OR f.Shamba__r.Field_Officer_Signup__c IN (%s) OR f.Shamba__r.Facilitator_Signup__c IN (%s) Order by Due_Date__c, Name";
+    public static final String GET_MY_DASHBOARD_DATA_FIELD_OFFICER = "Select f.Status__c, f.Started_Date__c, f.Shamba__c, f.Shamba__r.Farmer_Phone__c, f.Shamba__r.Facilitator_Signup__c, f.Shamba__r.Field_Officer_Signup__c, f.Shamba__r.Field_Manager_Signup__c, f.Name, f.Id, f.Farmer__c, f.Due_Date__c From Farming_Task__c f WHERE f.Shamba__r.Field_Officer_Signup__c = '%s' OR f.Shamba__r.Facilitator_Signup__c IN (%s) Order by Due_Date__c, Name";
+    public static final String GET_MY_DASHBOARD_DATA_FACILITATOR = "Select f.Status__c, f.Started_Date__c, f.Shamba__c, f.Shamba__r.Farmer_Phone__c, f.Shamba__r.Facilitator_Signup__c, f.Shamba__r.Field_Officer_Signup__c, f.Shamba__r.Field_Manager_Signup__c, f.Name, f.Id, f.Farmer__c, f.Due_Date__c From Farming_Task__c f WHERE f.Shamba__r.Facilitator_Signup__c = '%s' Order by Due_Date__c, Name";
+
+
 
     public static boolean isNetAvailable(Context context){
         ConnectivityManager cm =
