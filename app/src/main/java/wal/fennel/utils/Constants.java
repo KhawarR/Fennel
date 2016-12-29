@@ -75,7 +75,10 @@ public class Constants {
     }
 
     public static class DropboxConstants {
-        public static final String ACCESS_TOKEN = "fLeIQ1T-kdAAAAAAAAAAC6uQ_f83xp0g0L-GMEFWZmMeXJiya6kGN3atE37KGm7x";
+        // khawar's account
+//        public static final String ACCESS_TOKEN = "fLeIQ1T-kdAAAAAAAAAAC6uQ_f83xp0g0L-GMEFWZmMeXJiya6kGN3atE37KGm7x";
+        // Tiffany's account
+        public static final String ACCESS_TOKEN = "4945rxRfuokAAAAAAAIwL4p4pys_uFLPsL83s5O3CfdXPAUWfK5tW8uoLv_mU0to";
         public static final String FENNEL_DROPBOX_PATH = "dropbox/Fennel";
         public static final String DEBUG_LOGS_DROPBOX_PATH = "/DebugLogs/";
         public static final String FARMER_LOGS_DROPBOX_PATH = "/FarmerLogs/";

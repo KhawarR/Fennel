@@ -2,10 +2,12 @@ package wal.fennel.utils;
 
 import android.os.Environment;
 
+import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -13,6 +15,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.TimeZone;
 
@@ -88,22 +91,44 @@ public class FennelUtils {
     }
 
     public static void appendFarmerLog(String [] data) throws IOException {
+        String [] dataHeader = new String[]{"Timestamp", "Username", "UserID", "RecordType",
+                "ID Number", "Full name", "First Name", "Middle Name", "Last Name", "Location",
+                "SubLocation", "Village", "Tree Specie", "Mobile", "Is Leader?", "Is Farmer Home?",
+                "Farmer Photo", "Farmer National ID Photo", "Farmer ID", "Location ID",
+                "Sub Location ID", "Village ID", "Tree specie ID"};
+
         File rootPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         String filePath = rootPath + File.separator + PreferenceHelper.getInstance().readUserId() + Constants.DropboxConstants.FARMER_LOGS_FILE_NAME;
         File f = new File(filePath);
         CSVWriter writer;
         FileWriter mFileWriter;
+
         // File exist
         if(f.exists() && !f.isDirectory()){
+
+            CSVReader reader = new CSVReader(new FileReader(filePath));
+            List myEntries = reader.readAll();
+            reader.close();
+
             mFileWriter = new FileWriter(filePath, true);
             writer = new CSVWriter(mFileWriter);
+
+            if(myEntries.size() > 0) {
+                String [] arrLastEntry = (String[]) myEntries.get(myEntries.size() - 1);
+                if(arrLastEntry.length != dataHeader.length) {
+                    writer.writeNext(dataHeader);
+                }
+            }
+
+            writer.writeNext(data);
+            writer.close();
         }
         else {
             writer = new CSVWriter(new FileWriter(filePath));
-            data = new String[]{"Timestamp", "UserID", "RecordType", "ID Number", "Full name", "First Name", "Middle Name", "Last Name", "Location", "SubLocation", "Village", "Tree Specie", "Mobile", "Is Leader?", "Is Farmer Home?", "Farmer ID", "Location ID", "Sub Location ID", "Village ID", "Tree specie ID"};
+            writer.writeNext(dataHeader);
+            writer.close();
+            appendFarmerLog(data);
         }
-        writer.writeNext(data);
-        writer.close();
     }
 
     public static Date getDateFromString(String dueDateStr) {
