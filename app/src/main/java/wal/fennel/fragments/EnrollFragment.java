@@ -537,14 +537,22 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             recordType = Constants.STR_FARMER_LOG_TYPE_SUBMITTED;
         }
 
+        String fullName = PreferenceHelper.getInstance().readAboutFN();
+        fullName = fullName.trim() + " " + PreferenceHelper.getInstance().readAboutMN();
+        fullName = fullName.trim() + " " + PreferenceHelper.getInstance().readAboutLN();
+        fullName = fullName.trim();
+
 //        data = new String[]{"Timestamp", "UserID", "RecordType", "ID Number", "Full name", "First Name", "Middle Name", "Last Name", "Location", "SubLocation", "Village", "Tree Specie", "Mobile", "Is Leader?", "Is Farmer Home?", "Farmer ID", "Location ID", "Sub Location ID", "Village ID", "Tree specie ID"};
         String timestamp = FennelUtils.getFormattedTime(farmer.getLastModifiedTime().getTime(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_HH_MM_SS);
-        String [] data = {timestamp, PreferenceHelper.getInstance().readUserId(), recordType,
+        String [] data = {timestamp, fullName, PreferenceHelper.getInstance().readUserId(), recordType,
                 farmer.getIdNumber(), farmer.getFullName(), farmer.getFirstName(),
                 farmer.getSecondName(), farmer.getSurname(), farmer.getLocation(),
                 farmer.getSubLocation(), farmer.getVillageName(), farmer.getTreeSpecies(),
                 farmer.getMobileNumber(), farmer.isLeader() ? "Yes" : "No",
-                farmer.isFarmerHome() ? "Yes" : "No", farmer.getFarmerId(), farmer.getLocationId(),
+                farmer.isFarmerHome() ? "Yes" : "No",
+                farmer.getThumbUrl().isEmpty() ? "Not added" : "Added",
+                farmer.getNationalCardUrl().isEmpty() ? "Not added" : "Added",
+                farmer.getFarmerId(), farmer.getLocationId(),
                 farmer.getSubLocationId(), farmer.getVillageId(), farmer.getTreeSpeciesId()};
 
         try {
@@ -1307,7 +1315,9 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         Realm.getDefaultInstance().commitTransaction();
 
-        saveFarmerLog(Constants.STR_FARMER_LOG_TYPE_EDITED, farmerDbObj);
+        if(shouldPopFragment) {
+            saveFarmerLog(Constants.STR_FARMER_LOG_TYPE_EDITED, farmerDbObj);
+        }
 
         loadingFinished();
         Log.i("LP", "Farmer Edited Successfully");
