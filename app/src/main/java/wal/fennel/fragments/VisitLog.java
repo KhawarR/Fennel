@@ -64,7 +64,7 @@ import wal.fennel.views.FontTextView;
 import wal.fennel.views.NothingSelectedSpinnerAdapter;
 import wal.fennel.views.TitleBarLayout;
 
-public class VisitLog extends BaseFragment implements AdapterView.OnItemSelectedListener  {
+public class VisitLog extends BaseFragment  {
 
     @Bind(R.id.llTaskItemContainer)
     LinearLayout llTaskItemContainer;
@@ -328,9 +328,37 @@ public class VisitLog extends BaseFragment implements AdapterView.OnItemSelected
                 tvDescription.setVisibility(View.GONE);
                 etHoleCount.setVisibility(View.GONE);
                 spOption.setVisibility(View.VISIBLE);
-                ArrayAdapter<String> arrayAdapterLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, new String[] {"1", "2", "3"});
+                final ArrayList<String> arrOptionNames = new ArrayList<>();
+
+                if(taskItem.getOptions() != null) {
+                    for (int j = 0; j < taskItem.getOptions().size(); j++) {
+                        arrOptionNames.add(taskItem.getOptions().get(j).getName());
+                    }
+                }
+
+                ArrayAdapter<String> arrayAdapterLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, arrOptionNames);
                 spOption.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterLoc, R.layout.spinner_nothing_selected, getContext(), "OPTIONS"));
-                spOption.setOnItemSelectedListener(this);
+                spOption.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                        int position = pos - 1;
+                        if(position >= 0) {
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            Toast.makeText(getActivity(), taskItem.getOptions().get(position).getName(), Toast.LENGTH_SHORT).show();
+                            for (int j = 0; j < taskItem.getOptions().size(); j++) {
+                                taskItem.getOptions().get(j).setValue(false);
+                            }
+                            taskItem.getOptions().get(position).setValue(true);
+                            realm.commitTransaction();
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
 
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -338,7 +366,14 @@ public class VisitLog extends BaseFragment implements AdapterView.OnItemSelected
                         setTaskDone(taskItem);
                     }
                 });
-                if(!taskItem.isTaskDone()) {
+                if(taskItem.isTaskDone()) {
+                    for (int j = 0; j < taskItem.getOptions().size(); j++) {
+                        if(taskItem.getOptions().get(j).isValue()) {
+                            spOption.setSelection(j + 1);
+                            break;
+                        }
+                    }
+                } else {
                     ivBlockIcon.setImageResource(R.drawable.ic_pencil);
                 }
             }
@@ -471,6 +506,12 @@ public class VisitLog extends BaseFragment implements AdapterView.OnItemSelected
                 } else {
                     taskItems.get(i).setAttachmentPath(taskItem.getAttachmentPath());
                 }
+            } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Options.toString())){
+                for (int j = 0; j < taskItem.getOptions().size(); j++) {
+                    if(taskItem.getOptions().get(j).isValue()) {
+                        taskItems.get(i).getOptions().get(j).setValue(true);
+                    }
+                }
             }
         }
         realm.commitTransaction();
@@ -499,24 +540,5 @@ public class VisitLog extends BaseFragment implements AdapterView.OnItemSelected
     @Override
     public void onTitleBarLeftIconClicked(View view) {
         ((BaseContainerFragment) getParentFragment()).popFragment();
-    }
-
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-        Spinner spinnerView = (Spinner) parent;
-        int position = pos - 1;
-
-        switch (spinnerView.getId()) {
-            case R.id.spOptions: {
-                if(position >= 0) {
-
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
     }
 }
