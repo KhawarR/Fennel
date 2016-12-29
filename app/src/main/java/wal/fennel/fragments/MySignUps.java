@@ -1970,8 +1970,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
         }
-
-        getAllVisitLogsData(farmingTaskIds);
+        if (farmingTaskIds != null && !farmingTaskIds.isEmpty()) {
+            getAllVisitLogsData(farmingTaskIds);
+        }
     }
 
     private void parseMyDashboardData(String responseStr) throws JSONException {
