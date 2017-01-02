@@ -24,6 +24,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.mixpanel.android.mpmetrics.MixpanelAPI;
 import com.squareup.picasso.NetworkPolicy;
 
@@ -557,10 +558,16 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     };
 
     private void sessionExpireRedirect(){
-        PreferenceHelper.getInstance().clearSession(false);
-        Intent intent = new Intent(getActivity(), SplashActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        getActivity().startActivity(intent);
+        try {
+            PreferenceHelper.getInstance().clearSession(false);
+            Intent intent = new Intent(getActivity(), SplashActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            getActivity().startActivity(intent);
+        }
+        catch (NullPointerException e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
+        }
     }
 
     private void parseFarmerAttachmentData(String data) throws JSONException {
@@ -725,49 +732,54 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     }
 
     private void getDropDownsData() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
 
-        WebApi.getLocations(getLocationsCallback);
-        WebApi.getSubLocations(getSubLocationsCallback);
-        WebApi.getVillages(getVillagesCallback);
-        WebApi.getTrees(getTreesCallback);
-    }
-
-    private Callback<ResponseBody> getLocationsCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            locationsResponseCounter++;
-//            if (locationsResponseCounter == 4)
-//                loadingFinished();
-            if(isValid())
-            {
-                if (response.code() == 200) {
-                    try {
-                        parseLocations(response.body().string());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    Response<ResponseBody> locationsResponse =  WebApi.getLocations();
+                    if (locationsResponse.code() == 200) {
+                        parseLocations(locationsResponse.body().string());
                     }
-                }
-                else if(response.code() == 401)
-                {
-                    sessionExpireRedirect();
-                }
-                else
-                {
-                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                    else if(locationsResponse.code() == 401)
+                    {
+                        sessionExpireRedirect();
+                    }
+
+                    Response<ResponseBody> subLocationsResponse =  WebApi.getSubLocations();
+                    if (subLocationsResponse.code() == 200) {
+                        parseSubLocations(subLocationsResponse.body().string());
+                    }
+                    else if(subLocationsResponse.code() == 401)
+                    {
+                        sessionExpireRedirect();
+                    }
+
+                    Response<ResponseBody> villagesResponse = WebApi.getVillages();
+                    if (villagesResponse.code() == 200) {
+                        parseVillages(villagesResponse.body().string());
+                    }
+                    else if(villagesResponse.code() == 401)
+                    {
+                        sessionExpireRedirect();
+                    }
+
+                    Response<ResponseBody> treesResponse = WebApi.getTrees();
+                    if (treesResponse.code() == 200) {
+                        parseTrees(treesResponse.body().string());
+                    }
+                    else if(treesResponse.code() == 401)
+                    {
+                        sessionExpireRedirect();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
-            t.printStackTrace();
-        }
-    };
+        }).start();
+    }
 
     private void parseLocations(String data) throws JSONException {
 
@@ -800,43 +812,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
         }
     }
-
-    private Callback<ResponseBody> getSubLocationsCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            locationsResponseCounter++;
-//            if (locationsResponseCounter == 4)
-//                loadingFinished();
-            if(isValid())
-            {
-                if (response.code() == 200) {
-                    try {
-                        parseSubLocations(response.body().string());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                else if(response.code() == 401)
-                {
-                    sessionExpireRedirect();
-                }
-                else
-                {
-                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
-            t.printStackTrace();
-        }
-    };
 
     private void parseSubLocations(String data) throws JSONException {
 
@@ -874,43 +849,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
     }
 
-    private Callback<ResponseBody> getVillagesCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            locationsResponseCounter++;
-//            if (locationsResponseCounter == 4)
-//                loadingFinished();
-            if(isValid())
-            {
-                if (response.code() == 200) {
-                    try {
-                        parseVillages(response.body().string());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                else if(response.code() == 401)
-                {
-                    sessionExpireRedirect();
-                }
-                else
-                {
-                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
-            t.printStackTrace();
-        }
-    };
-
     private void parseVillages(String data) throws JSONException {
 
         JSONObject jsonObject = new JSONObject(data);
@@ -946,43 +884,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
         }
     }
-
-    private Callback<ResponseBody> getTreesCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            locationsResponseCounter++;
-//            if (locationsResponseCounter == 4)
-//                loadingFinished();
-            if(isValid())
-            {
-                if (response.code() == 200) {
-                    try {
-                        parseTrees(response.body().string());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                else if(response.code() == 401)
-                {
-                    sessionExpireRedirect();
-                }
-                else
-                {
-                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
-            t.printStackTrace();
-        }
-    };
 
     private void parseTrees(String data) throws JSONException {
 
