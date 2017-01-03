@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.mixpanel.android.mpmetrics.MixpanelAPI;
 
 import org.json.JSONArray;
@@ -17,6 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -29,7 +31,13 @@ import wal.fennel.R;
 import wal.fennel.activities.MainActivity;
 import wal.fennel.activities.SplashActivity;
 import wal.fennel.application.Fennel;
+import wal.fennel.common.database.DatabaseHelper;
 import wal.fennel.datamodels.Auth;
+import wal.fennel.models.Location;
+import wal.fennel.models.SubLocation;
+import wal.fennel.models.Tree;
+import wal.fennel.models.Village;
+import wal.fennel.network.NetworkHelper;
 import wal.fennel.network.Session;
 import wal.fennel.network.WebApi;
 import wal.fennel.utils.Constants;
@@ -210,7 +218,6 @@ public class Login extends BaseFragment {
     private Callback<ResponseBody> aboutMeCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            loadingFinished();
             if (response.code() == Constants.RESPONSE_SUCCESS) {
 
                 try {
@@ -318,7 +325,8 @@ public class Login extends BaseFragment {
             String idFac = obj1.getString("Id");
             PreferenceHelper.getInstance().writeLoginUserType(type);
             PreferenceHelper.getInstance().writeLoginUserId(idFac);
-            proceedToMainScreen();
+
+            getDropDownsData();
         }
     }
 
@@ -326,5 +334,225 @@ public class Login extends BaseFragment {
         PreferenceHelper.getInstance().writeFirstRun(true);
         startActivity(new Intent(getActivity(), MainActivity.class));
         getActivity().finish();
+    }
+
+    private void getDropDownsData() {
+
+        if(NetworkHelper.isNetAvailable(getActivity())) {
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+
+                        Response<ResponseBody> locationsResponse =  WebApi.getLocations();
+                        if (locationsResponse.code() == 200) {
+                            parseLocations(locationsResponse.body().string());
+                        }
+
+                        Response<ResponseBody> subLocationsResponse =  WebApi.getSubLocations();
+                        if (subLocationsResponse.code() == 200) {
+                            parseSubLocations(subLocationsResponse.body().string());
+                        }
+
+                        Response<ResponseBody> villagesResponse = WebApi.getVillages();
+                        if (villagesResponse.code() == 200) {
+                            parseVillages(villagesResponse.body().string());
+                        }
+
+                        Response<ResponseBody> treesResponse = WebApi.getTrees();
+                        if (treesResponse.code() == 200) {
+                            parseTrees(treesResponse.body().string());
+                        }
+
+                        loadingFinishedFromBackground();
+                        proceedToMainScreen();
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Crashlytics.logException(e);
+                        loadingFinishedFromBackground();
+                        proceedToMainScreen();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Crashlytics.logException(e);
+                        loadingFinishedFromBackground();
+                        proceedToMainScreen();
+                    }
+                }
+            }).start();
+        }
+    }
+
+    private void loadingFinishedFromBackground() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                loadingFinished();
+            }
+        });
+    }
+
+    private void parseLocations(String data) throws JSONException {
+
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if(arrRecords.length() > 0) {
+            DatabaseHelper.getInstance().deleteAllLocations();
+            ArrayList<Location> allLocations = new ArrayList<>();
+
+            DatabaseHelper.getInstance().getWritableDatabase().beginTransaction();
+
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject locationObj = arrRecords.getJSONObject(i);
+
+                String id = "";
+                String name = "";
+
+                id = locationObj.getString("Id");
+                if (id.equalsIgnoreCase("null")) id = "";
+
+                name = locationObj.getString("Name");
+                if (name.equalsIgnoreCase("null")) name = "";
+
+                Location location = new Location(id, name);
+                allLocations.add(location);
+                DatabaseHelper.getInstance().insertLocation(location);
+            }
+
+            DatabaseHelper.getInstance().getWritableDatabase().setTransactionSuccessful();
+            DatabaseHelper.getInstance().getWritableDatabase().endTransaction();
+        }
+        else
+        {
+            Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void parseSubLocations(String data) throws JSONException {
+
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if(arrRecords.length() > 0) {
+            DatabaseHelper.getInstance().deleteAllSubLocations();
+            ArrayList<SubLocation> allSubLocations = new ArrayList<>();
+
+            DatabaseHelper.getInstance().getWritableDatabase().beginTransaction();
+
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject subLocationObj = arrRecords.getJSONObject(i);
+
+                String id = "";
+                String name = "";
+                String locationId = "";
+
+                id = subLocationObj.getString("Id");
+                if (id.equalsIgnoreCase("null")) id = "";
+
+                name = subLocationObj.getString("Name");
+                if (name.equalsIgnoreCase("null")) name = "";
+
+                locationId = subLocationObj.getString("Location__c");
+                if (locationId.equalsIgnoreCase("null")) locationId = "";
+
+                SubLocation subLocation = new SubLocation(id, name, locationId);
+                allSubLocations.add(subLocation);
+
+                DatabaseHelper.getInstance().insertSubLocation(subLocation);
+            }
+
+            DatabaseHelper.getInstance().getWritableDatabase().setTransactionSuccessful();
+            DatabaseHelper.getInstance().getWritableDatabase().endTransaction();
+        }
+        else
+        {
+            Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void parseVillages(String data) throws JSONException {
+
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if(arrRecords.length() > 0) {
+            DatabaseHelper.getInstance().deleteAllVillages();
+            ArrayList<Village> allVillages = new ArrayList<>();
+
+            DatabaseHelper.getInstance().getWritableDatabase().beginTransaction();
+
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject subLocationObj = arrRecords.getJSONObject(i);
+
+                String id = "";
+                String name = "";
+                String subLocationId = "";
+
+                id = subLocationObj.getString("Id");
+                if (id.equalsIgnoreCase("null")) id = "";
+
+                name = subLocationObj.getString("Name");
+                if (name.equalsIgnoreCase("null")) name = "";
+
+                subLocationId = subLocationObj.getString("Sub_Location__c");
+                if (subLocationId.equalsIgnoreCase("null")) subLocationId = "";
+
+                Village village = new Village(id, name, subLocationId);
+                allVillages.add(village);
+                DatabaseHelper.getInstance().inserVillage(village);
+            }
+
+            DatabaseHelper.getInstance().getWritableDatabase().setTransactionSuccessful();
+            DatabaseHelper.getInstance().getWritableDatabase().endTransaction();
+        }
+        else
+        {
+            Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void parseTrees(String data) throws JSONException {
+
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if(arrRecords.length() > 0) {
+            DatabaseHelper.getInstance().deleteAllTrees();
+
+            DatabaseHelper.getInstance().getWritableDatabase().beginTransaction();
+
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject treeObj = arrRecords.getJSONObject(i).getJSONObject("Tree_Species__r");
+
+                String id = "";
+                String name = "";
+                String subLocationId = "";
+
+                id = treeObj.getString("Id");
+                if (id.equalsIgnoreCase("null")) id = "";
+
+                name = treeObj.getString("Name");
+                if (name.equalsIgnoreCase("null")) name = "";
+
+                subLocationId = arrRecords.getJSONObject(i).getString("Sub_Location__c");
+                if (subLocationId.equalsIgnoreCase("null")) subLocationId = "";
+
+                Tree tree = new Tree(id, name, subLocationId);
+                DatabaseHelper.getInstance().insertTree(tree);
+            }
+
+            DatabaseHelper.getInstance().getWritableDatabase().setTransactionSuccessful();
+            DatabaseHelper.getInstance().getWritableDatabase().endTransaction();
+        }
+        else
+        {
+            Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
+        }
     }
 }
