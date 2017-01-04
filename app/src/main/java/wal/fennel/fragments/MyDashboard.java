@@ -100,7 +100,7 @@ public class MyDashboard extends BaseFragment {
         BaseFragment personLogBookFragment = (BaseFragment) getChildFragmentManager().findFragmentByTag(Constants.PERSON_DASHBOARD_TAG);
         if (personLogBookFragment == null) {
             FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-            transaction.replace(R.id.dashboard_layout, new PersonLogBookFragment());
+            transaction.replace(R.id.dashboard_layout, new PersonDashboardFragment());
             transaction.commit();
             getChildFragmentManager().executePendingTransactions();
         }

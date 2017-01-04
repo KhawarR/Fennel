@@ -64,6 +64,8 @@ import wal.fennel.activities.SplashActivity;
 import wal.fennel.adapters.MySignupsAdapter;
 import wal.fennel.application.Fennel;
 import wal.fennel.common.database.DatabaseHelper;
+import wal.fennel.models.DashboardFieldAgent;
+import wal.fennel.models.DashboardTask;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.FieldAgent;
 import wal.fennel.models.Location;
@@ -85,6 +87,7 @@ import wal.fennel.utils.Singleton;
 import wal.fennel.views.TitleBarLayout;
 
 import static io.realm.Realm.getDefaultInstance;
+import static wal.fennel.utils.Constants.FARMING_STATE_ONTIME;
 import static wal.fennel.utils.Constants.STR_FACILITATOR;
 
 /**
@@ -294,6 +297,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             getMySignupsFromDB();
             getMyFarmerTasksFromDB();
             getMyLogbookDataFromDB();
+            getMyDashboardDataFromDB();
             if(PreferenceHelper.getInstance().isSessionExpiredSyncReq())
                 WebApi.syncAll(null);
         }
@@ -1919,8 +1923,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
 //                Task newTask = new Task();
                 Map<String, String> taskMap = new HashMap<>();
-
                 JSONObject farmingTaskObj = arrRecords.getJSONObject(i);
+
                 String taskId = farmingTaskObj.getString("Farming_Task__c");
                 JSONObject farmVisit = farmingTaskObj.getJSONObject("Farm_Visit__r");
                 JSONObject fieldManager = farmVisit.optJSONObject("Field_Manager__r");
@@ -1976,17 +1980,170 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     }
 
     private void parseMyDashboardData(String responseStr) throws JSONException {
+
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.delete(DashboardFieldAgent.class);
+        realm.delete(DashboardTask.class);
+        realm.commitTransaction();
+
         Log.i("FENNEL", responseStr);
         JSONObject jsonObject = new JSONObject(responseStr);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
+        HashMap<String, DashboardFieldAgent> dashboardAgents = null;
+        ArrayList<DashboardFieldAgent> dashboardAgentsList = null;
 
-        String fieldOfficers = "";
-        String facilitators = "";
         if(arrRecords.length() > 0) {
-
+            dashboardAgents = new HashMap<>();
+            dashboardAgentsList = new ArrayList<>();
             for (int i = 0; i < arrRecords.length(); i++) {
+
+                String id = null;
+                String name = null;
+                String employeeId = null;
+                String phone = null;
+                JSONObject employeeObj = null;
+                String taskName = null;
+                String taskId = null;
+                String dueDate = null;
+                String completionDate = null;
+                String agentType = null;
+                boolean isCompleted = false;
+
+                int state = FARMING_STATE_ONTIME;
+
+                DashboardFieldAgent dashboardFieldAgent = null;
+                DashboardTask task = null;
+
+                JSONObject farmingTaskObj = arrRecords.getJSONObject(i);
+
+                String statusStr = farmingTaskObj.optString("Status__c");
+                if (statusStr.equalsIgnoreCase(Constants.STR_COMPLETED)) {
+                    isCompleted = true;
+                }
+                JSONObject shambaObj = farmingTaskObj.optJSONObject("Shamba__r");
+
+                JSONObject facilitatorObj = shambaObj.optJSONObject("Facilitator_Signup__r");
+                JSONObject fieldOfficerObj = shambaObj.optJSONObject("Field_Officer_Signup__r");
+                JSONObject fieldManagerObj = shambaObj.optJSONObject("Field_Manager_Signup__r");
+
+                if (fieldManagerObj != null) {
+                    id = fieldManagerObj.optString("Id");
+                    name = fieldManagerObj.optString("Name");
+                    phone = fieldManagerObj.optString("Phone__c");
+                    employeeObj = fieldManagerObj.optJSONObject("Employee__r");
+                    employeeId = employeeObj.optString("Name");
+                    agentType = Constants.STR_FIELD_MANAGER;
+                } else if (fieldOfficerObj != null) {
+                    id = fieldOfficerObj.optString("Id");
+                    name = fieldOfficerObj.optString("Name");
+                    phone = fieldOfficerObj.optString("Phone__c");
+                    employeeObj = fieldOfficerObj.optJSONObject("Employee__r");
+                    agentType = Constants.STR_FIELD_OFFICER;
+                    employeeId = employeeObj.optString("Name");
+                } else if (facilitatorObj != null) {
+                    id = facilitatorObj.optString("Id");
+                    name = facilitatorObj.optString("Name");
+                    phone = facilitatorObj.optString("Phone__c");
+                    employeeId = facilitatorObj.optString("Employee_ID__c");
+                    agentType = Constants.STR_FACILITATOR;
+                }
+                taskName = farmingTaskObj.optString("Name");
+                taskId = farmingTaskObj.optString("Id");
+                dueDate = farmingTaskObj.optString("Due_Date__c");
+                completionDate = farmingTaskObj.optString("Completion_Date__c");
+
+                SimpleDateFormat serverFormat = new SimpleDateFormat("yyyy-MM-dd");
+                Date due = null;
+                Date completion = null;
+                try {
+                    due = serverFormat.parse(dueDate);
+                    completion = serverFormat.parse(completionDate);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                if ( (completion != null && completion.getTime() > due.getTime()) || (completion == null && !isCompleted && due.getTime() < System.currentTimeMillis()) ) {
+                    state = Constants.FARMING_STATE_LATE;
+                }
+
+                if (taskName.equalsIgnoreCase("Task1")) {
+                    Log.i("FENNEL", "Catch!");
+                }
+
+                RealmList<DashboardTask> dashboardTasks = null;
+
+                if (dashboardAgents.get(id) != null) {
+                    dashboardFieldAgent = dashboardAgents.get(id);
+                    dashboardTasks = dashboardFieldAgent.getDashboardTasks();
+                    boolean isFound = false;
+                    for (DashboardTask dashboardTask : dashboardTasks) {
+                        if (dashboardTask.getTaskName().equalsIgnoreCase(taskName)) {
+                            isFound = true;
+                            realm.beginTransaction();
+                            {
+                                dashboardTask.setTotalCount(dashboardTask.getTotalCount() + 1);
+                                if (state == Constants.FARMING_STATE_LATE)
+                                    dashboardTask.setState(state);
+                                if (isCompleted) {
+                                    dashboardTask.setCompleted(dashboardTask.getCompleted() + 1);
+                                    realm.commitTransaction();
+                                    break;
+                                }
+                            }
+                            realm.commitTransaction();
+                        }
+                    }
+                    if (!isFound) {
+                        realm.beginTransaction();
+                        {
+                            task = realm.createObject(DashboardTask.class);
+                            task.setTaskName(taskName);
+                            task.setTaskId(taskId);
+                            task.setDueDate(dueDate);
+                            task.setCompletionDate(completionDate);
+                            task.setTotalCount(task.getTotalCount() + 1);
+                            task.setState(state);
+
+                            if (isCompleted) {
+                                task.setCompleted(task.getCompleted() + 1);
+                            }
+                            dashboardTasks.add(task);
+                        }
+                        realm.commitTransaction();
+                    }
+                } else {
+
+                    realm.beginTransaction();
+                    {
+                        dashboardFieldAgent = realm.createObject(DashboardFieldAgent.class);
+                        dashboardFieldAgent.setAgentId(id);
+                        dashboardFieldAgent.setAgentName(name);
+                        dashboardFieldAgent.setAgentEmployeeId(employeeId);
+                        dashboardFieldAgent.setAgentNumber(phone);
+                        dashboardFieldAgent.setAgentType(agentType);
+
+                        task = realm.createObject(DashboardTask.class);
+                        task.setTaskName(taskName);
+                        task.setTaskId(taskId);
+                        task.setDueDate(dueDate);
+                        task.setCompletionDate(completionDate);
+                        task.setTotalCount(task.getTotalCount() + 1);
+                        task.setState(state);
+                        if (isCompleted) {
+                            task.setCompleted(task.getCompleted() + 1);
+                        }
+                        dashboardTasks = dashboardFieldAgent.getDashboardTasks();
+                        dashboardTasks.add(task);
+                    }
+                    realm.commitTransaction();
+
+                    dashboardAgents.put(id, dashboardFieldAgent);
+                    dashboardAgentsList.add(dashboardFieldAgent);
+                }
             }
         }
+        Singleton.getInstance().dashboardFieldAgents = dashboardAgentsList;
     }
 
     private void parseMyLogbookFOFacData(String responseStr) throws JSONException {
@@ -2332,6 +2489,18 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         RealmResults<FieldAgent> visitLogsList = Realm.getDefaultInstance().where(FieldAgent.class).findAll();
         Singleton.getInstance().fieldAgentsVisitLogs.addAll(visitLogsList);
+
+        loadingFinished();
+    }
+
+    private void getMyDashboardDataFromDB() {
+        Singleton.getInstance().dashboardFieldAgents.clear();
+
+        if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
+        loadingStarted();
+
+        RealmResults<DashboardFieldAgent> dashboardFieldAgents = Realm.getDefaultInstance().where(DashboardFieldAgent.class).findAll();
+        Singleton.getInstance().dashboardFieldAgents.addAll(dashboardFieldAgents);
 
         loadingFinished();
     }

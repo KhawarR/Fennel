@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import wal.fennel.R;
-import wal.fennel.adapters.PersonLogBookAdapter;
-import wal.fennel.models.FieldAgent;
+import wal.fennel.adapters.PersonDashboardAdapter;
+import wal.fennel.models.DashboardFieldAgent;
 import wal.fennel.utils.Constants;
 import wal.fennel.utils.Singleton;
 
@@ -26,9 +26,9 @@ public class PersonDashboardFragment extends BaseFragment implements AdapterView
 
     @Bind(R.id.person_listview)
     ListView logbookListView;
-    PersonLogBookAdapter logBookAdapter;
+    PersonDashboardAdapter dashboardAdapter;
 
-    ArrayList<FieldAgent> personsList;
+    ArrayList<DashboardFieldAgent> personsList;
 
     @Nullable
     @Override
@@ -47,30 +47,30 @@ public class PersonDashboardFragment extends BaseFragment implements AdapterView
 
         logbookListView.setOnItemClickListener(this);
 
-        personsList = getPersonLogbookData();
+        personsList = getPersonDashboardData();
 
-        logBookAdapter = new PersonLogBookAdapter(getActivity(), personsList);
-        logbookListView.setAdapter(logBookAdapter);
+        dashboardAdapter = new PersonDashboardAdapter(getActivity(), personsList);
+        logbookListView.setAdapter(dashboardAdapter);
     }
 
-    private ArrayList<FieldAgent> getPersonLogbookData() {
-        ArrayList<FieldAgent> fieldAgents = Singleton.getInstance().fieldAgentsVisitLogs;
-        ArrayList<FieldAgent> fieldOfficers = new ArrayList<>();
-        ArrayList<FieldAgent> facilitators = new ArrayList<>();
-        for (FieldAgent fieldAgent : fieldAgents) {
+    private ArrayList<DashboardFieldAgent> getPersonDashboardData() {
+        ArrayList<DashboardFieldAgent> fieldAgents = Singleton.getInstance().dashboardFieldAgents;
+        ArrayList<DashboardFieldAgent> fieldOfficers = new ArrayList<>();
+        ArrayList<DashboardFieldAgent> facilitators = new ArrayList<>();
+        for (DashboardFieldAgent fieldAgent : fieldAgents) {
             if (fieldAgent.getAgentType().equalsIgnoreCase(Constants.STR_FIELD_OFFICER)) {
                 fieldOfficers.add(fieldAgent);
             } else if (fieldAgent.getAgentType().equalsIgnoreCase(Constants.STR_FACILITATOR)) {
                 facilitators.add(fieldAgent);
             }
         }
-        ArrayList<FieldAgent> allAgents = new ArrayList<>();
+        ArrayList<DashboardFieldAgent> allAgents = new ArrayList<>();
         if (fieldOfficers.size() > 0) {
-            allAgents.add(new FieldAgent("FIELD OFFICERS", "", "", "", "", "", null, true));
+            allAgents.add(new DashboardFieldAgent("FIELD OFFICERS", "", "", "", "", "", null, true));
             allAgents.addAll(fieldOfficers);
         }
         if (facilitators.size() > 0) {
-            allAgents.add(new FieldAgent("FACILITATORS", "", "", "", "", "", null, true));
+            allAgents.add(new DashboardFieldAgent("FACILITATORS", "", "", "", "", "", null, true));
             allAgents.addAll(facilitators);
         }
         return allAgents;
@@ -83,7 +83,7 @@ public class PersonDashboardFragment extends BaseFragment implements AdapterView
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        FieldAgent clickedAgent = personsList.get(position - logbookListView.getHeaderViewsCount());
-        ((MyDashboard)getParentFragment()).addPersonDetailViewFragment(clickedAgent);
+        DashboardFieldAgent clickedAgent = personsList.get(position - logbookListView.getHeaderViewsCount());
+//        ((MyDashboard)getParentFragment()).addPersonDetailViewFragment(clickedAgent);
     }
 }

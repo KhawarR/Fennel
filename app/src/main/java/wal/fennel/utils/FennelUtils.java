@@ -131,18 +131,18 @@ public class FennelUtils {
         }
     }
 
-    public static Date getDateFromString(String dueDateStr) {
+    public static Date getDateFromString(String dateStr) {
 
-        Date dueDate = null;
-        if (dueDateStr != null) {
+        Date date = null;
+        if (dateStr != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             try {
-                dueDate= dateFormat.parse(dueDateStr);
+                date= dateFormat.parse(dateStr);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
         }
-        return dueDate;
+        return date;
     }
 
     public static String getTimeAgo(long time) {
@@ -221,5 +221,49 @@ public class FennelUtils {
             }
             return ext.toLowerCase();
         }
+    }
+
+    public static String getMonthString(int monthIndex) {
+        String monthStr = null;
+
+        switch (monthIndex) {
+            case 0:
+                monthStr = "JAN";
+                break;
+            case 1:
+                monthStr = "FEB";
+                break;
+            case 2:
+                monthStr = "MAR";
+                break;
+            case 3:
+                monthStr = "APR";
+                break;
+            case 4:
+                monthStr = "MAY";
+                break;
+            case 5:
+                monthStr = "JUN";
+                break;
+            case 6:
+                monthStr = "JUL";
+                break;
+            case 7:
+                monthStr = "AUG";
+                break;
+            case 8:
+                monthStr = "SEP";
+                break;
+            case 9:
+                monthStr = "OCT";
+                break;
+            case 10:
+                monthStr = "NOV";
+                break;
+            case 11:
+                monthStr = "DEC";
+                break;
+        }
+        return monthStr;
     }
 }
