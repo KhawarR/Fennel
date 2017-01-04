@@ -221,28 +221,32 @@ public class WebApi {
         return processCall(apiCall, callback);
     }
 
-    public static boolean getLocations(Callback<ResponseBody> callback){
+    public static Response getLocations() throws IOException {
         String locationsQuery = NetworkHelper.GET_LOCATIONS;
-        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, locationsQuery);
-        return processCall(apiCall, callback);
+        Call<ResponseBody> apiCall = Fennel.getWebService().querySynchronous(Session.getAuthToken(), NetworkHelper.API_VERSION, locationsQuery);
+        Response<ResponseBody> res = apiCall.execute();
+        return res;
     }
 
-    public static boolean getSubLocations(Callback<ResponseBody> callback){
+    public static Response getSubLocations() throws IOException {
         String subLocationsQuery = NetworkHelper.GET_SUB_LOCATIONS;
-        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, subLocationsQuery);
-        return processCall(apiCall, callback);
+        Call<ResponseBody> apiCall = Fennel.getWebService().querySynchronous(Session.getAuthToken(), NetworkHelper.API_VERSION, subLocationsQuery);
+        Response<ResponseBody> res = apiCall.execute();
+        return res;
     }
 
-    public static boolean getVillages(Callback<ResponseBody> callback){
+    public static Response getVillages() throws IOException {
         String villagesQuery = NetworkHelper.GET_VILLAGES;
-        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, villagesQuery);
-        return processCall(apiCall, callback);
+        Call<ResponseBody> apiCall = Fennel.getWebService().querySynchronous(Session.getAuthToken(), NetworkHelper.API_VERSION, villagesQuery);
+        Response<ResponseBody> res = apiCall.execute();
+        return res;
     }
 
-    public static boolean getTrees(Callback<ResponseBody> callback){
+    public static Response getTrees() throws IOException {
         String treesQuery = NetworkHelper.GET_TREES;
-        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, treesQuery);
-        return processCall(apiCall, callback);
+        Call<ResponseBody> apiCall = Fennel.getWebService().querySynchronous(Session.getAuthToken(), NetworkHelper.API_VERSION, treesQuery);
+        Response<ResponseBody> res = apiCall.execute();
+        return res;
     }
 
     public static boolean addAttachment(Callback<ResponseBody> callback, RequestBody entityBody, RequestBody imageBody){

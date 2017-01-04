@@ -23,6 +23,9 @@ public interface WebService {
 //    Call<SFResponse> loginQuery(@Header("Authorization") String token, @Path("apiVersion") String apiVersion, @Query("q") String query);
 
     @GET("/services/data/{apiVersion}/query")
+    Call<ResponseBody> querySynchronous(@Header("Authorization") String token, @Path("apiVersion") String apiVersion, @Query("q") String query);
+
+    @GET("/services/data/{apiVersion}/query")
     Call<ResponseBody> query(@Header("Authorization") String token, @Path("apiVersion") String apiVersion, @Query("q") String query);
 
     @POST ("/services/data/{apiVersion}/sobjects/Farmer__c/")

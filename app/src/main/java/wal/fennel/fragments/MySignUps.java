@@ -26,6 +26,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.mixpanel.android.mpmetrics.MixpanelAPI;
 import com.squareup.picasso.NetworkPolicy;
 
@@ -245,7 +246,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         });
 
         getMySignups();
-        getDropDownsData();
     }
 
     @Override
@@ -605,10 +605,16 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     };
 
     private void sessionExpireRedirect(){
-        PreferenceHelper.getInstance().clearSession(false);
-        Intent intent = new Intent(getActivity(), SplashActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        getActivity().startActivity(intent);
+        try {
+            PreferenceHelper.getInstance().clearSession(false);
+            Intent intent = new Intent(getActivity(), SplashActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            getActivity().startActivity(intent);
+        }
+        catch (NullPointerException e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
+        }
     }
 
     private void parseFarmerAttachmentData(String data) throws JSONException {
@@ -770,300 +776,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             }
         }
         return "";
-    }
-
-    private void getDropDownsData() {
-
-        WebApi.getLocations(getLocationsCallback);
-        WebApi.getSubLocations(getSubLocationsCallback);
-        WebApi.getVillages(getVillagesCallback);
-        WebApi.getTrees(getTreesCallback);
-    }
-
-    private Callback<ResponseBody> getLocationsCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            locationsResponseCounter++;
-//            if (locationsResponseCounter == 4)
-//                loadingFinished();
-            if(isValid())
-            {
-                if (response.code() == 200) {
-                    try {
-                        parseLocations(response.body().string());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                else if(response.code() == 401)
-                {
-                    sessionExpireRedirect();
-                }
-                else
-                {
-                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
-            t.printStackTrace();
-        }
-    };
-
-    private void parseLocations(String data) throws JSONException {
-
-        JSONObject jsonObject = new JSONObject(data);
-        JSONArray arrRecords = jsonObject.getJSONArray("records");
-
-        if(arrRecords.length() > 0) {
-            DatabaseHelper.getInstance().deleteAllLocations();
-            ArrayList<Location> allLocations = new ArrayList<>();
-            for (int i = 0; i < arrRecords.length(); i++) {
-
-                JSONObject locationObj = arrRecords.getJSONObject(i);
-
-                String id = "";
-                String name = "";
-
-                id = locationObj.getString("Id");
-                if (id.equalsIgnoreCase("null")) id = "";
-
-                name = locationObj.getString("Name");
-                if (name.equalsIgnoreCase("null")) name = "";
-
-                Location location = new Location(id, name);
-                allLocations.add(location);
-                DatabaseHelper.getInstance().insertLocation(location);
-            }
-        }
-        else
-        {
-            Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private Callback<ResponseBody> getSubLocationsCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            locationsResponseCounter++;
-//            if (locationsResponseCounter == 4)
-//                loadingFinished();
-            if(isValid())
-            {
-                if (response.code() == 200) {
-                    try {
-                        parseSubLocations(response.body().string());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                else if(response.code() == 401)
-                {
-                    sessionExpireRedirect();
-                }
-                else
-                {
-                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
-            t.printStackTrace();
-        }
-    };
-
-    private void parseSubLocations(String data) throws JSONException {
-
-        JSONObject jsonObject = new JSONObject(data);
-        JSONArray arrRecords = jsonObject.getJSONArray("records");
-
-        if(arrRecords.length() > 0) {
-            DatabaseHelper.getInstance().deleteAllSubLocations();
-            ArrayList<SubLocation> allSubLocations = new ArrayList<>();
-            for (int i = 0; i < arrRecords.length(); i++) {
-
-                JSONObject subLocationObj = arrRecords.getJSONObject(i);
-
-                String id = "";
-                String name = "";
-                String locationId = "";
-
-                id = subLocationObj.getString("Id");
-                if (id.equalsIgnoreCase("null")) id = "";
-
-                name = subLocationObj.getString("Name");
-                if (name.equalsIgnoreCase("null")) name = "";
-
-                locationId = subLocationObj.getString("Location__c");
-                if (locationId.equalsIgnoreCase("null")) locationId = "";
-
-                SubLocation subLocation = new SubLocation(id, name, locationId);
-                allSubLocations.add(subLocation);
-                DatabaseHelper.getInstance().insertSubLocation(subLocation);
-            }
-        }
-        else
-        {
-            Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private Callback<ResponseBody> getVillagesCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            locationsResponseCounter++;
-//            if (locationsResponseCounter == 4)
-//                loadingFinished();
-            if(isValid())
-            {
-                if (response.code() == 200) {
-                    try {
-                        parseVillages(response.body().string());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                else if(response.code() == 401)
-                {
-                    sessionExpireRedirect();
-                }
-                else
-                {
-                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
-            t.printStackTrace();
-        }
-    };
-
-    private void parseVillages(String data) throws JSONException {
-
-        JSONObject jsonObject = new JSONObject(data);
-        JSONArray arrRecords = jsonObject.getJSONArray("records");
-
-        if(arrRecords.length() > 0) {
-            DatabaseHelper.getInstance().deleteAllVillages();
-            ArrayList<Village> allVillages = new ArrayList<>();
-            for (int i = 0; i < arrRecords.length(); i++) {
-
-                JSONObject subLocationObj = arrRecords.getJSONObject(i);
-
-                String id = "";
-                String name = "";
-                String subLocationId = "";
-
-                id = subLocationObj.getString("Id");
-                if (id.equalsIgnoreCase("null")) id = "";
-
-                name = subLocationObj.getString("Name");
-                if (name.equalsIgnoreCase("null")) name = "";
-
-                subLocationId = subLocationObj.getString("Sub_Location__c");
-                if (subLocationId.equalsIgnoreCase("null")) subLocationId = "";
-
-                Village village = new Village(id, name, subLocationId);
-                allVillages.add(village);
-                DatabaseHelper.getInstance().insertVillage(village);
-            }
-        }
-        else
-        {
-            Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private Callback<ResponseBody> getTreesCallback = new Callback<ResponseBody>() {
-        @Override
-        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            locationsResponseCounter++;
-//            if (locationsResponseCounter == 4)
-//                loadingFinished();
-            if(isValid())
-            {
-                if (response.code() == 200) {
-                    try {
-                        parseTrees(response.body().string());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                else if(response.code() == 401)
-                {
-                    sessionExpireRedirect();
-                }
-                else
-                {
-                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-
-        @Override
-        public void onFailure(Call<ResponseBody> call, Throwable t) {
-            locationsResponseCounter++;
-            if (locationsResponseCounter == 4)
-                loadingFinished();
-            t.printStackTrace();
-        }
-    };
-
-    private void parseTrees(String data) throws JSONException {
-
-        JSONObject jsonObject = new JSONObject(data);
-        JSONArray arrRecords = jsonObject.getJSONArray("records");
-
-        if(arrRecords.length() > 0) {
-            DatabaseHelper.getInstance().deleteAllTrees();
-            for (int i = 0; i < arrRecords.length(); i++) {
-
-                JSONObject treeObj = arrRecords.getJSONObject(i).getJSONObject("Tree_Species__r");
-
-                String id = "";
-                String name = "";
-                String subLocationId = "";
-
-                id = treeObj.getString("Id");
-                if (id.equalsIgnoreCase("null")) id = "";
-
-                name = treeObj.getString("Name");
-                if (name.equalsIgnoreCase("null")) name = "";
-
-                subLocationId = arrRecords.getJSONObject(i).getString("Sub_Location__c");
-                if (subLocationId.equalsIgnoreCase("null")) subLocationId = "";
-
-                Tree tree = new Tree(id, name, subLocationId);
-                DatabaseHelper.getInstance().insertTree(tree);
-            }
-        }
-        else
-        {
-            Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
-        }
     }
     //endregion
 
