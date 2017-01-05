@@ -50,4 +50,7 @@ public interface WebService {
 
     @GET("/services/data/{apiVersion}/sobjects/Attachment/{attachmentId}/body")
     Call<ResponseBody> downloadAttachmentForTask(@Header("Authorization") String token, @Path("apiVersion") String apiVersion, @Path("attachmentId") String attachmentId);
+
+    @POST ("/services/data/{apiVersion}/sobjects/Farm_Visit__c/")
+    Call<ResponseModel> addFarmVisit(@Header("Authorization") String token, @Header("Content-Type") String contentType, @Path("apiVersion") String apiVersion, @Body HashMap<String, Object> farmVisitMap);
 }

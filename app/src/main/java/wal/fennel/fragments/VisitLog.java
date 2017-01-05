@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -51,6 +52,8 @@ import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
 import wal.fennel.adapters.FarmerStatusAdapter;
 import wal.fennel.location.GPSTracker;
+import wal.fennel.models.FarmVisit;
+import wal.fennel.models.FarmVisitLog;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.Task;
 import wal.fennel.models.TaskItem;
@@ -345,7 +348,6 @@ public class VisitLog extends BaseFragment  {
                         if(position >= 0) {
                             Realm realm = Realm.getDefaultInstance();
                             realm.beginTransaction();
-                            Toast.makeText(getActivity(), taskItem.getOptions().get(position).getName(), Toast.LENGTH_SHORT).show();
                             for (int j = 0; j < taskItem.getOptions().size(); j++) {
                                 taskItem.getOptions().get(j).setValue(false);
                             }
@@ -418,18 +420,6 @@ public class VisitLog extends BaseFragment  {
                 ivIcon.setVisibility(View.GONE);
 
                 taskItem.setTaskDone(true);
-
-//                farmerImageUri = originalPath;
-//                isFarmerPhotoSet = true;
-//                isFarmerPhotoEdited = true;
-//                farmerImageUrl = uri;
-//                if (isEdit) {
-////                    if(NetworkHelper.isNetAvailable(getActivity()))
-////                        attachFarmerImageToFarmerObject(farmer);
-////                    else
-//                    editFarmerInDB(false);
-//                }
-//                checkEnableSubmit();
             }
 
             @Override
@@ -460,8 +450,19 @@ public class VisitLog extends BaseFragment  {
     }
 
     private String getGpsStamp(double latitude, double longitude) {
+        int maxStrLength = 9;
         String strLatitude = String.valueOf(latitude);
+        try {
+             strLatitude = strLatitude.substring(0, maxStrLength);
+        } catch (StringIndexOutOfBoundsException e) {
+             e.printStackTrace();
+        }
         String strLongitude = String.valueOf(longitude);
+        try {
+            strLongitude = strLongitude.substring(0, maxStrLength);
+        } catch (StringIndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
         String time = FennelUtils.getFormattedTime(System.currentTimeMillis(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_HH_MM_SS);
         String gpsStamp = "Latitude: %s\nLongitude: %s\nTime: %s";
 
@@ -470,24 +471,31 @@ public class VisitLog extends BaseFragment  {
     }
 
     private void setTaskDone(final TaskItem taskItem) {
-//        Realm realm = Realm.getDefaultInstance();
-//        realm.beginTransaction();
-//        taskItem.setTaskDone(!taskItem.isTaskDone());
-//        realm.commitTransaction();
         taskItem.setTaskDone(!taskItem.isTaskDone());
         populateTaskItems();
     }
 
     @OnClick(R.id.txtSave)
     void onClickSaveTask() {
+        updateTaskItems(Constants.STR_IN_PROGRESS);
+    }
+
+    @OnClick(R.id.txtSubmitApproval)
+    void onClickSubmitForApprovalTask() {
+        updateTaskItems(Constants.STR_COMPLETED);
+    }
+
+    private void updateTaskItems(String taskStatus) {
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
-        task.setStatus(Constants.STR_IN_PROGRESS);
+        task.setStatus(taskStatus);
+        task.setDataDirty(true);
         for (int i = 0; i < localTaskItems.size(); i++) {
 
             TaskItem taskItem = localTaskItems.get(i);
 
             taskItems.get(i).setTaskDone(taskItem.isTaskDone());
+            taskItems.get(i).setDataDirty(true);
 
             if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Text.toString())){
                 taskItems.get(i).setTextValue(taskItem.getTextValue());
@@ -499,6 +507,7 @@ public class VisitLog extends BaseFragment  {
                         && taskItems.get(i).getOptions() != null
                         && taskItems.get(i).getOptions().size() > 0) {
                     taskItems.get(i).getOptions().get(0).setValue(taskItem.getOptions().get(0).isValue());
+                    taskItems.get(i).getOptions().get(0).setDataDirty(true);
                 }
             } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.File.toString())){
                 if(taskItem.getFileActionType().equalsIgnoreCase(Constants.STR_VIEW_MEDIA)){
@@ -510,19 +519,39 @@ public class VisitLog extends BaseFragment  {
                 for (int j = 0; j < taskItem.getOptions().size(); j++) {
                     if(taskItem.getOptions().get(j).isValue()) {
                         taskItems.get(i).getOptions().get(j).setValue(true);
+                        taskItems.get(i).getOptions().get(j).setDataDirty(true);
                     }
                 }
             }
         }
-        realm.commitTransaction();
-        ((BaseContainerFragment) getParentFragment()).popFragment();
-    }
 
-    @OnClick(R.id.txtSubmitApproval)
-    void onClickSubmitForApprovalTask() {
-        Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        task.setStatus(Constants.STR_COMPLETED);
+        RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("shambaId", farmer.getFarmId()).findAll().sort("visitedDate", Sort.DESCENDING);
+
+        boolean createNewFarmVisit = false;
+        FarmVisit farmVisit = null;
+        if(farmVisits != null && farmVisits.size() > 0) {
+            farmVisit = farmVisits.get(0);
+
+            if(!DateUtils.isToday(farmVisit.getVisitedDate())) {
+                createNewFarmVisit = true;
+            }
+        } else {
+            createNewFarmVisit = true;
+        }
+
+        if (createNewFarmVisit) {
+            String farmVisitId = Constants.STR_FARMER_ID_PREFIX + String.valueOf(System.currentTimeMillis());
+
+            farmVisit = realm.createObject(FarmVisit.class);
+            farmVisit.setAll(farmVisitId, farmer.getFarmId(), farmer.getFarmerId(),
+                    PreferenceHelper.getInstance().readLoginUserId(),
+                    PreferenceHelper.getInstance().readLoginUserType(),
+                    System.currentTimeMillis(), true);
+        }
+
+        FarmVisitLog visitLog = realm.createObject(FarmVisitLog.class);
+        visitLog.setAll(farmVisit.getFarmVisitId(), task.getTaskId(), true);
+
         realm.commitTransaction();
         ((BaseContainerFragment) getParentFragment()).popFragment();
     }

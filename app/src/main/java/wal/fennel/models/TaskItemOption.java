@@ -15,6 +15,7 @@ public class TaskItemOption extends RealmObject implements Parcelable{
     private String id = "";
     private String name = "";
     private boolean isValue = false;
+    private boolean isDataDirty = false;
 
     public TaskItemOption(){
 
@@ -24,12 +25,14 @@ public class TaskItemOption extends RealmObject implements Parcelable{
         this.id = other.id;
         this.name = other.name;
         this.isValue = other.isValue;
+        this.isDataDirty = other.isDataDirty;
     }
 
-    public TaskItemOption(String id, String name, boolean isValue) {
+    public TaskItemOption(String id, String name, boolean isValue, boolean isDataDirty) {
         this.id = id;
         this.name = name;
         this.isValue = isValue;
+        this.isDataDirty = isDataDirty;
     }
 
     public String getId() {
@@ -56,6 +59,14 @@ public class TaskItemOption extends RealmObject implements Parcelable{
         isValue = value;
     }
 
+    public boolean isDataDirty() {
+        return isDataDirty;
+    }
+
+    public void setDataDirty(boolean dataDirty) {
+        isDataDirty = dataDirty;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -66,12 +77,14 @@ public class TaskItemOption extends RealmObject implements Parcelable{
         dest.writeString(this.id);
         dest.writeString(this.name);
         dest.writeInt(isValue ? 1 : 0);
+        dest.writeInt(isDataDirty ? 1 : 0);
     }
 
     protected TaskItemOption(Parcel in) {
         this.id = in.readString();
         this.name = in.readString();
         this.isValue = in.readInt() == 1 ? true : false;
+        this.isDataDirty = in.readInt() == 1 ? true : false;
     }
 
     public static final Parcelable.Creator<TaskItemOption> CREATOR = new Parcelable.Creator<TaskItemOption>() {

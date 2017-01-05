@@ -1880,7 +1880,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                             RealmList<TaskItemOption> options = new RealmList<>();
 
-                            TaskItem newTaskItem = new TaskItem(sequence, id, taskMap.get("Id"), name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false, "");
+                            TaskItem newTaskItem = new TaskItem(sequence, id, taskMap.get("Id"), name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false, "", false);
                             visitLogTask.getTaskItems().add(newTaskItem);
                         }
                     }
