@@ -53,4 +53,16 @@ public interface WebService {
 
     @POST ("/services/data/{apiVersion}/sobjects/Farm_Visit__c/")
     Call<ResponseModel> addFarmVisit(@Header("Authorization") String token, @Header("Content-Type") String contentType, @Path("apiVersion") String apiVersion, @Body HashMap<String, Object> farmVisitMap);
+
+    @POST ("/services/data/{apiVersion}/sobjects/Visit_Log__c/")
+    Call<ResponseModel> addFarmVisitLog(@Header("Authorization") String token, @Header("Content-Type") String contentType, @Path("apiVersion") String apiVersion, @Body HashMap<String, Object> farmVisitLogMap);
+
+    @PATCH("/services/data/{apiVersion}/sobjects/Farming_Task__c/{farmingTaskId}")
+    Call<ResponseBody> editFarmingTask(@Header("Authorization") String token, @Header("Content-Type") String contentType, @Path("apiVersion") String apiVersion, @Path("farmingTaskId") String farmerId, @Body HashMap<String, Object> farmingTask);
+
+    @PATCH("/services/data/{apiVersion}/sobjects/Task_Item__c/{taskItemId}")
+    Call<ResponseBody> editTaskItem(@Header("Authorization") String token, @Header("Content-Type") String contentType, @Path("apiVersion") String apiVersion, @Path("taskItemId") String farmerId, @Body HashMap<String, Object> taskItem);
+
+    @PATCH("/services/data/{apiVersion}/sobjects/Task_Item_Option__c/{taskItemOptionId}")
+    Call<ResponseBody> editTaskItemOption(@Header("Authorization") String token, @Header("Content-Type") String contentType, @Path("apiVersion") String apiVersion, @Path("taskItemOptionId") String farmerId, @Body HashMap<String, Object> taskItemOption);
 }

@@ -547,6 +547,8 @@ public class VisitLog extends BaseFragment  {
                     PreferenceHelper.getInstance().readLoginUserId(),
                     PreferenceHelper.getInstance().readLoginUserType(),
                     System.currentTimeMillis(), true);
+        } else {
+            farmVisit.setDataDirty(true);
         }
 
         FarmVisitLog visitLog = realm.createObject(FarmVisitLog.class);

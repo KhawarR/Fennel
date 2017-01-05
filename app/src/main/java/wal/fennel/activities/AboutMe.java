@@ -671,6 +671,9 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
     @Override
     public void onTitleBarLeftIconClicked(View view) {
         mixPanel.track(MixPanelConstants.Event.BACK_BUTTON);
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
         finish();
     }
 
