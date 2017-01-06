@@ -309,6 +309,21 @@ public class WebApi {
         return processCall(apiCall, callback);
     }
 
+    public static boolean editFarmingTask(Callback<ResponseBody> callback, String farmingTaskId, HashMap<String, Object> farmingTaskMap){
+        Call<ResponseBody> apiCall = Fennel.getWebService().editFarmingTask(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmingTaskId, farmingTaskMap);
+        return processCall(apiCall, callback);
+    }
+
+    public static boolean editTaskItem(Callback<ResponseBody> callback, String taskItemId, HashMap<String, Object> taskItemMap){
+        Call<ResponseBody> apiCall = Fennel.getWebService().editTaskItem(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, taskItemId, taskItemMap);
+        return processCall(apiCall, callback);
+    }
+
+    public static boolean editTaskItemOption(Callback<ResponseBody> callback, String taskItemOptionId, HashMap<String, Object> taskItemOptionMap){
+        Call<ResponseBody> apiCall = Fennel.getWebService().editTaskItemOption(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, taskItemOptionId, taskItemOptionMap);
+        return processCall(apiCall, callback);
+    }
+
     private static <T> boolean processCall(Call<T> call, Callback<T> callback){
         try {
             if(mContext == null)
@@ -458,9 +473,24 @@ public class WebApi {
         processFarmerCalls(farmerRealmList);
         //endregion
 
-        //region VisitLogs
+        //region FarmVisits
         RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("isDataDirty", true).findAll();
         processFarmVisitCalls(farmVisits);
+        //endregion
+
+        //region FarmingTasks
+        RealmResults<Task> farmingTasks = Realm.getDefaultInstance().where(Task.class).equalTo("isDataDirty", true).findAll();
+        processFarmingTaskCalls(farmingTasks);
+        //endregion
+
+        //region TaskItems
+        RealmResults<TaskItem> taskItems = Realm.getDefaultInstance().where(TaskItem.class).equalTo("isDataDirty", true).findAll();
+        processTaskItemCalls(taskItems);
+        //endregion
+
+        //region TaskItemOption
+        RealmResults<TaskItemOption> taskItemOptions = Realm.getDefaultInstance().where(TaskItemOption.class).equalTo("isDataDirty", true).findAll();
+        processTaskItemOptionCalls(taskItemOptions);
         //endregion
 
         PreferenceHelper.getInstance().writeIsSyncInProgress(true);
@@ -848,6 +878,189 @@ public class WebApi {
         }
     }
 
+    private static void processFarmingTaskCalls(RealmResults<Task> farmingTasks) {
+        for (int i = 0; i < farmingTasks.size(); i++) {
+            final Task farmingTask = farmingTasks.get(i);
+            final HashMap<String, Object> farmingTaskMap = getFarmingTaskMap(farmingTask);
+            WebApi.editFarmingTask(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    countCalls--;
+
+                    FennelUtils.appendDebugLog("FarmingTask edit response: " + farmingTask.getTaskId() + " - " + response.code());
+
+                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+
+                        FennelUtils.appendDebugLog("FarmingTask edit finished: " + farmingTask.getTaskId());
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        farmingTask.setDataDirty(false);
+                        realm.commitTransaction();
+
+                        checkSyncComplete();
+                    }
+                    else if(response.code() == 401){
+                        FennelUtils.appendDebugLog("FarmingTask edit Session Expired, redirected: " + farmingTask.getTaskId());
+                        countFailedCalls++;
+                        sessionExpireRedirect();
+                    } else {
+                        String errorMessage = "";
+                        if(response.errorBody() != null) {
+                            try {
+                                errorMessage = response.errorBody().string().toString();
+                                JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
+                                errorMessage = objError.getString("message");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        FennelUtils.appendDebugLog("FarmingTask edit failed - " + response.code() + " - "  + errorMessage);
+                        Exception e = new Exception("FarmingTask Edit failed - " + response.code() + " - "  + errorMessage);
+                        Crashlytics.logException(e);
+                        if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
+                            sessionExpireRedirect();
+                        }
+                        countFailedCalls++;
+                        checkSyncComplete();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    countCalls--;
+                    countFailedCalls++;
+                    FennelUtils.appendDebugLog("FarmingTask edit Failed: " + t.getMessage());
+                    t.printStackTrace();
+                    checkSyncComplete();
+                }
+            }, farmingTask.getTaskId(), farmingTaskMap);
+        }
+    }
+
+    private static void processTaskItemCalls(RealmResults<TaskItem> taskItems) {
+        for (int i = 0; i < taskItems.size(); i++) {
+            final TaskItem taskItem = taskItems.get(i);
+            final HashMap<String, Object> taskItemMap = getTaskItemMap(taskItem);
+            WebApi.editTaskItem(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    countCalls--;
+
+                    FennelUtils.appendDebugLog("TaskItem edit response: " + taskItem.getId() + " - " + response.code());
+
+                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+
+                        FennelUtils.appendDebugLog("TaskItem edit finished: " + taskItem.getId());
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        taskItem.setDataDirty(false);
+                        realm.commitTransaction();
+
+                        checkSyncComplete();
+                    }
+                    else if(response.code() == 401){
+                        FennelUtils.appendDebugLog("TaskItem edit Session Expired, redirected: " + taskItem.getId());
+                        countFailedCalls++;
+                        sessionExpireRedirect();
+                    } else {
+                        String errorMessage = "";
+                        if(response.errorBody() != null) {
+                            try {
+                                errorMessage = response.errorBody().string().toString();
+                                JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
+                                errorMessage = objError.getString("message");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        FennelUtils.appendDebugLog("TaskItem edit failed - " + response.code() + " - "  + errorMessage);
+                        Exception e = new Exception("TaskItem Edit failed - " + response.code() + " - "  + errorMessage);
+                        Crashlytics.logException(e);
+                        if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
+                            sessionExpireRedirect();
+                        }
+                        countFailedCalls++;
+                        checkSyncComplete();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    countCalls--;
+                    countFailedCalls++;
+                    FennelUtils.appendDebugLog("TaskItem edit Failed: " + t.getMessage());
+                    t.printStackTrace();
+                    checkSyncComplete();
+                }
+            }, taskItem.getId(), taskItemMap);
+        }
+    }
+
+    private static void processTaskItemOptionCalls(RealmResults<TaskItemOption> taskItemOptions) {
+        for (int i = 0; i < taskItemOptions.size(); i++) {
+            final TaskItemOption taskItemOption = taskItemOptions.get(i);
+            final HashMap<String, Object> taskItemOptionMap = getTaskItemOptionMap(taskItemOption);
+            WebApi.editTaskItemOption(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    countCalls--;
+
+                    FennelUtils.appendDebugLog("TaskItemOption edit response: " + taskItemOption.getId() + " - " + response.code());
+
+                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+
+                        FennelUtils.appendDebugLog("TaskItemOption edit finished: " + taskItemOption.getId());
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        taskItemOption.setDataDirty(false);
+                        realm.commitTransaction();
+
+                        checkSyncComplete();
+                    }
+                    else if(response.code() == 401){
+                        FennelUtils.appendDebugLog("TaskItemOption edit Session Expired, redirected: " + taskItemOption.getId());
+                        countFailedCalls++;
+                        sessionExpireRedirect();
+                    } else {
+                        String errorMessage = "";
+                        if(response.errorBody() != null) {
+                            try {
+                                errorMessage = response.errorBody().string().toString();
+                                JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
+                                errorMessage = objError.getString("message");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        FennelUtils.appendDebugLog("TaskItemOption edit failed - " + response.code() + " - "  + errorMessage);
+                        Exception e = new Exception("TaskItemOption Edit failed - " + response.code() + " - "  + errorMessage);
+                        Crashlytics.logException(e);
+                        if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
+                            sessionExpireRedirect();
+                        }
+                        countFailedCalls++;
+                        checkSyncComplete();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    countCalls--;
+                    countFailedCalls++;
+                    FennelUtils.appendDebugLog("TaskItemOption edit Failed: " + t.getMessage());
+                    t.printStackTrace();
+                    checkSyncComplete();
+                }
+            }, taskItemOption.getId(), taskItemOptionMap);
+        }
+    }
+
     private static void adjustCountCallFailedFarmer(Farmer farmer){
         // -- for farm call
         countCalls--;
@@ -961,6 +1174,34 @@ public class WebApi {
         }
 
         return newFarmVisitMap;
+    }
+
+    private static HashMap<String, Object> getFarmingTaskMap(Task farmingTask) {
+
+        final HashMap<String, Object> newFarmingTaskMap = new HashMap<>();
+        newFarmingTaskMap.put("Status__c", farmingTask.getStatus());
+
+        return newFarmingTaskMap;
+    }
+
+    private static HashMap<String, Object> getTaskItemMap(TaskItem taskItem) {
+
+        final HashMap<String, Object> newTaskItemMap = new HashMap<>();
+        newTaskItemMap.put("Completed__c", taskItem.isTaskDone());
+        newTaskItemMap.put("Text_Value__c", taskItem.getTextValue());
+//        newTaskItemMap.put("GPS_Taken_Time__c", taskItem.getGpsTakenTime());
+//        newTaskItemMap.put("Status__c", taskItem.getLatitude());
+//        newTaskItemMap.put("Status__c", taskItem.getLongitude());
+
+        return newTaskItemMap;
+    }
+
+    private static HashMap<String, Object> getTaskItemOptionMap(TaskItemOption taskItemOption) {
+
+        final HashMap<String, Object> newTaskItemOptionMap = new HashMap<>();
+        newTaskItemOptionMap.put("Value__c", taskItemOption.isValue());
+
+        return newTaskItemOptionMap;
     }
 
     private static HashMap<String, Object> getFarmVisitLogMap(FarmVisitLog farmVisitLog) {
@@ -1381,8 +1622,14 @@ public class WebApi {
         RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).equalTo("isDataDirty", true).or().equalTo("isFarmerPicDirty", true).or().equalTo("isNatIdCardDirty", true).findAll();
         RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("isDataDirty", true).findAll();
         RealmResults<FarmVisitLog> farmVisitLogs = Realm.getDefaultInstance().where(FarmVisitLog.class).equalTo("isDataDirty", true).findAll();
-        if(PreferenceHelper.getInstance().readAboutIsSyncReq() || farmerDbList.size() > 0 || farmVisits.size() > 0 || farmVisitLogs.size() > 0)
+        RealmResults<Task> farmingTasks = Realm.getDefaultInstance().where(Task.class).equalTo("isDataDirty", true).findAll();
+        RealmResults<TaskItem> taskItems = Realm.getDefaultInstance().where(TaskItem.class).equalTo("isDataDirty", true).findAll();
+        RealmResults<TaskItemOption> taskItemsOptions = Realm.getDefaultInstance().where(TaskItemOption.class).equalTo("isDataDirty", true).findAll();
+        if(PreferenceHelper.getInstance().readAboutIsSyncReq() || farmerDbList.size() > 0 ||
+                farmVisits.size() > 0 || farmVisitLogs.size() > 0 || farmingTasks.size() > 0 ||
+                taskItems.size() > 0 || taskItemsOptions.size() > 0) {
             return true;
+        }
         return false;
     }
 
@@ -1405,20 +1652,20 @@ public class WebApi {
 
         RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("isDataDirty", true).findAll();
         RealmResults<FarmVisitLog> farmVisitLogs = Realm.getDefaultInstance().where(FarmVisitLog.class).equalTo("isDataDirty", true).findAll();
-//        RealmResults<Task> farmingTasks = Realm.getDefaultInstance().where(Task.class).equalTo("isDataDirty", true).findAll();
-//        RealmResults<TaskItem> farmingTaskItems = Realm.getDefaultInstance().where(TaskItem.class).equalTo("isDataDirty", true).findAll();
-//        RealmResults<TaskItemOption> farmingTaskItemOptions = Realm.getDefaultInstance().where(TaskItemOption.class).equalTo("isDataDirty", true).findAll();
+        RealmResults<Task> farmingTasks = Realm.getDefaultInstance().where(Task.class).equalTo("isDataDirty", true).findAll();
+        RealmResults<TaskItem> farmingTaskItems = Realm.getDefaultInstance().where(TaskItem.class).equalTo("isDataDirty", true).findAll();
+        RealmResults<TaskItemOption> farmingTaskItemOptions = Realm.getDefaultInstance().where(TaskItemOption.class).equalTo("isDataDirty", true).findAll();
 
         if(farmVisits != null)
             count = count + farmVisits.size();
         if(farmVisitLogs != null)
             count = count + farmVisitLogs.size();
-//        if(farmingTasks != null)
-//            count = count + farmingTasks.size();
-//        if(farmingTaskItems != null)
-//            count = count + farmingTaskItems.size();
-//        if(farmingTaskItemOptions != null)
-//            count = count + farmingTaskItemOptions.size();
+        if(farmingTasks != null)
+            count = count + farmingTasks.size();
+        if(farmingTaskItems != null)
+            count = count + farmingTaskItems.size();
+        if(farmingTaskItemOptions != null)
+            count = count + farmingTaskItemOptions.size();
 
         return count;
     }
@@ -2125,6 +2372,7 @@ public class WebApi {
 
             String id = objTask.getString("Id");
             String textValue = objTask.getString("Text_Value__c");
+            boolean isDone = objTask.getBoolean("Completed__c");
             int sequence = objTask.getInt("Sequence__c");
             String recordType = objTask.getJSONObject("RecordType").getString("Name");
             String name = objTask.getString("Name");
@@ -2156,7 +2404,7 @@ public class WebApi {
                 }
             }
 
-            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, null, null, null, null, false, "", false);
+            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, null, null, null, null, isDone, "", false);
 //            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, gpsTakenTime, latitude, longitude, options, false);
 
             for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {

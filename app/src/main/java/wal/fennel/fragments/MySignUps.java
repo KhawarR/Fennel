@@ -1250,6 +1250,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 JSONObject objTask = arrRecords.getJSONObject(i);
 
             String id = objTask.getString("Id");
+            boolean isDone = objTask.getBoolean("Completed__c");
             String textValue = objTask.getString("Text_Value__c");
             int sequence = objTask.getInt("Sequence__c");
             String recordType = objTask.getJSONObject("RecordType").getString("Name");
@@ -1304,6 +1305,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 taskItem.setLongitude(longitude);
                 taskItem.setOptions(options);
                 taskItem.setAttachmentPath("");
+                taskItem.setTaskDone(isDone);
                 realm.commitTransaction();
 
 //            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileAction, gpsTakenTime, latitude, longitude, options, null, null, null, null, false);
@@ -1443,7 +1445,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                                                         System.out.println("Error while closing stream: " + ioe);
                                                     }
                                                 }
-                                                Log.i("FENNEL", "Write Success!");
+//                                                Log.i("FENNEL", "Write Success!");
                                             } catch (IOException e) {
                                                 Log.e("FENNEL", "Error while writing file!");
                                                 Log.e("FENNEL", e.toString());
