@@ -20,7 +20,7 @@
             android:layout_height="match_parent">
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/imgRight"
+                android:id="@+id/img_left"
                 android:layout_width="@dimen/medium_avatar_size"
                 android:layout_height="@dimen/medium_avatar_size"
                 android:layout_alignParentLeft="true"
@@ -29,16 +29,18 @@
                 android:layout_marginLeft="5dp"
                 android:layout_marginEnd="5dp"
                 android:layout_marginRight="5dp"
-                android:src="@drawable/dummy_profile"
+                android:src="@color/app_green"
                 fennel:civ_border_color="@color/app_green"
                 fennel:civ_border_width="5dp" />
 
-            <TextView
+            <wal.fennel.views.FontTextView
                 android:id="@+id/count_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="20"
                 android:textSize="16sp"
+                android:textColor="#FFFFFF"
+                fennel:fontName="Avenir-Black.ttf"
                 android:layout_centerInParent="true"/>
 
         </RelativeLayout>
@@ -51,7 +53,7 @@
         android:layout_height="wrap_content">
 
         <wal.fennel.views.FontTextView
-            android:id="@+id/tv_desc"
+            android:id="@+id/task_name"
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginTop="5dp"
@@ -63,16 +65,32 @@
             android:layout_width="match_parent" />
 
         <ProgressBar
+            android:id="@+id/task_progress"
             android:layout_width="match_parent"
-            android:layout_height="10dp"
+            android:layout_height="15dp"
             android:layout_marginStart="15dp"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="20dp"
             android:layout_marginEnd="20dp"
             android:layout_marginBottom="5dp"
-            android:progressTint="@color/app_green"
+            android:progressDrawable="@drawable/progress_bar_bg"
             style="@android:style/Widget.ProgressBar.Horizontal"
             android:progress="80"/>
+
+        <wal.fennel.views.FontTextView
+            android:id="@+id/count_total"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:textSize="10sp"
+            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="5dp"
+            android:text="Farmer's Signed Up"
+            android:textColor="@color/black_txt_color"
+            fennel:fontName="Avenir-Heavy.ttf"
+            android:layout_width="wrap_content" />
     </LinearLayout>
 
         <LinearLayout
@@ -92,7 +110,6 @@
             android:textSize="15sp"
             android:text="AUG"
             android:layout_gravity="center_horizontal"
-
             android:layout_marginBottom="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>

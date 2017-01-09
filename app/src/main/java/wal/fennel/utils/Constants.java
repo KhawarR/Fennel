@@ -59,6 +59,8 @@ public class Constants {
 
     public static final String STR_VIEW_MEDIA = "View Media";
     public static final String STR_ATTACH_MEDIA = "Attach Media";
+    public static final int FARMING_STATE_ONTIME = 0;
+    public static final int FARMING_STATE_LATE = 1;
 
 
     public enum FarmerType {
@@ -72,6 +74,11 @@ public class Constants {
         Text,
         Checkbox,
         Options
+    }
+
+    public enum FarmingTaskState {
+        ONTIME,
+        LATE
     }
 
     public static class DropboxConstants {
