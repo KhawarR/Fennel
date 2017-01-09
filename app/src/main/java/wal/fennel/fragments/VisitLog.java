@@ -212,11 +212,17 @@ public class VisitLog extends BaseFragment  {
 
                             String gpsStamp = getGpsStamp(latitude, longitude);
                             taskItem.setDescription(gpsStamp);
+                            taskItem.setLatitude(latitude);
+                            taskItem.setLongitude(longitude);
+                            taskItem.setGpsTakenTime(FennelUtils.getFormattedTime(System.currentTimeMillis(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS));
                         }
                         setTaskDone(taskItem);
                     }
                 });
-                if(!taskItem.isTaskDone()) {
+                if(taskItem.isTaskDone()) {
+                    String gpsStamp = getGpsStamp(taskItem.getLatitude(), taskItem.getLongitude());
+                    tvDescription.setText(gpsStamp);
+                } else {
                     ivBlockIcon.setImageResource(R.drawable.ic_gps);
                 }
 
@@ -501,6 +507,9 @@ public class VisitLog extends BaseFragment  {
                 taskItems.get(i).setTextValue(taskItem.getTextValue());
             } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Gps.toString())){
                 taskItems.get(i).setDescription(taskItem.getDescription());
+                taskItems.get(i).setGpsTakenTime(taskItem.getGpsTakenTime());
+                taskItems.get(i).setLatitude(taskItem.getLatitude());
+                taskItems.get(i).setLongitude(taskItem.getLongitude());
             } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Checkbox.toString())){
                 if(taskItem.getOptions() != null
                         && taskItem.getOptions().size() > 0

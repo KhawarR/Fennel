@@ -1188,10 +1188,18 @@ public class WebApi {
 
         final HashMap<String, Object> newTaskItemMap = new HashMap<>();
         newTaskItemMap.put("Completed__c", taskItem.isTaskDone());
-        newTaskItemMap.put("Text_Value__c", taskItem.getTextValue());
-//        newTaskItemMap.put("GPS_Taken_Time__c", taskItem.getGpsTakenTime());
-//        newTaskItemMap.put("Status__c", taskItem.getLatitude());
-//        newTaskItemMap.put("Status__c", taskItem.getLongitude());
+        if(taskItem.getTextValue() != null && !taskItem.getTextValue().equalsIgnoreCase("null")) {
+            newTaskItemMap.put("Text_Value__c", taskItem.getTextValue());
+        }
+        if(taskItem.getGpsTakenTime() != null && !taskItem.getGpsTakenTime().equalsIgnoreCase("null")) {
+            newTaskItemMap.put("GPS_Taken_Time__c", taskItem.getGpsTakenTime());
+        }
+        if(taskItem.getLatitude() != 0) {
+            newTaskItemMap.put("Location__Latitude__s", taskItem.getLatitude());
+        }
+        if(taskItem.getLongitude() != 0) {
+            newTaskItemMap.put("Location__Longitude__s", taskItem.getLongitude());
+        }
 
         return newTaskItemMap;
     }
