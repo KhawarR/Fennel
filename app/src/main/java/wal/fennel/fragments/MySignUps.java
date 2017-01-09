@@ -64,18 +64,13 @@ import wal.fennel.activities.LoginActivity;
 import wal.fennel.activities.SplashActivity;
 import wal.fennel.adapters.MySignupsAdapter;
 import wal.fennel.application.Fennel;
-import wal.fennel.common.database.DatabaseHelper;
 import wal.fennel.models.DashboardFieldAgent;
 import wal.fennel.models.DashboardTask;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.FieldAgent;
-import wal.fennel.models.Location;
-import wal.fennel.models.SubLocation;
 import wal.fennel.models.Task;
 import wal.fennel.models.TaskItem;
 import wal.fennel.models.TaskItemOption;
-import wal.fennel.models.Tree;
-import wal.fennel.models.Village;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.network.Session;
 import wal.fennel.network.WebApi;
@@ -2031,7 +2026,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                             String gpsTakenTime = taskItem.getString("GPS_Taken_Time__c");
                             String fileType = taskItem.getString("File_Type__c");
                             String fileActionType = taskItem.getString("File_Action__c");
-                            String fileActionPerformed = taskItem.getString("Action_Performed__c");
+                            String fileActionPerformed = taskItem.optString("Action_Performed__c");
 //                        String taskId = taskItem.getString("Farming_Task__c");
                             String description = taskItem.getString("Description__c");
 
@@ -2079,7 +2074,29 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             RealmList<TaskItem> allItems = taskObj.getTaskItems();
             for (TaskItem item : allItems) {
                 item.setAgentName(taskObj.getAgentName());
-                agent.getVisitLogs().add(item);
+
+                TaskItem taskItem = realm.createObject(TaskItem.class);
+                taskItem.setSequence(item.getSequence());
+                taskItem.setId(item.getId());
+                taskItem.setFarmingTaskId(item.getFarmingTaskId());
+                taskItem.setName(item.getName());
+                taskItem.setRecordType(item.getRecordType());
+                taskItem.setDescription(item.getDescription());
+                taskItem.setTextValue(item.getTextValue());
+                taskItem.setFileType(item.getFileType());
+                taskItem.setFileActionType(item.getFileActionType());
+                taskItem.setFileActionPerformed(item.getFileActionPerformed());
+                taskItem.setGpsTakenTime(item.getGpsTakenTime());
+                taskItem.setLatitude(item.getLatitude());
+                taskItem.setLongitude(item.getLongitude());
+                taskItem.setOptions(item.getOptions());
+                taskItem.setDateModified(item.getDateModified());
+                taskItem.setAgentName(item.getAgentName());
+                taskItem.setFarmerName(item.getFarmerName());
+                taskItem.setAgentAttachmentId(item.getAgentAttachmentId());
+                taskItem.setTaskDone(item.isTaskDone());
+                taskItem.setAttachmentPath(item.getAttachmentPath());
+                agent.getVisitLogs().add(taskItem);
             }
         }
         realm.commitTransaction();

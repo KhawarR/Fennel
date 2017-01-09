@@ -83,6 +83,6 @@ public class PersonLogBookFragment extends BaseFragment implements AdapterView.O
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         FieldAgent clickedAgent = personsList.get(position - logbookListView.getHeaderViewsCount());
-        ((MyDashboard)getParentFragment()).addPersonDetailViewFragment(clickedAgent);
+        ((MyLogbook)getParentFragment()).addPersonDetailViewFragment(clickedAgent);
     }
 }

@@ -18,7 +18,7 @@ import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
-import wal.fennel.models.FieldAgent;
+import wal.fennel.models.DashboardFieldAgent;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
@@ -107,7 +107,7 @@ public class MyDashboard extends BaseFragment {
         titleBarLayout.setTxtLeft("");
     }
 
-    public void addPersonDetailViewFragment(FieldAgent fieldAgent) {
+    public void addPersonDetailViewFragment(DashboardFieldAgent fieldAgent) {
         BaseFragment personDetailLogBookFragment = (BaseFragment) getChildFragmentManager().findFragmentByTag(Constants.PERSON_DETAIL_LOGBOOK_TAG);
         if (personDetailLogBookFragment == null) {
             FragmentTransaction transaction = getChildFragmentManager().beginTransaction();

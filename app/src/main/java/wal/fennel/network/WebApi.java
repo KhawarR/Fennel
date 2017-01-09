@@ -1964,7 +1964,7 @@ public class WebApi {
 
                 agentIds = agentIds + id;
 
-                if(i+1 != Singleton.getInstance().myFarmersList.size()){
+                if(i+1 != Singleton.getInstance().fieldAgentsVisitLogs.size()){
                     agentIds = agentIds + ",";
                 }
             }

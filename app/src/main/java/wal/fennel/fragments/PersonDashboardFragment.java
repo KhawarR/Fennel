@@ -84,6 +84,6 @@ public class PersonDashboardFragment extends BaseFragment implements AdapterView
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         DashboardFieldAgent clickedAgent = personsList.get(position - logbookListView.getHeaderViewsCount());
-//        ((MyDashboard)getParentFragment()).addPersonDetailViewFragment(clickedAgent);
+        ((MyDashboard)getParentFragment()).addPersonDetailViewFragment(clickedAgent);
     }
 }

@@ -1,5 +1,8 @@
 package wal.fennel.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import io.realm.RealmList;
 import io.realm.RealmObject;
 
@@ -7,7 +10,7 @@ import io.realm.RealmObject;
  * Created by irfanayaz on 12/29/16.
  */
 
-public class DashboardFieldAgent extends RealmObject {
+public class DashboardFieldAgent extends RealmObject implements Parcelable {
 
     String agentName;
     String agentNumber;
@@ -96,4 +99,46 @@ public class DashboardFieldAgent extends RealmObject {
     public void setHeader(boolean header) {
         isHeader = header;
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.agentName);
+        dest.writeString(this.agentNumber);
+        dest.writeString(this.agentType);
+        dest.writeString(this.agentId);
+        dest.writeString(this.agentEmployeeId);
+        dest.writeString(this.agentAttachmentUrl);
+        dest.writeList(this.dashboardTasks);
+        dest.writeByte(this.isHeader ? (byte) 1 : (byte) 0);
+    }
+
+    protected DashboardFieldAgent(Parcel in) {
+        this.agentName = in.readString();
+        this.agentNumber = in.readString();
+        this.agentType = in.readString();
+        this.agentId = in.readString();
+        this.agentEmployeeId = in.readString();
+        this.agentAttachmentUrl = in.readString();
+        this.dashboardTasks = new RealmList<>();
+        in.readList(this.dashboardTasks, DashboardTask.class.getClassLoader());
+        this.isHeader = in.readByte() != 0;
+    }
+
+    public static final Creator<DashboardFieldAgent> CREATOR = new Creator<DashboardFieldAgent>() {
+        @Override
+        public DashboardFieldAgent createFromParcel(Parcel source) {
+            return new DashboardFieldAgent(source);
+        }
+
+        @Override
+        public DashboardFieldAgent[] newArray(int size) {
+            return new DashboardFieldAgent[size];
+        }
+    };
 }
