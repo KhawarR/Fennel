@@ -493,6 +493,11 @@ public class WebApi {
         processTaskItemOptionCalls(taskItemOptions);
         //endregion
 
+        //region TaskItemPics
+        RealmResults<TaskItem> taskItemPics = Realm.getDefaultInstance().where(TaskItem.class).equalTo("isPicUploadDirty", true).findAll();
+        processTaskItemPicsCalls(taskItemPics);
+        //endregion
+
         PreferenceHelper.getInstance().writeIsSyncInProgress(true);
     }
 
@@ -1000,6 +1005,16 @@ public class WebApi {
         }
     }
 
+    private static void processTaskItemPicsCalls(RealmResults<TaskItem> taskItemPics) {
+        for (int i = 0; i < taskItemPics.size(); i++) {
+            final TaskItem taskItem = taskItemPics.get(i);
+
+            if(taskItem.isPicUploadDirty()) {
+                attachImageToTaskItemObject(taskItem);
+            }
+        }
+    }
+
     private static void processTaskItemOptionCalls(RealmResults<TaskItemOption> taskItemOptions) {
         for (int i = 0; i < taskItemOptions.size(); i++) {
             final TaskItemOption taskItemOption = taskItemOptions.get(i);
@@ -1434,10 +1449,10 @@ public class WebApi {
                     Log.i("Fennel", "farmer profile picture upload failed!");
                 }
             }, entityBody, imageBody);
-        } else {
-            WebApi.editAttachment(new Callback<ResponseBody>() {
+            } else {
+                WebApi.editAttachment(new Callback<ResponseBody>() {
                 @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     countCalls--;
                     if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                         Log.i("Fennel", "farmer profile picture edited successfully!");
@@ -1590,6 +1605,143 @@ public class WebApi {
         }
     }
 
+    private static void attachImageToTaskItemObject(final TaskItem taskItem) {
+
+        if (taskItem.getAttachmentPath() == null || taskItem.getAttachmentPath().isEmpty()) {
+            countCalls--;
+            countFailedCalls++;
+            return;
+        }
+
+        HashMap<String, Object> attachmentMap = new HashMap<>();
+        attachmentMap.put("Description", "FileUploaded");
+        attachmentMap.put("Name", "picture.png");
+        if (taskItem.getAttachmentId() == null || taskItem.getAttachmentId().isEmpty()) {
+            attachmentMap.put("ParentId", taskItem.getId());
+        }
+        else
+        {
+            MyPicassoInstance.getInstance().invalidate(taskItem.getAttachmentPath());
+        }
+
+        JSONObject json = new JSONObject(attachmentMap);
+
+        byte[] byteArrayImage = null;
+        Bitmap bmp = null;
+
+        String imagePath = NetworkHelper.getUploadPathFromUri(taskItem.getAttachmentPath());
+//        bmp = PhotoUtils.decodeSampledBitmapFromResource(imagePath);
+        bmp = PhotoUtils.getBitmapFromPath(imagePath);
+
+        if(bmp != null)
+        {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+            byteArrayImage = bos.toByteArray();
+            try {
+                bos.close();
+                bmp.recycle();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else
+        {
+            byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(imagePath));
+        }
+
+//        countCalls++;
+        if(byteArrayImage != null){
+            RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
+            RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
+
+            if (taskItem.getAttachmentId() == null || taskItem.getAttachmentId().isEmpty()) {
+                WebApi.addAttachment(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        countCalls--;
+                        if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                            Log.i("Fennel", "TaskItem picture uploaded successfully!");
+
+                            String strResponse = "";
+                            String newPicId = "";
+
+                            try {
+                                strResponse = response.body().string();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+                            if(!strResponse.isEmpty()) {
+                                JSONObject objReponse = null;
+                                try {
+                                    objReponse = new JSONObject(strResponse);
+                                    newPicId = objReponse.getString("id");
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            final TaskItem taskItemDBObj = realm.where(TaskItem.class).equalTo("id", taskItem.getId()).findFirst();
+                            taskItemDBObj.setPicUploadDirty(false);
+                            taskItemDBObj.setAttachmentId(newPicId);
+                            realm.commitTransaction();
+                        } else {
+                            countFailedCalls++;
+                            Log.i("Fennel", "TaskItem picture upload failed!");
+                        }
+                        checkSyncComplete();
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        countCalls--;
+                        countFailedCalls++;
+                        checkSyncComplete();
+                        Log.i("Fennel", "TaskItem picture upload failed!");
+                    }
+                }, entityBody, imageBody);
+            } else {
+                WebApi.editAttachment(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        countCalls--;
+                        if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                            Log.i("Fennel", "TaskItem picture edited successfully!");
+                            Singleton.getInstance().taskItemPicIdtoInvalidate = taskItem.getId();
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            final TaskItem taskItemDBObj = realm.where(TaskItem.class).equalTo("id", taskItem.getId()).findFirst();
+                            taskItemDBObj.setPicUploadDirty(false);
+                            realm.commitTransaction();
+                        } else {
+                            countFailedCalls++;
+                            Log.i("Fennel", "TaskItem picture edit failed!");
+                        }
+                        checkSyncComplete();
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        countCalls--;
+                        countFailedCalls++;
+                        checkSyncComplete();
+                        Log.i("Fennel", "TaskItem picture edit failed!");
+                    }
+                }, taskItem.getAttachmentId(), entityBody, imageBody);
+            }
+        }
+        else {
+            countCalls--;
+            countFailedCalls++;
+            Exception e = new Exception("ByteArrayImage: attachImageToTaskItemObject() - " + imagePath);
+            Crashlytics.logException(e);
+            Log.i("ByteArrayImage" , "attachImageToTaskItemObject() - " + imagePath);
+        }
+    }
+
     private static void checkSyncComplete(){
         if(countCalls == 0) {
 
@@ -1631,7 +1783,7 @@ public class WebApi {
         RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("isDataDirty", true).findAll();
         RealmResults<FarmVisitLog> farmVisitLogs = Realm.getDefaultInstance().where(FarmVisitLog.class).equalTo("isDataDirty", true).findAll();
         RealmResults<Task> farmingTasks = Realm.getDefaultInstance().where(Task.class).equalTo("isDataDirty", true).findAll();
-        RealmResults<TaskItem> taskItems = Realm.getDefaultInstance().where(TaskItem.class).equalTo("isDataDirty", true).findAll();
+        RealmResults<TaskItem> taskItems = Realm.getDefaultInstance().where(TaskItem.class).equalTo("isDataDirty", true).or().equalTo("isPicUploadDirty", true).findAll();
         RealmResults<TaskItemOption> taskItemsOptions = Realm.getDefaultInstance().where(TaskItemOption.class).equalTo("isDataDirty", true).findAll();
         if(PreferenceHelper.getInstance().readAboutIsSyncReq() || farmerDbList.size() > 0 ||
                 farmVisits.size() > 0 || farmVisitLogs.size() > 0 || farmingTasks.size() > 0 ||
@@ -1661,7 +1813,7 @@ public class WebApi {
         RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("isDataDirty", true).findAll();
         RealmResults<FarmVisitLog> farmVisitLogs = Realm.getDefaultInstance().where(FarmVisitLog.class).equalTo("isDataDirty", true).findAll();
         RealmResults<Task> farmingTasks = Realm.getDefaultInstance().where(Task.class).equalTo("isDataDirty", true).findAll();
-        RealmResults<TaskItem> farmingTaskItems = Realm.getDefaultInstance().where(TaskItem.class).equalTo("isDataDirty", true).findAll();
+        RealmResults<TaskItem> farmingTaskItems = Realm.getDefaultInstance().where(TaskItem.class).equalTo("isDataDirty", true).or().equalTo("isPicUploadDirty", true).findAll();
         RealmResults<TaskItemOption> farmingTaskItemOptions = Realm.getDefaultInstance().where(TaskItemOption.class).equalTo("isDataDirty", true).findAll();
 
         if(farmVisits != null)
@@ -2412,7 +2564,7 @@ public class WebApi {
                 }
             }
 
-            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, null, null, null, null, isDone, "", false);
+            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, null, null, null, null, isDone, "", "", false, false);
 //            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, gpsTakenTime, latitude, longitude, options, false);
 
             for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {

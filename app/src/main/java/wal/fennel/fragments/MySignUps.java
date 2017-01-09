@@ -1436,7 +1436,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                                                     try {
                                                         if (fileOutputStream != null) {
                                                             fileOutputStream.close();
-                                                            updateTaskItemWithAttachment(taskItemId, file.getAbsolutePath());
+                                                            updateTaskItemWithAttachment(taskItemId, file.getAbsolutePath(), attachmentId);
                                                         } else {
                                                             file.delete();
                                                         }
@@ -1471,13 +1471,15 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     }
 
-    private void updateTaskItemWithAttachment(String taskItemId, String filePath) {
+    private void updateTaskItemWithAttachment(String taskItemId, String filePath, String attachmentId) {
         ArrayList<TaskItem> allTaskItems = Singleton.getInstance().taskItems;
         for (TaskItem taskItem : allTaskItems) {
             if (taskItem.getId().equals(taskItemId)) {
                 Realm realm = Realm.getDefaultInstance();
                 realm.beginTransaction();
-                taskItem.setAttachmentPath(filePath);
+                String uri = NetworkHelper.getUriFromPath(filePath);
+                taskItem.setAttachmentId(attachmentId);
+                taskItem.setAttachmentPath(uri);
                 realm.commitTransaction();
 
                 break;
@@ -1882,7 +1884,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                             RealmList<TaskItemOption> options = new RealmList<>();
 
-                            TaskItem newTaskItem = new TaskItem(sequence, id, taskMap.get("Id"), name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false, "", false);
+                            TaskItem newTaskItem = new TaskItem(sequence, id, taskMap.get("Id"), name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false, "", "", false, false);
                             visitLogTask.getTaskItems().add(newTaskItem);
                         }
                     }

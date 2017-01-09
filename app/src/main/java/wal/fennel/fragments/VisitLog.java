@@ -63,6 +63,7 @@ import wal.fennel.utils.Constants;
 import wal.fennel.utils.FennelUtils;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PreferenceHelper;
+import wal.fennel.utils.Singleton;
 import wal.fennel.views.FontTextView;
 import wal.fennel.views.NothingSelectedSpinnerAdapter;
 import wal.fennel.views.TitleBarLayout;
@@ -316,6 +317,11 @@ public class VisitLog extends BaseFragment  {
                         String path = taskItem.getAttachmentPath();
                         if(path != null && !path.isEmpty()) {
 
+                            if(Singleton.getInstance().taskItemPicIdtoInvalidate.equalsIgnoreCase(taskItem.getId())) {
+                                MyPicassoInstance.getInstance().invalidate(path);
+                                Singleton.getInstance().taskItemPicIdtoInvalidate = "";
+                            }
+
                             if(NetworkHelper.isNetAvailable(getActivity()))
                             {
                                 MyPicassoInstance.getInstance().load(path).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(roundedImageView);
@@ -325,6 +331,9 @@ public class VisitLog extends BaseFragment  {
                                 MyPicassoInstance.getInstance().load(path).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(roundedImageView);
                             }
                             ivBlockIcon.setVisibility(View.GONE);
+                        } else {
+                            roundedImageView.setBackgroundResource(R.drawable.green_rounded_rect);
+                            ivBlockIcon.setImageResource(R.drawable.ic_camera_white);
                         }
                     } else {
                         roundedImageView.setBackgroundResource(R.drawable.green_rounded_rect);
@@ -421,6 +430,7 @@ public class VisitLog extends BaseFragment  {
                 String uri = NetworkHelper.getUriFromPath(originalPath);
 
                 taskItem.setAttachmentPath(uri);
+                taskItem.setPicUploadDirty(true);
 
                 MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(roundedImageView);
                 ivIcon.setVisibility(View.GONE);
@@ -523,6 +533,7 @@ public class VisitLog extends BaseFragment  {
 
                 } else {
                     taskItems.get(i).setAttachmentPath(taskItem.getAttachmentPath());
+                    taskItems.get(i).setPicUploadDirty(taskItem.isPicUploadDirty());
                 }
             } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Options.toString())){
                 for (int j = 0; j < taskItem.getOptions().size(); j++) {

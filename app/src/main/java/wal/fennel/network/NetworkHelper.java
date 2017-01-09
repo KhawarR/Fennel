@@ -95,6 +95,6 @@ public class NetworkHelper {
         if(path == null || path.isEmpty())
             return "";
 
-        return Uri.parse("file://" + path).toString();
+        return Uri.parse(STR_FILE_PREFIX + path).toString();
     }
 }
