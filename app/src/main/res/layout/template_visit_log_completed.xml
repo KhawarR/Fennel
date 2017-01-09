@@ -50,7 +50,6 @@
                     android:background="@color/transparent_white_overlay"
                     android:layout_width="@dimen/width_edittext_template_visit_log"
                     android:layout_height="match_parent"
-                    android:text="185"
                     android:textSize="@dimen/font_edittext_template_visit_log"
                     android:gravity="center"
                     android:textColorHint="@color/black"

@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -51,6 +52,8 @@ import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
 import wal.fennel.adapters.FarmerStatusAdapter;
 import wal.fennel.location.GPSTracker;
+import wal.fennel.models.FarmVisit;
+import wal.fennel.models.FarmVisitLog;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.Task;
 import wal.fennel.models.TaskItem;
@@ -60,11 +63,12 @@ import wal.fennel.utils.Constants;
 import wal.fennel.utils.FennelUtils;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PreferenceHelper;
+import wal.fennel.utils.Singleton;
 import wal.fennel.views.FontTextView;
 import wal.fennel.views.NothingSelectedSpinnerAdapter;
 import wal.fennel.views.TitleBarLayout;
 
-public class VisitLog extends BaseFragment implements AdapterView.OnItemSelectedListener  {
+public class VisitLog extends BaseFragment  {
 
     @Bind(R.id.llTaskItemContainer)
     LinearLayout llTaskItemContainer;
@@ -209,11 +213,17 @@ public class VisitLog extends BaseFragment implements AdapterView.OnItemSelected
 
                             String gpsStamp = getGpsStamp(latitude, longitude);
                             taskItem.setDescription(gpsStamp);
+                            taskItem.setLatitude(latitude);
+                            taskItem.setLongitude(longitude);
+                            taskItem.setGpsTakenTime(FennelUtils.getFormattedTime(System.currentTimeMillis(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS));
                         }
                         setTaskDone(taskItem);
                     }
                 });
-                if(!taskItem.isTaskDone()) {
+                if(taskItem.isTaskDone()) {
+                    String gpsStamp = getGpsStamp(taskItem.getLatitude(), taskItem.getLongitude());
+                    tvDescription.setText(gpsStamp);
+                } else {
                     ivBlockIcon.setImageResource(R.drawable.ic_gps);
                 }
 
@@ -307,6 +317,11 @@ public class VisitLog extends BaseFragment implements AdapterView.OnItemSelected
                         String path = taskItem.getAttachmentPath();
                         if(path != null && !path.isEmpty()) {
 
+                            if(Singleton.getInstance().taskItemPicIdtoInvalidate.equalsIgnoreCase(taskItem.getId())) {
+                                MyPicassoInstance.getInstance().invalidate(path);
+                                Singleton.getInstance().taskItemPicIdtoInvalidate = "";
+                            }
+
                             if(NetworkHelper.isNetAvailable(getActivity()))
                             {
                                 MyPicassoInstance.getInstance().load(path).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(roundedImageView);
@@ -316,6 +331,9 @@ public class VisitLog extends BaseFragment implements AdapterView.OnItemSelected
                                 MyPicassoInstance.getInstance().load(path).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(roundedImageView);
                             }
                             ivBlockIcon.setVisibility(View.GONE);
+                        } else {
+                            roundedImageView.setBackgroundResource(R.drawable.green_rounded_rect);
+                            ivBlockIcon.setImageResource(R.drawable.ic_camera_white);
                         }
                     } else {
                         roundedImageView.setBackgroundResource(R.drawable.green_rounded_rect);
@@ -328,9 +346,36 @@ public class VisitLog extends BaseFragment implements AdapterView.OnItemSelected
                 tvDescription.setVisibility(View.GONE);
                 etHoleCount.setVisibility(View.GONE);
                 spOption.setVisibility(View.VISIBLE);
-                ArrayAdapter<String> arrayAdapterLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, new String[] {"1", "2", "3"});
+                final ArrayList<String> arrOptionNames = new ArrayList<>();
+
+                if(taskItem.getOptions() != null) {
+                    for (int j = 0; j < taskItem.getOptions().size(); j++) {
+                        arrOptionNames.add(taskItem.getOptions().get(j).getName());
+                    }
+                }
+
+                ArrayAdapter<String> arrayAdapterLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, arrOptionNames);
                 spOption.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterLoc, R.layout.spinner_nothing_selected, getContext(), "OPTIONS"));
-                spOption.setOnItemSelectedListener(this);
+                spOption.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                        int position = pos - 1;
+                        if(position >= 0) {
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            for (int j = 0; j < taskItem.getOptions().size(); j++) {
+                                taskItem.getOptions().get(j).setValue(false);
+                            }
+                            taskItem.getOptions().get(position).setValue(true);
+                            realm.commitTransaction();
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
 
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -338,7 +383,14 @@ public class VisitLog extends BaseFragment implements AdapterView.OnItemSelected
                         setTaskDone(taskItem);
                     }
                 });
-                if(!taskItem.isTaskDone()) {
+                if(taskItem.isTaskDone()) {
+                    for (int j = 0; j < taskItem.getOptions().size(); j++) {
+                        if(taskItem.getOptions().get(j).isValue()) {
+                            spOption.setSelection(j + 1);
+                            break;
+                        }
+                    }
+                } else {
                     ivBlockIcon.setImageResource(R.drawable.ic_pencil);
                 }
             }
@@ -378,23 +430,12 @@ public class VisitLog extends BaseFragment implements AdapterView.OnItemSelected
                 String uri = NetworkHelper.getUriFromPath(originalPath);
 
                 taskItem.setAttachmentPath(uri);
+                taskItem.setPicUploadDirty(true);
 
                 MyPicassoInstance.getInstance().load(uri).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().into(roundedImageView);
                 ivIcon.setVisibility(View.GONE);
 
                 taskItem.setTaskDone(true);
-
-//                farmerImageUri = originalPath;
-//                isFarmerPhotoSet = true;
-//                isFarmerPhotoEdited = true;
-//                farmerImageUrl = uri;
-//                if (isEdit) {
-////                    if(NetworkHelper.isNetAvailable(getActivity()))
-////                        attachFarmerImageToFarmerObject(farmer);
-////                    else
-//                    editFarmerInDB(false);
-//                }
-//                checkEnableSubmit();
             }
 
             @Override
@@ -425,8 +466,19 @@ public class VisitLog extends BaseFragment implements AdapterView.OnItemSelected
     }
 
     private String getGpsStamp(double latitude, double longitude) {
+        int maxStrLength = 9;
         String strLatitude = String.valueOf(latitude);
+        try {
+             strLatitude = strLatitude.substring(0, maxStrLength);
+        } catch (StringIndexOutOfBoundsException e) {
+             e.printStackTrace();
+        }
         String strLongitude = String.valueOf(longitude);
+        try {
+            strLongitude = strLongitude.substring(0, maxStrLength);
+        } catch (StringIndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
         String time = FennelUtils.getFormattedTime(System.currentTimeMillis(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_HH_MM_SS);
         String gpsStamp = "Latitude: %s\nLongitude: %s\nTime: %s";
 
@@ -435,53 +487,93 @@ public class VisitLog extends BaseFragment implements AdapterView.OnItemSelected
     }
 
     private void setTaskDone(final TaskItem taskItem) {
-//        Realm realm = Realm.getDefaultInstance();
-//        realm.beginTransaction();
-//        taskItem.setTaskDone(!taskItem.isTaskDone());
-//        realm.commitTransaction();
         taskItem.setTaskDone(!taskItem.isTaskDone());
         populateTaskItems();
     }
 
     @OnClick(R.id.txtSave)
     void onClickSaveTask() {
+        updateTaskItems(Constants.STR_IN_PROGRESS);
+    }
+
+    @OnClick(R.id.txtSubmitApproval)
+    void onClickSubmitForApprovalTask() {
+        updateTaskItems(Constants.STR_COMPLETED);
+    }
+
+    private void updateTaskItems(String taskStatus) {
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
-        task.setStatus(Constants.STR_IN_PROGRESS);
+        task.setStatus(taskStatus);
+        task.setDataDirty(true);
         for (int i = 0; i < localTaskItems.size(); i++) {
 
             TaskItem taskItem = localTaskItems.get(i);
 
             taskItems.get(i).setTaskDone(taskItem.isTaskDone());
+            taskItems.get(i).setDataDirty(true);
 
             if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Text.toString())){
                 taskItems.get(i).setTextValue(taskItem.getTextValue());
             } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Gps.toString())){
                 taskItems.get(i).setDescription(taskItem.getDescription());
+                taskItems.get(i).setGpsTakenTime(taskItem.getGpsTakenTime());
+                taskItems.get(i).setLatitude(taskItem.getLatitude());
+                taskItems.get(i).setLongitude(taskItem.getLongitude());
             } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Checkbox.toString())){
                 if(taskItem.getOptions() != null
                         && taskItem.getOptions().size() > 0
                         && taskItems.get(i).getOptions() != null
                         && taskItems.get(i).getOptions().size() > 0) {
                     taskItems.get(i).getOptions().get(0).setValue(taskItem.getOptions().get(0).isValue());
+                    taskItems.get(i).getOptions().get(0).setDataDirty(true);
                 }
             } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.File.toString())){
                 if(taskItem.getFileActionType().equalsIgnoreCase(Constants.STR_VIEW_MEDIA)){
 
                 } else {
                     taskItems.get(i).setAttachmentPath(taskItem.getAttachmentPath());
+                    taskItems.get(i).setPicUploadDirty(taskItem.isPicUploadDirty());
+                }
+            } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Options.toString())){
+                for (int j = 0; j < taskItem.getOptions().size(); j++) {
+                    if(taskItem.getOptions().get(j).isValue()) {
+                        taskItems.get(i).getOptions().get(j).setValue(true);
+                        taskItems.get(i).getOptions().get(j).setDataDirty(true);
+                    }
                 }
             }
         }
-        realm.commitTransaction();
-        ((BaseContainerFragment) getParentFragment()).popFragment();
-    }
 
-    @OnClick(R.id.txtSubmitApproval)
-    void onClickSubmitForApprovalTask() {
-        Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        task.setStatus(Constants.STR_COMPLETED);
+        RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("shambaId", farmer.getFarmId()).findAll().sort("visitedDate", Sort.DESCENDING);
+
+        boolean createNewFarmVisit = false;
+        FarmVisit farmVisit = null;
+        if(farmVisits != null && farmVisits.size() > 0) {
+            farmVisit = farmVisits.get(0);
+
+            if(!DateUtils.isToday(farmVisit.getVisitedDate())) {
+                createNewFarmVisit = true;
+            }
+        } else {
+            createNewFarmVisit = true;
+        }
+
+        if (createNewFarmVisit) {
+            String farmVisitId = Constants.STR_FARMER_ID_PREFIX + String.valueOf(System.currentTimeMillis());
+
+            farmVisit = realm.createObject(FarmVisit.class);
+            farmVisit.setAll(farmVisitId, farmer.getFarmId(), farmer.getFarmerId(),
+                    PreferenceHelper.getInstance().readLoginUserId(),
+                    PreferenceHelper.getInstance().readLoginUserType(),
+                    System.currentTimeMillis(), true);
+        } else {
+            farmVisit.setDataDirty(true);
+        }
+
+        FarmVisitLog visitLog = realm.createObject(FarmVisitLog.class);
+        visitLog.setAll(farmVisit.getFarmVisitId(), task.getTaskId(), true);
+
         realm.commitTransaction();
         ((BaseContainerFragment) getParentFragment()).popFragment();
     }
@@ -499,24 +591,5 @@ public class VisitLog extends BaseFragment implements AdapterView.OnItemSelected
     @Override
     public void onTitleBarLeftIconClicked(View view) {
         ((BaseContainerFragment) getParentFragment()).popFragment();
-    }
-
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-        Spinner spinnerView = (Spinner) parent;
-        int position = pos - 1;
-
-        switch (spinnerView.getId()) {
-            case R.id.spOptions: {
-                if(position >= 0) {
-
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
     }
 }

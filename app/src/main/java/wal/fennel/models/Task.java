@@ -19,7 +19,6 @@ public class Task extends RealmObject implements Parcelable {
     private String status;
     private boolean isHeader;
     private RealmList<TaskItem> taskItems = new RealmList<>();
-
     public String agentId;
     public String agentName;
     public String agentPhoneNumber;
@@ -27,12 +26,13 @@ public class Task extends RealmObject implements Parcelable {
     public String agentType;
     public String farmerName;
     public String shambaName;
+    private boolean isDataDirty = false;
 
     public Task(){
 
     }
 
-    public Task(String taskId, String name, String startedDate, String completionDate, String dueDate, String status, boolean isHeader, RealmList<TaskItem> taskItems) {
+    public Task(String taskId, String name, String startedDate, String completionDate, String dueDate, String status, boolean isHeader, RealmList<TaskItem> taskItems, boolean isDataDirty) {
         this.taskId = taskId;
         this.name = name;
         this.startedDate = startedDate;
@@ -41,6 +41,7 @@ public class Task extends RealmObject implements Parcelable {
         this.status = status;
         this.isHeader = isHeader;
         this.taskItems = taskItems;
+        this.isDataDirty = isDataDirty;
     }
 
     public Task(Task other) {
@@ -52,6 +53,7 @@ public class Task extends RealmObject implements Parcelable {
         this.status = other.status;
         this.isHeader = other.isHeader;
         this.taskItems = other.taskItems;
+        this.isDataDirty = other.isDataDirty;
     }
 
     public void setTaskId(String taskId) {
@@ -174,6 +176,14 @@ public class Task extends RealmObject implements Parcelable {
         this.agentEmployeeId = agentEmployeeId;
     }
 
+    public boolean isDataDirty() {
+        return isDataDirty;
+    }
+
+    public void setDataDirty(boolean dataDirty) {
+        isDataDirty = dataDirty;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -189,7 +199,6 @@ public class Task extends RealmObject implements Parcelable {
         dest.writeString(this.status);
         dest.writeInt(isHeader ? 1 : 0);
         dest.writeTypedList(taskItems);
-
         dest.writeString(this.agentId);
         dest.writeString(this.agentName);
         dest.writeString(this.agentPhoneNumber);
@@ -197,6 +206,7 @@ public class Task extends RealmObject implements Parcelable {
         dest.writeString(this.agentType);
         dest.writeString(this.farmerName);
         dest.writeString(this.shambaName);
+        dest.writeInt(isDataDirty ? 1 : 0);
     }
 
     protected Task(Parcel in) {
@@ -218,6 +228,7 @@ public class Task extends RealmObject implements Parcelable {
         this.agentType = in.readString();
         this.farmerName = in.readString();
         this.shambaName = in.readString();
+        this.isDataDirty = in.readInt() == 1 ? true : false;
     }
 
     public static final Parcelable.Creator<Task> CREATOR = new Parcelable.Creator<Task>() {

@@ -13,6 +13,7 @@ import wal.fennel.models.TaskItem;
 public class Singleton {
 
     public String farmerIdtoInvalidate = "";
+    public String taskItemPicIdtoInvalidate = "";
 
     public ArrayList<Farmer> mySignupsList = new ArrayList<>();
     public ArrayList<Farmer> myFarmersList = new ArrayList<>();

@@ -37,6 +37,8 @@ import retrofit2.Response;
 import wal.fennel.activities.SplashActivity;
 import wal.fennel.application.Fennel;
 import wal.fennel.datamodels.Auth;
+import wal.fennel.models.FarmVisit;
+import wal.fennel.models.FarmVisitLog;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.FieldAgent;
 import wal.fennel.models.ResponseModel;
@@ -297,6 +299,31 @@ public class WebApi {
         return processCall(apiCall, callback);
     }
 
+    public static boolean createFarmVisit(Callback<ResponseModel> callback, HashMap<String, Object> farmVisitMap) {
+        Call<ResponseModel> apiCall = Fennel.getWebService().addFarmVisit(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmVisitMap);
+        return processCall(apiCall, callback);
+    }
+
+    public static boolean createFarmVisitLog(Callback<ResponseModel> callback, HashMap<String, Object> farmVisitLogMap) {
+        Call<ResponseModel> apiCall = Fennel.getWebService().addFarmVisitLog(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmVisitLogMap);
+        return processCall(apiCall, callback);
+    }
+
+    public static boolean editFarmingTask(Callback<ResponseBody> callback, String farmingTaskId, HashMap<String, Object> farmingTaskMap){
+        Call<ResponseBody> apiCall = Fennel.getWebService().editFarmingTask(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, farmingTaskId, farmingTaskMap);
+        return processCall(apiCall, callback);
+    }
+
+    public static boolean editTaskItem(Callback<ResponseBody> callback, String taskItemId, HashMap<String, Object> taskItemMap){
+        Call<ResponseBody> apiCall = Fennel.getWebService().editTaskItem(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, taskItemId, taskItemMap);
+        return processCall(apiCall, callback);
+    }
+
+    public static boolean editTaskItemOption(Callback<ResponseBody> callback, String taskItemOptionId, HashMap<String, Object> taskItemOptionMap){
+        Call<ResponseBody> apiCall = Fennel.getWebService().editTaskItemOption(Session.getAuthToken(), "application/json", NetworkHelper.API_VERSION, taskItemOptionId, taskItemOptionMap);
+        return processCall(apiCall, callback);
+    }
+
     private static <T> boolean processCall(Call<T> call, Callback<T> callback){
         try {
             if(mContext == null)
@@ -446,6 +473,31 @@ public class WebApi {
         processFarmerCalls(farmerRealmList);
         //endregion
 
+        //region FarmVisits
+        RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("isDataDirty", true).findAll();
+        processFarmVisitCalls(farmVisits);
+        //endregion
+
+        //region FarmingTasks
+        RealmResults<Task> farmingTasks = Realm.getDefaultInstance().where(Task.class).equalTo("isDataDirty", true).findAll();
+        processFarmingTaskCalls(farmingTasks);
+        //endregion
+
+        //region TaskItems
+        RealmResults<TaskItem> taskItems = Realm.getDefaultInstance().where(TaskItem.class).equalTo("isDataDirty", true).findAll();
+        processTaskItemCalls(taskItems);
+        //endregion
+
+        //region TaskItemOption
+        RealmResults<TaskItemOption> taskItemOptions = Realm.getDefaultInstance().where(TaskItemOption.class).equalTo("isDataDirty", true).findAll();
+        processTaskItemOptionCalls(taskItemOptions);
+        //endregion
+
+        //region TaskItemPics
+        RealmResults<TaskItem> taskItemPics = Realm.getDefaultInstance().where(TaskItem.class).equalTo("isPicUploadDirty", true).findAll();
+        processTaskItemPicsCalls(taskItemPics);
+        //endregion
+
         PreferenceHelper.getInstance().writeIsSyncInProgress(true);
     }
 
@@ -551,6 +603,7 @@ public class WebApi {
                                     FennelUtils.appendDebugLog("Farmer create failed, ID empty: " + farmer.getIdNumber());
                                     countFailedCalls++;
                                     adjustCountCallFailedFarmer(farmer);
+                                    checkSyncComplete();
                                 }
                                 else {
                                     Realm realm = Realm.getDefaultInstance();
@@ -661,6 +714,368 @@ public class WebApi {
         }
     }
 
+    private static void processFarmVisitCalls(RealmResults<FarmVisit> farmVisits) {
+        for (int i = 0; i < farmVisits.size(); i++) {
+            final FarmVisit farmVisit = farmVisits.get(i);
+            if(farmVisit.getFarmVisitId().startsWith(Constants.STR_FARMER_ID_PREFIX)) {
+                final HashMap<String, Object> farmVisitMap = getFarmVisitMap(farmVisit);
+                WebApi.createFarmVisit(new Callback<ResponseModel>() {
+                    @Override
+                    public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
+                        countCalls--;
+
+                        FennelUtils.appendDebugLog("FarmVisit create response: " + farmVisit.getFarmVisitId() + " - " + response.code());
+
+                        String newFarmVisitId = "";
+                        String errorMessage = "";
+                        if (response.errorBody() != null) {
+                            try {
+                                errorMessage = response.errorBody().string().toString();
+                                FennelUtils.appendDebugLog("FarmVisit create error response: " + farmVisit.getFarmVisitId() + " - " + response.code() + " - " + errorMessage);
+                                JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
+                                errorMessage = objError.getString("message");
+
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        if (response.code() == 401) {
+                            FennelUtils.appendDebugLog("FarmVisit create Session Expired, redirected: " + farmVisit.getFarmVisitId());
+                            countFailedCalls++;
+                            sessionExpireRedirect();
+                        } else if (((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().isSuccess() == true)) {
+                            newFarmVisitId = response.body().getId();
+
+                            if (newFarmVisitId.isEmpty()) {
+                                FennelUtils.appendDebugLog("FarmVisit create failed" + farmVisit.getFarmVisitId());
+                                countFailedCalls++;
+                                adjustCountCallFailedFarmVisitLog(farmVisit.getFarmVisitId());
+                                checkSyncComplete();
+                            } else {
+                                Realm realm = Realm.getDefaultInstance();
+                                realm.beginTransaction();
+                                String localFarmVisitId = farmVisit.getFarmVisitId();
+
+                                RealmResults<FarmVisitLog> farmVisitLogs = Realm.getDefaultInstance().where(FarmVisitLog.class).equalTo("isDataDirty", true).equalTo("farmVisitId", localFarmVisitId).findAll();
+                                for (int j = 0; j < farmVisitLogs.size(); j++) {
+                                    farmVisitLogs.get(j).setFarmVisitId(newFarmVisitId);
+                                }
+
+                                farmVisit.setFarmVisitId(newFarmVisitId);
+                                farmVisit.setDataDirty(false);
+                                realm.commitTransaction();
+
+                                FennelUtils.appendDebugLog("FarmVisit create finished: " + farmVisit.getFarmVisitId());
+
+                                processFarmVisitLogCalls(farmVisit);
+
+                                checkSyncComplete();
+                            }
+                        } else {
+                            FennelUtils.appendDebugLog("FarmVisit Create failed - " + response.code() + " - " + errorMessage);
+                            Exception e = new Exception("FarmVisit Create failed - " + response.code() + " - " + errorMessage);
+                            Crashlytics.logException(e);
+                            if (errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)) {
+                                sessionExpireRedirect();
+                            }
+                            countFailedCalls++;
+                            adjustCountCallFailedFarmVisitLog(farmVisit.getFarmVisitId());
+                            checkSyncComplete();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseModel> call, Throwable t) {
+                        countCalls--;
+                        countFailedCalls++;
+                        FennelUtils.appendDebugLog("FarmVisit create Failed: " + t.getMessage());
+                        t.printStackTrace();
+                        adjustCountCallFailedFarmVisitLog(farmVisit.getFarmVisitId());
+                        checkSyncComplete();
+                    }
+                }, farmVisitMap);
+            } else {
+                countCalls--;
+                processFarmVisitLogCalls(farmVisit);
+                checkSyncComplete();
+            }
+        }
+    }
+
+    private static void processFarmVisitLogCalls(final FarmVisit farmVisit) {
+
+        RealmResults<FarmVisitLog> farmVisitLogs = Realm.getDefaultInstance().where(FarmVisitLog.class).equalTo("isDataDirty", true).equalTo("farmVisitId", farmVisit.getFarmVisitId()).findAll();
+
+        for (int i = 0; i < farmVisitLogs.size(); i++) {
+            final FarmVisitLog farmVisitLog = farmVisitLogs.get(i);
+            final HashMap<String, Object> farmVisitLogMap = getFarmVisitLogMap(farmVisitLog);
+
+            WebApi.createFarmVisitLog(new Callback<ResponseModel>() {
+                @Override
+                public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
+                    countCalls--;
+
+                    FennelUtils.appendDebugLog("FarmVisitLog create response: " + farmVisitLog.getFarmVisitId() + " - " + response.code());
+
+                    String newFarmVisitLogId = "";
+                    String errorMessage = "";
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMessage = response.errorBody().string().toString();
+                            FennelUtils.appendDebugLog("FarmVisitLog create error response: " + farmVisitLog.getFarmVisitId() + " - " + response.code() + " - " + errorMessage);
+                            JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
+                            errorMessage = objError.getString("message");
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    if (response.code() == 401) {
+                        FennelUtils.appendDebugLog("FarmVisitLog create Session Expired, redirected: " + farmVisitLog.getFarmVisitId());
+                        countFailedCalls++;
+                        sessionExpireRedirect();
+                    } else if (((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().isSuccess() == true)) {
+                        newFarmVisitLogId = response.body().getId();
+
+                        if (newFarmVisitLogId.isEmpty()) {
+                            FennelUtils.appendDebugLog("FarmVisitLog create failed" + farmVisitLog.getFarmVisitId());
+                            countFailedCalls++;
+                        } else {
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+
+                            farmVisit.setDataDirty(false);
+
+                            farmVisitLog.setDataDirty(false);
+                            realm.commitTransaction();
+
+                            FennelUtils.appendDebugLog("FarmVisitLog create finished: " + farmVisitLog.getFarmVisitId());
+
+                            checkSyncComplete();
+                        }
+                    } else {
+                        FennelUtils.appendDebugLog("FarmVisitLog Create failed - " + response.code() + " - " + errorMessage);
+                        Exception e = new Exception("FarmVisitLog Create failed - " + response.code() + " - " + errorMessage);
+                        Crashlytics.logException(e);
+                        if (errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)) {
+                            sessionExpireRedirect();
+                        }
+                        countFailedCalls++;
+                        checkSyncComplete();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseModel> call, Throwable t) {
+                    countCalls--;
+                    countFailedCalls++;
+                    FennelUtils.appendDebugLog("FarmVisitLog create Failed: " + t.getMessage());
+                    t.printStackTrace();
+                    checkSyncComplete();
+                }
+            }, farmVisitLogMap);
+        }
+    }
+
+    private static void processFarmingTaskCalls(RealmResults<Task> farmingTasks) {
+        for (int i = 0; i < farmingTasks.size(); i++) {
+            final Task farmingTask = farmingTasks.get(i);
+            final HashMap<String, Object> farmingTaskMap = getFarmingTaskMap(farmingTask);
+            WebApi.editFarmingTask(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    countCalls--;
+
+                    FennelUtils.appendDebugLog("FarmingTask edit response: " + farmingTask.getTaskId() + " - " + response.code());
+
+                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+
+                        FennelUtils.appendDebugLog("FarmingTask edit finished: " + farmingTask.getTaskId());
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        farmingTask.setDataDirty(false);
+                        realm.commitTransaction();
+
+                        checkSyncComplete();
+                    }
+                    else if(response.code() == 401){
+                        FennelUtils.appendDebugLog("FarmingTask edit Session Expired, redirected: " + farmingTask.getTaskId());
+                        countFailedCalls++;
+                        sessionExpireRedirect();
+                    } else {
+                        String errorMessage = "";
+                        if(response.errorBody() != null) {
+                            try {
+                                errorMessage = response.errorBody().string().toString();
+                                JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
+                                errorMessage = objError.getString("message");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        FennelUtils.appendDebugLog("FarmingTask edit failed - " + response.code() + " - "  + errorMessage);
+                        Exception e = new Exception("FarmingTask Edit failed - " + response.code() + " - "  + errorMessage);
+                        Crashlytics.logException(e);
+                        if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
+                            sessionExpireRedirect();
+                        }
+                        countFailedCalls++;
+                        checkSyncComplete();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    countCalls--;
+                    countFailedCalls++;
+                    FennelUtils.appendDebugLog("FarmingTask edit Failed: " + t.getMessage());
+                    t.printStackTrace();
+                    checkSyncComplete();
+                }
+            }, farmingTask.getTaskId(), farmingTaskMap);
+        }
+    }
+
+    private static void processTaskItemCalls(RealmResults<TaskItem> taskItems) {
+        for (int i = 0; i < taskItems.size(); i++) {
+            final TaskItem taskItem = taskItems.get(i);
+            final HashMap<String, Object> taskItemMap = getTaskItemMap(taskItem);
+            WebApi.editTaskItem(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    countCalls--;
+
+                    FennelUtils.appendDebugLog("TaskItem edit response: " + taskItem.getId() + " - " + response.code());
+
+                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+
+                        FennelUtils.appendDebugLog("TaskItem edit finished: " + taskItem.getId());
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        taskItem.setDataDirty(false);
+                        realm.commitTransaction();
+
+                        checkSyncComplete();
+                    }
+                    else if(response.code() == 401){
+                        FennelUtils.appendDebugLog("TaskItem edit Session Expired, redirected: " + taskItem.getId());
+                        countFailedCalls++;
+                        sessionExpireRedirect();
+                    } else {
+                        String errorMessage = "";
+                        if(response.errorBody() != null) {
+                            try {
+                                errorMessage = response.errorBody().string().toString();
+                                JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
+                                errorMessage = objError.getString("message");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        FennelUtils.appendDebugLog("TaskItem edit failed - " + response.code() + " - "  + errorMessage);
+                        Exception e = new Exception("TaskItem Edit failed - " + response.code() + " - "  + errorMessage);
+                        Crashlytics.logException(e);
+                        if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
+                            sessionExpireRedirect();
+                        }
+                        countFailedCalls++;
+                        checkSyncComplete();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    countCalls--;
+                    countFailedCalls++;
+                    FennelUtils.appendDebugLog("TaskItem edit Failed: " + t.getMessage());
+                    t.printStackTrace();
+                    checkSyncComplete();
+                }
+            }, taskItem.getId(), taskItemMap);
+        }
+    }
+
+    private static void processTaskItemPicsCalls(RealmResults<TaskItem> taskItemPics) {
+        for (int i = 0; i < taskItemPics.size(); i++) {
+            final TaskItem taskItem = taskItemPics.get(i);
+
+            if(taskItem.isPicUploadDirty()) {
+                attachImageToTaskItemObject(taskItem);
+            }
+        }
+    }
+
+    private static void processTaskItemOptionCalls(RealmResults<TaskItemOption> taskItemOptions) {
+        for (int i = 0; i < taskItemOptions.size(); i++) {
+            final TaskItemOption taskItemOption = taskItemOptions.get(i);
+            final HashMap<String, Object> taskItemOptionMap = getTaskItemOptionMap(taskItemOption);
+            WebApi.editTaskItemOption(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    countCalls--;
+
+                    FennelUtils.appendDebugLog("TaskItemOption edit response: " + taskItemOption.getId() + " - " + response.code());
+
+                    if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+
+                        FennelUtils.appendDebugLog("TaskItemOption edit finished: " + taskItemOption.getId());
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        taskItemOption.setDataDirty(false);
+                        realm.commitTransaction();
+
+                        checkSyncComplete();
+                    }
+                    else if(response.code() == 401){
+                        FennelUtils.appendDebugLog("TaskItemOption edit Session Expired, redirected: " + taskItemOption.getId());
+                        countFailedCalls++;
+                        sessionExpireRedirect();
+                    } else {
+                        String errorMessage = "";
+                        if(response.errorBody() != null) {
+                            try {
+                                errorMessage = response.errorBody().string().toString();
+                                JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
+                                errorMessage = objError.getString("message");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        FennelUtils.appendDebugLog("TaskItemOption edit failed - " + response.code() + " - "  + errorMessage);
+                        Exception e = new Exception("TaskItemOption Edit failed - " + response.code() + " - "  + errorMessage);
+                        Crashlytics.logException(e);
+                        if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
+                            sessionExpireRedirect();
+                        }
+                        countFailedCalls++;
+                        checkSyncComplete();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    countCalls--;
+                    countFailedCalls++;
+                    FennelUtils.appendDebugLog("TaskItemOption edit Failed: " + t.getMessage());
+                    t.printStackTrace();
+                    checkSyncComplete();
+                }
+            }, taskItemOption.getId(), taskItemOptionMap);
+        }
+    }
+
     private static void adjustCountCallFailedFarmer(Farmer farmer){
         // -- for farm call
         countCalls--;
@@ -669,6 +1084,14 @@ public class WebApi {
             countCalls--;
         if(farmer.isNatIdCardDirty())
             countCalls--;
+    }
+
+    private static void adjustCountCallFailedFarmVisitLog(String farmVisitId){
+
+        RealmResults<FarmVisitLog> farmVisitLogs = Realm.getDefaultInstance().where(FarmVisitLog.class).equalTo("isDataDirty", true).equalTo("farmVisitId", farmVisitId).findAll();
+        if(farmVisitLogs != null && farmVisitLogs.size() > 0) {
+            countCalls = countCalls - farmVisitLogs.size();
+        }
     }
 
     private static String getAttachmentIdFromUploadSuccess(String data) {
@@ -748,6 +1171,69 @@ public class WebApi {
         newFarmerMap.put("Leader__c", farmer.isLeader() ? 1 : 0);
 
         return newFarmerMap;
+    }
+
+    private static HashMap<String, Object> getFarmVisitMap(FarmVisit farmVisit) {
+
+        final HashMap<String, Object> newFarmVisitMap = new HashMap<>();
+        newFarmVisitMap.put("Farmer__c", farmVisit.getFarmerId());
+        newFarmVisitMap.put("Shamba__c", farmVisit.getShambaId());
+        newFarmVisitMap.put("Visited_Date__c", farmVisit.getVisitedDate());
+
+        if(farmVisit.getLoggedInPersonRole().equalsIgnoreCase(Constants.STR_FACILITATOR)) {
+            newFarmVisitMap.put("Facilitator__c", farmVisit.getLoggedInPersonId());
+        } else if(farmVisit.getLoggedInPersonRole().equalsIgnoreCase(Constants.STR_FIELD_OFFICER)) {
+            newFarmVisitMap.put("Field_Officer__c", farmVisit.getLoggedInPersonId());
+        } else if(farmVisit.getLoggedInPersonRole().equalsIgnoreCase(Constants.STR_FIELD_MANAGER)) {
+            newFarmVisitMap.put("Field_Manager__c", farmVisit.getLoggedInPersonId());
+        }
+
+        return newFarmVisitMap;
+    }
+
+    private static HashMap<String, Object> getFarmingTaskMap(Task farmingTask) {
+
+        final HashMap<String, Object> newFarmingTaskMap = new HashMap<>();
+        newFarmingTaskMap.put("Status__c", farmingTask.getStatus());
+
+        return newFarmingTaskMap;
+    }
+
+    private static HashMap<String, Object> getTaskItemMap(TaskItem taskItem) {
+
+        final HashMap<String, Object> newTaskItemMap = new HashMap<>();
+        newTaskItemMap.put("Completed__c", taskItem.isTaskDone());
+        if(taskItem.getTextValue() != null && !taskItem.getTextValue().equalsIgnoreCase("null")) {
+            newTaskItemMap.put("Text_Value__c", taskItem.getTextValue());
+        }
+        if(taskItem.getGpsTakenTime() != null && !taskItem.getGpsTakenTime().equalsIgnoreCase("null")) {
+            newTaskItemMap.put("GPS_Taken_Time__c", taskItem.getGpsTakenTime());
+        }
+        if(taskItem.getLatitude() != 0) {
+            newTaskItemMap.put("Location__Latitude__s", taskItem.getLatitude());
+        }
+        if(taskItem.getLongitude() != 0) {
+            newTaskItemMap.put("Location__Longitude__s", taskItem.getLongitude());
+        }
+
+        return newTaskItemMap;
+    }
+
+    private static HashMap<String, Object> getTaskItemOptionMap(TaskItemOption taskItemOption) {
+
+        final HashMap<String, Object> newTaskItemOptionMap = new HashMap<>();
+        newTaskItemOptionMap.put("Value__c", taskItemOption.isValue());
+
+        return newTaskItemOptionMap;
+    }
+
+    private static HashMap<String, Object> getFarmVisitLogMap(FarmVisitLog farmVisitLog) {
+
+        final HashMap<String, Object> newFarmVisitLogMap = new HashMap<>();
+        newFarmVisitLogMap.put("Farm_Visit__c", farmVisitLog.getFarmVisitId());
+        newFarmVisitLogMap.put("Farming_Task__c", farmVisitLog.getFarmingTaskId());
+
+        return newFarmVisitLogMap;
     }
 
     private static HashMap<String, Object> getFarmMap(Farmer farmer) {
@@ -963,10 +1449,10 @@ public class WebApi {
                     Log.i("Fennel", "farmer profile picture upload failed!");
                 }
             }, entityBody, imageBody);
-        } else {
-            WebApi.editAttachment(new Callback<ResponseBody>() {
+            } else {
+                WebApi.editAttachment(new Callback<ResponseBody>() {
                 @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     countCalls--;
                     if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                         Log.i("Fennel", "farmer profile picture edited successfully!");
@@ -1119,6 +1605,143 @@ public class WebApi {
         }
     }
 
+    private static void attachImageToTaskItemObject(final TaskItem taskItem) {
+
+        if (taskItem.getAttachmentPath() == null || taskItem.getAttachmentPath().isEmpty()) {
+            countCalls--;
+            countFailedCalls++;
+            return;
+        }
+
+        HashMap<String, Object> attachmentMap = new HashMap<>();
+        attachmentMap.put("Description", "FileUploaded");
+        attachmentMap.put("Name", "picture.png");
+        if (taskItem.getAttachmentId() == null || taskItem.getAttachmentId().isEmpty()) {
+            attachmentMap.put("ParentId", taskItem.getId());
+        }
+        else
+        {
+            MyPicassoInstance.getInstance().invalidate(taskItem.getAttachmentPath());
+        }
+
+        JSONObject json = new JSONObject(attachmentMap);
+
+        byte[] byteArrayImage = null;
+        Bitmap bmp = null;
+
+        String imagePath = NetworkHelper.getUploadPathFromUri(taskItem.getAttachmentPath());
+//        bmp = PhotoUtils.decodeSampledBitmapFromResource(imagePath);
+        bmp = PhotoUtils.getBitmapFromPath(imagePath);
+
+        if(bmp != null)
+        {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+            byteArrayImage = bos.toByteArray();
+            try {
+                bos.close();
+                bmp.recycle();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else
+        {
+            byteArrayImage = PhotoUtils.getByteArrayFromFile(new File(imagePath));
+        }
+
+//        countCalls++;
+        if(byteArrayImage != null){
+            RequestBody entityBody = RequestBody.create(MediaType.parse("application/json"), json.toString());
+            RequestBody imageBody = RequestBody.create(MediaType.parse("image/*"), byteArrayImage);
+
+            if (taskItem.getAttachmentId() == null || taskItem.getAttachmentId().isEmpty()) {
+                WebApi.addAttachment(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        countCalls--;
+                        if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                            Log.i("Fennel", "TaskItem picture uploaded successfully!");
+
+                            String strResponse = "";
+                            String newPicId = "";
+
+                            try {
+                                strResponse = response.body().string();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+                            if(!strResponse.isEmpty()) {
+                                JSONObject objReponse = null;
+                                try {
+                                    objReponse = new JSONObject(strResponse);
+                                    newPicId = objReponse.getString("id");
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            final TaskItem taskItemDBObj = realm.where(TaskItem.class).equalTo("id", taskItem.getId()).findFirst();
+                            taskItemDBObj.setPicUploadDirty(false);
+                            taskItemDBObj.setAttachmentId(newPicId);
+                            realm.commitTransaction();
+                        } else {
+                            countFailedCalls++;
+                            Log.i("Fennel", "TaskItem picture upload failed!");
+                        }
+                        checkSyncComplete();
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        countCalls--;
+                        countFailedCalls++;
+                        checkSyncComplete();
+                        Log.i("Fennel", "TaskItem picture upload failed!");
+                    }
+                }, entityBody, imageBody);
+            } else {
+                WebApi.editAttachment(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        countCalls--;
+                        if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                            Log.i("Fennel", "TaskItem picture edited successfully!");
+                            Singleton.getInstance().taskItemPicIdtoInvalidate = taskItem.getId();
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            final TaskItem taskItemDBObj = realm.where(TaskItem.class).equalTo("id", taskItem.getId()).findFirst();
+                            taskItemDBObj.setPicUploadDirty(false);
+                            realm.commitTransaction();
+                        } else {
+                            countFailedCalls++;
+                            Log.i("Fennel", "TaskItem picture edit failed!");
+                        }
+                        checkSyncComplete();
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        countCalls--;
+                        countFailedCalls++;
+                        checkSyncComplete();
+                        Log.i("Fennel", "TaskItem picture edit failed!");
+                    }
+                }, taskItem.getAttachmentId(), entityBody, imageBody);
+            }
+        }
+        else {
+            countCalls--;
+            countFailedCalls++;
+            Exception e = new Exception("ByteArrayImage: attachImageToTaskItemObject() - " + imagePath);
+            Crashlytics.logException(e);
+            Log.i("ByteArrayImage" , "attachImageToTaskItemObject() - " + imagePath);
+        }
+    }
+
     private static void checkSyncComplete(){
         if(countCalls == 0) {
 
@@ -1157,8 +1780,16 @@ public class WebApi {
 
     public static boolean isSyncRequired(){
         RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).equalTo("isDataDirty", true).or().equalTo("isFarmerPicDirty", true).or().equalTo("isNatIdCardDirty", true).findAll();
-        if(PreferenceHelper.getInstance().readAboutIsSyncReq() || farmerDbList.size() > 0)
+        RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("isDataDirty", true).findAll();
+        RealmResults<FarmVisitLog> farmVisitLogs = Realm.getDefaultInstance().where(FarmVisitLog.class).equalTo("isDataDirty", true).findAll();
+        RealmResults<Task> farmingTasks = Realm.getDefaultInstance().where(Task.class).equalTo("isDataDirty", true).findAll();
+        RealmResults<TaskItem> taskItems = Realm.getDefaultInstance().where(TaskItem.class).equalTo("isDataDirty", true).or().equalTo("isPicUploadDirty", true).findAll();
+        RealmResults<TaskItemOption> taskItemsOptions = Realm.getDefaultInstance().where(TaskItemOption.class).equalTo("isDataDirty", true).findAll();
+        if(PreferenceHelper.getInstance().readAboutIsSyncReq() || farmerDbList.size() > 0 ||
+                farmVisits.size() > 0 || farmVisitLogs.size() > 0 || farmingTasks.size() > 0 ||
+                taskItems.size() > 0 || taskItemsOptions.size() > 0) {
             return true;
+        }
         return false;
     }
 
@@ -1178,6 +1809,23 @@ public class WebApi {
 
         if(PreferenceHelper.getInstance().readAboutIsSyncReq())
             count = count + 1;
+
+        RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("isDataDirty", true).findAll();
+        RealmResults<FarmVisitLog> farmVisitLogs = Realm.getDefaultInstance().where(FarmVisitLog.class).equalTo("isDataDirty", true).findAll();
+        RealmResults<Task> farmingTasks = Realm.getDefaultInstance().where(Task.class).equalTo("isDataDirty", true).findAll();
+        RealmResults<TaskItem> farmingTaskItems = Realm.getDefaultInstance().where(TaskItem.class).equalTo("isDataDirty", true).or().equalTo("isPicUploadDirty", true).findAll();
+        RealmResults<TaskItemOption> farmingTaskItemOptions = Realm.getDefaultInstance().where(TaskItemOption.class).equalTo("isDataDirty", true).findAll();
+
+        if(farmVisits != null)
+            count = count + farmVisits.size();
+        if(farmVisitLogs != null)
+            count = count + farmVisitLogs.size();
+        if(farmingTasks != null)
+            count = count + farmingTasks.size();
+        if(farmingTaskItems != null)
+            count = count + farmingTaskItems.size();
+        if(farmingTaskItemOptions != null)
+            count = count + farmingTaskItemOptions.size();
 
         return count;
     }
@@ -1301,6 +1949,7 @@ public class WebApi {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         Realm realm = getDefaultInstance();
+        realm.beginTransaction();
 
         if(arrRecords.length() > 0)
         {
@@ -1356,7 +2005,6 @@ public class WebApi {
                         Farmer farmerDb = realm.where(Farmer.class).equalTo("farmerId", id).findFirst();
                         if(farmerDb != null)
                         {
-                            realm.beginTransaction();
                             farmerDb.setThumbAttachmentId(farmerPicId);
                             farmerDb.setNationalCardAttachmentId(farmerNatId);
                             if(!farmerPicId.isEmpty())
@@ -1367,7 +2015,6 @@ public class WebApi {
                             {
                                 farmerDb.setNationalCardUrl(natIdUrl);
                             }
-                            realm.commitTransaction();
                         }
 
                         MyPicassoInstance.getInstance().load(thumbUrl).fetch(/*new com.squareup.picasso.Callback() {
@@ -1401,6 +2048,8 @@ public class WebApi {
 
 //            tasksAdapter.notifyDataSetChanged();
         }
+
+        realm.commitTransaction();
     }
 
     private static void parseMyFarmersData(String data) throws JSONException {
@@ -1883,6 +2532,7 @@ public class WebApi {
 
             String id = objTask.getString("Id");
             String textValue = objTask.getString("Text_Value__c");
+            boolean isDone = objTask.getBoolean("Completed__c");
             int sequence = objTask.getInt("Sequence__c");
             String recordType = objTask.getJSONObject("RecordType").getString("Name");
             String name = objTask.getString("Name");
@@ -1910,11 +2560,11 @@ public class WebApi {
                     String optionName = objOption.getString("Name");
                     boolean isValue = objOption.getBoolean("Value__c");
 
-                    options.add(new TaskItemOption(optionId, optionName, isValue));
+                    options.add(new TaskItemOption(optionId, optionName, isValue, false));
                 }
             }
 
-            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, null, null, null, null, false, "");
+            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, null, null, null, null, isDone, "", "", false, false);
 //            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, gpsTakenTime, latitude, longitude, options, false);
 
             for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {

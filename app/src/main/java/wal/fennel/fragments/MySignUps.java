@@ -1249,6 +1249,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 JSONObject objTask = arrRecords.getJSONObject(i);
 
             String id = objTask.getString("Id");
+            boolean isDone = objTask.getBoolean("Completed__c");
             String textValue = objTask.getString("Text_Value__c");
             int sequence = objTask.getInt("Sequence__c");
             String recordType = objTask.getJSONObject("RecordType").getString("Name");
@@ -1303,6 +1304,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 taskItem.setLongitude(longitude);
                 taskItem.setOptions(options);
                 taskItem.setAttachmentPath("");
+                taskItem.setTaskDone(isDone);
                 realm.commitTransaction();
 
 //            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileAction, gpsTakenTime, latitude, longitude, options, null, null, null, null, false);
@@ -1433,7 +1435,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                                                     try {
                                                         if (fileOutputStream != null) {
                                                             fileOutputStream.close();
-                                                            updateTaskItemWithAttachment(taskItemId, file.getAbsolutePath());
+                                                            updateTaskItemWithAttachment(taskItemId, file.getAbsolutePath(), attachmentId);
                                                         } else {
                                                             file.delete();
                                                         }
@@ -1442,7 +1444,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                                                         System.out.println("Error while closing stream: " + ioe);
                                                     }
                                                 }
-                                                Log.i("FENNEL", "Write Success!");
+//                                                Log.i("FENNEL", "Write Success!");
                                             } catch (IOException e) {
                                                 Log.e("FENNEL", "Error while writing file!");
                                                 Log.e("FENNEL", e.toString());
@@ -1468,13 +1470,15 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     }
 
-    private void updateTaskItemWithAttachment(String taskItemId, String filePath) {
+    private void updateTaskItemWithAttachment(String taskItemId, String filePath, String attachmentId) {
         ArrayList<TaskItem> allTaskItems = Singleton.getInstance().taskItems;
         for (TaskItem taskItem : allTaskItems) {
             if (taskItem.getId().equals(taskItemId)) {
                 Realm realm = Realm.getDefaultInstance();
                 realm.beginTransaction();
-                taskItem.setAttachmentPath(filePath);
+                String uri = NetworkHelper.getUriFromPath(filePath);
+                taskItem.setAttachmentId(attachmentId);
+                taskItem.setAttachmentPath(uri);
                 realm.commitTransaction();
 
                 break;
@@ -2032,7 +2036,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                             RealmList<TaskItemOption> options = new RealmList<>();
 
-                            TaskItem newTaskItem = new TaskItem(sequence, id, taskMap.get("Id"), name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false, "");
+                            TaskItem newTaskItem = new TaskItem(sequence, id, taskMap.get("Id"), name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false, "", "", false, false);
                             visitLogTask.getTaskItems().add(newTaskItem);
                         }
                     }

@@ -1,6 +1,7 @@
 package wal.fennel.utils;
 
 import android.os.Environment;
+import android.util.Log;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
@@ -88,6 +89,8 @@ public class FennelUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        Log.d("FennelSyncLog", text);
     }
 
     public static void appendFarmerLog(String [] data) throws IOException {

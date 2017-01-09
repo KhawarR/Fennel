@@ -128,17 +128,17 @@ public class FarmerStatus extends BaseFragment {
         }
 
         if(inProgressTasks.size() > 0){
-            allTasks.add(new Task("", Constants.STR_IN_PROGRESS, "", "", "", "", true, null));
+            allTasks.add(new Task("", Constants.STR_IN_PROGRESS, "", "", "", "", true, null, false));
             allTasks.addAll(inProgressTasks);
         }
 
         if(notStartedTasks.size() > 0){
-            allTasks.add(new Task("", Constants.STR_NOT_STARTED, "", "", "", "", true, null));
+            allTasks.add(new Task("", Constants.STR_NOT_STARTED, "", "", "", "", true, null, false));
             allTasks.addAll(notStartedTasks);
         }
 
         if(completedTasks.size() > 0){
-            allTasks.add(new Task("", Constants.STR_COMPLETED, "", "", "", "", true, null));
+            allTasks.add(new Task("", Constants.STR_COMPLETED, "", "", "", "", true, null, false));
             allTasks.addAll(completedTasks);
         }
 

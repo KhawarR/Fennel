@@ -28,8 +28,11 @@ public class TaskItem extends RealmObject implements Parcelable {
     private double latitude;
     private double longitude;
     private RealmList<TaskItemOption> options = new RealmList<>();
+    private boolean isDataDirty = false;
+    private boolean isPicUploadDirty = false;
 
     private String attachmentPath = "";
+    private String attachmentId = "";
     private Date dateModified = null;
     private String agentName = "";
     private String farmerName = "";
@@ -58,13 +61,21 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.isTaskDone = other.isTaskDone;
 
         this.attachmentPath = other.attachmentPath;
+        this.attachmentId = other.attachmentId;
         this.dateModified = other.dateModified;
         this.agentName = other.agentName;
         this.farmerName = other.farmerName;
         this.agentAttachmentId = other.agentAttachmentId;
+        this.isDataDirty = other.isDataDirty;
+        this.isPicUploadDirty = other.isPicUploadDirty;
     }
 
-    public TaskItem(int sequence, String id, String farmingTaskId, String name, String recordType, String description, String textValue, String fileType, String fileActionType, String fileActionPerformed, String gpsTakenTime, double latitude, double longitude, RealmList<TaskItemOption> options, Date lastModified, String agent, String farmer, String attachmentId, boolean isTaskDone, String attachmentPath) {
+    public TaskItem(int sequence, String id, String farmingTaskId, String name, String recordType,
+                    String description, String textValue, String fileType, String fileActionType,
+                    String fileActionPerformed, String gpsTakenTime, double latitude,
+                    double longitude, RealmList<TaskItemOption> options, Date lastModified,
+                    String agent, String farmer, String agentAttachmentId, boolean isTaskDone,
+                    String attachmentPath, String attachmentId, boolean isDataDirty, boolean isPicUploadDirty) {
         this.sequence = sequence;
         this.id = id;
         this.farmingTaskId = farmingTaskId;
@@ -82,10 +93,13 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.isTaskDone = isTaskDone;
 
         this.attachmentPath = attachmentPath;
+        this.attachmentId = attachmentId;
         this.dateModified = lastModified;
         this.agentName = agent;
         this.farmerName = farmer;
-        this.agentAttachmentId = attachmentId;
+        this.agentAttachmentId = agentAttachmentId;
+        this.isDataDirty = isDataDirty;
+        this.isPicUploadDirty = isPicUploadDirty;
     }
 
     @Override
@@ -106,11 +120,14 @@ public class TaskItem extends RealmObject implements Parcelable {
         dest.writeInt(this.isTaskDone ? 1 : 0);
         dest.writeTypedList(options);
 
+        dest.writeString(this.attachmentPath);
+        dest.writeString(this.attachmentId);
         dest.writeLong(dateModified == null ? 0 : dateModified.getTime());
         dest.writeString(this.agentName);
         dest.writeString(this.farmerName);
         dest.writeString(this.agentAttachmentId);
-
+        dest.writeInt(this.isDataDirty ? 1 : 0);
+        dest.writeInt(this.isPicUploadDirty ? 1 : 0);
     }
 
     protected TaskItem(Parcel in) {
@@ -131,10 +148,14 @@ public class TaskItem extends RealmObject implements Parcelable {
         options = new RealmList<>();
         in.readTypedList(options, TaskItemOption.CREATOR);
 
+        this.attachmentPath = in.readString();
+        this.attachmentId = in.readString();
         this.dateModified = new Date(in.readLong());
         this.agentName = in.readString();
         this.farmerName = in.readString();
         this.agentAttachmentId = in.readString();
+        this.isDataDirty = in.readInt() == 1 ? true : false;
+        this.isPicUploadDirty = in.readInt() == 1 ? true : false;
     }
 
     public static final Parcelable.Creator<TaskItem> CREATOR = new Parcelable.Creator<TaskItem>() {
@@ -312,5 +333,29 @@ public class TaskItem extends RealmObject implements Parcelable {
 
     public void setAgentName(String agentName) {
         this.agentName = agentName;
+    }
+
+    public boolean isDataDirty() {
+        return isDataDirty;
+    }
+
+    public void setDataDirty(boolean dataDirty) {
+        isDataDirty = dataDirty;
+    }
+
+    public String getAttachmentId() {
+        return attachmentId;
+    }
+
+    public void setAttachmentId(String attachmentId) {
+        this.attachmentId = attachmentId;
+    }
+
+    public boolean isPicUploadDirty() {
+        return isPicUploadDirty;
+    }
+
+    public void setPicUploadDirty(boolean picUploadDirty) {
+        isPicUploadDirty = picUploadDirty;
     }
 }
