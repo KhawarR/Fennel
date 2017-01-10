@@ -99,7 +99,7 @@ public class TeamLogBookAdapter extends BaseAdapter {
         } else if (taskItem.getRecordType().equalsIgnoreCase("Checkbox") || taskItem.getRecordType().equalsIgnoreCase("Options")) {
             desciption = taskItem.getAgentName() + " updated " + taskItem.getName() + "'s value at " + taskItem.getFarmerName() + "'s farm";;
         } else if (taskItem.getRecordType().equalsIgnoreCase("GPS")) {
-            if (taskItem.getName().equalsIgnoreCase("Check-in")) {
+            if (taskItem.getName().equalsIgnoreCase("Check-in") || taskItem.getName().equalsIgnoreCase("Checkin")) {
                 desciption = taskItem.getAgentName() + " checked into " + taskItem.getFarmerName() + "'s farm";
             } else {
                 desciption = taskItem.getAgentName() + " checked out of " + taskItem.getFarmerName() + "'s farm";
