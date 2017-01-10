@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.squareup.picasso.NetworkPolicy;
@@ -44,6 +45,9 @@ public class MyDashboard extends BaseFragment {
     @Bind(R.id.tvteam)
     TextView tvTeam;
 
+    @Bind(R.id.tabview)
+    LinearLayout tabView;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -69,15 +73,13 @@ public class MyDashboard extends BaseFragment {
                 MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
         }
 
-
-
         String userType = PreferenceHelper.getInstance().readLoginUserType();
 
-//        if (userType.equalsIgnoreCase(Constants.STR_FACILITATOR)) {
-//            tabView.setVisibility(View.GONE);
-//        } else {
-//            tabView.setVisibility(View.VISIBLE);
-//        }
+        if (userType.equalsIgnoreCase(Constants.STR_FACILITATOR)) {
+            tabView.setVisibility(View.GONE);
+        } else {
+            tabView.setVisibility(View.VISIBLE);
+        }
 
 //        showPersonViewFragment();
 //        tvPerson.setSelected(true);

@@ -37,6 +37,7 @@ import retrofit2.Response;
 import wal.fennel.activities.SplashActivity;
 import wal.fennel.application.Fennel;
 import wal.fennel.datamodels.Auth;
+import wal.fennel.models.DashboardFieldAgent;
 import wal.fennel.models.FarmVisit;
 import wal.fennel.models.FarmVisitLog;
 import wal.fennel.models.Farmer;
@@ -2615,6 +2616,32 @@ public class WebApi {
                 agentIds = agentIds + id;
 
                 if(i+1 != Singleton.getInstance().fieldAgentsVisitLogs.size()){
+                    agentIds = agentIds + ",";
+                }
+            }
+        }
+
+        String query = String.format(NetworkHelper.QUERY_MY_LOGBOOK_ATTACHMENTS, agentIds);
+        Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
+        return processCall(apiCall, callback);
+    }
+
+    public static boolean getMyDashboardAttachments(Callback<ResponseBody> callback){
+
+        String agentIds = "";
+
+        for (int i = 0; i < Singleton.getInstance().dashboardFieldAgents.size(); i++) {
+
+            DashboardFieldAgent fieldAgent = Singleton.getInstance().dashboardFieldAgents.get(i);
+
+            if(!fieldAgent.isHeader() && !fieldAgent.getAgentId().isEmpty()){
+                String id = fieldAgent.getAgentEmployeeId();
+
+                id = "'" + id + "'";
+
+                agentIds = agentIds + id;
+
+                if(i+1 != Singleton.getInstance().dashboardFieldAgents.size()){
                     agentIds = agentIds + ",";
                 }
             }

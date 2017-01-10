@@ -1376,6 +1376,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     try {
                         responseStr = response.body().string();
                         parseMyDashboardData(responseStr);
+                        WebApi.getMyDashboardAttachments(myDashboardAttachmentCallback);
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (JSONException e) {
@@ -1946,6 +1947,46 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
     };
 
+    private Callback<ResponseBody> myDashboardAttachmentCallback = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            loadingFinished();
+            if(isValid())
+            {
+                if (response.code() == 200) {
+                    String responseStr = "";
+
+                    try {
+                        responseStr = response.body().string();
+                        parseMyDashboardAttachments(responseStr);
+                    }catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if(response.code() == 401)
+                {
+                    PreferenceHelper.getInstance().clearSession(false);
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    getActivity().finish();
+                }
+                else
+                {
+                    Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            loadingFinished();
+            t.printStackTrace();
+        }
+    };
+
+
+
     private void parseMyLogbookAttachments(String data) throws JSONException {
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
@@ -1978,12 +2019,65 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     if (fieldAgent.getAgentEmployeeId().equalsIgnoreCase(name)) {
                         String attachmentUrl = NetworkHelper.makeAttachmentUrlFromId(agentAttachmentId);
 
+                            realm.beginTransaction();
+
+                            fieldAgent.setAgentAttachmentUrl(agentAttachmentId);
+                            for (TaskItem item : fieldAgent.getVisitLogs()) {
+                                item.setAgentAttachmentId(agentAttachmentId);
+                            }
+
+                            realm.commitTransaction();
+
+                        MyPicassoInstance.getInstance().load(attachmentUrl).fetch();
+                        break;
+                    }
+                }
+            }
+
+//            tasksAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void parseMyDashboardAttachments(String data) throws JSONException {
+
+        JSONObject jsonObject = new JSONObject(data);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        Realm realm = getDefaultInstance();
+
+        if(arrRecords.length() > 0)
+        {
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject agentObj = arrRecords.getJSONObject(i);
+                String id = agentObj.getString("Id");
+                String name = agentObj.getString("Name");
+                String agentAttachmentId  = null;
+
+                JSONObject attachmentObj = agentObj.optJSONObject("Attachments");
+                if(attachmentObj != null)
+                {
+
+                    JSONArray attRecords = attachmentObj.getJSONArray("records");
+                    for (int j = 0; j < attRecords.length(); j++) {
+                        JSONObject objAttachment = attRecords.getJSONObject(j);
+                        agentAttachmentId = objAttachment.getString("Id");
+                    }
+                }
+
+                ArrayList<DashboardFieldAgent> allAgentsList = Singleton.getInstance().dashboardFieldAgents;
+
+                for (int j = 0; j < allAgentsList.size(); j++) {
+                    final DashboardFieldAgent fieldAgent = allAgentsList.get(j);
+
+                    if(fieldAgent.getAgentEmployeeId().equalsIgnoreCase(name))
+                    {
+                        String attachmentUrl = NetworkHelper.makeAttachmentUrlFromId(agentAttachmentId);
+
                         realm.beginTransaction();
                         fieldAgent.setAgentAttachmentUrl(agentAttachmentId);
-                        for (TaskItem item : fieldAgent.getVisitLogs()) {
-                            item.setAgentAttachmentId(agentAttachmentId);
-                        }
                         realm.commitTransaction();
+
                         MyPicassoInstance.getInstance().load(attachmentUrl).fetch();
                         break;
                     }

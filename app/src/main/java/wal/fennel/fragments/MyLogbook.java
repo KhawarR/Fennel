@@ -80,8 +80,7 @@ public class MyLogbook extends BaseFragment {
         } else {
             tabView.setVisibility(View.VISIBLE);
         }
-//        showPersonViewFragment();
-//        tvPerson.setSelected(true);
+
         showTeamViewFragment();
         tvTeam.setSelected(true);
 
