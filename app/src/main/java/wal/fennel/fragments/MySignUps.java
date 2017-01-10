@@ -106,6 +106,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     private RelativeLayout rlAdd;
     private EditText etSearch;
 
+    private int startingCallsCounter = 0;
+
 
     @Nullable
     @Override
@@ -265,6 +267,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     //region Network calls, callbacks & parsers
     private void getMySignups() {
 
+        loadingStarted();
+
         if (NetworkHelper.isNetAvailable(getActivity()) && !WebApi.isSyncRequired() && PreferenceHelper.getInstance().readFirstRun()) {
             getMySignupsFromServer();
             getMyFarmerTasksData();
@@ -274,8 +278,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             getMyFarmerTasksFromDB();
             getMyLogbookDataFromDB();
             getMyDashboardDataFromDB();
-            if (PreferenceHelper.getInstance().isSessionExpiredSyncReq())
+            if (PreferenceHelper.getInstance().isSessionExpiredSyncReq()) {
                 WebApi.syncAll(null);
+            }
+            loadingFinished();
         }
     }
 
@@ -283,7 +289,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         Singleton.getInstance().mySignupsList.clear();
 
         if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
-        loadingStarted();
 
         RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerType", Constants.FarmerType.MYSIGNUPS.toString()).findAll().sort("lastModifiedTime", Sort.ASCENDING);
 
@@ -318,25 +323,20 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         adapter = new MySignupsAdapter(getActivity(), Singleton.getInstance().mySignupsList);
         mLvMySignups.setAdapter(adapter);
-
-        loadingFinished();
     }
 
     private void getMyFarmerTasksFromDB() {
         Singleton.getInstance().myFarmersList.clear();
 
         if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
-        loadingStarted();
 
         RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerType", Constants.FarmerType.MYFARMERTASKS.toString()).findAll();
         Singleton.getInstance().myFarmersList.addAll(farmerDbList);
-
-        loadingFinished();
     }
 
     private void getMySignupsFromServer() {
         if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
-        loadingStarted();
+        startingCallsCounter++;
         WebApi.getMySignUps(mySignupsCallback);
         WebApi.getAboutMeAttachment(aboutMeAttachmentCallback);
     }
@@ -344,7 +344,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     private Callback<ResponseBody> mySignupsCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            loadingFinished();
             WebApi.saveSyncTimeStamp();
             if (isValid()) {
                 if (response.code() == 200) {
@@ -354,6 +353,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         responseStr = response.body().string();
                         PreferenceHelper.getInstance().writeFirstRun(false);
                         parseData(responseStr);
+                        startingCallsCounter++;
                         WebApi.getMyFarmerAttachments(myFarmersAttachments);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -366,14 +366,22 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
+            checkCallsCounter();
         }
 
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
-            loadingFinished();
             t.printStackTrace();
+            checkCallsCounter();
         }
     };
+
+    private void checkCallsCounter() {
+        startingCallsCounter--;
+        if(startingCallsCounter == 0) {
+            loadingFinished();
+        }
+    }
 
     private void parseData(String data) throws JSONException {
 
@@ -509,7 +517,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     private Callback<ResponseBody> myFarmersAttachments = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            loadingFinished();
             if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
@@ -528,12 +535,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
+            checkCallsCounter();
         }
 
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
-            loadingFinished();
             t.printStackTrace();
+            checkCallsCounter();
         }
     };
 
@@ -734,19 +742,19 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     public void getMyFarmerTasksData() {
         if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
-        loadingStarted();
+        startingCallsCounter++;
         WebApi.getMyfarmerTasks(myFarmerTasksCallback);
     }
 
     public void getMyLogbookData(String fieldOfficers, String facilitators) {
         if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
-        loadingStarted();
+        startingCallsCounter++;
         WebApi.getMyLogbookData(myLogbookDataCallback, fieldOfficers, facilitators);
     }
 
     public void getMyDashboardData(String fieldOfficers, String facilitators) {
         if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
-        loadingStarted();
+        startingCallsCounter++;
         WebApi.getMyDashboardData(myDashboardDataCallback, fieldOfficers, facilitators);
     }
 
@@ -945,7 +953,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     private Callback<ResponseBody> myFarmerTasksCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            loadingFinished();
             if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
@@ -968,19 +975,19 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
+            checkCallsCounter();
         }
 
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
-            loadingFinished();
             t.printStackTrace();
+            checkCallsCounter();
         }
     };
 
     private Callback<ResponseBody> myFarmerTasksAttachments = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            loadingFinished();
             if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
@@ -1005,15 +1012,11 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
-            loadingFinished();
             t.printStackTrace();
         }
     };
 
     private void getFarmerTaskItems() {
-
-        loadingStarted();
-
         String farmingTaskIds = "";
 
         for (int i = 0; i < Singleton.getInstance().myFarmersList.size(); i++) {
@@ -1033,13 +1036,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
         }
+        startingCallsCounter++;
         WebApi.getFarmingTaskItems(farmerStatusCallback, farmingTaskIds);
     }
 
     private Callback<ResponseBody> farmerStatusCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            loadingFinished();
             if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
@@ -1063,12 +1066,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
+            checkCallsCounter();
         }
 
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
-            loadingFinished();
             t.printStackTrace();
+            checkCallsCounter();
         }
     };
 
@@ -1199,7 +1203,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     private Callback<ResponseBody> taskItemsAttachments = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            loadingFinished();
             if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
@@ -1225,7 +1228,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
-            loadingFinished();
             t.printStackTrace();
         }
     };
@@ -1334,7 +1336,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     private Callback<ResponseBody> myLogbookDataCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            loadingFinished();
             if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
@@ -1355,19 +1356,19 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
+            checkCallsCounter();
         }
 
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
-            loadingFinished();
             t.printStackTrace();
+            checkCallsCounter();
         }
     };
 
     private Callback<ResponseBody> myDashboardDataCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            loadingFinished();
             if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
@@ -1388,19 +1389,19 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
+            checkCallsCounter();
         }
 
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
-            loadingFinished();
             t.printStackTrace();
+            checkCallsCounter();
         }
     };
 
     private Callback<ResponseBody> myLogbookFOAndFacDataCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            loadingFinished();
             if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
@@ -1425,12 +1426,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
+            checkCallsCounter();
         }
 
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
-            loadingFinished();
             t.printStackTrace();
+            checkCallsCounter();
         }
     };
 
@@ -1442,10 +1444,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         } else if (userType.equalsIgnoreCase(Constants.STR_FIELD_OFFICER)) {
             query = NetworkHelper.GET_FAC_FOR_FO;
         } else {
+            startingCallsCounter++;
             WebApi.getMyLogbookData(myLogbookDataCallback, "", "");
+            startingCallsCounter++;
             WebApi.getMyDashboardData(myDashboardDataCallback, "", "");
             return;
         }
+        startingCallsCounter++;
         WebApi.getFOAndFacDataForLogbook(myLogbookFOAndFacDataCallback, query);
     }
 
@@ -1737,14 +1742,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     private void getAllVisitLogsData(String farmingTaskIds) {
         if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
-        loadingStarted();
+        startingCallsCounter++;
         WebApi.getAllVisitLogsForMyLogbook(allVisitLogsCallback, farmingTaskIds);
     }
 
     private Callback<ResponseBody> allVisitLogsCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            loadingFinished();
             if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
@@ -1766,12 +1770,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
+            checkCallsCounter();
         }
 
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
-            loadingFinished();
             t.printStackTrace();
+            checkCallsCounter();
         }
     };
 
@@ -1913,7 +1918,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     private Callback<ResponseBody> myLogbookAttachmentCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            loadingFinished();
             if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
@@ -1938,7 +1942,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
-            loadingFinished();
             t.printStackTrace();
         }
     };
@@ -1994,23 +1997,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         Singleton.getInstance().fieldAgentsVisitLogs.clear();
 
         if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
-        loadingStarted();
 
         RealmResults<FieldAgent> visitLogsList = Realm.getDefaultInstance().where(FieldAgent.class).findAll();
         Singleton.getInstance().fieldAgentsVisitLogs.addAll(visitLogsList);
-
-        loadingFinished();
     }
 
     private void getMyDashboardDataFromDB() {
         Singleton.getInstance().dashboardFieldAgents.clear();
 
         if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
-        loadingStarted();
 
         RealmResults<DashboardFieldAgent> dashboardFieldAgents = Realm.getDefaultInstance().where(DashboardFieldAgent.class).findAll();
         Singleton.getInstance().dashboardFieldAgents.addAll(dashboardFieldAgents);
-
-        loadingFinished();
     }
 }
