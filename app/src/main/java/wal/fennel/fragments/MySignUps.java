@@ -99,20 +99,12 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     @Bind(R.id.lv_farmers)
     ListView mLvMySignups;
 
-    EditText etSearch;
-    RelativeLayout rlAdd;
-    CircleImageView cIvIconRight;
-    SwipeRefreshLayout mSwipeRefreshLayout;
-
-    MySignupsAdapter adapter;
-
-//    RealmList<Farmer> myFarmers = new RealmList<>();
-    int locationsResponseCounter = 0;
-    //endregion
-
-//    ArrayList<TaskItem> allTaskItems = null;
-
-    Map<String, Map<String, String>> visitLogFarmingTasks = null;
+    private Map<String, Map<String, String>> visitLogFarmingTasks = null;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private CircleImageView cIvIconRight;
+    private MySignupsAdapter adapter;
+    private RelativeLayout rlAdd;
+    private EditText etSearch;
 
 
     @Nullable
@@ -121,7 +113,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_my_sign_ups, container, false);
         ButterKnife.bind(this, view);
-
         return view;
     }
 
@@ -139,7 +130,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         mSwipeRefreshLayout.setOnRefreshListener(onRefreshListener);
 
         LayoutInflater myinflater = getActivity().getLayoutInflater();
-        ViewGroup myHeader = (ViewGroup)myinflater.inflate(R.layout.header_mysignups_list, mLvMySignups, false);
+        ViewGroup myHeader = (ViewGroup) myinflater.inflate(R.layout.header_mysignups_list, mLvMySignups, false);
 
         rlAdd = (RelativeLayout) myHeader.findViewById(R.id.rl_add);
         rlAdd.setOnClickListener(this);
@@ -171,16 +162,15 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 final int DRAWABLE_RIGHT = 2;
                 final int DRAWABLE_BOTTOM = 3;
 
-                if(event.getAction() == MotionEvent.ACTION_UP) {
-                    if(event.getRawX() >= (etSearch.getRight() - etSearch.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if (event.getRawX() >= (etSearch.getRight() - etSearch.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
 
                         try {
                             String strSearchKey = etSearch.getText().toString().trim();
                             JSONObject props = new JSONObject();
                             props.put(MixPanelConstants.Property.SEARCH_KEY, strSearchKey);
                             mixPanel.track(MixPanelConstants.Event.SEARCH_MYSIGNUP_ACTION, props);
-                        }
-                        catch (JSONException e){
+                        } catch (JSONException e) {
                             e.printStackTrace();
                         }
 
@@ -201,8 +191,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         JSONObject props = new JSONObject();
                         props.put(MixPanelConstants.Property.SEARCH_KEY, strSearchKey);
                         mixPanel.track(MixPanelConstants.Event.SEARCH_MYSIGNUP_ACTION, props);
-                    }
-                    catch (JSONException e){
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
 
@@ -223,16 +212,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 position -= mLvMySignups.getHeaderViewsCount();
                 Farmer farmer = Singleton.getInstance().mySignupsList.get(position);
-                if(!farmer.isHeader())
-                {
+                if (!farmer.isHeader()) {
                     try {
                         JSONObject props = new JSONObject();
                         props.put(MixPanelConstants.Property.MYSIGNUP_STATUS, farmer.getSignupStatus());
                         props.put(MixPanelConstants.Property.MYSIGNUP_NAME, farmer.getFullName());
                         props.put(MixPanelConstants.Property.MYSIGNUP_ID, farmer.getFarmerId());
                         mixPanel.track(MixPanelConstants.Event.MYSIGNUP_MENU_ITEM_ACTION, props);
-                    }
-                    catch (JSONException e){
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
                     ((BaseContainerFragment) getParentFragment()).replaceFragment(EnrollFragment.newInstance(Constants.STR_EDIT_FARMER, farmer), true);
@@ -244,27 +231,24 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         loadAttachment();
-//        if(mLvMySignups != null && adapter != null)
-//            adapter.notifyDataSetChanged();
         refreshDataFromDB();
-        IntentFilter iff= new IntentFilter(Constants.MY_SIGNPS_BROADCAST_ACTION);
+        IntentFilter iff = new IntentFilter(Constants.MY_SIGNPS_BROADCAST_ACTION);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(onMySignupsUpdated, iff);
     }
 
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(onMySignupsUpdated);
     }
 
     private void loadAttachment() {
         String thumbUrl = PreferenceHelper.getInstance().readAboutAttUrl();
-        if(!thumbUrl.isEmpty())
-        {
-            if(NetworkHelper.isNetAvailable(getActivity()))
+        if (!thumbUrl.isEmpty()) {
+            if (NetworkHelper.isNetAvailable(getActivity()))
                 MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
             else
                 MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
@@ -279,30 +263,26 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     };
 
     //region Network calls, callbacks & parsers
-    private void getMySignups(){
+    private void getMySignups() {
 
-        if(NetworkHelper.isNetAvailable(getActivity()) && !WebApi.isSyncRequired() && PreferenceHelper.getInstance().readFirstRun())
-        {
+        if (NetworkHelper.isNetAvailable(getActivity()) && !WebApi.isSyncRequired() && PreferenceHelper.getInstance().readFirstRun()) {
             getMySignupsFromServer();
             getMyFarmerTasksData();
             getFOAndFacilitatorsData();
-        }
-        else
-        {
+        } else {
             getMySignupsFromDB();
             getMyFarmerTasksFromDB();
             getMyLogbookDataFromDB();
             getMyDashboardDataFromDB();
-            if(PreferenceHelper.getInstance().isSessionExpiredSyncReq())
+            if (PreferenceHelper.getInstance().isSessionExpiredSyncReq())
                 WebApi.syncAll(null);
         }
     }
 
-    private void getMySignupsFromDB()
-    {
+    private void getMySignupsFromDB() {
         Singleton.getInstance().mySignupsList.clear();
 
-        if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
+        if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         loadingStarted();
 
         RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerType", Constants.FarmerType.MYSIGNUPS.toString()).findAll().sort("lastModifiedTime", Sort.ASCENDING);
@@ -314,49 +294,38 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         for (int i = 0; i < farmerDbList.size(); i++) {
             Farmer farmer = farmerDbList.get(i);
 
-            if(farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_ENROLLED))
-            {
+            if (farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_ENROLLED)) {
                 incompleteFarmersList.add(farmer);
-            }
-            else if(farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_PENDING))
-            {
+            } else if (farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_PENDING)) {
                 pendingFarmersList.add(farmer);
-            }
-            else if(farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_APPROVED))
-            {
+            } else if (farmer.getSignupStatus().equalsIgnoreCase(Constants.STR_APPROVED)) {
                 approvedFarmersList.add(farmer);
             }
         }
 
-        if(incompleteFarmersList.size() > 0)
-        {
+        if (incompleteFarmersList.size() > 0) {
             Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(incompleteFarmersList);
         }
-        if(pendingFarmersList.size() > 0)
-        {
+        if (pendingFarmersList.size() > 0) {
             Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(pendingFarmersList);
         }
-        if(approvedFarmersList.size() > 0)
-        {
+        if (approvedFarmersList.size() > 0) {
             Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(approvedFarmersList);
         }
 
-        // Creating our custom adapter
         adapter = new MySignupsAdapter(getActivity(), Singleton.getInstance().mySignupsList);
-        // Create the list view and bind the adapter
         mLvMySignups.setAdapter(adapter);
 
         loadingFinished();
     }
 
-    private void getMyFarmerTasksFromDB()
-    {
+    private void getMyFarmerTasksFromDB() {
         Singleton.getInstance().myFarmersList.clear();
 
-        if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
+        if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         loadingStarted();
 
         RealmResults<Farmer> farmerDbList = Realm.getDefaultInstance().where(Farmer.class).equalTo("farmerType", Constants.FarmerType.MYFARMERTASKS.toString()).findAll();
@@ -365,9 +334,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         loadingFinished();
     }
 
-    private void getMySignupsFromServer()
-    {
-        if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
+    private void getMySignupsFromServer() {
+        if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         loadingStarted();
         WebApi.getMySignUps(mySignupsCallback);
         WebApi.getAboutMeAttachment(aboutMeAttachmentCallback);
@@ -378,8 +346,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
             WebApi.saveSyncTimeStamp();
-            if(isValid())
-            {
+            if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
 
@@ -393,13 +360,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                else if(response.code() == 401)
-                {
+                } else if (response.code() == 401) {
                     sessionExpireRedirect();
-                }
-                else
-                {
+                } else {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -421,8 +384,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
-        if(arrRecords.length() > 0)
-        {
+        if (arrRecords.length() > 0) {
             for (int i = 0; i < arrRecords.length(); i++) {
 
                 JSONObject farmObj = arrRecords.getJSONObject(i);
@@ -449,80 +411,67 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                 farmId = farmObj.getString("Id");
                 JSONObject objLocation = farmObj.optJSONObject("LocationLookup__r");
-                if(objLocation != null)
-                {
+                if (objLocation != null) {
                     location = objLocation.getString("Name");
                     locationId = objLocation.getString("Id");
                 }
 
                 JSONObject objSubLocation = farmObj.optJSONObject("Sub_LocationLookup__r");
-                if(objSubLocation != null)
-                {
+                if (objSubLocation != null) {
                     subLocation = objSubLocation.getString("Name");
                     subLocationId = objSubLocation.getString("Id");
                 }
 
                 JSONObject objVillage = farmObj.optJSONObject("Village__r");
-                if(objVillage != null)
-                {
+                if (objVillage != null) {
                     village = objVillage.getString("Name");
                     villageId = objVillage.getString("Id");
                 }
 
 
                 JSONObject objTree = farmObj.optJSONObject("Tree_Specie__r");
-                if(objTree != null)
-                {
+                if (objTree != null) {
                     tree = objTree.getString("Name");
                     treeId = objTree.getString("Id");
                 }
 
                 id = farmObj.optString("Farmer__c");
-                if(id != null && id.equalsIgnoreCase("null")) id = "";
+                if (id != null && id.equalsIgnoreCase("null")) id = "";
 
                 JSONObject objFarmer = farmObj.optJSONObject("Farmer__r");
-                if(objFarmer != null)
-                {
+                if (objFarmer != null) {
                     fullName = objFarmer.getString("FullName__c");
-                    if(fullName.equalsIgnoreCase("null")) fullName = "";
+                    if (fullName.equalsIgnoreCase("null")) fullName = "";
                     firstName = objFarmer.getString("First_Name__c");
-                    if(firstName.equalsIgnoreCase("null")) firstName = "";
+                    if (firstName.equalsIgnoreCase("null")) firstName = "";
                     secondName = objFarmer.getString("Middle_Name__c");
-                    if(secondName.equalsIgnoreCase("null")) secondName = "";
+                    if (secondName.equalsIgnoreCase("null")) secondName = "";
                     surname = objFarmer.getString("Last_Name__c");
-                    if(surname.equalsIgnoreCase("null")) surname = "";
+                    if (surname.equalsIgnoreCase("null")) surname = "";
                     idNumber = objFarmer.getString("Name");
-                    if(idNumber.equalsIgnoreCase("null")) idNumber = "";
+                    if (idNumber.equalsIgnoreCase("null")) idNumber = "";
                     gender = objFarmer.getString("Gender__c");
-                    if(gender.equalsIgnoreCase("null")) gender = "";
+                    if (gender.equalsIgnoreCase("null")) gender = "";
                     mobileNumber = objFarmer.getString("Mobile_Number__c");
-                    if(mobileNumber.equalsIgnoreCase("null")) mobileNumber = "";
+                    if (mobileNumber.equalsIgnoreCase("null")) mobileNumber = "";
                     leader = objFarmer.getBoolean("Leader__c");
                 }
 
                 isFarmerHome = farmObj.optBoolean("Is_Farmer_Home__c");
 
-//                String status = farmObj.getString("Status__c");
                 String status = farmObj.getString("Sign_Up_Status__c");
 
                 Farmer farmer = new Farmer(null, id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "", null, Constants.FarmerType.MYSIGNUPS);
 
-                if(status.equalsIgnoreCase(Constants.STR_ENROLLED))
-                {
+                if (status.equalsIgnoreCase(Constants.STR_ENROLLED)) {
                     incompleteFarmersList.add(farmer);
-                }
-                else if(status.equalsIgnoreCase(Constants.STR_PENDING))
-                {
+                } else if (status.equalsIgnoreCase(Constants.STR_PENDING)) {
                     pendingFarmersList.add(farmer);
-                }
-                else if(status.equalsIgnoreCase(Constants.STR_APPROVED))
-                {
+                } else if (status.equalsIgnoreCase(Constants.STR_APPROVED)) {
                     approvedFarmersList.add(farmer);
                 }
             }
-        }
-        else
-        {
+        } else {
             Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
         }
 
@@ -533,33 +482,27 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         realm.delete(Farmer.class);
         realm.commitTransaction();
 
-        if(incompleteFarmersList.size() > 0)
-        {
+        if (incompleteFarmersList.size() > 0) {
             Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_ENROLLED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(incompleteFarmersList);
         }
-        if(pendingFarmersList.size() > 0)
-        {
+        if (pendingFarmersList.size() > 0) {
             Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_PENDING, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(pendingFarmersList);
         }
-        if(approvedFarmersList.size() > 0)
-        {
+        if (approvedFarmersList.size() > 0) {
             Singleton.getInstance().mySignupsList.add(new Farmer(null, "", "", Constants.STR_APPROVED, "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYSIGNUPS));
             Singleton.getInstance().mySignupsList.addAll(approvedFarmersList);
         }
 
         for (int i = 0; i < Singleton.getInstance().mySignupsList.size(); i++) {
-            // Save to DB
             realm.beginTransaction();
             final Farmer farmerDbObj = realm.createObject(Farmer.class);
             farmerDbObj.setAllValues(Singleton.getInstance().mySignupsList.get(i));
             realm.commitTransaction();
         }
 
-        // Creating our custom adapter
         adapter = new MySignupsAdapter(getActivity(), Singleton.getInstance().mySignupsList);
-        // Create the list view and bind the adapter
         mLvMySignups.setAdapter(adapter);
     }
 
@@ -567,8 +510,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
-            if(isValid())
-            {
+            if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
 
@@ -580,13 +522,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                else if(response.code() == 401)
-                {
+                } else if (response.code() == 401) {
                     sessionExpireRedirect();
-                }
-                else
-                {
+                } else {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -599,14 +537,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
     };
 
-    private void sessionExpireRedirect(){
+    private void sessionExpireRedirect() {
         try {
             PreferenceHelper.getInstance().clearSession(false);
             Intent intent = new Intent(getActivity(), SplashActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             getActivity().startActivity(intent);
-        }
-        catch (NullPointerException e) {
+        } catch (NullPointerException e) {
             e.printStackTrace();
             Crashlytics.logException(e);
         }
@@ -618,8 +555,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         Realm realm = Realm.getDefaultInstance();
 
-        if(arrRecords.length() > 0)
-        {
+        if (arrRecords.length() > 0) {
             for (int i = 0; i < arrRecords.length(); i++) {
 
                 JSONObject farmerObj = arrRecords.getJSONObject(i);
@@ -629,19 +565,15 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 String farmerNatId = "";
 
                 JSONObject attachmentObj = farmerObj.optJSONObject("Attachments");
-                if(attachmentObj != null)
-                {
+                if (attachmentObj != null) {
 
                     JSONArray attRecords = attachmentObj.getJSONArray("records");
                     for (int j = 0; j < attRecords.length(); j++) {
                         JSONObject objAttachment = attRecords.getJSONObject(j);
                         String description = objAttachment.getString("Description").toLowerCase().trim();
-                        if(description.contains("pic") || description.contains("photo"))
-                        {
+                        if (description.contains("pic") || description.contains("photo")) {
                             farmerPicId = objAttachment.getString("Id");
-                        }
-                        else if(description.contains("id"))
-                        {
+                        } else if (description.contains("id")) {
                             farmerNatId = objAttachment.getString("Id");
                         }
                     }
@@ -649,38 +581,32 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                 for (int j = 0; j < Singleton.getInstance().mySignupsList.size(); j++) {
                     final Farmer farmer = Singleton.getInstance().mySignupsList.get(j);
-                    if(farmer.getFarmerId().equalsIgnoreCase(id))
-                    {
+                    if (farmer.getFarmerId().equalsIgnoreCase(id)) {
                         realm.beginTransaction();
                         farmer.setThumbAttachmentId(farmerPicId);
                         farmer.setNationalCardAttachmentId(farmerNatId);
 
                         String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(farmer.getThumbAttachmentId());
-                        if(!farmerPicId.isEmpty())
-                        {
+                        if (!farmerPicId.isEmpty()) {
                             farmer.setThumbUrl(thumbUrl);
                         }
 
                         String natIdUrl = NetworkHelper.makeAttachmentUrlFromId(farmer.getNationalCardAttachmentId());
-                        if(!farmerNatId.isEmpty())
-                        {
+                        if (!farmerNatId.isEmpty()) {
                             farmer.setNationalCardUrl(natIdUrl);
                         }
                         realm.commitTransaction();
 
                         RealmResults<Farmer> farmerDbList = realm.where(Farmer.class).equalTo("farmerId", id).findAll();
-                        if(farmerDbList != null && farmerDbList.size() > 0)
-                        {
+                        if (farmerDbList != null && farmerDbList.size() > 0) {
                             for (int k = 0; k < farmerDbList.size(); k++) {
                                 realm.beginTransaction();
                                 farmerDbList.get(k).setThumbAttachmentId(farmerPicId);
                                 farmerDbList.get(k).setNationalCardAttachmentId(farmerNatId);
-                                if(!farmerPicId.isEmpty())
-                                {
+                                if (!farmerPicId.isEmpty()) {
                                     farmerDbList.get(k).setThumbUrl(thumbUrl);
                                 }
-                                if(!farmerNatId.isEmpty())
-                                {
+                                if (!farmerNatId.isEmpty()) {
                                     farmerDbList.get(k).setNationalCardUrl(natIdUrl);
                                 }
                                 realm.commitTransaction();
@@ -713,7 +639,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     }
                 }
             }
-
             adapter.notifyDataSetChanged();
         }
     }
@@ -728,11 +653,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     responseStr = response.body().string();
                     String attId = parseAboutMeDataAttachment(responseStr);
                     PreferenceHelper.getInstance().writeAboutAttId(attId);
-                    if(!attId.isEmpty())
-                    {
+                    if (!attId.isEmpty()) {
                         String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(attId);
                         PreferenceHelper.getInstance().writeAboutAttUrl(thumbUrl);
-                        if(NetworkHelper.isNetAvailable(getActivity()))
+                        if (NetworkHelper.isNetAvailable(getActivity()))
                             MyPicassoInstance.getInstance().load(thumbUrl).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
                         else
                             MyPicassoInstance.getInstance().load(thumbUrl).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(cIvIconRight);
@@ -755,15 +679,12 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
-        if(arrRecords.length() > 0)
-        {
+        if (arrRecords.length() > 0) {
             JSONObject facObj = arrRecords.getJSONObject(0);
             JSONObject attachmentObj = facObj.optJSONObject("Attachments");
-            if(attachmentObj != null)
-            {
+            if (attachmentObj != null) {
                 JSONArray attRecords = attachmentObj.getJSONArray("records");
-                if(attRecords.length() > 0)
-                {
+                if (attRecords.length() > 0) {
                     JSONObject objFarmerPhoto = attRecords.getJSONObject(0);
                     String idAttachment = objFarmerPhoto.getString("Id");
                     return idAttachment;
@@ -781,16 +702,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     @Override
     public void onTitleBarRightIconClicked(View view) {
-//        ((BaseContainerFragment) getParentFragment()).replaceFragment(new AboutMe(), true);
         startActivity(new Intent(getActivity(), AboutMe.class));
     }
 
     @Override
     public void onClick(View v) {
-        switch (v.getId())
-        {
-            case R.id.rl_add:
-            {
+        switch (v.getId()) {
+            case R.id.rl_add: {
                 mixPanel.track(MixPanelConstants.Event.ENROLL_FARMER_BUTTON);
                 ((BaseContainerFragment) getParentFragment()).replaceFragment(EnrollFragment.newInstance(Constants.STR_ENROLL_FARMER, null), true);
             }
@@ -798,8 +716,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
     }
 
-    private void refreshDataFromDB(){
-        if(mLvMySignups != null && adapter != null) {
+    private void refreshDataFromDB() {
+        if (mLvMySignups != null && adapter != null) {
             getMySignupsFromDB();
             adapter = new MySignupsAdapter(getActivity(), Singleton.getInstance().mySignupsList);
             mLvMySignups.setAdapter(adapter);
@@ -815,22 +733,19 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     };
 
     public void getMyFarmerTasksData() {
-
-        if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
+        if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         loadingStarted();
         WebApi.getMyfarmerTasks(myFarmerTasksCallback);
     }
 
     public void getMyLogbookData(String fieldOfficers, String facilitators) {
-
-        if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
+        if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         loadingStarted();
         WebApi.getMyLogbookData(myLogbookDataCallback, fieldOfficers, facilitators);
     }
 
     public void getMyDashboardData(String fieldOfficers, String facilitators) {
-
-        if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
+        if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         loadingStarted();
         WebApi.getMyDashboardData(myDashboardDataCallback, fieldOfficers, facilitators);
     }
@@ -840,8 +755,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         Realm realm = Realm.getDefaultInstance();
-        if(arrRecords.length() > 0)
-        {
+        if (arrRecords.length() > 0) {
             for (int i = 0; i < arrRecords.length(); i++) {
 
                 JSONObject farmerObj = arrRecords.getJSONObject(i);
@@ -851,19 +765,15 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 String farmerNatId = "";
 
                 JSONObject attachmentObj = farmerObj.optJSONObject("Attachments");
-                if(attachmentObj != null)
-                {
+                if (attachmentObj != null) {
 
                     JSONArray attRecords = attachmentObj.getJSONArray("records");
                     for (int j = 0; j < attRecords.length(); j++) {
                         JSONObject objAttachment = attRecords.getJSONObject(j);
                         String description = objAttachment.getString("Description").toLowerCase().trim();
-                        if(description.contains("pic") || description.contains("photo"))
-                        {
+                        if (description.contains("pic") || description.contains("photo")) {
                             farmerPicId = objAttachment.getString("Id");
-                        }
-                        else if(description.contains("id"))
-                        {
+                        } else if (description.contains("id")) {
                             farmerNatId = objAttachment.getString("Id");
                         }
                     }
@@ -874,41 +784,21 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 for (int j = 0; j < allFarmerTasks.size(); j++) {
                     final Farmer farmer = allFarmerTasks.get(j);
 
-                    if(farmer.getFarmerId().equalsIgnoreCase(id))
-                    {
+                    if (farmer.getFarmerId().equalsIgnoreCase(id)) {
                         realm.beginTransaction();
                         farmer.setThumbAttachmentId(farmerPicId);
                         farmer.setNationalCardAttachmentId(farmerNatId);
 
                         String thumbUrl = NetworkHelper.makeAttachmentUrlFromId(farmer.getThumbAttachmentId());
-                        if(!farmerPicId.isEmpty())
-                        {
+                        if (!farmerPicId.isEmpty()) {
                             farmer.setThumbUrl(thumbUrl);
                         }
 
                         String natIdUrl = NetworkHelper.makeAttachmentUrlFromId(farmer.getNationalCardAttachmentId());
-                        if(!farmerNatId.isEmpty())
-                        {
+                        if (!farmerNatId.isEmpty()) {
                             farmer.setNationalCardUrl(natIdUrl);
                         }
                         realm.commitTransaction();
-
-//                        Farmer farmerDb = realm.where(Farmer.class).equalTo("farmerId", id).findFirst();
-//                        if(farmerDb != null)
-//                        {
-//                            realm.beginTransaction();
-//                            farmerDb.setThumbAttachmentId(farmerPicId);
-//                            farmerDb.setNationalCardAttachmentId(farmerNatId);
-//                            if(!farmerPicId.isEmpty())
-//                            {
-//                                farmerDb.setThumbUrl(thumbUrl);
-//                            }
-//                            if(!farmerNatId.isEmpty())
-//                            {
-//                                farmerDb.setNationalCardUrl(natIdUrl);
-//                            }
-//                            realm.commitTransaction();
-//                        }
 
                         MyPicassoInstance.getInstance().load(thumbUrl).fetch(/*new com.squareup.picasso.Callback() {
                             @Override
@@ -933,18 +823,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                                 Log.i("Fetch failed", "NAT ID: " + farmer.getNationalCardUrl());
                             }
                         }*/);
-
                         break;
                     }
                 }
             }
-
-//            tasksAdapter.notifyDataSetChanged();
         }
     }
 
     private void parseMyFarmersData(String data) throws JSONException {
-
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         realm.delete(Task.class);
@@ -954,13 +840,11 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
-        Map<String,Farmer> farmersMap = new HashMap<>();
-        Map<String,Task> tasksMap = new HashMap<>();
+        Map<String, Farmer> farmersMap = new HashMap<>();
+        Map<String, Task> tasksMap = new HashMap<>();
         List<Farmer> farmersTaskList = new ArrayList<>();
 
-        if(arrRecords.length() > 0)
-        {
-
+        if (arrRecords.length() > 0) {
             for (int i = 0; i < arrRecords.length(); i++) {
 
                 JSONObject taskObj = arrRecords.getJSONObject(i);
@@ -997,7 +881,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     currentTask.setStatus(status);
 
                     realm.commitTransaction();
-//                    currentTask = new Tasks(id, taskName, startedDate, completionDate, dueDate, status);
                     tasksMap.put(taskName, currentTask);
                 }
 
@@ -1017,7 +900,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     realm.commitTransaction();
 
                 } else {
-//                    currentFarmer = new Farmer();
                     realm.beginTransaction();
 
                     currentFarmer = realm.createObject(Farmer.class);
@@ -1045,8 +927,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
         }
-
-//        addFarmerTasksToDB(farmersTaskList);
         Singleton.getInstance().myFarmersList = (ArrayList<Farmer>) farmersTaskList;
     }
 
@@ -1066,8 +946,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
-            if(isValid())
-            {
+            if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
 
@@ -1078,19 +957,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         WebApi.getMyFarmerTaskAttachments(myFarmerTasksAttachments);
                     } catch (IOException e) {
                         e.printStackTrace();
-                    }
-                    catch (JSONException e) {
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                else if(response.code() == 401)
-                {
+                } else if (response.code() == 401) {
                     PreferenceHelper.getInstance().clearSession(false);
                     startActivity(new Intent(getActivity(), SplashActivity.class));
                     getActivity().finish();
-                }
-                else
-                {
+                } else {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -1107,8 +981,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
-            if(isValid())
-            {
+            if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
 
@@ -1117,19 +990,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         parseMyFarmersAttachmentData(responseStr);
                     } catch (IOException e) {
                         e.printStackTrace();
-                    }
-                    catch (JSONException e) {
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                else if(response.code() == 401)
-                {
+                } else if (response.code() == 401) {
                     PreferenceHelper.getInstance().clearSession(false);
                     startActivity(new Intent(getActivity(), SplashActivity.class));
                     getActivity().finish();
-                }
-                else
-                {
+                } else {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -1142,7 +1010,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
     };
 
-    private void getFarmerTaskItems(){
+    private void getFarmerTaskItems() {
 
         loadingStarted();
 
@@ -1152,20 +1020,19 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
             Farmer farmer = Singleton.getInstance().myFarmersList.get(i);
 
-            if(farmer.getFarmerTasks().size() > 0) {
+            if (farmer.getFarmerTasks().size() > 0) {
                 for (int j = 0; j < farmer.getFarmerTasks().size(); j++) {
                     String id = farmer.getFarmerTasks().get(j).getTaskId();
                     id = "'" + id + "'";
 
                     farmingTaskIds = farmingTaskIds + id;
 
-                    if(i+1 != Singleton.getInstance().myFarmersList.size() || j + 1 != farmer.getFarmerTasks().size()){
+                    if (i + 1 != Singleton.getInstance().myFarmersList.size() || j + 1 != farmer.getFarmerTasks().size()) {
                         farmingTaskIds = farmingTaskIds + ",";
                     }
                 }
             }
         }
-
         WebApi.getFarmingTaskItems(farmerStatusCallback, farmingTaskIds);
     }
 
@@ -1173,8 +1040,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
-            if(isValid())
-            {
+            if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
 
@@ -1183,21 +1049,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         ArrayList<TaskItem> allTaskItems = parseTaskItemData(responseStr);
                         Singleton.getInstance().taskItems = allTaskItems;
                         getTaskItemAttachments(allTaskItems);
-                        Log.i("Parsing" , "Complete" );
+                        Log.i("Parsing", "Complete");
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                else if(response.code() == 401)
-                {
+                } else if (response.code() == 401) {
                     PreferenceHelper.getInstance().clearSession(false);
                     startActivity(new Intent(getActivity(), SplashActivity.class));
                     getActivity().finish();
-                }
-                else
-                {
+                } else {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -1224,11 +1086,11 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         // clear old lists
         for (int i = 0; i < Singleton.getInstance().myFarmersList.size(); i++) {
 
-            if(Singleton.getInstance().myFarmersList.get(i).getFarmerTasks() != null){
+            if (Singleton.getInstance().myFarmersList.get(i).getFarmerTasks() != null) {
 
                 for (int j = 0; j < Singleton.getInstance().myFarmersList.get(i).getFarmerTasks().size(); j++) {
 
-                    if(Singleton.getInstance().myFarmersList.get(i).getFarmerTasks().get(j).getTaskItems() != null){
+                    if (Singleton.getInstance().myFarmersList.get(i).getFarmerTasks().get(j).getTaskItems() != null) {
 
                         realm.beginTransaction();
                         Singleton.getInstance().myFarmersList.get(i).getFarmerTasks().get(j).getTaskItems().clear();
@@ -1248,24 +1110,24 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                 JSONObject objTask = arrRecords.getJSONObject(i);
 
-            String id = objTask.getString("Id");
-            boolean isDone = objTask.getBoolean("Completed__c");
-            String textValue = objTask.getString("Text_Value__c");
-            int sequence = objTask.getInt("Sequence__c");
-            String recordType = objTask.getJSONObject("RecordType").getString("Name");
-            String name = objTask.getString("Name");
-            double latitude = objTask.optDouble("Location__Latitude__s");
-            if(Double.isNaN(latitude))
-                latitude = 0;
-            double longitude = objTask.optDouble("Location__Longitude__s");
-            if(Double.isNaN(longitude))
-                longitude = 0;
-            String gpsTakenTime = objTask.getString("GPS_Taken_Time__c");
-            String fileType = objTask.getString("File_Type__c");
-            String fileActionType = objTask.getString("File_Action__c");
-            String fileActionPerformed = objTask.getString("Action_Performed__c");
-            String farmingTaskId = objTask.getString("Farming_Task__c");
-            String description = objTask.getString("Description__c");
+                String id = objTask.getString("Id");
+                boolean isDone = objTask.getBoolean("Completed__c");
+                String textValue = objTask.getString("Text_Value__c");
+                int sequence = objTask.getInt("Sequence__c");
+                String recordType = objTask.getJSONObject("RecordType").getString("Name");
+                String name = objTask.getString("Name");
+                double latitude = objTask.optDouble("Location__Latitude__s");
+                if (Double.isNaN(latitude))
+                    latitude = 0;
+                double longitude = objTask.optDouble("Location__Longitude__s");
+                if (Double.isNaN(longitude))
+                    longitude = 0;
+                String gpsTakenTime = objTask.getString("GPS_Taken_Time__c");
+                String fileType = objTask.getString("File_Type__c");
+                String fileActionType = objTask.getString("File_Action__c");
+                String fileActionPerformed = objTask.getString("Action_Performed__c");
+                String farmingTaskId = objTask.getString("Farming_Task__c");
+                String description = objTask.getString("Description__c");
 
                 RealmList<TaskItemOption> options = new RealmList<>();
 
@@ -1283,7 +1145,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         taskItemOption.setId(optionId);
                         taskItemOption.setName(optionName);
                         taskItemOption.setValue(isValue);
-//                        options.add(new TaskItemOption(optionId, optionName, isValue));
                         options.add(taskItemOption);
                         realm.commitTransaction();
                     }
@@ -1307,7 +1168,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 taskItem.setTaskDone(isDone);
                 realm.commitTransaction();
 
-//            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileAction, gpsTakenTime, latitude, longitude, options, null, null, null, null, false);
                 taskItems.add(taskItem);
 
                 for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
@@ -1329,12 +1189,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
         }
-
         return taskItems;
     }
 
     private void getTaskItemAttachments(ArrayList<TaskItem> taskItems) {
-
         WebApi.getAllTaskItemAttachments(taskItemsAttachments);
     }
 
@@ -1342,8 +1200,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
-            if(isValid())
-            {
+            if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
 
@@ -1353,19 +1210,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                     } catch (IOException e) {
                         e.printStackTrace();
-                    }
-                    catch (JSONException e) {
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                else if(response.code() == 401)
-                {
+                } else if (response.code() == 401) {
                     PreferenceHelper.getInstance().clearSession(false);
                     startActivity(new Intent(getActivity(), LoginActivity.class));
                     getActivity().finish();
-                }
-                else
-                {
+                } else {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -1399,13 +1251,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         final String attachmentParentId = attachmentObj.getString("ParentId");
                         final String filename = attachmentObj.optString("Name");
                         String[] separated = filename.split("\\.");
-                        final String ext = separated[separated.length-1];
+                        final String ext = separated[separated.length - 1];
 
                         Call<ResponseBody> apiCall = Fennel.getWebService().downloadAttachmentForTask(Session.getAuthToken(), NetworkHelper.API_VERSION, attachmentId);
                         try {
-                            if(getActivity() == null)
+                            if (getActivity() == null)
                                 Fennel.initWebApi();
-                            if(NetworkHelper.isNetAvailable(getActivity())){
+                            if (NetworkHelper.isNetAvailable(getActivity())) {
                                 apiCall.enqueue(new Callback<ResponseBody>() {
                                     @Override
                                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -1423,14 +1275,11 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                                                 try {
                                                     // Writes bytes from the specified byte array to this file output stream
                                                     fileOutputStream.write(response.body().bytes());
-                                                }
-                                                catch (FileNotFoundException e) {
+                                                } catch (FileNotFoundException e) {
                                                     System.out.println("File not found" + e);
-                                                }
-                                                catch (IOException ioe) {
+                                                } catch (IOException ioe) {
                                                     System.out.println("Exception while writing file " + ioe);
-                                                }
-                                                finally {
+                                                } finally {
                                                     // close the streams using close method
                                                     try {
                                                         if (fileOutputStream != null) {
@@ -1439,8 +1288,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                                                         } else {
                                                             file.delete();
                                                         }
-                                                    }
-                                                    catch (IOException ioe) {
+                                                    } catch (IOException ioe) {
                                                         System.out.println("Error while closing stream: " + ioe);
                                                     }
                                                 }
@@ -1458,16 +1306,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                                     }
                                 });
                             }
-                        }
-                        catch (NullPointerException e){
+                        } catch (NullPointerException e) {
                             e.printStackTrace();
                         }
                     }
                 }
-
             }
         }
-
     }
 
     private void updateTaskItemWithAttachment(String taskItemId, String filePath, String attachmentId) {
@@ -1490,8 +1335,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
-            if(isValid())
-            {
+            if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
 
@@ -1500,19 +1344,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         parseMyLogbookData(responseStr);
                     } catch (IOException e) {
                         e.printStackTrace();
-                    }
-                    catch (JSONException e) {
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                else if(response.code() == 401)
-                {
+                } else if (response.code() == 401) {
                     PreferenceHelper.getInstance().clearSession(false);
                     startActivity(new Intent(getActivity(), LoginActivity.class));
                     getActivity().finish();
-                }
-                else
-                {
+                } else {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -1529,8 +1368,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
-            if(isValid())
-            {
+            if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
 
@@ -1539,19 +1377,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         parseMyDashboardData(responseStr);
                     } catch (IOException e) {
                         e.printStackTrace();
-                    }
-                    catch (JSONException e) {
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                else if(response.code() == 401)
-                {
+                } else if (response.code() == 401) {
                     PreferenceHelper.getInstance().clearSession(false);
                     startActivity(new Intent(getActivity(), LoginActivity.class));
                     getActivity().finish();
-                }
-                else
-                {
+                } else {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -1568,8 +1401,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
-            if(isValid())
-            {
+            if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
 
@@ -1582,19 +1414,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
-                    }
-                    catch (JSONException e) {
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                else if(response.code() == 401)
-                {
+                } else if (response.code() == 401) {
                     PreferenceHelper.getInstance().clearSession(false);
                     startActivity(new Intent(getActivity(), LoginActivity.class));
                     getActivity().finish();
-                }
-                else
-                {
+                } else {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -1628,11 +1455,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         String farmingTaskIds = "";
-        if(arrRecords.length() > 0) {
+        if (arrRecords.length() > 0) {
             visitLogFarmingTasks = new HashMap<>();
             for (int i = 0; i < arrRecords.length(); i++) {
 
-//                Task newTask = new Task();
                 Map<String, String> taskMap = new HashMap<>();
                 JSONObject farmingTaskObj = arrRecords.getJSONObject(i);
 
@@ -1655,7 +1481,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     agentPhone = fieldManager.getString("Phone__c");
                     employeeObj = fieldOfficer.optJSONObject("Employee__r");
                     agentEmployeeId = employeeObj.optString("Name");
-                } else if(fieldOfficer != null) {
+                } else if (fieldOfficer != null) {
                     name = fieldOfficer.getString("Name");
                     agentType = Constants.STR_FIELD_OFFICER;
                     agentId = fieldOfficer.getString("Id");
@@ -1672,12 +1498,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 taskMap.put("agentName", name);
                 taskMap.put("agentType", agentType);
                 taskMap.put("Id", taskId);
-                taskMap.put("agentId" , agentId);
+                taskMap.put("agentId", agentId);
                 taskMap.put("agentPhone", agentPhone);
                 taskMap.put("agentEmployeeId", agentEmployeeId);
-//                newTask.setAgentName(name);
-//                newTask.setAgentType(agentType);
-//                newTask.setTaskId(taskId);
                 visitLogFarmingTasks.put(taskId, taskMap);
                 farmingTaskIds = farmingTaskIds + "'" + taskId + "'";
                 if (i < arrRecords.length() - 1) {
@@ -1691,7 +1514,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     }
 
     private void parseMyDashboardData(String responseStr) throws JSONException {
-
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         realm.delete(DashboardFieldAgent.class);
@@ -1704,7 +1526,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         HashMap<String, DashboardFieldAgent> dashboardAgents = null;
         ArrayList<DashboardFieldAgent> dashboardAgentsList = null;
 
-        if(arrRecords.length() > 0) {
+        if (arrRecords.length() > 0) {
             dashboardAgents = new HashMap<>();
             dashboardAgentsList = new ArrayList<>();
             for (int i = 0; i < arrRecords.length(); i++) {
@@ -1774,7 +1596,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     e.printStackTrace();
                 }
 
-                if ( (completion != null && completion.getTime() > due.getTime()) || (completion == null && !isCompleted && due.getTime() < System.currentTimeMillis()) ) {
+                if ((completion != null && completion.getTime() > due.getTime()) || (completion == null && !isCompleted && due.getTime() < System.currentTimeMillis())) {
                     state = Constants.FARMING_STATE_LATE;
                 }
 
@@ -1824,7 +1646,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         realm.commitTransaction();
                     }
                 } else {
-
                     realm.beginTransaction();
                     {
                         dashboardFieldAgent = realm.createObject(DashboardFieldAgent.class);
@@ -1864,20 +1685,20 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         String fieldOfficers = "";
         String facilitators = "";
-        if(arrRecords.length() > 0) {
+        if (arrRecords.length() > 0) {
 
             for (int i = 0; i < arrRecords.length(); i++) {
                 JSONObject fieldOfficerObj = arrRecords.getJSONObject(i);
                 String foId = fieldOfficerObj.getString("Id");
                 fieldOfficers = fieldOfficers + "'" + foId + "'";
-                if (i < arrRecords.length()-1) {
+                if (i < arrRecords.length() - 1) {
                     fieldOfficers = fieldOfficers + ",";
                 }
 
                 JSONObject facilitatorsObj = fieldOfficerObj.getJSONObject("Facilitators__r");
                 JSONArray facilitatorsArray = facilitatorsObj.getJSONArray("records");
 
-                if(facilitatorsArray.length() > 0) {
+                if (facilitatorsArray.length() > 0) {
 
                     for (int j = 0; j < facilitatorsArray.length(); j++) {
                         JSONObject facilitatorObj = facilitatorsArray.getJSONObject(j);
@@ -1890,19 +1711,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
         }
-
         getMyLogbookData(fieldOfficers, facilitators);
         getMyDashboardData(fieldOfficers, facilitators);
     }
 
     private void parseMyLogbookFacData(String responseStr) throws JSONException {
-
         Log.i("FENNEL", responseStr);
         JSONObject jsonObject = new JSONObject(responseStr);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         String facilitators = "";
-        if(arrRecords.length() > 0) {
+        if (arrRecords.length() > 0) {
             for (int i = 0; i < arrRecords.length(); i++) {
                 JSONObject facilitatorsObj = arrRecords.getJSONObject(i);
                 String facId = facilitatorsObj.getString("Id");
@@ -1912,15 +1731,12 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
         }
-
         getMyLogbookData("", facilitators);
         getMyDashboardData("", facilitators);
-
     }
 
     private void getAllVisitLogsData(String farmingTaskIds) {
-
-        if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
+        if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         loadingStarted();
         WebApi.getAllVisitLogsForMyLogbook(allVisitLogsCallback, farmingTaskIds);
     }
@@ -1929,8 +1745,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
-            if(isValid())
-            {
+            if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
 
@@ -1940,19 +1755,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         WebApi.getMyLogBookAttachments(myLogbookAttachmentCallback);
                     } catch (IOException e) {
                         e.printStackTrace();
-                    }
-                    catch (JSONException e) {
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                else if(response.code() == 401)
-                {
+                } else if (response.code() == 401) {
                     PreferenceHelper.getInstance().clearSession(false);
                     startActivity(new Intent(getActivity(), LoginActivity.class));
                     getActivity().finish();
-                }
-                else
-                {
+                } else {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -1966,7 +1776,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     };
 
     private void parseAllVisitLogsDataForLogbook(String responseStr) throws JSONException {
-
         JSONObject jsonObject = new JSONObject(responseStr);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
         ArrayList<Task> allTasks = null;
@@ -1976,7 +1785,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             for (int i = 0; i < arrRecords.length(); i++) {
                 JSONObject farmingTaskObj = (JSONObject) arrRecords.get(i);
                 String farmingTaskId = farmingTaskObj.getString("Id");
-//                Task visitLogTask = visitLogFarmingTasks.get(farmingTaskId);
                 Map<String, String> taskMap = visitLogFarmingTasks.get(farmingTaskId);
 
                 Task visitLogTask = new Task();
@@ -2031,7 +1839,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                             String fileType = taskItem.getString("File_Type__c");
                             String fileActionType = taskItem.getString("File_Action__c");
                             String fileActionPerformed = taskItem.optString("Action_Performed__c");
-//                        String taskId = taskItem.getString("Farming_Task__c");
                             String description = taskItem.getString("Description__c");
 
                             RealmList<TaskItemOption> options = new RealmList<>();
@@ -2043,14 +1850,11 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     allTasks.add(visitLogTask);
                 }
             }
-
             parseVisitLogsFromTasks(allTasks);
-
         }
     }
 
     private void parseVisitLogsFromTasks(ArrayList<Task> allTasks) {
-
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         realm.delete(FieldAgent.class);
@@ -2067,7 +1871,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 agent = agentsMap.get(agentId);
             } else {
                 agent = realm.createObject(FieldAgent.class);
-//                agent = new FieldAgent();
                 agent.setAgentId(taskObj.getAgentId());
                 agent.setName(taskObj.getAgentName());
                 agent.setAgentType(taskObj.getAgentType());
@@ -2111,28 +1914,23 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
-            if(isValid())
-            {
+            if (isValid()) {
                 if (response.code() == 200) {
                     String responseStr = "";
 
                     try {
                         responseStr = response.body().string();
                         parseMyLogbookAttachments(responseStr);
-                    }catch (IOException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }
-                else if(response.code() == 401)
-                {
+                } else if (response.code() == 401) {
                     PreferenceHelper.getInstance().clearSession(false);
                     startActivity(new Intent(getActivity(), LoginActivity.class));
                     getActivity().finish();
-                }
-                else
-                {
+                } else {
                     Toast.makeText(getActivity(), "Error code: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
@@ -2145,26 +1943,22 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
     };
 
-
     private void parseMyLogbookAttachments(String data) throws JSONException {
-
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         Realm realm = getDefaultInstance();
 
-        if(arrRecords.length() > 0)
-        {
+        if (arrRecords.length() > 0) {
             for (int i = 0; i < arrRecords.length(); i++) {
 
                 JSONObject agentObj = arrRecords.getJSONObject(i);
                 String id = agentObj.getString("Id");
                 String name = agentObj.getString("Name");
-                String agentAttachmentId  = null;
+                String agentAttachmentId = null;
 
                 JSONObject attachmentObj = agentObj.optJSONObject("Attachments");
-                if(attachmentObj != null)
-                {
+                if (attachmentObj != null) {
 
                     JSONArray attRecords = attachmentObj.getJSONArray("records");
                     for (int j = 0; j < attRecords.length(); j++) {
@@ -2178,38 +1972,20 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 for (int j = 0; j < allAgentsList.size(); j++) {
                     final FieldAgent fieldAgent = allAgentsList.get(j);
 
-                    if(fieldAgent.getAgentEmployeeId().equalsIgnoreCase(name))
-                    {
+                    if (fieldAgent.getAgentEmployeeId().equalsIgnoreCase(name)) {
                         String attachmentUrl = NetworkHelper.makeAttachmentUrlFromId(agentAttachmentId);
 
-//                        Farmer farmerDb = realm.where(Farmer.class).equalTo("farmerId", id).findFirst();
-//                        if(farmerDb != null)
-//                        {
-                            realm.beginTransaction();
-                            fieldAgent.setAgentAttachmentUrl(agentAttachmentId);
-                            for (TaskItem item : fieldAgent.getVisitLogs()) {
-                                item.setAgentAttachmentId(agentAttachmentId);
-                            }
-//                            farmerDb.setThumbAttachmentId(farmerPicId);
-//                            farmerDb.setNationalCardAttachmentId(farmerNatId);
-//                            if(!farmerPicId.isEmpty())
-//                            {
-//                                farmerDb.setThumbUrl(thumbUrl);
-//                            }
-//                            if(!farmerNatId.isEmpty())
-//                            {
-//                                farmerDb.setNationalCardUrl(natIdUrl);
-//                            }
-                            realm.commitTransaction();
-//                        }
-
+                        realm.beginTransaction();
+                        fieldAgent.setAgentAttachmentUrl(agentAttachmentId);
+                        for (TaskItem item : fieldAgent.getVisitLogs()) {
+                            item.setAgentAttachmentId(agentAttachmentId);
+                        }
+                        realm.commitTransaction();
                         MyPicassoInstance.getInstance().load(attachmentUrl).fetch();
                         break;
                     }
                 }
             }
-
-//            tasksAdapter.notifyDataSetChanged();
         }
     }
 
@@ -2217,7 +1993,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         Singleton.getInstance().fieldAgentsVisitLogs.clear();
 
-        if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
+        if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         loadingStarted();
 
         RealmResults<FieldAgent> visitLogsList = Realm.getDefaultInstance().where(FieldAgent.class).findAll();
@@ -2229,7 +2005,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     private void getMyDashboardDataFromDB() {
         Singleton.getInstance().dashboardFieldAgents.clear();
 
-        if(mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
+        if (mSwipeRefreshLayout != null) mSwipeRefreshLayout.setRefreshing(false);
         loadingStarted();
 
         RealmResults<DashboardFieldAgent> dashboardFieldAgents = Realm.getDefaultInstance().where(DashboardFieldAgent.class).findAll();
@@ -2237,5 +2013,4 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         loadingFinished();
     }
-
 }
