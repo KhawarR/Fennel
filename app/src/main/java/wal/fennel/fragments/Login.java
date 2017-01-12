@@ -218,16 +218,18 @@ public class Login extends BaseFragment {
     private Callback<ResponseBody> aboutMeCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            if (response.code() == Constants.RESPONSE_SUCCESS) {
+            if(isValid()){
+                if (response.code() == Constants.RESPONSE_SUCCESS) {
 
-                try {
-                    String responseStr = response.body().string();
-                    parseAboutMeData(responseStr);
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
+                    try {
+                        String responseStr = response.body().string();
+                        parseAboutMeData(responseStr);
+                    } catch (IOException | JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    Toast.makeText(getActivity(), getString(R.string.str_error_code_message) + response.code(), Toast.LENGTH_SHORT).show();
                 }
-            } else {
-                Toast.makeText(getActivity(), getString(R.string.str_error_code_message) + response.code(), Toast.LENGTH_SHORT).show();
             }
         }
 
