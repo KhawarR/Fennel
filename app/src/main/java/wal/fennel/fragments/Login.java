@@ -149,7 +149,6 @@ public class Login extends BaseFragment {
                     loadingFinished();
                 }
             } else {
-                Toast.makeText(getActivity(), Constants.TOAST_LOGIN_ERROR, Toast.LENGTH_LONG).show();
                 loadingFinished();
             }
         }
