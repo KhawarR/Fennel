@@ -114,7 +114,7 @@ public class DashboardFieldAgent extends RealmObject implements Parcelable {
         dest.writeString(this.agentId);
         dest.writeString(this.agentEmployeeId);
         dest.writeString(this.agentAttachmentUrl);
-        dest.writeList(this.dashboardTasks);
+        dest.writeTypedList(this.dashboardTasks);
         dest.writeByte(this.isHeader ? (byte) 1 : (byte) 0);
     }
 
@@ -126,7 +126,7 @@ public class DashboardFieldAgent extends RealmObject implements Parcelable {
         this.agentEmployeeId = in.readString();
         this.agentAttachmentUrl = in.readString();
         this.dashboardTasks = new RealmList<>();
-        in.readList(this.dashboardTasks, DashboardTask.class.getClassLoader());
+        in.readTypedList(this.dashboardTasks, DashboardTask.CREATOR);
         this.isHeader = in.readByte() != 0;
     }
 

@@ -1,12 +1,15 @@
 package wal.fennel.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import io.realm.RealmObject;
 
 /**
  * Created by irfanayaz on 12/29/16.
  */
 
-public class DashboardTask extends RealmObject {
+public class DashboardTask extends RealmObject implements Parcelable {
 
     String taskId;
     String taskName;
@@ -85,4 +88,43 @@ public class DashboardTask extends RealmObject {
     public void setState(int state) {
         this.state = state;
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.taskId);
+        dest.writeString(this.taskName);
+        dest.writeString(this.dueDate);
+        dest.writeString(this.completionDate);
+        dest.writeInt(this.totalCount);
+        dest.writeInt(this.completed);
+        dest.writeInt(this.state);
+    }
+
+    protected DashboardTask(Parcel in) {
+        this.taskId = in.readString();
+        this.taskName = in.readString();
+        this.dueDate = in.readString();
+        this.completionDate = in.readString();
+        this.totalCount = in.readInt();
+        this.completed = in.readInt();
+        this.state = in.readInt();
+    }
+
+    public static final Parcelable.Creator<DashboardTask> CREATOR = new Parcelable.Creator<DashboardTask>() {
+        @Override
+        public DashboardTask createFromParcel(Parcel source) {
+            return new DashboardTask(source);
+        }
+
+        @Override
+        public DashboardTask[] newArray(int size) {
+            return new DashboardTask[size];
+        }
+    };
 }

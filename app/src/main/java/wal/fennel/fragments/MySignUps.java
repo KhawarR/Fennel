@@ -865,65 +865,70 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 String farmerIdNumber = farmerObj.getString("Name");
                 String subLocationName = shambaObj.getJSONObject("Sub_LocationLookup__r").getString("Name");
                 String villageName = shambaObj.getJSONObject("Village__r").getString("Name");
+                String signupStatus = shambaObj.optString("Sign_Up_Status__c");
 
-                Task currentTask;
-                if (tasksMap.containsKey(taskName)) {
-                    currentTask = (Task) tasksMap.get(taskName);
-                } else {
-                    realm.beginTransaction();
+                if (signupStatus.equalsIgnoreCase(Constants.STR_APPROVED)) {
 
-                    currentTask = realm.createObject(Task.class);
-                    currentTask.setTaskId(id);
-                    currentTask.setName(taskName);
-                    currentTask.setStartedDate(startedDate);
-                    currentTask.setCompletionDate(completionDate);
-                    currentTask.setDueDate(dueDate);
-                    currentTask.setStatus(status);
-
-                    realm.commitTransaction();
-                    tasksMap.put(taskName, currentTask);
-                }
-
-                Farmer currentFarmer;
-                RealmList<Task> farmingTasks;
-                if (farmersMap.containsKey(farmerIdNumber)) {
-                    currentFarmer = (Farmer) farmersMap.get(farmerIdNumber);
-                    farmingTasks = currentFarmer.getFarmerTasks();
-                    realm.beginTransaction();
-                    if (farmingTasks != null) {
-                        farmingTasks.add(currentTask);
+                    Task currentTask;
+                    if (tasksMap.containsKey(taskName)) {
+                        currentTask = (Task) tasksMap.get(taskName);
                     } else {
+                        realm.beginTransaction();
+
+                        currentTask = realm.createObject(Task.class);
+                        currentTask.setTaskId(id);
+                        currentTask.setName(taskName);
+                        currentTask.setStartedDate(startedDate);
+                        currentTask.setCompletionDate(completionDate);
+                        currentTask.setDueDate(dueDate);
+                        currentTask.setStatus(status);
+
+                        realm.commitTransaction();
+                        tasksMap.put(taskName, currentTask);
+                    }
+
+                    Farmer currentFarmer;
+                    RealmList<Task> farmingTasks;
+                    if (farmersMap.containsKey(farmerIdNumber)) {
+                        currentFarmer = (Farmer) farmersMap.get(farmerIdNumber);
+                        farmingTasks = currentFarmer.getFarmerTasks();
+                        realm.beginTransaction();
+                        if (farmingTasks != null) {
+                            farmingTasks.add(currentTask);
+                        } else {
+                            farmingTasks = new RealmList<>();
+                            farmingTasks.add(currentTask);
+                            currentFarmer.setFarmerTasks(farmingTasks);
+                        }
+                        realm.commitTransaction();
+
+                    } else {
+                        realm.beginTransaction();
+
+                        currentFarmer = realm.createObject(Farmer.class);
+                        currentFarmer.setFarmerId(farmerId);
+                        currentFarmer.setFarmId(farmId);
+                        currentFarmer.setIdNumber(farmerIdNumber);
+                        currentFarmer.setFullName(farmerName);
+                        currentFarmer.setMobileNumber(mobileNumber);
+                        currentFarmer.setSubLocation(subLocationName);
+                        currentFarmer.setVillageName(villageName);
+                        currentFarmer.setHeader(false);
+                        currentFarmer.setFarmerType(Constants.FarmerType.MYFARMERTASKS);
+                        currentFarmer.setSignupStatus(signupStatus);
+
                         farmingTasks = new RealmList<>();
                         farmingTasks.add(currentTask);
                         currentFarmer.setFarmerTasks(farmingTasks);
+
+                        realm.commitTransaction();
+
+                        farmersMap.put(farmerIdNumber, currentFarmer);
                     }
-                    realm.commitTransaction();
 
-                } else {
-                    realm.beginTransaction();
-
-                    currentFarmer = realm.createObject(Farmer.class);
-                    currentFarmer.setFarmerId(farmerId);
-                    currentFarmer.setFarmId(farmId);
-                    currentFarmer.setIdNumber(farmerIdNumber);
-                    currentFarmer.setFullName(farmerName);
-                    currentFarmer.setMobileNumber(mobileNumber);
-                    currentFarmer.setSubLocation(subLocationName);
-                    currentFarmer.setVillageName(villageName);
-                    currentFarmer.setHeader(false);
-                    currentFarmer.setFarmerType(Constants.FarmerType.MYFARMERTASKS);
-
-                    farmingTasks = new RealmList<>();
-                    farmingTasks.add(currentTask);
-                    currentFarmer.setFarmerTasks(farmingTasks);
-
-                    realm.commitTransaction();
-
-                    farmersMap.put(farmerIdNumber, currentFarmer);
-                }
-
-                if (!(farmersTaskList.contains(currentFarmer))) {
-                    farmersTaskList.add(currentFarmer);
+                    if (!(farmersTaskList.contains(currentFarmer))) {
+                        farmersTaskList.add(currentFarmer);
+                    }
                 }
             }
         }
@@ -1317,6 +1322,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     private void updateTaskItemWithAttachment(String taskItemId, String filePath, String attachmentId) {
         ArrayList<TaskItem> allTaskItems = Singleton.getInstance().taskItems;
+        if (allTaskItems == null)
+            return;
         for (TaskItem taskItem : allTaskItems) {
             if (taskItem.getId().equals(taskItemId)) {
                 Realm realm = Realm.getDefaultInstance();
