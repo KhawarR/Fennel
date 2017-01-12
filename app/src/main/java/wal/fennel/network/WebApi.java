@@ -479,11 +479,6 @@ public class WebApi {
         processFarmVisitCalls(farmVisits);
         //endregion
 
-        //region FarmingTasks
-        RealmResults<Task> farmingTasks = Realm.getDefaultInstance().where(Task.class).equalTo("isDataDirty", true).findAll();
-        processFarmingTaskCalls(farmingTasks);
-        //endregion
-
         //region TaskItems
         RealmResults<TaskItem> taskItems = Realm.getDefaultInstance().where(TaskItem.class).equalTo("isDataDirty", true).findAll();
         processTaskItemCalls(taskItems);
@@ -850,13 +845,13 @@ public class WebApi {
                         } else {
                             Realm realm = Realm.getDefaultInstance();
                             realm.beginTransaction();
-
                             farmVisit.setDataDirty(false);
-
                             farmVisitLog.setDataDirty(false);
                             realm.commitTransaction();
 
                             FennelUtils.appendDebugLog("FarmVisitLog create finished: " + farmVisitLog.getFarmVisitId());
+
+                            processFarmingTaskCalls();
 
                             checkSyncComplete();
                         }
@@ -884,7 +879,8 @@ public class WebApi {
         }
     }
 
-    private static void processFarmingTaskCalls(RealmResults<Task> farmingTasks) {
+    private static void processFarmingTaskCalls() {
+        RealmResults<Task> farmingTasks = Realm.getDefaultInstance().where(Task.class).equalTo("isDataDirty", true).findAll();
         for (int i = 0; i < farmingTasks.size(); i++) {
             final Task farmingTask = farmingTasks.get(i);
             final HashMap<String, Object> farmingTaskMap = getFarmingTaskMap(farmingTask);
