@@ -3,6 +3,7 @@ package wal.fennel.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,6 +49,8 @@ public class Login extends BaseFragment {
 
     private MixpanelAPI mixPanel;
 
+    private static final String TAG = "LoginFragment";
+
     @Bind(R.id.etPassword)
     EditText etPassword;
 
@@ -61,6 +64,7 @@ public class Login extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+//        Log.i(TAG, "onCreateView()");
         View view = inflater.inflate(R.layout.fragment_login, container, false);
         ButterKnife.bind(this, view);
         return view;
@@ -69,6 +73,7 @@ public class Login extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+//        Log.i(TAG, "onViewCreated()");
 
         mixPanel = MixpanelAPI.getInstance(getActivity(), MixPanelConstants.MIXPANEL_TOKEN);
         mixPanel.track(MixPanelConstants.PageView.LOGIN);
@@ -149,7 +154,6 @@ public class Login extends BaseFragment {
                     loadingFinished();
                 }
             } else {
-                Toast.makeText(getActivity(), Constants.TOAST_LOGIN_ERROR, Toast.LENGTH_LONG).show();
                 loadingFinished();
             }
         }
@@ -218,16 +222,18 @@ public class Login extends BaseFragment {
     private Callback<ResponseBody> aboutMeCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            if (response.code() == Constants.RESPONSE_SUCCESS) {
+            if(isValid()){
+                if (response.code() == Constants.RESPONSE_SUCCESS) {
 
-                try {
-                    String responseStr = response.body().string();
-                    parseAboutMeData(responseStr);
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
+                    try {
+                        String responseStr = response.body().string();
+                        parseAboutMeData(responseStr);
+                    } catch (IOException | JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    Toast.makeText(getActivity(), getString(R.string.str_error_code_message) + response.code(), Toast.LENGTH_SHORT).show();
                 }
-            } else {
-                Toast.makeText(getActivity(), getString(R.string.str_error_code_message) + response.code(), Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -338,19 +344,19 @@ public class Login extends BaseFragment {
 
     private void getDropDownsData() {
 
-        if(NetworkHelper.isNetAvailable(getActivity())) {
+        if (NetworkHelper.isNetAvailable(getActivity())) {
 
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
 
-                        Response<ResponseBody> locationsResponse =  WebApi.getLocations();
+                        Response<ResponseBody> locationsResponse = WebApi.getLocations();
                         if (locationsResponse.code() == 200) {
                             parseLocations(locationsResponse.body().string());
                         }
 
-                        Response<ResponseBody> subLocationsResponse =  WebApi.getSubLocations();
+                        Response<ResponseBody> subLocationsResponse = WebApi.getSubLocations();
                         if (subLocationsResponse.code() == 200) {
                             parseSubLocations(subLocationsResponse.body().string());
                         }
@@ -385,20 +391,83 @@ public class Login extends BaseFragment {
     }
 
     private void loadingFinishedFromBackground() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                loadingFinished();
-            }
-        });
+        if (isValid()) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    loadingFinished();
+                }
+            });
+        }
     }
+
+//    @Override
+//    public void onAttach(Context context) {
+//        super.onAttach(context);
+//        Log.i(TAG, "onAttach()");
+//    }
+//
+//    @Override
+//    public void onCreate(Bundle onSaved) {
+//        super.onCreate(onSaved);
+//        Log.i(TAG, "onCreate()");
+//    }
+//
+//    @Override
+//    public void onActivityCreated(Bundle bundle) {
+//        super.onActivityCreated(bundle);
+//        Log.i(TAG, "onActivityCreated()");
+//    }
+//
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//        Log.i(TAG, "onStart()");
+//    }
+//
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        Log.i(TAG, "onResume()");
+//    }
+//
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//        Log.i(TAG, "onPause()");
+//    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.i(TAG, "onStop()");
+        loadingFinished();
+    }
+
+//    @Override
+//    public void onDestroyView() {
+//        super.onDestroyView();
+//        Log.i(TAG, "onDestroyView()");
+//    }
+//
+//    @Override
+//    public void onDestroy() {
+//        super.onDestroy();
+//        Log.i(TAG, "onDestroy()");
+//    }
+//
+//    @Override
+//    public void onDetach() {
+//        super.onDetach();
+//        Log.i(TAG, "onDetach()");
+//    }
 
     private void parseLocations(String data) throws JSONException {
 
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
-        if(arrRecords.length() > 0) {
+        if (arrRecords.length() > 0) {
             DatabaseHelper.getInstance().deleteAllLocations();
             ArrayList<Location> allLocations = new ArrayList<>();
 
@@ -424,9 +493,7 @@ public class Login extends BaseFragment {
 
             DatabaseHelper.getInstance().getWritableDatabase().setTransactionSuccessful();
             DatabaseHelper.getInstance().getWritableDatabase().endTransaction();
-        }
-        else
-        {
+        } else {
             Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
         }
     }
@@ -436,7 +503,7 @@ public class Login extends BaseFragment {
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
-        if(arrRecords.length() > 0) {
+        if (arrRecords.length() > 0) {
             DatabaseHelper.getInstance().deleteAllSubLocations();
             ArrayList<SubLocation> allSubLocations = new ArrayList<>();
 
@@ -467,9 +534,7 @@ public class Login extends BaseFragment {
 
             DatabaseHelper.getInstance().getWritableDatabase().setTransactionSuccessful();
             DatabaseHelper.getInstance().getWritableDatabase().endTransaction();
-        }
-        else
-        {
+        } else {
             Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
         }
     }
@@ -479,7 +544,7 @@ public class Login extends BaseFragment {
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
-        if(arrRecords.length() > 0) {
+        if (arrRecords.length() > 0) {
             DatabaseHelper.getInstance().deleteAllVillages();
             ArrayList<Village> allVillages = new ArrayList<>();
 
@@ -509,9 +574,7 @@ public class Login extends BaseFragment {
 
             DatabaseHelper.getInstance().getWritableDatabase().setTransactionSuccessful();
             DatabaseHelper.getInstance().getWritableDatabase().endTransaction();
-        }
-        else
-        {
+        } else {
             Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
         }
     }
@@ -521,7 +584,7 @@ public class Login extends BaseFragment {
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
-        if(arrRecords.length() > 0) {
+        if (arrRecords.length() > 0) {
             DatabaseHelper.getInstance().deleteAllTrees();
 
             DatabaseHelper.getInstance().getWritableDatabase().beginTransaction();
@@ -549,9 +612,7 @@ public class Login extends BaseFragment {
 
             DatabaseHelper.getInstance().getWritableDatabase().setTransactionSuccessful();
             DatabaseHelper.getInstance().getWritableDatabase().endTransaction();
-        }
-        else
-        {
+        } else {
             Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
         }
     }
