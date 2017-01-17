@@ -140,7 +140,8 @@ public class FennelUtils {
         if (dateStr != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             try {
-                date= dateFormat.parse(dateStr);
+                if (dateStr != null && !dateStr.equalsIgnoreCase("null"))
+                    date= dateFormat.parse(dateStr);
             } catch (ParseException e) {
                 e.printStackTrace();
             }

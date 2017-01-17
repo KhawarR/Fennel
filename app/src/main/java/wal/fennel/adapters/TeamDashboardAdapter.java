@@ -83,8 +83,10 @@ public class TeamDashboardAdapter extends BaseAdapter{
         Date dueDate = null;
         Date completionDate = null;
         try {
-            dueDate = serverFormat.parse(dueDateString);
-            completionDate = serverFormat.parse(completionDateString);
+            if (dueDateString != null && !dueDateString.equalsIgnoreCase("null"))
+                dueDate = serverFormat.parse(dueDateString);
+            if (completionDateString != null && !completionDateString.equalsIgnoreCase("null"))
+                completionDate = serverFormat.parse(completionDateString);
         } catch (ParseException e) {
             e.printStackTrace();
         }
