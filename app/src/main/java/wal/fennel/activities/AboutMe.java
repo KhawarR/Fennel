@@ -27,6 +27,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
+import wal.fennel.BuildConfig;
 import wal.fennel.R;
 import wal.fennel.dropbox.DropboxClient;
 import wal.fennel.dropbox.UploadTask;
@@ -50,6 +51,9 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
 
     @Bind(R.id.titleBar)
     TitleBarLayout titleBarLayout;
+
+    @Bind(R.id.tvVersionNumber)
+    FontTextView tvVersionNumber;
 
     @Bind(R.id.tv_first_name)
     FontTextView tvFirstName;
@@ -75,16 +79,13 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
     @Bind(R.id.pbSync)
     ProgressBar pbSync;
 
-    CircleImageView cIvIconRight;
-
-    private ImagePicker imagePicker;
     private ImagePickerCallback imagePickerCallback;
     private CameraImagePicker cameraImagePicker;
+    private ProgressDialog mProgressDialog;
+    private CircleImageView cIvIconRight;
+    private ImagePicker imagePicker;
 
     private String loggedInUserId = null;
-
-    private ProgressDialog mProgressDialog;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -141,12 +142,13 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
 
     private void populateView()
     {
-        tvFirstName.setText(PreferenceHelper.getInstance().readAboutFN());
-        tvSecondName.setText(PreferenceHelper.getInstance().readAboutMN());
-        tvSurname.setText(PreferenceHelper.getInstance().readAboutLN());
+        tvVersionNumber.setText(Constants.STR_FENNEL_VERSION + BuildConfig.VERSION_NAME);
         tvFieldOfficer.setText(PreferenceHelper.getInstance().readAboutFOname());
         tvFieldManager.setText(PreferenceHelper.getInstance().readAboutFMname());
         tvSyncTime.setText(PreferenceHelper.getInstance().readLastSyncTime());
+        tvSecondName.setText(PreferenceHelper.getInstance().readAboutMN());
+        tvFirstName.setText(PreferenceHelper.getInstance().readAboutFN());
+        tvSurname.setText(PreferenceHelper.getInstance().readAboutLN());
 
         loadAttachment();
     }

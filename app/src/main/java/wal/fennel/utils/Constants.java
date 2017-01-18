@@ -13,6 +13,8 @@ public class Constants {
      */
     public static final long TIME_DIFF = 2000;
 
+    public static final String STR_FENNEL_VERSION = "Fennel version ";
+
     public static final String STR_ENROLLED = "ENROLLED";
     public static final String STR_PENDING = "PENDING";
     public static final String STR_APPROVED = "APPROVED";

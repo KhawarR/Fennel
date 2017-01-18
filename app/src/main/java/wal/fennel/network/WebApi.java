@@ -8,6 +8,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.mixpanel.android.mpmetrics.MixpanelAPI;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,6 +40,7 @@ import wal.fennel.models.Farmer;
 import wal.fennel.models.ResponseModel;
 import wal.fennel.utils.Constants;
 import wal.fennel.utils.FennelUtils;
+import wal.fennel.utils.MixPanelConstants;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PhotoUtils;
 import wal.fennel.utils.PreferenceHelper;
@@ -50,14 +52,14 @@ import wal.fennel.utils.Singleton;
 public class WebApi {
 
     private static RealmList<Farmer> pendingFarmersList = new RealmList<>();
-
+    private OnSyncCompleteListener onSyncCompleteListener;
     private static Context mContext = null;
     private static WebApi sInstance = null;
 
     private static int countFailedCalls = 0;
     private static int countCalls = 0;
 
-    private OnSyncCompleteListener onSyncCompleteListener;
+    private static MixpanelAPI mixPanel;
 
     private WebApi(Context context){
         mContext = context;
@@ -66,6 +68,7 @@ public class WebApi {
     public static synchronized void initializeInstance(Context context) {
         if (sInstance == null) {
             sInstance = new WebApi(context);
+            mixPanel = MixpanelAPI.getInstance(context, MixPanelConstants.MIXPANEL_TOKEN);
         }
     }
 
@@ -1054,6 +1057,7 @@ public class WebApi {
                 if(WebApi.getInstance().onSyncCompleteListener != null) {
                     WebApi.getInstance().onSyncCompleteListener.syncCompleted();
                 }
+                mixPanel.track(MixPanelConstants.Event.SYNC_COMPLETED);
 
                 PreferenceHelper.getInstance().writeIsSyncInProgress(false);
             }
