@@ -27,8 +27,8 @@ android {
         applicationId "wal.fennel"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 46
-        versionName "4.6"
+        versionCode 48
+        versionName "0.4.8"
     }
     buildTypes {
         release {
