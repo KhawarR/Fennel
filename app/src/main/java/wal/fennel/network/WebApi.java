@@ -185,6 +185,10 @@ public class WebApi {
             }
         }
 
+        if (farmerIds.isEmpty()) {
+            return false;
+        }
+
         String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS_ATTACHMENTS, farmerIds);
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         return processCall(apiCall, callback);
@@ -210,6 +214,9 @@ public class WebApi {
                 }
             }
         }
+
+        if (farmerIds.isEmpty())
+            return false;
 
         String query = String.format(NetworkHelper.QUERY_MY_SIGNUPS_ATTACHMENTS, farmerIds);
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
@@ -2693,6 +2700,10 @@ public class WebApi {
                     agentIds = agentIds + ",";
                 }
             }
+        }
+
+        if (agentIds.isEmpty()) {
+            return false;
         }
 
         String query = String.format(NetworkHelper.QUERY_MY_LOGBOOK_ATTACHMENTS, agentIds);
