@@ -19,14 +19,14 @@ public class FieldAgent extends RealmObject implements Parcelable {
     public String agentEmployeeId;
     public String agentAttachmentUrl;
 
-    RealmList<TaskItem> visitLogs = new RealmList<>();
+    RealmList<LogTaskItem> visitLogs = new RealmList<>();
     public boolean isHeader = false;
 
     public FieldAgent() {
 
     }
 
-    public FieldAgent(String name, String phoneNumber, String agentType, String agentId, String agentEmployeeId, String attachmentUrl, RealmList<TaskItem> visitLogs, boolean isHeader) {
+    public FieldAgent(String name, String phoneNumber, String agentType, String agentId, String agentEmployeeId, String attachmentUrl, RealmList<LogTaskItem> visitLogs, boolean isHeader) {
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.agentType = agentType;
@@ -45,7 +45,7 @@ public class FieldAgent extends RealmObject implements Parcelable {
         this.phoneNumber = phoneNumber;
     }
 
-    public void setVisitLogs(RealmList<TaskItem> logs) {
+    public void setVisitLogs(RealmList<LogTaskItem> logs) {
         this.visitLogs = logs;
     }
 
@@ -65,7 +65,7 @@ public class FieldAgent extends RealmObject implements Parcelable {
         return agentType;
     }
 
-    public RealmList<TaskItem> getVisitLogs() {
+    public RealmList<LogTaskItem> getVisitLogs() {
         return visitLogs;
     }
 
@@ -126,7 +126,7 @@ public class FieldAgent extends RealmObject implements Parcelable {
         this.agentEmployeeId = in.readString();
         this.agentAttachmentUrl = in.readString();
         this.visitLogs = new RealmList<>();
-        in.readTypedList(this.visitLogs, TaskItem.CREATOR);
+        in.readTypedList(this.visitLogs, LogTaskItem.CREATOR);
         this.isHeader = in.readByte() != 0;
     }
 

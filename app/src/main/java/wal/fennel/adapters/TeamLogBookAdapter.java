@@ -15,6 +15,7 @@ import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import wal.fennel.R;
+import wal.fennel.models.LogTaskItem;
 import wal.fennel.models.TaskItem;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.utils.Constants;
@@ -27,9 +28,9 @@ import wal.fennel.utils.MyPicassoInstance;
 public class TeamLogBookAdapter extends BaseAdapter {
 
     private Context mContext;
-    private List<TaskItem> mList;
+    private List<LogTaskItem> mList;
 
-    public TeamLogBookAdapter(Context context, List<TaskItem> list) {
+    public TeamLogBookAdapter(Context context, List<LogTaskItem> list) {
         mContext = context;
         mList = new ArrayList<>();
         mList.addAll(list);
@@ -53,7 +54,7 @@ public class TeamLogBookAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        TaskItem taskItem = mList.get(position);
+        LogTaskItem taskItem = mList.get(position);
         View view;
 
         int itemViewType = getItemViewType(position);
@@ -90,7 +91,7 @@ public class TeamLogBookAdapter extends BaseAdapter {
         return view;
     }
 
-    private String getLogDescriptionForTaskItem(TaskItem taskItem) {
+    private String getLogDescriptionForTaskItem(LogTaskItem taskItem) {
         String desciption = "";
         if (taskItem == null)
             return desciption;
@@ -122,7 +123,7 @@ public class TeamLogBookAdapter extends BaseAdapter {
         return desciption;
     }
 
-    private int getRightIconForTaskItem(TaskItem taskItem) {
+    private int getRightIconForTaskItem(LogTaskItem taskItem) {
         int icon = 0;
         if (taskItem.getRecordType().equalsIgnoreCase("Text")) {
             icon = R.drawable.icon_text;

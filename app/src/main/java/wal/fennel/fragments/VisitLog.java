@@ -37,6 +37,7 @@ import com.makeramen.roundedimageview.RoundedImageView;
 import com.squareup.picasso.NetworkPolicy;
 
 import java.io.File;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,6 +71,7 @@ import wal.fennel.views.TitleBarLayout;
 
 public class VisitLog extends BaseFragment  {
 
+    private static final String TAG = "VisitLog";
     @Bind(R.id.llTaskItemContainer)
     LinearLayout llTaskItemContainer;
     @Bind(R.id.titleBar)
@@ -115,6 +117,8 @@ public class VisitLog extends BaseFragment  {
         this.farmer = getArguments().getParcelable("farmer");
         this.task = getArguments().getParcelable("task");
         this.taskItems = Realm.getDefaultInstance().where(TaskItem.class).equalTo("farmingTaskId", task.getTaskId()).findAll().sort("sequence", Sort.ASCENDING);
+        Log.i(TAG, "TaskItems: " + taskItems.size());
+
         this.localTaskItems = new ArrayList<>();
         for (int i = 0; i < taskItems.size(); i++) {
             this.localTaskItems.add(new TaskItem(taskItems.get(i)));
@@ -211,7 +215,7 @@ public class VisitLog extends BaseFragment  {
                             double latitude = gps.getLatitude();
                             double longitude = gps.getLongitude();
 
-                            String gpsStamp = getGpsStamp(latitude, longitude);
+                            String gpsStamp = getGpsStamp(latitude, longitude, "");
                             taskItem.setDescription(gpsStamp);
                             taskItem.setLatitude(latitude);
                             taskItem.setLongitude(longitude);
@@ -221,7 +225,7 @@ public class VisitLog extends BaseFragment  {
                     }
                 });
                 if(taskItem.isTaskDone()) {
-                    String gpsStamp = getGpsStamp(taskItem.getLatitude(), taskItem.getLongitude());
+                    String gpsStamp = getGpsStamp(taskItem.getLatitude(), taskItem.getLongitude(), taskItem.getGpsTakenTime());
                     tvDescription.setText(gpsStamp);
                 } else {
                     ivBlockIcon.setImageResource(R.drawable.ic_gps);
@@ -289,7 +293,7 @@ public class VisitLog extends BaseFragment  {
                                 MimeTypeMap myMime = MimeTypeMap.getSingleton();
                                 Intent newIntent = new Intent(Intent.ACTION_VIEW);
                                 String mimeType = myMime.getMimeTypeFromExtension(FennelUtils.fileExt(path));
-                                newIntent.setDataAndType(Uri.fromFile(new File(path)),mimeType);
+                                newIntent.setDataAndType(Uri.parse(path),mimeType);
                                 newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 try {
                                     getActivity().startActivity(newIntent);
@@ -465,7 +469,7 @@ public class VisitLog extends BaseFragment  {
         }
     }
 
-    private String getGpsStamp(double latitude, double longitude) {
+    private String getGpsStamp(double latitude, double longitude, String time) {
         int maxStrLength = 9;
         String strLatitude = String.valueOf(latitude);
         try {
@@ -479,7 +483,19 @@ public class VisitLog extends BaseFragment  {
         } catch (StringIndexOutOfBoundsException e) {
             e.printStackTrace();
         }
-        String time = FennelUtils.getFormattedTime(System.currentTimeMillis(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_HH_MM_SS);
+
+        long timeMillis = System.currentTimeMillis();
+
+        if(time != null && !time.isEmpty()) {
+            try {
+                timeMillis = FennelUtils.getTimeInMillis(time, Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+        time = FennelUtils.getFormattedTime(timeMillis, Constants.STR_TIME_FORMAT_YYYY_MM_DD_HH_MM_SS);
+
         String gpsStamp = "Latitude: %s\nLongitude: %s\nTime: %s";
 
         gpsStamp = String.format(gpsStamp, strLatitude, strLongitude, time);

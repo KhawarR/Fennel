@@ -68,6 +68,7 @@ import wal.fennel.models.DashboardFieldAgent;
 import wal.fennel.models.DashboardTask;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.FieldAgent;
+import wal.fennel.models.LogTaskItem;
 import wal.fennel.models.Task;
 import wal.fennel.models.TaskItem;
 import wal.fennel.models.TaskItemOption;
@@ -90,6 +91,8 @@ import static wal.fennel.utils.Constants.STR_FACILITATOR;
  * Created by Faizan on 9/27/2016.
  */
 public class MySignUps extends BaseFragment implements View.OnClickListener {
+
+    private static final String TAG = "MySignups";
 
     private MixpanelAPI mixPanel;
 
@@ -1056,7 +1059,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         responseStr = response.body().string();
                         ArrayList<TaskItem> allTaskItems = parseTaskItemData(responseStr);
                         Singleton.getInstance().taskItems = allTaskItems;
-                        getTaskItemAttachments(allTaskItems);
+                        WebApi.getAllTaskItemAttachments(taskItemsAttachments);
                         Log.i("Parsing", "Complete");
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -1179,6 +1182,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                 taskItems.add(taskItem);
 
+                Log.i(TAG, "TaskItems3: " + taskItems.size());
+
                 for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
 
                     if (Singleton.getInstance().myFarmersList.get(j).getFarmerTasks() != null) {
@@ -1199,10 +1204,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             }
         }
         return taskItems;
-    }
-
-    private void getTaskItemAttachments(ArrayList<TaskItem> taskItems) {
-        WebApi.getAllTaskItemAttachments(taskItemsAttachments);
     }
 
     private Callback<ResponseBody> taskItemsAttachments = new Callback<ResponseBody>() {
@@ -1897,7 +1898,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             for (TaskItem item : allItems) {
                 item.setAgentName(taskObj.getAgentName());
 
-                TaskItem taskItem = realm.createObject(TaskItem.class);
+                LogTaskItem taskItem = realm.createObject(LogTaskItem.class);
                 taskItem.setSequence(item.getSequence());
                 taskItem.setId(item.getId());
                 taskItem.setFarmingTaskId(item.getFarmingTaskId());
@@ -1919,6 +1920,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 taskItem.setTaskDone(item.isTaskDone());
                 taskItem.setAttachmentPath(item.getAttachmentPath());
                 agent.getVisitLogs().add(taskItem);
+
+                Log.i(TAG, "TaskItems4: " + agent.getVisitLogs().size());
             }
         }
         realm.commitTransaction();
@@ -2030,7 +2033,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                             realm.beginTransaction();
 
                             fieldAgent.setAgentAttachmentUrl(agentAttachmentId);
-                            for (TaskItem item : fieldAgent.getVisitLogs()) {
+                            for (LogTaskItem item : fieldAgent.getVisitLogs()) {
                                 item.setAgentAttachmentId(agentAttachmentId);
                             }
 

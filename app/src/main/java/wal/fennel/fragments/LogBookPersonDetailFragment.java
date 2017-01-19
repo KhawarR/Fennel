@@ -16,6 +16,7 @@ import io.realm.RealmList;
 import wal.fennel.R;
 import wal.fennel.adapters.TeamLogBookAdapter;
 import wal.fennel.models.FieldAgent;
+import wal.fennel.models.LogTaskItem;
 import wal.fennel.models.TaskItem;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.utils.CircleViewTransformation;
@@ -58,7 +59,7 @@ public class LogBookPersonDetailFragment extends BaseFragment {
 
         fieldAgent = (FieldAgent) getArguments().getParcelable("fieldAgent");
 
-        RealmList<TaskItem> descriptionList = fieldAgent.getVisitLogs();
+        RealmList<LogTaskItem> descriptionList = fieldAgent.getVisitLogs();
 
         logBookAdapter = new TeamLogBookAdapter(getActivity(), descriptionList);
         logbookListView.setAdapter(logBookAdapter);

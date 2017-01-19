@@ -14,6 +14,7 @@ import butterknife.ButterKnife;
 import wal.fennel.R;
 import wal.fennel.adapters.TeamLogBookAdapter;
 import wal.fennel.models.FieldAgent;
+import wal.fennel.models.LogTaskItem;
 import wal.fennel.models.TaskItem;
 import wal.fennel.utils.Singleton;
 
@@ -40,14 +41,14 @@ public class TeamLogBookFragment extends BaseFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 
         super.onViewCreated(view, savedInstanceState);
-        ArrayList<TaskItem> logsList = getDataForTeamLogbook();
+        ArrayList<LogTaskItem> logsList = getDataForTeamLogbook();
 
         logBookAdapter = new TeamLogBookAdapter(getActivity(), logsList);
         logbookListView.setAdapter(logBookAdapter);
     }
 
     private ArrayList getDataForTeamLogbook() {
-        ArrayList<TaskItem> allLogs = new ArrayList<>();
+        ArrayList<LogTaskItem> allLogs = new ArrayList<>();
         ArrayList<FieldAgent> agentsData = Singleton.getInstance().fieldAgentsVisitLogs;
         for (FieldAgent agent : agentsData) {
             allLogs.addAll(agent.getVisitLogs());

@@ -36,6 +36,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import wal.fennel.activities.LoginActivity;
 import wal.fennel.activities.SplashActivity;
 import wal.fennel.application.Fennel;
 import wal.fennel.datamodels.Auth;
@@ -45,6 +46,7 @@ import wal.fennel.models.FarmVisit;
 import wal.fennel.models.FarmVisitLog;
 import wal.fennel.models.Farmer;
 import wal.fennel.models.FieldAgent;
+import wal.fennel.models.LogTaskItem;
 import wal.fennel.models.ResponseModel;
 import wal.fennel.models.Task;
 import wal.fennel.models.TaskItem;
@@ -66,6 +68,7 @@ import static wal.fennel.utils.Constants.STR_FACILITATOR;
  */
 public class WebApi {
 
+    private static final String TAG = "WebApi";
     private static Map<String, Map<String, String>> visitLogFarmingTasks = null;
     private static RealmList<Farmer> pendingFarmersList = new RealmList<>();
     private OnSyncCompleteListener onSyncCompleteListener;
@@ -2536,7 +2539,10 @@ public class WebApi {
 
                 try {
                     responseStr = response.body().string();
-                    parseTaskItemData(responseStr);
+                    ArrayList<TaskItem> allTaskItems = parseTaskItemData(responseStr);
+                    Singleton.getInstance().taskItems = allTaskItems;
+                    // TODO Add attachments flow
+//                    WebApi.getAllTaskItemAttachments(taskItemsAttachments);
                     Log.i("Parsing" , "Complete" );
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -2552,18 +2558,26 @@ public class WebApi {
         }
     };
 
-    private static void parseTaskItemData(String data) throws JSONException {
+    private static ArrayList<TaskItem> parseTaskItemData(String data) throws JSONException {
+
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.delete(TaskItem.class);
+        realm.delete(TaskItemOption.class);
+        realm.commitTransaction();
+
+
+        ArrayList<TaskItem> taskItems = null;
 
         // clear old lists
         for (int i = 0; i < Singleton.getInstance().myFarmersList.size(); i++) {
 
-            if(Singleton.getInstance().myFarmersList.get(i).getFarmerTasks() != null){
+            if (Singleton.getInstance().myFarmersList.get(i).getFarmerTasks() != null) {
 
                 for (int j = 0; j < Singleton.getInstance().myFarmersList.get(i).getFarmerTasks().size(); j++) {
 
-                    if(Singleton.getInstance().myFarmersList.get(i).getFarmerTasks().get(j).getTaskItems() != null){
+                    if (Singleton.getInstance().myFarmersList.get(i).getFarmerTasks().get(j).getTaskItems() != null) {
 
-                        Realm realm = Realm.getDefaultInstance();
                         realm.beginTransaction();
                         Singleton.getInstance().myFarmersList.get(i).getFarmerTasks().get(j).getTaskItems().clear();
                         realm.commitTransaction();
@@ -2575,65 +2589,95 @@ public class WebApi {
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
-        for (int i = 0; i < arrRecords.length(); i++) {
+        if (arrRecords.length() > 0) {
+            taskItems = new ArrayList<>();
 
-            JSONObject objTask = arrRecords.getJSONObject(i);
+            for (int i = 0; i < arrRecords.length(); i++) {
 
-            String id = objTask.getString("Id");
-            String textValue = objTask.getString("Text_Value__c");
-            boolean isDone = objTask.getBoolean("Completed__c");
-            int sequence = objTask.getInt("Sequence__c");
-            String recordType = objTask.getJSONObject("RecordType").getString("Name");
-            String name = objTask.getString("Name");
-            double latitude = objTask.optDouble("Location__Latitude__s");
-            if(Double.isNaN(latitude))
-                latitude = 0;
-            double longitude = objTask.optDouble("Location__Longitude__s");
-            if(Double.isNaN(longitude))
-                longitude = 0;
-            String gpsTakenTime = objTask.getString("GPS_Taken_Time__c");
-            String fileType = objTask.getString("File_Type__c");
-            String fileActionType = objTask.getString("File_Action__c");
-            String fileActionPerformed = objTask.getString("Action_Performed__c");
-            String farmingTaskId = objTask.getString("Farming_Task__c");
-            String description = objTask.getString("Description__c");
+                JSONObject objTask = arrRecords.getJSONObject(i);
 
-            RealmList<TaskItemOption> options = new RealmList<>();
+                String id = objTask.getString("Id");
+                boolean isDone = objTask.getBoolean("Completed__c");
+                String textValue = objTask.getString("Text_Value__c");
+                int sequence = objTask.getInt("Sequence__c");
+                String recordType = objTask.getJSONObject("RecordType").getString("Name");
+                String name = objTask.getString("Name");
+                double latitude = objTask.optDouble("Location__Latitude__s");
+                if (Double.isNaN(latitude))
+                    latitude = 0;
+                double longitude = objTask.optDouble("Location__Longitude__s");
+                if (Double.isNaN(longitude))
+                    longitude = 0;
+                String gpsTakenTime = objTask.getString("GPS_Taken_Time__c");
+                String fileType = objTask.getString("File_Type__c");
+                String fileActionType = objTask.getString("File_Action__c");
+                String fileActionPerformed = objTask.getString("Action_Performed__c");
+                String farmingTaskId = objTask.getString("Farming_Task__c");
+                String description = objTask.getString("Description__c");
 
-            JSONObject objOptions = objTask.optJSONObject("Task_Item_Options__r");
-            if(objOptions != null){
-                JSONArray arrOptions = objOptions.getJSONArray("records");
-                for (int j = 0; j < arrOptions.length(); j++) {
-                    JSONObject objOption = arrOptions.getJSONObject(j);
-                    String optionId = objOption.getString("Id");
-                    String optionName = objOption.getString("Name");
-                    boolean isValue = objOption.getBoolean("Value__c");
+                RealmList<TaskItemOption> options = new RealmList<>();
 
-                    options.add(new TaskItemOption(optionId, optionName, isValue, false));
+                JSONObject objOptions = objTask.optJSONObject("Task_Item_Options__r");
+                if (objOptions != null) {
+                    JSONArray arrOptions = objOptions.getJSONArray("records");
+                    for (int j = 0; j < arrOptions.length(); j++) {
+                        JSONObject objOption = arrOptions.getJSONObject(j);
+                        String optionId = objOption.getString("Id");
+                        String optionName = objOption.getString("Name");
+                        boolean isValue = objOption.getBoolean("Value__c");
+
+                        realm.beginTransaction();
+                        TaskItemOption taskItemOption = realm.createObject(TaskItemOption.class);
+                        taskItemOption.setId(optionId);
+                        taskItemOption.setName(optionName);
+                        taskItemOption.setValue(isValue);
+                        options.add(taskItemOption);
+                        realm.commitTransaction();
+                    }
                 }
-            }
+                realm.beginTransaction();
+                TaskItem taskItem = realm.createObject(TaskItem.class);
+                taskItem.setSequence(sequence);
+                taskItem.setId(id);
+                taskItem.setFarmingTaskId(farmingTaskId);
+                taskItem.setName(name);
+                taskItem.setRecordType(recordType);
+                taskItem.setDescription(description);
+                taskItem.setTextValue(textValue);
+                taskItem.setFileType(fileType);
+                taskItem.setFileActionType(fileActionType);
+                taskItem.setGpsTakenTime(gpsTakenTime);
+                taskItem.setLatitude(latitude);
+                taskItem.setLongitude(longitude);
+                taskItem.setOptions(options);
+                taskItem.setAttachmentPath("");
+                taskItem.setTaskDone(isDone);
+                realm.commitTransaction();
 
-            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, null, null, null, null, isDone, "", "", false, false);
-//            TaskItem taskItem = new TaskItem(sequence, id, farmingTaskId, name, recordType, description, textValue, fileType, gpsTakenTime, latitude, longitude, options, false);
+                taskItems.add(taskItem);
 
-            for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
+                Log.i(TAG, "TaskItems1: " + taskItems.size());
 
-                if(Singleton.getInstance().myFarmersList.get(j).getFarmerTasks() != null){
+                for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
 
-                    for (int k = 0; k < Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().size(); k++) {
+                    if (Singleton.getInstance().myFarmersList.get(j).getFarmerTasks() != null) {
 
-                        if (taskItem.getFarmingTaskId().equalsIgnoreCase(Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskId())){
-                            Realm realm = Realm.getDefaultInstance();
-                            realm.beginTransaction();
-                            if(Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskItems() == null)
-                                Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).setTaskItems(new RealmList<TaskItem>());
-                            Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskItems().add(taskItem);
-                            realm.commitTransaction();
+                        for (int k = 0; k < Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().size(); k++) {
+
+                            if (taskItem.getFarmingTaskId().equalsIgnoreCase(Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskId())) {
+                                realm.beginTransaction();
+                                if (Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskItems() == null) {
+                                    Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).setTaskItems(new RealmList<TaskItem>());
+                                }
+                                Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskItems().add(taskItem);
+                                realm.commitTransaction();
+                            }
                         }
                     }
                 }
             }
         }
+        return taskItems;
     }
 
     public static boolean downloadAttachmentForAttachmentId(String attachmentId, Callback<ResponseBody> callback) {
@@ -3241,7 +3285,7 @@ public class WebApi {
             for (TaskItem item : allItems) {
                 item.setAgentName(taskObj.getAgentName());
 
-                TaskItem taskItem = realm.createObject(TaskItem.class);
+                LogTaskItem taskItem = realm.createObject(LogTaskItem.class);
                 taskItem.setSequence(item.getSequence());
                 taskItem.setId(item.getId());
                 taskItem.setFarmingTaskId(item.getFarmingTaskId());
@@ -3263,6 +3307,7 @@ public class WebApi {
                 taskItem.setTaskDone(item.isTaskDone());
                 taskItem.setAttachmentPath(item.getAttachmentPath());
                 agent.getVisitLogs().add(taskItem);
+                Log.i(TAG, "TaskItems2: " + agent.getVisitLogs().size());
             }
         }
         realm.commitTransaction();
@@ -3329,7 +3374,7 @@ public class WebApi {
                         realm.beginTransaction();
 
                         fieldAgent.setAgentAttachmentUrl(agentAttachmentId);
-                        for (TaskItem item : fieldAgent.getVisitLogs()) {
+                        for (LogTaskItem item : fieldAgent.getVisitLogs()) {
                             item.setAgentAttachmentId(agentAttachmentId);
                         }
 
