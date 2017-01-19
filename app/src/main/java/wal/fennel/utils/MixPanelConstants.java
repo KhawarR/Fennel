@@ -39,6 +39,10 @@ public class MixPanelConstants {
         public static final String SEARCH_MYSIGNUP_ACTION = "Search MySignup-Action";
         public static final String MYSIGNUP_MENU_ITEM_ACTION = "MySignup Menu Item-Click";
 
+        public static final String FARMER_LOG_UPLOADED = "Farmer Log Uploaded";
+        public static final String DEBUG_LOG_UPLOADED = "Debug Log Uploaded";
+        public static final String SYNC_COMPLETED = "Sync Completed";
+
         public static final String DROPDOWN_SHOW_LOCATION = "Dropdown location-Show";
         public static final String DROPDOWN_SHOW_SUBLOCATION = "Dropdown sublocation-Show";
         public static final String DROPDOWN_SHOW_VILLAGE = "Dropdown village-Show";

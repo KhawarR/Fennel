@@ -1491,14 +1491,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     name = fieldManager.getString("Name");
                     agentType = Constants.STR_FIELD_MANAGER;
                     agentId = fieldManager.getString("Id");
-                    agentPhone = fieldManager.getString("Phone__c");
-                    employeeObj = fieldOfficer.optJSONObject("Employee__r");
+                    agentPhone = fieldManager.optString("Phone__c");
+                    employeeObj = fieldManager.optJSONObject("Employee__r");
                     agentEmployeeId = employeeObj.optString("Name");
                 } else if (fieldOfficer != null) {
                     name = fieldOfficer.getString("Name");
                     agentType = Constants.STR_FIELD_OFFICER;
                     agentId = fieldOfficer.getString("Id");
-                    agentPhone = fieldOfficer.getString("Phone__c");
+                    agentPhone = fieldOfficer.optString("Phone__c");
                     employeeObj = fieldOfficer.optJSONObject("Employee__r");
                     agentEmployeeId = employeeObj.optString("Name");
                 } else if (facilitator != null) {
@@ -1606,8 +1606,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     Date due = null;
                     Date completion = null;
                     try {
-                        due = serverFormat.parse(dueDate);
-                        completion = serverFormat.parse(completionDate);
+                        if (dueDate != null && !dueDate.equalsIgnoreCase("null"))
+                            due = serverFormat.parse(dueDate);
+                        if (completionDate != null && !completionDate.equalsIgnoreCase("null"))
+                            completion = serverFormat.parse(completionDate);
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
@@ -1995,7 +1997,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             t.printStackTrace();
         }
     };
-
 
 
     private void parseMyLogbookAttachments(String data) throws JSONException {

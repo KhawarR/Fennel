@@ -42,12 +42,21 @@
                     fennel:fontName="Avenir-Heavy.ttf" />
 
                 <wal.fennel.views.FontTextView
+                    android:id="@+id/tvVersionNumber"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/padding_20"
                     android:gravity="center_horizontal"
-                    android:text="Last Sync:"
                     android:textColor="@color/black_txt_color"
+                    android:textSize="@dimen/textsize_22"
+                    fennel:fontName="Avenir-Heavy.ttf" />
+
+                <wal.fennel.views.FontTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:textColor="@color/black_txt_color"
+                    android:text="Last Sync:"
                     android:textSize="@dimen/textsize_22"
                     fennel:fontName="Avenir-Medium.ttf" />
 

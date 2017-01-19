@@ -150,13 +150,15 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
                     }
                     if (!taskFound) {
                         ArrayList<Farmer> newTaskList = new ArrayList<>();
+                        Date dueDate = FennelUtils.getDateFromString(currentTask.getDueDate());
+                        newTaskList.add(new Farmer(dueDate, currentTask.getTaskId(), "", currentTask.getName(), "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYFARMERTASKS));
                         if (farmersMap.get(currentFarmer.getFarmerId()) == null) {
-                            Date dueDate = FennelUtils.getDateFromString(currentTask.getDueDate());
-                            newTaskList.add(new Farmer(dueDate, currentTask.getTaskId(), "", currentTask.getName(), "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYFARMERTASKS));
+//                            Date dueDate = FennelUtils.getDateFromString(currentTask.getDueDate());
+//                            newTaskList.add(new Farmer(dueDate, currentTask.getTaskId(), "", currentTask.getName(), "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYFARMERTASKS));
                             newTaskList.add(currentFarmer);
                             farmersMap.put(currentFarmer.getFarmerId(), currentFarmer);
-                            farmersTaskList.add(newTaskList);
                         }
+                        farmersTaskList.add(newTaskList);
                     }
                 }
             }

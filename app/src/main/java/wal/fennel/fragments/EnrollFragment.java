@@ -399,7 +399,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
             if (farmer.getLocation() != null && !farmer.getLocation().isEmpty()) {
                 int index = getPositionForSpinnerArray(farmer.getLocation(), strArrLocations);
-                if(index >= 0)
+                if(index >= 0 && arrLocations.size() > 0)
                 {
                     updateSubLocFromLocation(arrLocations.get(index).getId());
                     ArrayAdapter<String> arrayAdapterSubLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrSubLocations);
@@ -411,7 +411,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
             }
             if (farmer.getSubLocation() != null && !farmer.getSubLocation().isEmpty()) {
                 int index = getPositionForSpinnerArray(farmer.getSubLocation(), strArrSubLocations);
-                if(index >= 0)
+                if(index >= 0 && arrSubLocations.size() > 0)
                 {
                     spSubLocation.setTag(false);
                     spSubLocation.setSelection(index + 1);
