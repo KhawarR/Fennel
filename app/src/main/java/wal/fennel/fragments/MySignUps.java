@@ -849,7 +849,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         Map<String, Farmer> farmersMap = new HashMap<>();
-        Map<String, Task> tasksMap = new HashMap<>();
+//        Map<String, Task> tasksMap = new HashMap<>();
         List<Farmer> farmersTaskList = new ArrayList<>();
 
         if (arrRecords.length() > 0) {
@@ -878,10 +878,12 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 if (signupStatus.equalsIgnoreCase(Constants.STR_APPROVED)) {
 
                     Task currentTask;
-                    if (tasksMap.containsKey(taskName)) {
-                        currentTask = (Task) tasksMap.get(taskName);
-                    } else {
-                        realm.beginTransaction();
+//                    if (tasksMap.containsKey(taskName)) {
+//                        currentTask = (Task) tasksMap.get(taskName);
+//                    } else {
+
+                    realm.beginTransaction();
+                    {
 
                         currentTask = realm.createObject(Task.class);
                         currentTask.setTaskId(id);
@@ -890,10 +892,12 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         currentTask.setCompletionDate(completionDate);
                         currentTask.setDueDate(dueDate);
                         currentTask.setStatus(status);
-
-                        realm.commitTransaction();
-                        tasksMap.put(taskName, currentTask);
+                        currentTask.setTaskShambaId(farmId);
+                        currentTask.setTaskFarmerId(farmerId);
                     }
+                    realm.commitTransaction();
+//                        tasksMap.put(taskName, currentTask);
+//                    }
 
                     Farmer currentFarmer;
                     RealmList<Task> farmingTasks;
@@ -1041,8 +1045,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
         }
-        startingCallsCounter++;
-        WebApi.getFarmingTaskItems(farmerStatusCallback, farmingTaskIds);
+        if (!farmingTaskIds.isEmpty()) {
+            startingCallsCounter++;
+            WebApi.getFarmingTaskItems(farmerStatusCallback, farmingTaskIds);
+        }
     }
 
     private Callback<ResponseBody> farmerStatusCallback = new Callback<ResponseBody>() {
@@ -1480,44 +1486,50 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 JSONObject fieldManager = farmVisit.optJSONObject("Field_Manager__r");
                 JSONObject fieldOfficer = farmVisit.optJSONObject("Field_Officer__r");
                 JSONObject facilitator = farmVisit.optJSONObject("Facilitator__r");
-                String name = null;
-                String agentType = null;
-                String agentId = null;
-                String agentPhone = null;
-                String agentEmployeeId = null;
-                JSONObject employeeObj = null;
 
-                if (fieldManager != null) {
-                    name = fieldManager.getString("Name");
-                    agentType = Constants.STR_FIELD_MANAGER;
-                    agentId = fieldManager.getString("Id");
-                    agentPhone = fieldManager.optString("Phone__c");
-                    employeeObj = fieldManager.optJSONObject("Employee__r");
-                    agentEmployeeId = employeeObj.optString("Name");
-                } else if (fieldOfficer != null) {
-                    name = fieldOfficer.getString("Name");
-                    agentType = Constants.STR_FIELD_OFFICER;
-                    agentId = fieldOfficer.getString("Id");
-                    agentPhone = fieldOfficer.optString("Phone__c");
-                    employeeObj = fieldOfficer.optJSONObject("Employee__r");
-                    agentEmployeeId = employeeObj.optString("Name");
-                } else if (facilitator != null) {
-                    name = facilitator.getString("Name");
-                    agentType = STR_FACILITATOR;
-                    agentId = facilitator.getString("Id");
-                    agentPhone = facilitator.optString("Phone__c");
-                    agentEmployeeId = facilitator.optString("Employee_ID__c");
-                }
-                taskMap.put("agentName", name);
-                taskMap.put("agentType", agentType);
-                taskMap.put("Id", taskId);
-                taskMap.put("agentId", agentId);
-                taskMap.put("agentPhone", agentPhone);
-                taskMap.put("agentEmployeeId", agentEmployeeId);
-                visitLogFarmingTasks.put(taskId, taskMap);
-                farmingTaskIds = farmingTaskIds + "'" + taskId + "'";
-                if (i < arrRecords.length() - 1) {
-                    farmingTaskIds = farmingTaskIds + ",";
+                JSONObject shambaObj = farmVisit.optJSONObject("Shamba__r");
+                String signupStatus = shambaObj.optString("Sign_Up_Status__c");
+
+                if (signupStatus.equalsIgnoreCase(Constants.STR_APPROVED)) {
+                    String name = null;
+                    String agentType = null;
+                    String agentId = null;
+                    String agentPhone = null;
+                    String agentEmployeeId = null;
+                    JSONObject employeeObj = null;
+
+                    if (fieldManager != null) {
+                        name = fieldManager.getString("Name");
+                        agentType = Constants.STR_FIELD_MANAGER;
+                        agentId = fieldManager.getString("Id");
+                        agentPhone = fieldManager.optString("Phone__c");
+                        employeeObj = fieldManager.optJSONObject("Employee__r");
+                        agentEmployeeId = employeeObj.optString("Name");
+                    } else if (fieldOfficer != null) {
+                        name = fieldOfficer.getString("Name");
+                        agentType = Constants.STR_FIELD_OFFICER;
+                        agentId = fieldOfficer.getString("Id");
+                        agentPhone = fieldOfficer.optString("Phone__c");
+                        employeeObj = fieldOfficer.optJSONObject("Employee__r");
+                        agentEmployeeId = employeeObj.optString("Name");
+                    } else if (facilitator != null) {
+                        name = facilitator.getString("Name");
+                        agentType = STR_FACILITATOR;
+                        agentId = facilitator.getString("Id");
+                        agentPhone = facilitator.optString("Phone__c");
+                        agentEmployeeId = facilitator.optString("Employee_ID__c");
+                    }
+                    taskMap.put("agentName", name);
+                    taskMap.put("agentType", agentType);
+                    taskMap.put("Id", taskId);
+                    taskMap.put("agentId", agentId);
+                    taskMap.put("agentPhone", agentPhone);
+                    taskMap.put("agentEmployeeId", agentEmployeeId);
+                    visitLogFarmingTasks.put(taskId, taskMap);
+                    farmingTaskIds = farmingTaskIds + "'" + taskId + "'";
+                    if (i < arrRecords.length() - 1) {
+                        farmingTaskIds = farmingTaskIds + ",";
+                    }
                 }
             }
         }
