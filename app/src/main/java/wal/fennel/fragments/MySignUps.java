@@ -1572,77 +1572,105 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 JSONObject facilitatorObj = shambaObj.optJSONObject("Facilitator_Signup__r");
                 JSONObject fieldOfficerObj = shambaObj.optJSONObject("Field_Officer_Signup__r");
                 JSONObject fieldManagerObj = shambaObj.optJSONObject("Field_Manager_Signup__r");
+                String signupStatus = shambaObj.optString("Sign_Up_Status__c");
 
-                if (fieldManagerObj != null) {
-                    id = fieldManagerObj.optString("Id");
-                    name = fieldManagerObj.optString("Name");
-                    phone = fieldManagerObj.optString("Phone__c");
-                    employeeObj = fieldManagerObj.optJSONObject("Employee__r");
-                    employeeId = employeeObj.optString("Name");
-                    agentType = Constants.STR_FIELD_MANAGER;
-                } else if (fieldOfficerObj != null) {
-                    id = fieldOfficerObj.optString("Id");
-                    name = fieldOfficerObj.optString("Name");
-                    phone = fieldOfficerObj.optString("Phone__c");
-                    employeeObj = fieldOfficerObj.optJSONObject("Employee__r");
-                    agentType = Constants.STR_FIELD_OFFICER;
-                    employeeId = employeeObj.optString("Name");
-                } else if (facilitatorObj != null) {
-                    id = facilitatorObj.optString("Id");
-                    name = facilitatorObj.optString("Name");
-                    phone = facilitatorObj.optString("Phone__c");
-                    employeeId = facilitatorObj.optString("Employee_ID__c");
-                    agentType = Constants.STR_FACILITATOR;
-                }
-                taskName = farmingTaskObj.optString("Name");
-                taskId = farmingTaskObj.optString("Id");
-                dueDate = farmingTaskObj.optString("Due_Date__c");
-                completionDate = farmingTaskObj.optString("Completion_Date__c");
+                if (signupStatus.equalsIgnoreCase(Constants.STR_APPROVED)) {
 
-                SimpleDateFormat serverFormat = new SimpleDateFormat("yyyy-MM-dd");
-                Date due = null;
-                Date completion = null;
-                try {
-                    due = serverFormat.parse(dueDate);
-                    completion = serverFormat.parse(completionDate);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+                    if (fieldManagerObj != null) {
+                        id = fieldManagerObj.optString("Id");
+                        name = fieldManagerObj.optString("Name");
+                        phone = fieldManagerObj.optString("Phone__c");
+                        employeeObj = fieldManagerObj.optJSONObject("Employee__r");
+                        employeeId = employeeObj.optString("Name");
+                        agentType = Constants.STR_FIELD_MANAGER;
+                    } else if (fieldOfficerObj != null) {
+                        id = fieldOfficerObj.optString("Id");
+                        name = fieldOfficerObj.optString("Name");
+                        phone = fieldOfficerObj.optString("Phone__c");
+                        employeeObj = fieldOfficerObj.optJSONObject("Employee__r");
+                        agentType = Constants.STR_FIELD_OFFICER;
+                        employeeId = employeeObj.optString("Name");
+                    } else if (facilitatorObj != null) {
+                        id = facilitatorObj.optString("Id");
+                        name = facilitatorObj.optString("Name");
+                        phone = facilitatorObj.optString("Phone__c");
+                        employeeId = facilitatorObj.optString("Employee_ID__c");
+                        agentType = Constants.STR_FACILITATOR;
+                    }
+                    taskName = farmingTaskObj.optString("Name");
+                    taskId = farmingTaskObj.optString("Id");
+                    dueDate = farmingTaskObj.optString("Due_Date__c");
+                    completionDate = farmingTaskObj.optString("Completion_Date__c");
 
-                if ((completion != null && completion.getTime() > due.getTime()) || (completion == null && !isCompleted && due.getTime() < System.currentTimeMillis())) {
-                    state = Constants.FARMING_STATE_LATE;
-                }
+                    SimpleDateFormat serverFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    Date due = null;
+                    Date completion = null;
+                    try {
+                        due = serverFormat.parse(dueDate);
+                        completion = serverFormat.parse(completionDate);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
 
-                if (taskName.equalsIgnoreCase("Task1")) {
-                    Log.i("FENNEL", "Catch!");
-                }
+                    if ((completion != null && completion.getTime() > due.getTime()) || (completion == null && !isCompleted && due.getTime() < System.currentTimeMillis())) {
+                        state = Constants.FARMING_STATE_LATE;
+                    }
 
-                RealmList<DashboardTask> dashboardTasks = null;
+                    if (taskName.equalsIgnoreCase("Task1")) {
+                        Log.i("FENNEL", "Catch!");
+                    }
 
-                if (dashboardAgents.get(id) != null) {
-                    dashboardFieldAgent = dashboardAgents.get(id);
-                    dashboardTasks = dashboardFieldAgent.getDashboardTasks();
-                    boolean isFound = false;
-                    for (DashboardTask dashboardTask : dashboardTasks) {
-                        if (dashboardTask.getTaskName().equalsIgnoreCase(taskName)) {
-                            isFound = true;
+                    RealmList<DashboardTask> dashboardTasks = null;
+
+                    if (dashboardAgents.get(id) != null) {
+                        dashboardFieldAgent = dashboardAgents.get(id);
+                        dashboardTasks = dashboardFieldAgent.getDashboardTasks();
+                        boolean isFound = false;
+                        for (DashboardTask dashboardTask : dashboardTasks) {
+                            if (dashboardTask.getTaskName().equalsIgnoreCase(taskName)) {
+                                isFound = true;
+                                realm.beginTransaction();
+                                {
+                                    dashboardTask.setTotalCount(dashboardTask.getTotalCount() + 1);
+                                    if (state == Constants.FARMING_STATE_LATE)
+                                        dashboardTask.setState(state);
+                                    if (isCompleted) {
+                                        dashboardTask.setCompleted(dashboardTask.getCompleted() + 1);
+                                        realm.commitTransaction();
+                                        break;
+                                    }
+                                }
+                                realm.commitTransaction();
+                            }
+                        }
+                        if (!isFound) {
                             realm.beginTransaction();
                             {
-                                dashboardTask.setTotalCount(dashboardTask.getTotalCount() + 1);
-                                if (state == Constants.FARMING_STATE_LATE)
-                                    dashboardTask.setState(state);
+                                task = realm.createObject(DashboardTask.class);
+                                task.setTaskName(taskName);
+                                task.setTaskId(taskId);
+                                task.setDueDate(dueDate);
+                                task.setCompletionDate(completionDate);
+                                task.setTotalCount(task.getTotalCount() + 1);
+                                task.setState(state);
+
                                 if (isCompleted) {
-                                    dashboardTask.setCompleted(dashboardTask.getCompleted() + 1);
-                                    realm.commitTransaction();
-                                    break;
+                                    task.setCompleted(task.getCompleted() + 1);
                                 }
+                                dashboardTasks.add(task);
                             }
                             realm.commitTransaction();
                         }
-                    }
-                    if (!isFound) {
+                    } else {
                         realm.beginTransaction();
                         {
+                            dashboardFieldAgent = realm.createObject(DashboardFieldAgent.class);
+                            dashboardFieldAgent.setAgentId(id);
+                            dashboardFieldAgent.setAgentName(name);
+                            dashboardFieldAgent.setAgentEmployeeId(employeeId);
+                            dashboardFieldAgent.setAgentNumber(phone);
+                            dashboardFieldAgent.setAgentType(agentType);
+
                             task = realm.createObject(DashboardTask.class);
                             task.setTaskName(taskName);
                             task.setTaskId(taskId);
@@ -1650,41 +1678,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                             task.setCompletionDate(completionDate);
                             task.setTotalCount(task.getTotalCount() + 1);
                             task.setState(state);
-
                             if (isCompleted) {
                                 task.setCompleted(task.getCompleted() + 1);
                             }
+                            dashboardTasks = dashboardFieldAgent.getDashboardTasks();
                             dashboardTasks.add(task);
                         }
                         realm.commitTransaction();
-                    }
-                } else {
-                    realm.beginTransaction();
-                    {
-                        dashboardFieldAgent = realm.createObject(DashboardFieldAgent.class);
-                        dashboardFieldAgent.setAgentId(id);
-                        dashboardFieldAgent.setAgentName(name);
-                        dashboardFieldAgent.setAgentEmployeeId(employeeId);
-                        dashboardFieldAgent.setAgentNumber(phone);
-                        dashboardFieldAgent.setAgentType(agentType);
 
-                        task = realm.createObject(DashboardTask.class);
-                        task.setTaskName(taskName);
-                        task.setTaskId(taskId);
-                        task.setDueDate(dueDate);
-                        task.setCompletionDate(completionDate);
-                        task.setTotalCount(task.getTotalCount() + 1);
-                        task.setState(state);
-                        if (isCompleted) {
-                            task.setCompleted(task.getCompleted() + 1);
-                        }
-                        dashboardTasks = dashboardFieldAgent.getDashboardTasks();
-                        dashboardTasks.add(task);
+                        dashboardAgents.put(id, dashboardFieldAgent);
+                        dashboardAgentsList.add(dashboardFieldAgent);
                     }
-                    realm.commitTransaction();
-
-                    dashboardAgents.put(id, dashboardFieldAgent);
-                    dashboardAgentsList.add(dashboardFieldAgent);
                 }
             }
         }

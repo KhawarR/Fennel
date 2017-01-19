@@ -81,8 +81,6 @@ public class MyDashboard extends BaseFragment {
             tabView.setVisibility(View.VISIBLE);
         }
 
-//        showPersonViewFragment();
-//        tvPerson.setSelected(true);
         showTeamViewFragment();
         tvTeam.setSelected(true);
     }
