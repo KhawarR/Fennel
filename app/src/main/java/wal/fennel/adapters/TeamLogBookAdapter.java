@@ -127,8 +127,10 @@ public class TeamLogBookAdapter extends BaseAdapter {
         int icon = 0;
         if (taskItem.getRecordType().equalsIgnoreCase("Text")) {
             icon = R.drawable.icon_text;
-        } else if (taskItem.getRecordType().equalsIgnoreCase("Checkbox") || taskItem.getRecordType().equalsIgnoreCase("Options")) {
-            icon = R.drawable.icon_text;
+        } else if (taskItem.getRecordType().equalsIgnoreCase("Checkbox")) {
+            icon = R.drawable.ic_tick_grey;
+        } else if (taskItem.getRecordType().equalsIgnoreCase("Options")) {
+            icon = R.drawable.ic_dropdown_grey;
         } else if (taskItem.getRecordType().equalsIgnoreCase("GPS")) {
             icon = R.drawable.icon_gps;
         } else if (taskItem.getRecordType().equalsIgnoreCase("File")) {

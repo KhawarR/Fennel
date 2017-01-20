@@ -121,7 +121,13 @@ public class VisitLog extends BaseFragment  {
 
         this.localTaskItems = new ArrayList<>();
         for (int i = 0; i < taskItems.size(); i++) {
-            this.localTaskItems.add(new TaskItem(taskItems.get(i)));
+            TaskItem taskItem = new TaskItem(taskItems.get(i));
+            if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Gps.toString())){
+                taskItem.setTaskDone(false);
+                taskItem.setLatitude(0);
+                taskItem.setLongitude(0);
+            }
+            this.localTaskItems.add(taskItem);
         }
 
         titleBarLayout.setOnIconClickListener(this);
@@ -216,7 +222,7 @@ public class VisitLog extends BaseFragment  {
                             double longitude = gps.getLongitude();
 
                             String gpsStamp = getGpsStamp(latitude, longitude, "");
-                            taskItem.setDescription(gpsStamp);
+//                            taskItem.setDescription(gpsStamp);
                             taskItem.setLatitude(latitude);
                             taskItem.setLongitude(longitude);
                             taskItem.setGpsTakenTime(FennelUtils.getFormattedTime(System.currentTimeMillis(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS));
@@ -395,7 +401,7 @@ public class VisitLog extends BaseFragment  {
                         }
                     }
                 } else {
-                    ivBlockIcon.setImageResource(R.drawable.ic_pencil);
+                    ivBlockIcon.setImageResource(R.drawable.ic_dropdown_white);
                 }
             }
 

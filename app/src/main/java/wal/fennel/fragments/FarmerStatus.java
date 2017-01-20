@@ -147,8 +147,9 @@ public class FarmerStatus extends BaseFragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 position -= mLvFarmers.getHeaderViewsCount();
-                if(!allTasks.get(position).isHeader())
+                if(!allTasks.get(position).isHeader() && !allTasks.get(position).getStatus().equalsIgnoreCase(Constants.STR_COMPLETED)) {
                     ((BaseContainerFragment) getParentFragment()).replaceFragment(VisitLog.newInstance(Constants.STR_VISIT_LOG, farmer, allTasks.get(position)), true);
+                }
             }
         });
     }
