@@ -19,6 +19,7 @@ public class Task extends RealmObject implements Parcelable {
     private String status;
     private boolean isHeader;
     private RealmList<TaskItem> taskItems = new RealmList<>();
+
     public String agentId;
     public String agentName;
     public String agentPhoneNumber;
@@ -26,13 +27,15 @@ public class Task extends RealmObject implements Parcelable {
     public String agentType;
     public String farmerName;
     public String shambaName;
+    public String taskShambaId;
+    public String taskFarmerId;
     private boolean isDataDirty = false;
 
     public Task(){
 
     }
 
-    public Task(String taskId, String name, String startedDate, String completionDate, String dueDate, String status, boolean isHeader, RealmList<TaskItem> taskItems, boolean isDataDirty) {
+    public Task(String taskId, String name, String startedDate, String completionDate, String dueDate, String status, boolean isHeader, RealmList<TaskItem> taskItems, String shambaId, String farmerId, boolean isDataDirty) {
         this.taskId = taskId;
         this.name = name;
         this.startedDate = startedDate;
@@ -41,6 +44,8 @@ public class Task extends RealmObject implements Parcelable {
         this.status = status;
         this.isHeader = isHeader;
         this.taskItems = taskItems;
+        this.taskShambaId = shambaId;
+        this.taskFarmerId = farmerId;
         this.isDataDirty = isDataDirty;
     }
 
@@ -53,6 +58,8 @@ public class Task extends RealmObject implements Parcelable {
         this.status = other.status;
         this.isHeader = other.isHeader;
         this.taskItems = other.taskItems;
+        this.taskShambaId = other.taskShambaId;
+        this.taskFarmerId = other.taskFarmerId;
         this.isDataDirty = other.isDataDirty;
     }
 
@@ -184,6 +191,22 @@ public class Task extends RealmObject implements Parcelable {
         isDataDirty = dataDirty;
     }
 
+    public String getTaskShambaId() {
+        return taskShambaId;
+    }
+
+    public void setTaskShambaId(String taskShambaId) {
+        this.taskShambaId = taskShambaId;
+    }
+
+    public String getTaskFarmerId() {
+        return taskFarmerId;
+    }
+
+    public void setTaskFarmerId(String taskFarmerId) {
+        this.taskFarmerId = taskFarmerId;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -206,6 +229,8 @@ public class Task extends RealmObject implements Parcelable {
         dest.writeString(this.agentType);
         dest.writeString(this.farmerName);
         dest.writeString(this.shambaName);
+        dest.writeString(this.taskShambaId);
+        dest.writeString(this.taskFarmerId);
         dest.writeInt(isDataDirty ? 1 : 0);
     }
 
@@ -228,6 +253,8 @@ public class Task extends RealmObject implements Parcelable {
         this.agentType = in.readString();
         this.farmerName = in.readString();
         this.shambaName = in.readString();
+        this.taskShambaId = in.readString();
+        this.taskFarmerId = in.readString();
         this.isDataDirty = in.readInt() == 1 ? true : false;
     }
 
