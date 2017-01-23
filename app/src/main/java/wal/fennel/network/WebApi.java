@@ -834,7 +834,6 @@ public class WebApi {
 
                     FennelUtils.appendDebugLog("FarmVisitLog create response: " + farmVisitLog.getFarmVisitId() + " - " + response.code());
 
-                    String newFarmVisitLogId = "";
                     String errorMessage = "";
                     if (response.errorBody() != null) {
                         try {
@@ -855,32 +854,32 @@ public class WebApi {
                         countFailedCalls++;
                         sessionExpireRedirect();
                     } else if (((response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) && response.body() != null && response.body().isSuccess() == true)) {
-                        newFarmVisitLogId = response.body().getId();
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        farmVisit.setDataDirty(false);
+                        farmVisitLog.setDataDirty(false);
+                        realm.commitTransaction();
 
-                        if (newFarmVisitLogId.isEmpty()) {
-                            FennelUtils.appendDebugLog("FarmVisitLog create failed" + farmVisitLog.getFarmVisitId());
-                            countFailedCalls++;
-                        } else {
-                            Realm realm = Realm.getDefaultInstance();
-                            realm.beginTransaction();
-                            farmVisit.setDataDirty(false);
-                            farmVisitLog.setDataDirty(false);
-                            realm.commitTransaction();
+                        FennelUtils.appendDebugLog("FarmVisitLog create finished: " + farmVisitLog.getFarmVisitId());
 
-                            FennelUtils.appendDebugLog("FarmVisitLog create finished: " + farmVisitLog.getFarmVisitId());
+                        processFarmingTaskCalls();
 
-                            processFarmingTaskCalls();
-
-                            checkSyncComplete();
-                        }
+                        checkSyncComplete();
                     } else {
                         FennelUtils.appendDebugLog("FarmVisitLog Create failed - " + response.code() + " - " + errorMessage);
                         Exception e = new Exception("FarmVisitLog Create failed - " + response.code() + " - " + errorMessage);
                         Crashlytics.logException(e);
+
+                        boolean deleteFromRealm = false;
+
                         if (errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)) {
                             sessionExpireRedirect();
+                        } else if(errorMessage.equalsIgnoreCase(Constants.STR_RESPONSE_ENTITIY_DELETED)) {
+                            deleteFromRealm = true;
                         }
+
                         countFailedCalls++;
+                        adjustCountCallFailedFarmingTasks(farmVisitLog.getFarmingTaskId(), deleteFromRealm);
                         checkSyncComplete();
                     }
                 }
@@ -889,6 +888,7 @@ public class WebApi {
                 public void onFailure(Call<ResponseModel> call, Throwable t) {
                     countCalls--;
                     countFailedCalls++;
+                    adjustCountCallFailedFarmingTasks(farmVisitLog.getFarmingTaskId(), false);
                     FennelUtils.appendDebugLog("FarmVisitLog create Failed: " + t.getMessage());
                     t.printStackTrace();
                     checkSyncComplete();
@@ -1109,6 +1109,31 @@ public class WebApi {
         }
     }
 
+    private static void adjustCountCallFailedFarmingTasks(String farmingTaskId, boolean deleteFromRealm){
+
+        RealmResults<Task> farmingTasks = Realm.getDefaultInstance().where(Task.class).equalTo("isDataDirty", true).equalTo("taskId", farmingTaskId).findAll();
+        if(farmingTasks != null && farmingTasks.size() > 0) {
+            countCalls = countCalls - farmingTasks.size();
+        }
+
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        if(deleteFromRealm) {
+
+            for (int i = 0; i < farmingTasks.size(); i++) {
+                farmingTasks.get(i).deleteFromRealm();
+            }
+
+            RealmResults<FarmVisitLog> farmVisitLogs = Realm.getDefaultInstance().where(FarmVisitLog.class).equalTo("isDataDirty", true).equalTo("farmingTaskId", farmingTaskId).findAll();
+            if (farmVisitLogs != null && farmVisitLogs.size() > 0) {
+                for (int i = 0; i < farmVisitLogs.size(); i++) {
+                    farmVisitLogs.get(i).deleteFromRealm();
+                }
+            }
+        }
+        realm.commitTransaction();
+    }
+
     private static String getAttachmentIdFromUploadSuccess(String data) {
         JSONObject responseJson = null;
         String attachmentId = null;
@@ -1325,6 +1350,7 @@ public class WebApi {
             public void onFailure(Call<ResponseModel> call, Throwable t) {
                 countCalls--;
                 countFailedCalls++;
+                checkSyncComplete();
                 FennelUtils.appendDebugLog("Farm create Sync Failed: " + t.getMessage());
                 t.printStackTrace();
             }
@@ -1392,6 +1418,7 @@ public class WebApi {
         if (farmer.getThumbUrl() == null || farmer.getThumbUrl().isEmpty()) {
             countCalls--;
             countFailedCalls++;
+            checkSyncComplete();
             return;
         }
 
@@ -1500,6 +1527,7 @@ public class WebApi {
             Exception e = new Exception("ByteArrayImage: attachFarmerImageToFarmerObject() - " + imagePath);
             Crashlytics.logException(e);
             Log.i("ByteArrayImage" , "attachFarmerImageToFarmerObject() - " + imagePath);
+            checkSyncComplete();
         }
     }
 
@@ -1508,6 +1536,7 @@ public class WebApi {
         if (farmer.getNationalCardUrl() == null || farmer.getNationalCardUrl().isEmpty()) {
             countCalls--;
             countFailedCalls++;
+            checkSyncComplete();
             return;
         }
 
@@ -1617,6 +1646,7 @@ public class WebApi {
             Exception e = new Exception("ByteArrayImage: attachFarmerIDImageToFarmerObject() - " + imagePath);
             Crashlytics.logException(e);
             Log.i("ByteArrayImage" , "attachFarmerIDImageToFarmerObject() - " + imagePath);
+            checkSyncComplete();
         }
     }
 
@@ -1625,6 +1655,7 @@ public class WebApi {
         if (taskItem.getAttachmentPath() == null || taskItem.getAttachmentPath().isEmpty()) {
             countCalls--;
             countFailedCalls++;
+            checkSyncComplete();
             return;
         }
 
@@ -1754,6 +1785,7 @@ public class WebApi {
             Exception e = new Exception("ByteArrayImage: attachImageToTaskItemObject() - " + imagePath);
             Crashlytics.logException(e);
             Log.i("ByteArrayImage" , "attachImageToTaskItemObject() - " + imagePath);
+            checkSyncComplete();
         }
     }
 
