@@ -1,8 +1,10 @@
 package wal.fennel.utils;
 
+import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
@@ -19,6 +21,9 @@ import java.util.Locale;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.TimeZone;
+
+import wal.fennel.dropbox.DropboxClient;
+import wal.fennel.dropbox.UploadTask;
 
 /**
  * Created by Khawar on 14/11/2016.
@@ -269,5 +274,49 @@ public class FennelUtils {
                 break;
         }
         return monthStr;
+    }
+
+    public static void uploadDebugLogFile(Context context){
+
+        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        if(downloadsDirectory.exists()){
+            String downloadDirPath = downloadsDirectory.getAbsolutePath();
+            String debugLogFileName = PreferenceHelper.getInstance().readUserId() + Constants.DropboxConstants.DEBUG_LOGS_FILE_NAME;
+
+            File debugLogsFile = new File(downloadDirPath + File.separator + debugLogFileName);
+            if(debugLogsFile.exists()) {
+                uploadDropboxFile(context, debugLogsFile, Constants.DropboxConstants.DEBUG_LOGS_DROPBOX_PATH);
+            }
+            else {
+                Crashlytics.logException(new Throwable("Debug log file doesn't exist - " + PreferenceHelper.getInstance().readUserId()));
+            }
+        }
+        else {
+            Crashlytics.logException(new Throwable("Download directory doesn't exist"));
+        }
+    }
+
+    public static void uploadFarmerLogFile(Context context){
+
+        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        if(downloadsDirectory.exists()){
+            String downloadDirPath = downloadsDirectory.getAbsolutePath();
+            String farmerLogFileName = PreferenceHelper.getInstance().readUserId() + Constants.DropboxConstants.FARMER_LOGS_FILE_NAME;
+
+            File farmerLogsFile = new File(downloadDirPath + File.separator + farmerLogFileName);
+            if(farmerLogsFile.exists()) {
+                uploadDropboxFile(context, farmerLogsFile, Constants.DropboxConstants.FARMER_LOGS_DROPBOX_PATH);
+            }
+            else {
+                Crashlytics.logException(new Throwable("Farmer log file doesn't exist - " + PreferenceHelper.getInstance().readUserId()));
+            }
+        }
+        else {
+            Crashlytics.logException(new Throwable("Download directory doesn't exist"));
+        }
+    }
+
+    private static void uploadDropboxFile(Context context, File file, String fileDropboxPath){
+        new UploadTask(DropboxClient.getClient(Constants.DropboxConstants.ACCESS_TOKEN), file, context, fileDropboxPath).execute();
     }
 }

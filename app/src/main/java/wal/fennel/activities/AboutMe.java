@@ -29,12 +29,14 @@ import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import wal.fennel.BuildConfig;
 import wal.fennel.R;
+import wal.fennel.application.Fennel;
 import wal.fennel.dropbox.DropboxClient;
 import wal.fennel.dropbox.UploadTask;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.network.WebApi;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
+import wal.fennel.utils.FennelUtils;
 import wal.fennel.utils.MixPanelConstants;
 import wal.fennel.utils.MyPicassoInstance;
 import wal.fennel.utils.PreferenceHelper;
@@ -165,7 +167,7 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
 
         if(NetworkHelper.isNetAvailable(getApplicationContext())){
 
-            uploadFarmerLogFile();
+            FennelUtils.uploadFarmerLogFile(getApplicationContext());
 
             if(!PreferenceHelper.getInstance().readIsSyncInProgress()){
                 if(WebApi.isSyncRequired())
@@ -183,50 +185,6 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
             Toast.makeText(getApplicationContext(), "Network not available", Toast.LENGTH_SHORT).show();
             pbSync.setVisibility(View.GONE);
         }
-    }
-
-    private void uploadDebugLogFile(){
-
-        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        if(downloadsDirectory.exists()){
-            String downloadDirPath = downloadsDirectory.getAbsolutePath();
-            String debugLogFileName = PreferenceHelper.getInstance().readUserId() + Constants.DropboxConstants.DEBUG_LOGS_FILE_NAME;
-
-            File debugLogsFile = new File(downloadDirPath + File.separator + debugLogFileName);
-            if(debugLogsFile.exists()) {
-                uploadDropboxFile(debugLogsFile, Constants.DropboxConstants.DEBUG_LOGS_DROPBOX_PATH);
-            }
-            else {
-                Crashlytics.logException(new Throwable("Debug log file doesn't exist - " + PreferenceHelper.getInstance().readUserId()));
-            }
-        }
-        else {
-            Crashlytics.logException(new Throwable("Download directory doesn't exist"));
-        }
-    }
-
-    private void uploadFarmerLogFile(){
-
-        File downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        if(downloadsDirectory.exists()){
-            String downloadDirPath = downloadsDirectory.getAbsolutePath();
-            String farmerLogFileName = PreferenceHelper.getInstance().readUserId() + Constants.DropboxConstants.FARMER_LOGS_FILE_NAME;
-
-            File farmerLogsFile = new File(downloadDirPath + File.separator + farmerLogFileName);
-            if(farmerLogsFile.exists()) {
-                uploadDropboxFile(farmerLogsFile, Constants.DropboxConstants.FARMER_LOGS_DROPBOX_PATH);
-            }
-            else {
-                Crashlytics.logException(new Throwable("Farmer log file doesn't exist - " + PreferenceHelper.getInstance().readUserId()));
-            }
-        }
-        else {
-            Crashlytics.logException(new Throwable("Download directory doesn't exist"));
-        }
-    }
-
-    private void uploadDropboxFile(File file, String fileDropboxPath){
-        new UploadTask(DropboxClient.getClient(Constants.DropboxConstants.ACCESS_TOKEN), file, getApplicationContext(), fileDropboxPath).execute();
     }
 
     @OnClick(R.id.rl_pick_image)
@@ -364,7 +322,5 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
             syncTime = "-";
 
         tvSyncTime.setText(syncTime);
-
-        uploadDebugLogFile();
     }
 }
