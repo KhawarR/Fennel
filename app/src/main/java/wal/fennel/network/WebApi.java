@@ -1790,6 +1790,8 @@ public class WebApi {
                 mixPanel.track(MixPanelConstants.Event.SYNC_COMPLETED);
 
                 PreferenceHelper.getInstance().writeIsSyncInProgress(false);
+
+                FennelUtils.uploadDebugLogFile(mContext);
             }
         }
     }

@@ -18,6 +18,9 @@ public class NetworkChangeReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, final Intent intent) {
         if(NetworkHelper.isNetAvailable(context)){
+
+            FennelUtils.uploadFarmerLogFile(context);
+
             if(!PreferenceHelper.getInstance().readIsSyncInProgress()){
                 if(WebApi.isSyncRequired()){
                     String lastSyncTime = PreferenceHelper.getInstance().readNetworkChangeSyncStamp();
