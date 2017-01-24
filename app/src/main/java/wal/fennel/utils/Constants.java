@@ -33,6 +33,8 @@ public class Constants {
 
     public static final String URL_NOT_SET_ERROR_MESSAGE = "Destination URL not reset. The URL returned from login must be set";
 
+    public static final String STR_RESPONSE_ENTITIY_DELETED = "entity is deleted";
+
     public static final String STR_NOT_STARTED = "NOT STARTED";
     public static final String STR_IN_PROGRESS = "IN PROGRESS";
     public static final String STR_COMPLETED = "COMPLETED";
