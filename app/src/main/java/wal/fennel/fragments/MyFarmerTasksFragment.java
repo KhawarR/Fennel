@@ -129,38 +129,36 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
 
     private void parseDataForMyFarmers(List<Farmer> farmerList) {
 
-        Map<String,Farmer> farmersMap = new HashMap<>();
+        Map<String, Farmer> farmersMap = new HashMap<>();
 
         List<List<Farmer>> farmersTaskList = new ArrayList<List<Farmer>>();
 
         for (Farmer currentFarmer : farmerList) {
             for (Task currentTask : currentFarmer.getFarmerTasks()) {
-                if (currentTask.getStatus().equalsIgnoreCase(Constants.STR_NOT_STARTED) || currentTask.getStatus().equalsIgnoreCase(Constants.STR_IN_PROGRESS)) {
+//                if (currentTask.getStatus().equalsIgnoreCase(Constants.STR_NOT_STARTED) || currentTask.getStatus().equalsIgnoreCase(Constants.STR_IN_PROGRESS)) {
                     boolean taskFound = false;
+                    ArrayList<Farmer> newTaskList = null;
+
                     for (List<Farmer> taskList : farmersTaskList) {
                         Farmer taskObject = (Farmer) taskList.get(0);
-                        if (taskObject.getFarmerId().equals(currentTask.getTaskId())) {
+                        if (taskObject.getFullName().equals(currentTask.getName())) {
                             taskFound = true;
-                            if (farmersMap.get(currentFarmer.getFarmerId()) == null) {
-                                taskList.add(currentFarmer);
-                                farmersMap.put(currentFarmer.getFarmerId(), currentFarmer);
-                            }
+                            newTaskList = (ArrayList<Farmer>) taskList;
                             break;
                         }
                     }
-                    if (!taskFound) {
-                        ArrayList<Farmer> newTaskList = new ArrayList<>();
+                    if (!taskFound && newTaskList == null) {
+                        newTaskList = new ArrayList<>();
                         Date dueDate = FennelUtils.getDateFromString(currentTask.getDueDate());
                         newTaskList.add(new Farmer(dueDate, currentTask.getTaskId(), "", currentTask.getName(), "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYFARMERTASKS));
-                        if (farmersMap.get(currentFarmer.getFarmerId()) == null) {
-//                            Date dueDate = FennelUtils.getDateFromString(currentTask.getDueDate());
-//                            newTaskList.add(new Farmer(dueDate, currentTask.getTaskId(), "", currentTask.getName(), "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYFARMERTASKS));
-                            newTaskList.add(currentFarmer);
-                            farmersMap.put(currentFarmer.getFarmerId(), currentFarmer);
-                        }
                         farmersTaskList.add(newTaskList);
                     }
-                }
+                    if (farmersMap.get(currentFarmer.getFarmerId()) == null && !currentTask.getStatus().equalsIgnoreCase(Constants.STR_COMPLETED)) {
+                        newTaskList.add(currentFarmer);
+                        farmersMap.put(currentFarmer.getFarmerId(), currentFarmer);
+                    }
+
+//                }
             }
         }
 

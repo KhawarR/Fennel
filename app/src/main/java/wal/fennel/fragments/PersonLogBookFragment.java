@@ -54,16 +54,24 @@ public class PersonLogBookFragment extends BaseFragment implements AdapterView.O
 
     private ArrayList<FieldAgent> getPersonLogbookData() {
         ArrayList<FieldAgent> fieldAgents = Singleton.getInstance().fieldAgentsVisitLogs;
+        ArrayList<FieldAgent> fieldManagers = new ArrayList<>();
         ArrayList<FieldAgent> fieldOfficers = new ArrayList<>();
         ArrayList<FieldAgent> facilitators = new ArrayList<>();
+
         for (FieldAgent fieldAgent : fieldAgents) {
-            if (fieldAgent.getAgentType().equalsIgnoreCase(Constants.STR_FIELD_OFFICER)) {
+            if (fieldAgent.getAgentType().equalsIgnoreCase(Constants.STR_FIELD_MANAGER)) {
+                fieldManagers.add(fieldAgent);
+            } else if (fieldAgent.getAgentType().equalsIgnoreCase(Constants.STR_FIELD_OFFICER)) {
                 fieldOfficers.add(fieldAgent);
             } else if (fieldAgent.getAgentType().equalsIgnoreCase(Constants.STR_FACILITATOR)) {
                 facilitators.add(fieldAgent);
             }
         }
         ArrayList<FieldAgent> allAgents = new ArrayList<>();
+        if (fieldManagers.size() > 0) {
+            allAgents.add(new FieldAgent("FIELD MANAGERS", "", "", "", "", "", null, true));
+            allAgents.addAll(fieldManagers);
+        }
         if (fieldOfficers.size() > 0) {
             allAgents.add(new FieldAgent("FIELD OFFICERS", "", "", "", "", "", null, true));
             allAgents.addAll(fieldOfficers);

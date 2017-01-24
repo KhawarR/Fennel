@@ -119,19 +119,23 @@ public class TeamDashboardAdapter extends BaseAdapter{
                     leftImageView.setBorderColor(ContextCompat.getColor(mContext, R.color.app_green));
                     leftImageView.setImageDrawable(new ColorDrawable(ContextCompat.getColor(mContext, R.color.app_green)));
                     countText.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+                    progressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.progress_bar_bg));
                 } else {
                     leftImageView.setBorderColor(ContextCompat.getColor(mContext, R.color.dark_red));
                     leftImageView.setImageDrawable(new ColorDrawable(ContextCompat.getColor(mContext, R.color.dark_red)));
                     countText.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+                    progressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.progress_bar_bg_red));
                 }
             } else {
                 leftImageView.setImageDrawable(new ColorDrawable(ContextCompat.getColor(mContext, R.color.white)));
                 if (task.getState() == Constants.FARMING_STATE_ONTIME) {
                     leftImageView.setBorderColor(ContextCompat.getColor(mContext, R.color.app_green));
                     countText.setTextColor(ContextCompat.getColor(mContext, R.color.app_green));
+                    progressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.progress_bar_bg));
                 } else {
                     leftImageView.setBorderColor(ContextCompat.getColor(mContext, R.color.dark_red));
                     countText.setTextColor(ContextCompat.getColor(mContext, R.color.dark_red));
+                    progressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.progress_bar_bg_red));
                 }
             }
         } else {

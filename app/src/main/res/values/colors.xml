@@ -14,7 +14,7 @@
     <color name="transparent_white_overlay">#40FFFFFF</color>
     <color name="btn_disabled_bg_color">#f5bfc4</color>
     <color name="grey_light">#F5F5F5</color>
-    <color name="dark_red">#d50010</color>
+    <color name="dark_red">#D50010</color>
     <color name="red_disabled_color">#f5bfc4</color>
 
     <color name="black_overlay">#66000000</color>

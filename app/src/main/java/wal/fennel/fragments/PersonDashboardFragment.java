@@ -55,16 +55,24 @@ public class PersonDashboardFragment extends BaseFragment implements AdapterView
 
     private ArrayList<DashboardFieldAgent> getPersonDashboardData() {
         ArrayList<DashboardFieldAgent> fieldAgents = Singleton.getInstance().dashboardFieldAgents;
+        ArrayList<DashboardFieldAgent> fieldManagers = new ArrayList<>();
         ArrayList<DashboardFieldAgent> fieldOfficers = new ArrayList<>();
         ArrayList<DashboardFieldAgent> facilitators = new ArrayList<>();
         for (DashboardFieldAgent fieldAgent : fieldAgents) {
-            if (fieldAgent.getAgentType().equalsIgnoreCase(Constants.STR_FIELD_OFFICER)) {
+            if (fieldAgent.getAgentType().equalsIgnoreCase(Constants.STR_FIELD_MANAGER)) {
+                fieldManagers.add(fieldAgent);
+            } else if (fieldAgent.getAgentType().equalsIgnoreCase(Constants.STR_FIELD_OFFICER)) {
                 fieldOfficers.add(fieldAgent);
             } else if (fieldAgent.getAgentType().equalsIgnoreCase(Constants.STR_FACILITATOR)) {
                 facilitators.add(fieldAgent);
             }
         }
         ArrayList<DashboardFieldAgent> allAgents = new ArrayList<>();
+
+        if (fieldManagers.size() > 0) {
+            allAgents.add(new DashboardFieldAgent("FIELD MANAGERS", "", "", "", "", "", null, true));
+            allAgents.addAll(fieldManagers);
+        }
         if (fieldOfficers.size() > 0) {
             allAgents.add(new DashboardFieldAgent("FIELD OFFICERS", "", "", "", "", "", null, true));
             allAgents.addAll(fieldOfficers);
