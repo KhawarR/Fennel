@@ -1763,8 +1763,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
         }
-        getMyLogbookData("", facilitators);
-        getMyDashboardData("", facilitators);
+        if (!facilitators.trim().isEmpty()) {
+            getMyLogbookData("", facilitators);
+            getMyDashboardData("", facilitators);
+        }
     }
 
     private void getAllVisitLogsData(String farmingTaskIds) {
