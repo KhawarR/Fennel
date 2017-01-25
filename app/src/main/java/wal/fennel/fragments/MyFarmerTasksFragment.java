@@ -150,7 +150,8 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
                     if (!taskFound && newTaskList == null) {
                         newTaskList = new ArrayList<>();
                         Date dueDate = FennelUtils.getDateFromString(currentTask.getDueDate());
-                        newTaskList.add(new Farmer(dueDate, currentTask.getTaskId(), "", currentTask.getName(), "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYFARMERTASKS));
+                        String tempFarmId = Constants.STR_FARMER_ID_PREFIX + String.valueOf(System.currentTimeMillis());
+                        newTaskList.add(new Farmer(dueDate, currentTask.getTaskId(), tempFarmId, currentTask.getName(), "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYFARMERTASKS));
                         farmersTaskList.add(newTaskList);
                     }
                     if (farmersMap.get(currentFarmer.getFarmerId()) == null && !currentTask.getStatus().equalsIgnoreCase(Constants.STR_COMPLETED)) {
