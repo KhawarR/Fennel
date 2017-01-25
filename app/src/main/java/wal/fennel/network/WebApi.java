@@ -173,7 +173,7 @@ public class WebApi {
             }
             query = query + NetworkHelper.DASHBOARD_QUERY_ORDER;
         } else {
-            query = String.format(NetworkHelper.GET_MY_LOGBOOK_DATA_FACILITATOR, PreferenceHelper.getInstance().readLoginUserId());
+            query = String.format(NetworkHelper.GET_MY_DASHBOARD_DATA_FACILITATOR, PreferenceHelper.getInstance().readLoginUserId());
         }
 
 //        String query = String.format(NetworkHelper.GET_MY_LOGBOOK_DATA, PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId(), PreferenceHelper.getInstance().readLoginUserId());
