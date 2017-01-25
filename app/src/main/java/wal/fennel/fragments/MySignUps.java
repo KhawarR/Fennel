@@ -357,7 +357,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         PreferenceHelper.getInstance().writeFirstRun(false);
                         parseData(responseStr);
                         startingCallsCounter++;
-                        WebApi.getMyFarmerAttachments(myFarmersAttachments);
+                        boolean result = WebApi.getMyFarmerAttachments(myFarmersAttachments);
+                        if(!result) {
+                            checkCallsCounter();
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (JSONException e) {
@@ -1099,7 +1102,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         realm.commitTransaction();
 
 
-        ArrayList<TaskItem> taskItems = null;
+        ArrayList<TaskItem> taskItems = new ArrayList<>();
 
         // clear old lists
         for (int i = 0; i < Singleton.getInstance().myFarmersList.size(); i++) {
@@ -1122,7 +1125,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
         if (arrRecords.length() > 0) {
-            taskItems = new ArrayList<>();
 
             for (int i = 0; i < arrRecords.length(); i++) {
 
@@ -1550,11 +1552,10 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         JSONObject jsonObject = new JSONObject(responseStr);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
         HashMap<String, DashboardFieldAgent> dashboardAgents = null;
-        ArrayList<DashboardFieldAgent> dashboardAgentsList = null;
+        ArrayList<DashboardFieldAgent> dashboardAgentsList = new ArrayList<>();
 
         if (arrRecords.length() > 0) {
             dashboardAgents = new HashMap<>();
-            dashboardAgentsList = new ArrayList<>();
             for (int i = 0; i < arrRecords.length(); i++) {
 
                 String id = null;
