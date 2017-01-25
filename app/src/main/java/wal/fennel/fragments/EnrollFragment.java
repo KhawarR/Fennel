@@ -1426,7 +1426,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         Realm.getDefaultInstance().beginTransaction();
 
         final Farmer farmerDbObj = Realm.getDefaultInstance().createObject(Farmer.class);
-        farmerDbObj.setAllValues(new Date(System.currentTimeMillis()), id, "", fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, location, subLocationName, subLocation, villageName, village, treeSpeciesName, treeSpecies, isFarmerHome, mobileNumber, "", "", farmerStatus, false, "", "",null, Constants.FarmerType.MYSIGNUPS);
+        farmerDbObj.setAllValues(new Date(System.currentTimeMillis()), id, id, fullName, firstName, secondName, surname, idNumber, gender, leader, locationName, location, subLocationName, subLocation, villageName, village, treeSpeciesName, treeSpecies, isFarmerHome, mobileNumber, "", "", farmerStatus, false, "", "",null, Constants.FarmerType.MYSIGNUPS);
         farmerDbObj.setDataDirty(true);
 
         if(farmerImageUrl != null && !farmerImageUrl.isEmpty()){

@@ -671,7 +671,7 @@ public class WebApi {
 
                                 FennelUtils.appendDebugLog("Farmer edit finished: " + farmer.getIdNumber());
 
-                                if(farmer.getFarmId().isEmpty() || farmer.getFarmId() == null){
+                                if(farmer.getFarmId().startsWith(Constants.STR_FARMER_ID_PREFIX) || farmer.getFarmId().isEmpty() || farmer.getFarmId() == null){
                                     addFarmWithFarmerId(farmer);
                                 } else {
                                     editFarmWithFarmId(farmer);
