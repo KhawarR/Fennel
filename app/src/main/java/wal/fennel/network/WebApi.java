@@ -36,7 +36,6 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import wal.fennel.activities.LoginActivity;
 import wal.fennel.activities.SplashActivity;
 import wal.fennel.application.Fennel;
 import wal.fennel.datamodels.Auth;
@@ -134,8 +133,17 @@ public class WebApi {
         String userType = PreferenceHelper.getInstance().readLoginUserType();
         if (userType.equalsIgnoreCase(Constants.STR_FIELD_MANAGER)) {
             query = String.format(NetworkHelper.GET_MY_LOGBOOK_DATA_FIELD_MANAGER, PreferenceHelper.getInstance().readLoginUserId(), fieldOffiers, facilitators);
+            if (!fieldOffiers.trim().isEmpty()) {
+                query = query + String.format(NetworkHelper.FIELD_OFFICER_ADDON_LOGBOOK, fieldOffiers);
+            }
+            if (!facilitators.trim().isEmpty()) {
+                query = query + String.format(NetworkHelper.FACILITATOR_ADDON_LOGBOOK, facilitators);
+            }
         } else if (userType.equalsIgnoreCase(Constants.STR_FIELD_OFFICER)) {
             query = String.format(NetworkHelper.GET_MY_LOGBOOK_DATA_FIELD_OFFICER, PreferenceHelper.getInstance().readLoginUserId(), facilitators);
+            if (!facilitators.trim().isEmpty()) {
+                query = query + String.format(NetworkHelper.FACILITATOR_ADDON_LOGBOOK, facilitators);
+            }
         } else {
             query = String.format(NetworkHelper.GET_MY_LOGBOOK_DATA_FACILITATOR, PreferenceHelper.getInstance().readLoginUserId());
         }
@@ -151,8 +159,19 @@ public class WebApi {
         String userType = PreferenceHelper.getInstance().readLoginUserType();
         if (userType.equalsIgnoreCase(Constants.STR_FIELD_MANAGER)) {
             query = String.format(NetworkHelper.GET_MY_DASHBOARD_DATA_FIELD_MANAGER, PreferenceHelper.getInstance().readLoginUserId(), fieldOffiers, facilitators);
+            if (!fieldOffiers.trim().isEmpty()) {
+                query = query + String.format(NetworkHelper.FIELD_OFFICER_ADDON_DASHBOARD, fieldOffiers);
+            }
+            if (!facilitators.trim().isEmpty()) {
+                query = query + String.format(NetworkHelper.FACILITATOR_ADDON_DASHBOARD, facilitators);
+            }
+            query = query + NetworkHelper.DASHBOARD_QUERY_ORDER;
         } else if (userType.equalsIgnoreCase(Constants.STR_FIELD_OFFICER)) {
             query = String.format(NetworkHelper.GET_MY_DASHBOARD_DATA_FIELD_OFFICER, PreferenceHelper.getInstance().readLoginUserId(), facilitators);
+            if (!facilitators.trim().isEmpty()) {
+                query = query + String.format(NetworkHelper.FACILITATOR_ADDON_DASHBOARD, facilitators);
+            }
+            query = query + NetworkHelper.DASHBOARD_QUERY_ORDER;
         } else {
             query = String.format(NetworkHelper.GET_MY_DASHBOARD_DATA_FACILITATOR, PreferenceHelper.getInstance().readLoginUserId());
         }

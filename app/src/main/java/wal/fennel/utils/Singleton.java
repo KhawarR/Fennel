@@ -33,4 +33,14 @@ public class Singleton {
             instance = new Singleton();
         return instance;
     }
+
+    public void clearAll() {
+        farmerIdtoInvalidate = "";
+        taskItemPicIdtoInvalidate = "";
+        mySignupsList.clear();
+        myFarmersList.clear();
+        taskItems.clear();
+        fieldAgentsVisitLogs.clear();
+        dashboardFieldAgents.clear();
+    }
 }

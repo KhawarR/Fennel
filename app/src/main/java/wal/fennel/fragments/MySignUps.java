@@ -1336,7 +1336,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         if (allTaskItems == null)
             return;
         for (TaskItem taskItem : allTaskItems) {
-            if (taskItem.getId().equals(taskItemId)) {
+            if (taskItem.isValid() && taskItem.getId().equals(taskItemId)) {
                 Realm realm = Realm.getDefaultInstance();
                 realm.beginTransaction();
                 String uri = NetworkHelper.getUriFromPath(filePath);
@@ -1764,8 +1764,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
         }
-        getMyLogbookData("", facilitators);
-        getMyDashboardData("", facilitators);
+            getMyLogbookData("", facilitators);
+            getMyDashboardData("", facilitators);
     }
 
     private void getAllVisitLogsData(String farmingTaskIds) {
@@ -1891,6 +1891,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         realm.delete(FieldAgent.class);
+        realm.delete(LogTaskItem.class);
         realm.commitTransaction();
 
         realm.beginTransaction();
