@@ -52,16 +52,16 @@ public class Fennel extends Application {
 //        initImageLoader();
 
         Realm.init(getApplicationContext());
-        RealmConfiguration config = new RealmConfiguration.Builder()
-                .deleteRealmIfMigrationNeeded()
-                .build();
-        Realm.setDefaultConfiguration(config);
-
 //        RealmConfiguration config = new RealmConfiguration.Builder()
-//                .schemaVersion(1) // Must be bumped when the schema changes
-//                .migration(new FennelRealmMigrations()) // Migration to run
+//                .schemaVersion(1)
 //                .build();
 //        Realm.setDefaultConfiguration(config);
+
+        RealmConfiguration config = new RealmConfiguration.Builder()
+                .schemaVersion(2) // Must be bumped when the schema changes
+                .migration(new FennelRealmMigrations()) // Migration to run
+                .build();
+        Realm.setDefaultConfiguration(config);
 
         WebApi.initializeInstance(getApplicationContext());
         MyPicassoInstance.initializeInstance(getApplicationContext());

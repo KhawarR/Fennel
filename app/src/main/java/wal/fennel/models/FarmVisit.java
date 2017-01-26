@@ -3,6 +3,7 @@ package wal.fennel.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 import io.realm.RealmObject;
+import io.realm.annotations.Required;
 
 /**
  * Created by Khawar on 3/1/2017.
@@ -15,7 +16,7 @@ public class FarmVisit extends RealmObject implements Parcelable {
     private String loggedInPersonId = "";
     private String shambaId = "";
     private String farmerId = "";
-    private long visitedDate;
+    private long visitedDate = 0;
     private boolean isDataDirty = false;
 
     public FarmVisit() {
