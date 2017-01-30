@@ -34,11 +34,11 @@
     <string name="employee_id_number">Employee ID Number</string>
     <string name="password">Password</string>
     <string name="sign_in">SIGN IN</string>
-    <string name="cancel_txt">CANCEL</string>
+    <string name="cancel_txt">Cancel</string>
     <string name="done_txt">DONE</string>
-    <string name="back_txt">BACK</string>
-    <string name="team">Team</string>
-    <string name="person">Person</string>
+    <string name="back_txt">Back</string>
+    <string name="team">TEAM</string>
+    <string name="person">PERSON</string>
 
     <string-array name="optionsLocation">
         <item>LOCATION 1</item>

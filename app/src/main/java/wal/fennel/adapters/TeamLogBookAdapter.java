@@ -16,7 +16,6 @@ import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 import wal.fennel.R;
 import wal.fennel.models.LogTaskItem;
-import wal.fennel.models.TaskItem;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.utils.Constants;
 import wal.fennel.utils.FennelUtils;
@@ -100,11 +99,7 @@ public class TeamLogBookAdapter extends BaseAdapter {
         } else if (taskItem.getRecordType().equalsIgnoreCase("Checkbox") || taskItem.getRecordType().equalsIgnoreCase("Options")) {
             desciption = taskItem.getAgentName() + " updated " + taskItem.getName() + "'s value at " + taskItem.getFarmerName() + "'s farm";;
         } else if (taskItem.getRecordType().equalsIgnoreCase("GPS")) {
-            if (taskItem.getName().equalsIgnoreCase("Check-in") || taskItem.getName().equalsIgnoreCase("Checkin")) {
-                desciption = taskItem.getAgentName() + " checked into " + taskItem.getFarmerName() + "'s farm";
-            } else {
-                desciption = taskItem.getAgentName() + " checked out of " + taskItem.getFarmerName() + "'s farm";
-            }
+                desciption = taskItem.getAgentName() + " updated " + taskItem.getName() + ": " + taskItem.getLatitude() + " , " + taskItem.getLongitude() + " at " + taskItem.getFarmerName() + "'s farm";
         } else if (taskItem.getRecordType().equalsIgnoreCase("File")) {
             if (taskItem.getFileActionType().equalsIgnoreCase("View Media")) {
                 if (taskItem.getFileType().equalsIgnoreCase("Documents")) {

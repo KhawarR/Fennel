@@ -2,13 +2,17 @@ package wal.fennel.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -21,13 +25,16 @@ import wal.fennel.utils.Singleton;
 /**
  * Created by irfanayaz on 12/2/16.
  */
-public class PersonLogBookFragment extends BaseFragment implements AdapterView.OnItemClickListener {
+public class PersonLogBookFragment extends BaseFragment implements AdapterView.OnItemClickListener, TextWatcher {
 
     @Bind(R.id.person_listview)
     ListView logbookListView;
     PersonLogBookAdapter logBookAdapter;
 
     ArrayList<FieldAgent> personsList;
+
+    @Bind(R.id.et_search)
+    EditText searchText;
 
     @Nullable
     @Override
@@ -50,6 +57,8 @@ public class PersonLogBookFragment extends BaseFragment implements AdapterView.O
 
         logBookAdapter = new PersonLogBookAdapter(getActivity(), personsList);
         logbookListView.setAdapter(logBookAdapter);
+
+        searchText.addTextChangedListener(this);
     }
 
     private ArrayList<FieldAgent> getPersonLogbookData() {
@@ -92,5 +101,21 @@ public class PersonLogBookFragment extends BaseFragment implements AdapterView.O
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         FieldAgent clickedAgent = personsList.get(position - logbookListView.getHeaderViewsCount());
         ((MyLogbook)getParentFragment()).addPersonDetailViewFragment(clickedAgent);
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+        String text = searchText.getText().toString().toLowerCase(Locale.getDefault());
+        logBookAdapter.filter(text);
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+
     }
 }

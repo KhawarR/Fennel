@@ -38,8 +38,9 @@
                     android:gravity="center"
                     android:padding="@dimen/padding_15"
                     android:text="@string/sync_data"
+                    android:textSize="16sp"
                     android:textColor="@color/white"
-                    fennel:fontName="Avenir-Heavy.ttf" />
+                    fennel:fontName="Avenir-Book.ttf" />
 
                 <wal.fennel.views.FontTextView
                     android:id="@+id/tvVersionNumber"
@@ -87,6 +88,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
+                        android:layout_marginRight="5dp"
                         android:src="@drawable/ic_add_pic" />
 
                 </RelativeLayout>
@@ -98,6 +100,7 @@
                     android:text="@string/first_name"
                     android:textColor="@color/black_txt_color"
                     android:textStyle="bold"
+                    android:textSize="14sp"
                     fennel:fontName="Avenir-Heavy.ttf" />
 
                 <wal.fennel.views.FontTextView
@@ -107,6 +110,7 @@
                     android:layout_marginBottom="10dp"
                     android:layout_marginTop="5dp"
                     android:textColor="@color/black_txt_color"
+                    android:textSize="14sp"
                     fennel:fontName="Avenir-Heavy.ttf" />
 
                 <wal.fennel.views.FontTextView
@@ -116,6 +120,7 @@
                     android:text="@string/second_name"
                     android:textColor="@color/black_txt_color"
                     android:textStyle="bold"
+                    android:textSize="14sp"
                     fennel:fontName="Avenir-Heavy.ttf" />
 
                 <wal.fennel.views.FontTextView
@@ -125,6 +130,7 @@
                     android:layout_marginBottom="10dp"
                     android:layout_marginTop="5dp"
                     android:textColor="@color/black_txt_color"
+                    android:textSize="14sp"
                     fennel:fontName="Avenir-Heavy.ttf" />
 
                 <wal.fennel.views.FontTextView
@@ -134,6 +140,7 @@
                     android:text="@string/surname"
                     android:textColor="@color/black_txt_color"
                     android:textStyle="bold"
+                    android:textSize="14sp"
                     fennel:fontName="Avenir-Heavy.ttf" />
 
                 <wal.fennel.views.FontTextView
@@ -143,6 +150,7 @@
                     android:layout_marginBottom="10dp"
                     android:layout_marginTop="5dp"
                     android:textColor="@color/black_txt_color"
+                    android:textSize="14sp"
                     fennel:fontName="Avenir-Heavy.ttf" />
 
                 <wal.fennel.views.FontTextView
@@ -152,6 +160,7 @@
                     android:text="@string/managing_field_officer"
                     android:textColor="@color/black_txt_color"
                     android:textStyle="bold"
+                    android:textSize="14sp"
                     fennel:fontName="Avenir-Heavy.ttf" />
 
                 <wal.fennel.views.FontTextView
@@ -161,6 +170,7 @@
                     android:layout_marginBottom="10dp"
                     android:layout_marginTop="5dp"
                     android:textColor="@color/black_txt_color"
+                    android:textSize="14sp"
                     fennel:fontName="Avenir-Heavy.ttf" />
 
                 <wal.fennel.views.FontTextView
@@ -170,6 +180,7 @@
                     android:text="@string/managing_field_manager"
                     android:textColor="@color/black_txt_color"
                     android:textStyle="bold"
+                    android:textSize="14sp"
                     fennel:fontName="Avenir-Heavy.ttf" />
 
                 <wal.fennel.views.FontTextView
@@ -179,6 +190,7 @@
                     android:layout_marginBottom="10dp"
                     android:layout_marginTop="5dp"
                     android:textColor="@color/black_txt_color"
+                    android:textSize="14sp"
                     fennel:fontName="Avenir-Heavy.ttf" />
 
                 <wal.fennel.views.FontTextView
@@ -189,9 +201,10 @@
                     android:background="@drawable/selector_red_button"
                     android:gravity="center"
                     android:padding="@dimen/padding_15"
+                    android:textSize="16sp"
                     android:text="@string/sign_out"
                     android:textColor="@color/white"
-                    fennel:fontName="Avenir-Heavy.ttf" />
+                    fennel:fontName="Avenir-Book.ttf" />
 
             </LinearLayout>
         </ScrollView>

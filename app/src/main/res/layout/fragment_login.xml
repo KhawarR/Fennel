@@ -77,9 +77,10 @@
             android:background="@drawable/selector_green_button"
             android:gravity="center"
             android:padding="@dimen/padding_15"
+            android:textSize="16sp"
             android:text="@string/sign_in"
             android:textColor="@color/white"
-            fennel:fontName="Avenir-Heavy.ttf" />
+            fennel:fontName="Avenir-Book.ttf" />
     </RelativeLayout>
 
 </RelativeLayout>

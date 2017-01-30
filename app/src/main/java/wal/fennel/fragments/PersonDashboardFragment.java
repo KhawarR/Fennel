@@ -2,13 +2,17 @@ package wal.fennel.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -22,13 +26,16 @@ import wal.fennel.utils.Singleton;
  * Created by irfanayaz on 12/25/16.
  */
 
-public class PersonDashboardFragment extends BaseFragment implements AdapterView.OnItemClickListener {
+public class PersonDashboardFragment extends BaseFragment implements AdapterView.OnItemClickListener, TextWatcher {
 
     @Bind(R.id.person_listview)
     ListView logbookListView;
     PersonDashboardAdapter dashboardAdapter;
 
     ArrayList<DashboardFieldAgent> personsList;
+
+    @Bind(R.id.et_search)
+    EditText searchText;
 
     @Nullable
     @Override
@@ -51,6 +58,8 @@ public class PersonDashboardFragment extends BaseFragment implements AdapterView
 
         dashboardAdapter = new PersonDashboardAdapter(getActivity(), personsList);
         logbookListView.setAdapter(dashboardAdapter);
+
+        searchText.addTextChangedListener(this);
     }
 
     private ArrayList<DashboardFieldAgent> getPersonDashboardData() {
@@ -93,5 +102,21 @@ public class PersonDashboardFragment extends BaseFragment implements AdapterView
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         DashboardFieldAgent clickedAgent = personsList.get(position - logbookListView.getHeaderViewsCount());
         ((MyDashboard)getParentFragment()).addPersonDetailViewFragment(clickedAgent);
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+        String text = searchText.getText().toString().toLowerCase(Locale.getDefault());
+        dashboardAdapter.filter(text);
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+
     }
 }

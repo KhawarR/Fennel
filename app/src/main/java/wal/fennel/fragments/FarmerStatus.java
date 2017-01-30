@@ -100,11 +100,11 @@ public class FarmerStatus extends BaseFragment {
 
         FontTextView tvFarmerName = (FontTextView) myHeader.findViewById(R.id.tvFullName);
         FontTextView tvFullName = (FontTextView) myHeader.findViewById(R.id.tvLocation);
-        FontTextView tvMobile = (FontTextView) myHeader.findViewById(R.id.tvMobile);
+        FontTextView tvMobile = (FontTextView) myHeader.findViewById(R.id.tvMobileNumber);
 
         tvFarmerName.setText(farmer.getFullName());
         tvFullName.setText(farmer.getVillageName() + ", " + farmer.getSubLocation());
-        tvMobile.setText("MOBILE " + farmer.getMobileNumber());
+        tvMobile.setText(farmer.getMobileNumber());
 
         mLvFarmers.addHeaderView(myHeader);
 
@@ -126,7 +126,7 @@ public class FarmerStatus extends BaseFragment {
         }
 
         if(inProgressTasks.size() > 0){
-            allTasks.add(new Task("", Constants.STR_IN_PROGRESS, "", "", "", "", true, null, null, null, false));
+            allTasks.add(new Task("", Constants.STR_DOING, "", "", "", "", true, null, null, null, false));
             allTasks.addAll(inProgressTasks);
         }
 
@@ -136,7 +136,7 @@ public class FarmerStatus extends BaseFragment {
         }
 
         if(completedTasks.size() > 0){
-            allTasks.add(new Task("", Constants.STR_COMPLETED, "", "", "", "", true, null, null, null, false));
+            allTasks.add(new Task("", Constants.STR_DONE, "", "", "", "", true, null, null, null, false));
             allTasks.addAll(completedTasks);
         }
 

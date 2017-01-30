@@ -71,8 +71,8 @@ public class DashboardPersonDetailFragment extends BaseFragment {
         tvFarmerName.setText(fieldAgent.getAgentName());
         FontTextView tvLocation = (FontTextView) myHeader.findViewById(R.id.tvLocation);
         tvLocation.setVisibility(View.GONE);
-        FontTextView tvMobile = (FontTextView) myHeader.findViewById(R.id.tvMobile);
-        tvMobile.setText(fieldAgent.getAgentNumber() != null && !fieldAgent.getAgentNumber().isEmpty() && !fieldAgent.getAgentNumber().equalsIgnoreCase("null") ? fieldAgent.getAgentNumber() : "-");
+        FontTextView tvMobile = (FontTextView) myHeader.findViewById(R.id.tvMobileNumber);
+        tvMobile.setText((fieldAgent.getAgentNumber() != null && !fieldAgent.getAgentNumber().isEmpty() && !fieldAgent.getAgentNumber().equalsIgnoreCase("null") ? fieldAgent.getAgentNumber() : "-"));
 
         logbookListView.addHeaderView(myHeader);
 

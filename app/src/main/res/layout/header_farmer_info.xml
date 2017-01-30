@@ -38,15 +38,30 @@
             android:textSize="14sp"
             fennel:fontName="Avenir-Medium.ttf"/>
 
+        <LinearLayout android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
         <wal.fennel.views.FontTextView
             android:id="@+id/tvMobile"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
+            android:text="MOBILE"
             android:layout_height="wrap_content"
             android:textColor="@color/black_txt_color"
             android:textSize="16sp"
             fennel:fontName="Avenir-Medium.ttf"
+            android:textStyle="bold"/>
+
+        <wal.fennel.views.FontTextView
+            android:id="@+id/tvMobileNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black_txt_color"
+            android:textSize="18sp"
+            fennel:fontName="Avenir-Medium.ttf"
             android:textStyle="bold"
-            android:layout_marginTop="5dp"/>
+            android:layout_marginLeft="5dp"/>
+            </LinearLayout>
 
     </LinearLayout>
 

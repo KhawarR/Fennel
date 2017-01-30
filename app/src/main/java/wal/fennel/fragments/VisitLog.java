@@ -7,13 +7,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
@@ -23,7 +20,6 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -36,7 +32,6 @@ import com.kbeanie.multipicker.api.entity.ChosenImage;
 import com.makeramen.roundedimageview.RoundedImageView;
 import com.squareup.picasso.NetworkPolicy;
 
-import java.io.File;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,12 +41,10 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
-import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
-import wal.fennel.adapters.FarmerStatusAdapter;
 import wal.fennel.location.GPSTracker;
 import wal.fennel.models.FarmVisit;
 import wal.fennel.models.FarmVisitLog;
@@ -515,12 +508,33 @@ public class VisitLog extends BaseFragment  {
 
     @OnClick(R.id.txtSave)
     void onClickSaveTask() {
-        updateTaskItems(Constants.STR_IN_PROGRESS);
+
+        showUpdateTaskDialog();
     }
 
     @OnClick(R.id.txtSubmitApproval)
     void onClickSubmitForApprovalTask() {
         updateTaskItems(Constants.STR_COMPLETED);
+    }
+
+    private void showUpdateTaskDialog() {
+            AlertDialog.Builder pickerDialog = new AlertDialog.Builder(getActivity());
+            pickerDialog.setTitle("CONFIRM");
+            pickerDialog.setMessage("The farmer fully completed this task and is ready to move on to the next stage.");
+            pickerDialog.setPositiveButton("Confirm",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            updateTaskItems(Constants.STR_IN_PROGRESS);
+                            dialog.dismiss();
+                        }
+                    });
+            pickerDialog.setNegativeButton("No",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            pickerDialog.show();
     }
 
     private void updateTaskItems(String taskStatus) {

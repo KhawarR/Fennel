@@ -43,7 +43,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:gravity="center"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textColor="@color/black_txt_color"
                 fennel:fontName="Avenir-Heavy.ttf"
                 android:background="@color/grey_light"/>
@@ -70,9 +70,10 @@
                 android:background="@drawable/selector_green_button"
                 android:gravity="center"
                 android:padding="@dimen/padding_15"
+                android:textSize="16sp"
                 android:text="@string/save"
                 android:textColor="@color/white"
-                fennel:fontName="Avenir-Heavy.ttf"/>
+                fennel:fontName="Avenir-Book.ttf"/>
 
             <View
                 android:layout_width="match_parent"
@@ -85,7 +86,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:gravity="center"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textColor="@color/black_txt_color"
                 fennel:fontName="Avenir-Heavy.ttf"
                 android:text="@string/task_is_complete"
@@ -105,9 +106,10 @@
                 android:background="@drawable/selector_red_button"
                 android:gravity="center"
                 android:padding="@dimen/padding_15"
+                android:textSize="16sp"
                 android:text="@string/submit_for_approval"
                 android:textColor="@color/white"
-                fennel:fontName="Avenir-Heavy.ttf" />
+                fennel:fontName="Avenir-Book.ttf" />
 
         </LinearLayout>
 

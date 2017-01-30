@@ -50,6 +50,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="textCapSentences"
                     android:singleLine="true"
+
                     android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
                     android:nextFocusDown="@+id/et_second_name"
                     android:layout_marginLeft="@dimen/margin_left_adjustment" />
@@ -116,6 +117,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/padding_10"
+                    android:paddingTop="@dimen/padding_10"
+                    android:paddingBottom="@dimen/padding_10"
                     android:orientation="horizontal">
 
                     <wal.fennel.views.FontTextView
@@ -159,6 +162,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/padding_10"
+                    android:paddingTop="@dimen/padding_10"
+                    android:paddingBottom="@dimen/padding_10"
                     android:orientation="horizontal">
 
                     <wal.fennel.views.FontTextView
@@ -179,11 +184,8 @@
                         android:layout_weight="1"
                         android:background="@drawable/selector_radio_bg"
                         android:gravity="center"
-
                         android:text="@string/no"
                         android:textColor="@color/green_white_text_selector"
-
-
                         fennel:fontName="Avenir-Heavy.ttf" />
 
                     <wal.fennel.views.FontTextView
@@ -239,6 +241,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/padding_10"
+                    android:paddingTop="@dimen/padding_10"
+                    android:paddingBottom="@dimen/padding_10"
                     android:orientation="horizontal">
 
                     <wal.fennel.views.FontTextView
@@ -302,9 +306,10 @@
                     android:background="@drawable/selector_green_button"
                     android:gravity="center"
                     android:padding="@dimen/padding_15"
+                    android:textSize="16sp"
                     android:text="@string/create"
                     android:textColor="@color/white"
-                    fennel:fontName="Avenir-Heavy.ttf" />
+                    fennel:fontName="Avenir-Book.ttf" />
 
             </LinearLayout>
 
@@ -342,6 +347,7 @@
                     android:gravity="center_vertical"
                     android:padding="@dimen/padding_15"
                     android:text="@string/farmer_photo"
+                    android:textSize="16dp"
                     android:textColor="@color/black_txt_color"
                     fennel:fontName="Avenir-Black.ttf" />
 
@@ -379,6 +385,7 @@
                     android:layout_marginTop="@dimen/padding_20"
                     android:gravity="center_vertical"
                     android:padding="@dimen/padding_15"
+                    android:textSize="16dp"
                     android:text="@string/national_id_photo"
                     android:textColor="@color/black_txt_color"
                     fennel:fontName="Avenir-Black.ttf"
@@ -422,9 +429,10 @@
             android:enabled="false"
             android:gravity="center"
             android:padding="@dimen/padding_15"
+            android:textSize="16sp"
             android:text="@string/submit_for_approval"
             android:textColor="@color/white"
-            fennel:fontName="Avenir-Heavy.ttf" />
+            fennel:fontName="Avenir-Book.ttf" />
 
 
     </LinearLayout>

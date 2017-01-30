@@ -40,8 +40,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import butterknife.Bind;
@@ -257,6 +257,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         for (int i = 0; i < arrLocations.size(); i++) {
             strArrLocations.add(arrLocations.get(i).getName());
         }
+        Collections.sort(strArrLocations);
 
         arrSubLocations = DatabaseHelper.getInstance().getAllSubLocations();
         strArrSubLocations = new ArrayList<>();
@@ -271,6 +272,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         for (int i = 0; i < arrVillages.size(); i++) {
             strArrVillages.add(arrVillages.get(i).getName());
         }
+        Collections.sort(strArrVillages);
 
         arrTrees = DatabaseHelper.getInstance().getAllTrees();
         strArrTrees = new ArrayList<>();
@@ -278,6 +280,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         for (int i = 0; i < arrTrees.size(); i++) {
             strArrTrees.add(arrTrees.get(i).getName());
         }
+        Collections.sort(strArrTrees);
 
         spLocation.setTag(true);
         ArrayAdapter<String> arrayAdapterLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrLocations);
@@ -287,7 +290,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         spSubLocation.setTag(true);
         ArrayAdapter<String> arrayAdapterSubLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrSubLocations);
-        spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterSubLoc, R.layout.spinner_nothing_selected, getContext(), "SUB LOCATION"));
+        spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterSubLoc, R.layout.spinner_nothing_selected, getContext(), "SUBLOCATION"));
         spSubLocation.setOnItemSelectedListener(this);
         spSubLocation.setOnTouchListener(this);
 
@@ -1102,6 +1105,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         for (int i = 0; i < arrSubLocations.size(); i++) {
             strArrSubLocations.add(arrSubLocations.get(i).getName());
         }
+        Collections.sort(strArrSubLocations);
     }
 
     private void updateVillageAndTreeFromSubLocation(String subLocationId) {
@@ -1116,6 +1120,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
         for (int i = 0; i < arrTrees.size(); i++) {
             strArrTrees.add(arrTrees.get(i).getName());
         }
+        Collections.sort(strArrVillages);
+        Collections.sort(strArrTrees);
     }
 
     @Override

@@ -17,7 +17,6 @@ import wal.fennel.R;
 import wal.fennel.adapters.TeamLogBookAdapter;
 import wal.fennel.models.FieldAgent;
 import wal.fennel.models.LogTaskItem;
-import wal.fennel.models.TaskItem;
 import wal.fennel.network.NetworkHelper;
 import wal.fennel.utils.CircleViewTransformation;
 import wal.fennel.utils.Constants;
@@ -72,8 +71,8 @@ public class LogBookPersonDetailFragment extends BaseFragment {
         tvFarmerName.setText(fieldAgent.getName());
         FontTextView tvLocation = (FontTextView) myHeader.findViewById(R.id.tvLocation);
         tvLocation.setVisibility(View.GONE);
-        FontTextView tvMobile = (FontTextView) myHeader.findViewById(R.id.tvMobile);
-        tvMobile.setText(fieldAgent.getPhoneNumber() != null ? fieldAgent.getPhoneNumber() : "-");
+        FontTextView tvMobile = (FontTextView) myHeader.findViewById(R.id.tvMobileNumber);
+        tvMobile.setText((fieldAgent.getPhoneNumber() != null && !fieldAgent.getPhoneNumber().isEmpty() && !fieldAgent.getPhoneNumber().equalsIgnoreCase("null") ? fieldAgent.getPhoneNumber() : "-"));
 
         logbookListView.addHeaderView(myHeader);
 
@@ -87,7 +86,6 @@ public class LogBookPersonDetailFragment extends BaseFragment {
                 MyPicassoInstance.getInstance().load(NetworkHelper.makeAttachmentUrlFromId(fieldAgent.getAgentAttachmentUrl())).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
             else
                 MyPicassoInstance.getInstance().load(NetworkHelper.makeAttachmentUrlFromId(fieldAgent.getAgentAttachmentUrl())).networkPolicy(NetworkPolicy.OFFLINE).resize(Constants.IMAGE_MAX_DIM, Constants.IMAGE_MAX_DIM).onlyScaleDown().centerCrop().transform(new CircleViewTransformation()).placeholder(R.drawable.dummy_profile).error(R.drawable.dummy_profile).into(ivFarmerThumb);
-
         }
     }
 
