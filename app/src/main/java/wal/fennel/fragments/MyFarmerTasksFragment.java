@@ -12,6 +12,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -27,6 +28,7 @@ import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
@@ -112,6 +114,9 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        hideKeyboard();
+        if (allFarmerTasks.get(position).isHeader())
+            return;
         if(allFarmerTasks.get(position).getFarmerTasks().size() > 0) {
             ((BaseContainerFragment) getParentFragment()).replaceFragment(FarmerStatus.newInstance(Constants.STR_EDIT_FARMER, allFarmerTasks.get(position)), true);
         }
@@ -200,9 +205,19 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
         String text = searchText.getText().toString().toLowerCase(Locale.getDefault());
-        tasksAdapter.filter(text);
+        allFarmerTasks = tasksAdapter.filter(text);
     }
 
     @Override
     public void afterTextChanged(Editable s) { }
+
+    @OnClick(R.id.parent_view)
+    public void hideKeyboard() {
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            view.clearFocus();
+        }
+    }
 }

@@ -78,7 +78,7 @@ public class MySignupsAdapter extends BaseAdapter {
 
     @Override
     public boolean isEnabled(int position) {
-        return getItemViewType(position) != ITEM_VIEW_TYPE_SEPARATOR;
+        return true;//getItemViewType(position) != ITEM_VIEW_TYPE_SEPARATOR;
     }
 
     public void setUpdateDataSet(){
@@ -177,7 +177,7 @@ public class MySignupsAdapter extends BaseAdapter {
     }
 
     // Filter Class
-    public void filter(String charText) {
+    public ArrayList filter(String charText) {
         charText = charText.toLowerCase(Locale.getDefault());
         mList.clear();
         if (charText.length() == 0) {
@@ -194,5 +194,6 @@ public class MySignupsAdapter extends BaseAdapter {
             }
         }
         notifyDataSetChanged();
+        return mList;
     }
 }

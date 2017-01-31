@@ -406,7 +406,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                 {
                     updateSubLocFromLocation(arrLocations.get(index).getId());
                     ArrayAdapter<String> arrayAdapterSubLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrSubLocations);
-                    spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterSubLoc, R.layout.spinner_nothing_selected, getContext(), "SUB LOCATION"));
+                    spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterSubLoc, R.layout.spinner_nothing_selected, getContext(), "SUBLOCATION"));
 
                     spLocation.setTag(false);
                     spLocation.setSelection(index + 1);
@@ -1155,7 +1155,7 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
                     updateSubLocFromLocation(location);
 
                     ArrayAdapter<String> arrayAdapterSubLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrSubLocations);
-                    spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterSubLoc, R.layout.spinner_nothing_selected, getContext(), "SUB LOCATION"));
+                    spSubLocation.setAdapter(new NothingSelectedSpinnerAdapter(arrayAdapterSubLoc, R.layout.spinner_nothing_selected, getContext(), "SUBLOCATION"));
 
                     strArrVillages.clear();
                     ArrayAdapter<String> arrayAdapterVillages = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrVillages);

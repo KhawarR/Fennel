@@ -110,8 +110,8 @@
                     android:layout_marginBottom="10dp"
                     android:layout_marginTop="5dp"
                     android:textColor="@color/black_txt_color"
-                    android:textSize="14sp"
-                    fennel:fontName="Avenir-Heavy.ttf" />
+                    android:textSize="16sp"
+                    fennel:fontName="Avenir-Book.ttf" />
 
                 <wal.fennel.views.FontTextView
                     android:layout_width="wrap_content"
@@ -130,8 +130,8 @@
                     android:layout_marginBottom="10dp"
                     android:layout_marginTop="5dp"
                     android:textColor="@color/black_txt_color"
-                    android:textSize="14sp"
-                    fennel:fontName="Avenir-Heavy.ttf" />
+                    android:textSize="16sp"
+                    fennel:fontName="Avenir-Book.ttf" />
 
                 <wal.fennel.views.FontTextView
                     android:layout_width="wrap_content"
@@ -150,8 +150,8 @@
                     android:layout_marginBottom="10dp"
                     android:layout_marginTop="5dp"
                     android:textColor="@color/black_txt_color"
-                    android:textSize="14sp"
-                    fennel:fontName="Avenir-Heavy.ttf" />
+                    android:textSize="16sp"
+                    fennel:fontName="Avenir-Book.ttf" />
 
                 <wal.fennel.views.FontTextView
                     android:layout_width="wrap_content"
@@ -170,8 +170,8 @@
                     android:layout_marginBottom="10dp"
                     android:layout_marginTop="5dp"
                     android:textColor="@color/black_txt_color"
-                    android:textSize="14sp"
-                    fennel:fontName="Avenir-Heavy.ttf" />
+                    android:textSize="16sp"
+                    fennel:fontName="Avenir-Book.ttf" />
 
                 <wal.fennel.views.FontTextView
                     android:layout_width="wrap_content"
@@ -190,8 +190,8 @@
                     android:layout_marginBottom="10dp"
                     android:layout_marginTop="5dp"
                     android:textColor="@color/black_txt_color"
-                    android:textSize="14sp"
-                    fennel:fontName="Avenir-Heavy.ttf" />
+                    android:textSize="16sp"
+                    fennel:fontName="Avenir-Book.ttf" />
 
                 <wal.fennel.views.FontTextView
                     android:id="@+id/txtSignOut"

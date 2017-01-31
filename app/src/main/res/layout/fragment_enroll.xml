@@ -49,8 +49,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textCapSentences"
+                    android:textSize="16sp"
+                    android:fontFamily="Avenir-Book.ttf"
                     android:singleLine="true"
-
                     android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
                     android:nextFocusDown="@+id/et_second_name"
                     android:layout_marginLeft="@dimen/margin_left_adjustment" />
@@ -68,6 +69,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textCapSentences"
+                    android:textSize="16sp"
+                    android:fontFamily="Avenir-Book.ttf"
                     android:singleLine="true"
                     android:nextFocusDown="@+id/et_sur_name"
                     android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
@@ -88,6 +91,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textCapSentences"
+                    android:textSize="16sp"
+                    android:fontFamily="Avenir-Book.ttf"
                     android:singleLine="true"
                     android:nextFocusDown="@+id/et_id_number"
                     android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
@@ -109,6 +114,8 @@
                     android:layout_height="wrap_content"
                     android:inputType="number"
                     android:imeOptions="actionDone"
+                    android:textSize="16sp"
+                    android:fontFamily="Avenir-Book.ttf"
                     android:layout_marginLeft="@dimen/margin_left_adjustment" />
 
 
@@ -296,6 +303,8 @@
                     android:layout_height="wrap_content"
                     android:imeOptions="actionDone"
                     android:inputType="number"
+                    android:textSize="16sp"
+                    android:fontFamily="Avenir-Book.ttf"
                     android:layout_marginLeft="@dimen/margin_left_adjustment" />
 
                 <wal.fennel.views.FontTextView

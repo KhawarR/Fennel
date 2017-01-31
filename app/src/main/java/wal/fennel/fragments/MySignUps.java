@@ -49,6 +49,7 @@ import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
 import io.realm.RealmList;
@@ -111,6 +112,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     private int startingCallsCounter = 0;
 
+    private ArrayList<Farmer> mySignupsList = null;
+
 
     @Nullable
     @Override
@@ -124,6 +127,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mySignupsList = Singleton.getInstance().mySignupsList;
 
         mixPanel = MixpanelAPI.getInstance(getActivity(), MixPanelConstants.MIXPANEL_TOKEN);
         mixPanel.track(MixPanelConstants.PageView.MY_SIGNUPS);
@@ -146,7 +151,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             @Override
             public void afterTextChanged(Editable arg0) {
                 String text = etSearch.getText().toString().toLowerCase(Locale.getDefault());
-                adapter.filter(text);
+                mySignupsList = adapter.filter(text);
             }
 
             @Override
@@ -215,8 +220,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         mLvMySignups.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                hideKeyboard();
                 position -= mLvMySignups.getHeaderViewsCount();
-                Farmer farmer = Singleton.getInstance().mySignupsList.get(position);
+                Farmer farmer = mySignupsList.get(position);
                 if (!farmer.isHeader()) {
                     try {
                         JSONObject props = new JSONObject();
@@ -324,7 +330,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             Singleton.getInstance().mySignupsList.addAll(approvedFarmersList);
         }
 
-        adapter = new MySignupsAdapter(getActivity(), Singleton.getInstance().mySignupsList);
+        mySignupsList = Singleton.getInstance().mySignupsList;
+
+        adapter = new MySignupsAdapter(getActivity(), mySignupsList);
         mLvMySignups.setAdapter(adapter);
     }
 
@@ -489,6 +497,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
         }
 
+        mySignupsList.clear();
         Singleton.getInstance().mySignupsList.clear();
 
         Realm realm = Realm.getDefaultInstance();
@@ -516,7 +525,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             realm.commitTransaction();
         }
 
-        adapter = new MySignupsAdapter(getActivity(), Singleton.getInstance().mySignupsList);
+        mySignupsList = Singleton.getInstance().mySignupsList;
+        adapter = new MySignupsAdapter(getActivity(), mySignupsList);
         mLvMySignups.setAdapter(adapter);
     }
 
@@ -593,8 +603,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     }
                 }
 
-                for (int j = 0; j < Singleton.getInstance().mySignupsList.size(); j++) {
-                    final Farmer farmer = Singleton.getInstance().mySignupsList.get(j);
+                for (int j = 0; j < mySignupsList.size(); j++) {
+                    final Farmer farmer = mySignupsList.get(j);
                     if (farmer.getFarmerId().equalsIgnoreCase(id)) {
                         realm.beginTransaction();
                         farmer.setThumbAttachmentId(farmerPicId);
@@ -723,6 +733,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.rl_add: {
+                hideKeyboard();
                 mixPanel.track(MixPanelConstants.Event.ENROLL_FARMER_BUTTON);
                 ((BaseContainerFragment) getParentFragment()).replaceFragment(EnrollFragment.newInstance(Constants.STR_ENROLL_FARMER, null), true);
             }
@@ -733,7 +744,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     private void refreshDataFromDB() {
         if (mLvMySignups != null && adapter != null) {
             getMySignupsFromDB();
-            adapter = new MySignupsAdapter(getActivity(), Singleton.getInstance().mySignupsList);
+            adapter = new MySignupsAdapter(getActivity(), mySignupsList);
             mLvMySignups.setAdapter(adapter);
         }
     }
@@ -2132,5 +2143,15 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
         RealmResults<DashboardFieldAgent> dashboardFieldAgents = Realm.getDefaultInstance().where(DashboardFieldAgent.class).findAll();
         Singleton.getInstance().dashboardFieldAgents.addAll(dashboardFieldAgents);
+    }
+
+    @OnClick(R.id.parent_view)
+    public void hideKeyboard() {
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            view.clearFocus();
+        }
     }
 }

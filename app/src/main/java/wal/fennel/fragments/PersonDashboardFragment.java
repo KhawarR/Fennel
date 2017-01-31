@@ -1,5 +1,6 @@
 package wal.fennel.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.Editable;
@@ -7,6 +8,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -16,6 +18,7 @@ import java.util.Locale;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import wal.fennel.R;
 import wal.fennel.adapters.PersonDashboardAdapter;
 import wal.fennel.models.DashboardFieldAgent;
@@ -100,6 +103,7 @@ public class PersonDashboardFragment extends BaseFragment implements AdapterView
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        hideKeyboard();
         DashboardFieldAgent clickedAgent = personsList.get(position - logbookListView.getHeaderViewsCount());
         ((MyDashboard)getParentFragment()).addPersonDetailViewFragment(clickedAgent);
     }
@@ -112,11 +116,21 @@ public class PersonDashboardFragment extends BaseFragment implements AdapterView
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
         String text = searchText.getText().toString().toLowerCase(Locale.getDefault());
-        dashboardAdapter.filter(text);
+        personsList = dashboardAdapter.filter(text);
     }
 
     @Override
     public void afterTextChanged(Editable s) {
 
+    }
+
+    @OnClick(R.id.parent_view)
+    public void hideKeyboard() {
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            view.clearFocus();
+        }
     }
 }

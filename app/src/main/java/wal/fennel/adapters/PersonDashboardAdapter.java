@@ -146,10 +146,10 @@ public class PersonDashboardAdapter extends BaseAdapter {
 
     @Override
     public boolean isEnabled(int position) {
-        return getItemViewType(position) != ITEM_VIEW_TYPE_SEPARATOR;
+        return true;//getItemViewType(position) != ITEM_VIEW_TYPE_SEPARATOR;
     }
 
-    public void filter(String charText) {
+    public ArrayList<DashboardFieldAgent> filter(String charText) {
 
         dashboardAgents.clear();
         if (charText.length() == 0) {
@@ -166,6 +166,7 @@ public class PersonDashboardAdapter extends BaseAdapter {
             }
         }
         notifyDataSetChanged();
+        return dashboardAgents;
     }
 }
 
