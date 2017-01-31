@@ -19,9 +19,9 @@
         android:gravity="center_vertical"
         android:layout_marginLeft="15dp"
         android:textSize="16sp"
-        android:textStyle="bold"
         android:textColor="@color/black_txt_color"
-        fennel:fontName="Avenir-Heavy.ttf"/>
+        fennel:fontName="Avenir-Heavy.ttf"
+        android:textStyle="bold"/>
 
     <View
         android:layout_width="match_parent"
