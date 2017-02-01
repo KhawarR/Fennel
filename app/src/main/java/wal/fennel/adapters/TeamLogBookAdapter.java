@@ -32,7 +32,9 @@ public class TeamLogBookAdapter extends BaseAdapter {
     public TeamLogBookAdapter(Context context, List<LogTaskItem> list) {
         mContext = context;
         mList = new ArrayList<>();
-        mList.addAll(list);
+        if (list != null && list.size() > 0) {
+            mList.addAll(list);
+        }
     }
 
     @Override

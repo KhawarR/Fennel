@@ -3,7 +3,7 @@ package wal.fennel.models;
 /**
  * Created by irfanayaz on 10/7/16.
  */
-public class Village {
+public class Village implements Comparable<Village> {
 
     private String id;
     private String name;
@@ -37,5 +37,10 @@ public class Village {
 
     public String getSubLocationId() {
         return subLocationId;
+    }
+
+    @Override
+    public int compareTo(Village another) {
+        return name.compareTo(another.name);
     }
 }

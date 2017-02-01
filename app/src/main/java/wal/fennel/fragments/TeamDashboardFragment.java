@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +44,7 @@ public class TeamDashboardFragment extends BaseFragment {
 
         super.onViewCreated(view, savedInstanceState);
         ArrayList<DashboardTask> dashboardTasks = getDataForTeamDashboard();
+        Collections.sort(dashboardTasks);
 
         dashboardAdapter = new TeamDashboardAdapter(getActivity(), dashboardTasks);
         dashboardListView.setAdapter(dashboardAdapter);

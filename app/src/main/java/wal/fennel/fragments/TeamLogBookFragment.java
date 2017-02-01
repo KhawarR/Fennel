@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -15,7 +16,6 @@ import wal.fennel.R;
 import wal.fennel.adapters.TeamLogBookAdapter;
 import wal.fennel.models.FieldAgent;
 import wal.fennel.models.LogTaskItem;
-import wal.fennel.models.TaskItem;
 import wal.fennel.utils.Singleton;
 
 /**
@@ -42,6 +42,7 @@ public class TeamLogBookFragment extends BaseFragment {
 
         super.onViewCreated(view, savedInstanceState);
         ArrayList<LogTaskItem> logsList = getDataForTeamLogbook();
+        Collections.sort(logsList, Collections.<LogTaskItem>reverseOrder());
 
         logBookAdapter = new TeamLogBookAdapter(getActivity(), logsList);
         logbookListView.setAdapter(logBookAdapter);

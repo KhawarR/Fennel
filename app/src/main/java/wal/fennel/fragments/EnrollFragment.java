@@ -253,34 +253,39 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
 
         arrLocations = DatabaseHelper.getInstance().getAllLocations();
         strArrLocations = new ArrayList<>();
+        Collections.sort(arrLocations);
 
         for (int i = 0; i < arrLocations.size(); i++) {
             strArrLocations.add(arrLocations.get(i).getName());
         }
-        Collections.sort(strArrLocations);
+//        Collections.sort(strArrLocations);
 
         arrSubLocations = DatabaseHelper.getInstance().getAllSubLocations();
         strArrSubLocations = new ArrayList<>();
+        Collections.sort(arrSubLocations);
 
         for (int i = 0; i < arrSubLocations.size(); i++) {
             strArrSubLocations.add(arrSubLocations.get(i).getName());
         }
+//        Collections.sort(strArrSubLocations);
 
         arrVillages = DatabaseHelper.getInstance().getAllVillages();
         strArrVillages = new ArrayList<>();
+        Collections.sort(arrVillages);
 
         for (int i = 0; i < arrVillages.size(); i++) {
             strArrVillages.add(arrVillages.get(i).getName());
         }
-        Collections.sort(strArrVillages);
+//        Collections.sort(strArrVillages);
 
         arrTrees = DatabaseHelper.getInstance().getAllTrees();
         strArrTrees = new ArrayList<>();
+        Collections.sort(strArrTrees);
 
         for (int i = 0; i < arrTrees.size(); i++) {
             strArrTrees.add(arrTrees.get(i).getName());
         }
-        Collections.sort(strArrTrees);
+//        Collections.sort(strArrTrees);
 
         spLocation.setTag(true);
         ArrayAdapter<String> arrayAdapterLoc = new ArrayAdapter<>(getActivity(), R.layout.simple_spinner_item, strArrLocations);
@@ -1102,6 +1107,8 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private void updateSubLocFromLocation(String locationId) {
         arrSubLocations = DatabaseHelper.getInstance().getSubLocationsFromLocation(locationId);
         strArrSubLocations.clear();
+        Collections.sort(arrSubLocations);
+
         for (int i = 0; i < arrSubLocations.size(); i++) {
             strArrSubLocations.add(arrSubLocations.get(i).getName());
         }
@@ -1111,17 +1118,21 @@ public class EnrollFragment extends BaseContainerFragment implements AdapterView
     private void updateVillageAndTreeFromSubLocation(String subLocationId) {
         arrVillages = DatabaseHelper.getInstance().getVillagesFromSubLocation(subLocationId);
         strArrVillages.clear();
+        Collections.sort(arrVillages);
+
         for (int i = 0; i < arrVillages.size(); i++) {
             strArrVillages.add(arrVillages.get(i).getName());
         }
 
         arrTrees = DatabaseHelper.getInstance().getTreesFromSubLocation(subLocationId);
         strArrTrees.clear();
+        Collections.sort(arrTrees);
+
         for (int i = 0; i < arrTrees.size(); i++) {
             strArrTrees.add(arrTrees.get(i).getName());
         }
-        Collections.sort(strArrVillages);
-        Collections.sort(strArrTrees);
+//        Collections.sort(strArrVillages);
+//        Collections.sort(strArrTrees);
     }
 
     @Override

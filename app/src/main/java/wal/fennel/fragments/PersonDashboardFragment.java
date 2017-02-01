@@ -105,6 +105,8 @@ public class PersonDashboardFragment extends BaseFragment implements AdapterView
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         hideKeyboard();
         DashboardFieldAgent clickedAgent = personsList.get(position - logbookListView.getHeaderViewsCount());
+        if (clickedAgent.isHeader())
+            return;
         ((MyDashboard)getParentFragment()).addPersonDetailViewFragment(clickedAgent);
     }
 

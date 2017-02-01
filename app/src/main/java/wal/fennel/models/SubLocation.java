@@ -3,7 +3,7 @@ package wal.fennel.models;
 /**
  * Created by irfanayaz on 10/7/16.
  */
-public class SubLocation {
+public class SubLocation implements Comparable<SubLocation> {
 
     private String id;
     private String name;
@@ -37,5 +37,10 @@ public class SubLocation {
 
     public String getLocationId() {
         return locationId;
+    }
+
+    @Override
+    public int compareTo(SubLocation another) {
+        return name.compareTo(another.name);
     }
 }

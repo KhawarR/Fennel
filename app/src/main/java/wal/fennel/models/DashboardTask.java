@@ -3,13 +3,17 @@ package wal.fennel.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import io.realm.RealmObject;
 
 /**
  * Created by irfanayaz on 12/29/16.
  */
 
-public class DashboardTask extends RealmObject implements Parcelable {
+public class DashboardTask extends RealmObject implements Parcelable, Comparable<DashboardTask> {
 
     String taskId;
     String taskName;
@@ -127,4 +131,29 @@ public class DashboardTask extends RealmObject implements Parcelable {
             return new DashboardTask[size];
         }
     };
+
+    @Override
+    public int compareTo(DashboardTask another) {
+
+        String dueDateString = this.getDueDate();
+        SimpleDateFormat serverFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date dueDate = null;
+        try {
+            if (dueDateString != null && !dueDateString.equalsIgnoreCase("null"))
+                dueDate = serverFormat.parse(dueDateString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        String anotherDueDateString = another.getDueDate();
+        Date anotherDueDate = null;
+        try {
+            if (anotherDueDateString != null && !anotherDueDateString.equalsIgnoreCase("null"))
+                anotherDueDate = serverFormat.parse(anotherDueDateString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return dueDate.compareTo(anotherDueDate);
+    }
 }

@@ -3,7 +3,7 @@ package wal.fennel.models;
 /**
  * Created by irfanayaz on 10/7/16.
  */
-public class Tree {
+public class Tree implements Comparable<Tree> {
 
     private String id;
     private String name;
@@ -37,6 +37,11 @@ public class Tree {
 
     public String getSubLocationId() {
         return subLocationId;
+    }
+
+    @Override
+    public int compareTo(Tree another) {
+        return name.compareTo(another.name);
     }
 }
 

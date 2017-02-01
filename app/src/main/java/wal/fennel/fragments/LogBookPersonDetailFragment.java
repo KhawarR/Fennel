@@ -9,10 +9,13 @@ import android.widget.ListView;
 
 import com.squareup.picasso.NetworkPolicy;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
-import io.realm.RealmList;
 import wal.fennel.R;
 import wal.fennel.adapters.TeamLogBookAdapter;
 import wal.fennel.models.FieldAgent;
@@ -58,9 +61,12 @@ public class LogBookPersonDetailFragment extends BaseFragment {
 
         fieldAgent = (FieldAgent) getArguments().getParcelable("fieldAgent");
 
-        RealmList<LogTaskItem> descriptionList = fieldAgent.getVisitLogs();
+        LogTaskItem[] descriptionList = (LogTaskItem[]) fieldAgent.getVisitLogs().toArray(new LogTaskItem[0]);
+        ArrayList<LogTaskItem> logsList = new ArrayList<LogTaskItem>(Arrays.asList(descriptionList));
 
-        logBookAdapter = new TeamLogBookAdapter(getActivity(), descriptionList);
+        Collections.sort(logsList, Collections.<LogTaskItem>reverseOrder());
+
+        logBookAdapter = new TeamLogBookAdapter(getActivity(), logsList);
         logbookListView.setAdapter(logBookAdapter);
 
         ViewGroup myHeader = (ViewGroup)getActivity().getLayoutInflater().inflate(R.layout.header_farmer_info, logbookListView, false);

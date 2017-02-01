@@ -41,7 +41,7 @@ public class PersonLogBookAdapter extends BaseAdapter {
         mContext = context;
         mList.addAll(list);
         allTasks.addAll(list);
-//        mFarmersList.addAll(list);
+
     }
 
     public void setTaskList(ArrayList list) {

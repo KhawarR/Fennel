@@ -12,7 +12,7 @@ import io.realm.RealmObject;
  * Created by Khawar on 22/11/2016.
  */
 
-public class LogTaskItem extends RealmObject implements Parcelable {
+public class LogTaskItem extends RealmObject implements Parcelable, Comparable<LogTaskItem> {
 
     private int sequence;
     private String id = "";
@@ -357,5 +357,10 @@ public class LogTaskItem extends RealmObject implements Parcelable {
 
     public void setPicUploadDirty(boolean picUploadDirty) {
         isPicUploadDirty = picUploadDirty;
+    }
+
+    @Override
+    public int compareTo(LogTaskItem another) {
+        return this.dateModified.compareTo(another.dateModified);
     }
 }

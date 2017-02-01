@@ -2,6 +2,7 @@ package wal.fennel.fragments;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -14,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -62,7 +64,7 @@ import wal.fennel.views.FontTextView;
 import wal.fennel.views.NothingSelectedSpinnerAdapter;
 import wal.fennel.views.TitleBarLayout;
 
-public class VisitLog extends BaseFragment  {
+public class VisitLog extends BaseFragment {
 
     private static final String TAG = "VisitLog";
     @Bind(R.id.llTaskItemContainer)
@@ -136,8 +138,19 @@ public class VisitLog extends BaseFragment  {
         }
 
         View farmerHeader = stubFarmerHeader.inflate();
-        farmerHeader.setEnabled(false);
-        farmerHeader.setOnClickListener(null);
+        farmerHeader.setEnabled(true);
+        farmerHeader.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideKeyboard();
+            }
+        });
+        stubFarmerHeader.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideKeyboard();
+            }
+        });
 
         imagePicker = new ImagePicker(VisitLog.this);
         cameraImagePicker = new CameraImagePicker(VisitLog.this);
@@ -158,6 +171,12 @@ public class VisitLog extends BaseFragment  {
         tvMobile.setText("MOBILE " + farmer.getMobileNumber());
 
         tvTaskHeader.setText(task.getName());
+        tvTaskHeader.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideKeyboard();
+            }
+        });
 
         populateTaskItems();
     }
@@ -189,6 +208,13 @@ public class VisitLog extends BaseFragment  {
                 vTaskItem = getActivity().getLayoutInflater().inflate(R.layout.template_visit_log, null);
             }
 
+            vTaskItem.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    hideKeyboard();
+                }
+            });
+
             FontTextView tvTitle = (FontTextView) vTaskItem.findViewById(R.id.tvTitle);
             final FontTextView tvDescription = (FontTextView) vTaskItem.findViewById(R.id.tvDescription);
             final EditText etHoleCount = (EditText) vTaskItem.findViewById(R.id.etInput);
@@ -210,6 +236,7 @@ public class VisitLog extends BaseFragment  {
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        hideKeyboard();
                         if(!taskItem.isTaskDone()){
                             double latitude = gps.getLatitude();
                             double longitude = gps.getLongitude();
@@ -243,6 +270,7 @@ public class VisitLog extends BaseFragment  {
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        hideKeyboard();
                         if(taskItem.getOptions() != null && taskItem.getOptions().size() > 0) {
                             Realm realm = Realm.getDefaultInstance();
                             realm.beginTransaction();
@@ -267,6 +295,7 @@ public class VisitLog extends BaseFragment  {
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        hideKeyboard();
                         taskItem.setTextValue(etHoleCount.getText().toString());
                         setTaskDone(taskItem);
                     }
@@ -286,6 +315,8 @@ public class VisitLog extends BaseFragment  {
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        hideKeyboard();
+
                         if(taskItem.getFileActionType().equalsIgnoreCase(Constants.STR_VIEW_MEDIA)){
                             String path = taskItem.getAttachmentPath();
                             if(path != null && !path.trim().isEmpty()) {
@@ -362,6 +393,8 @@ public class VisitLog extends BaseFragment  {
                 spOption.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                        hideKeyboard();
+
                         int position = pos - 1;
                         if(position >= 0) {
                             Realm realm = Realm.getDefaultInstance();
@@ -383,6 +416,7 @@ public class VisitLog extends BaseFragment  {
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        hideKeyboard();
                         setTaskDone(taskItem);
                     }
                 });
@@ -581,7 +615,7 @@ public class VisitLog extends BaseFragment  {
             }
         }
 
-        RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("shambaId", farmer.getFarmId()).findAll().sort("visitedDate", Sort.DESCENDING);
+        RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("shambaId", task.getTaskShambaId()).findAll().sort("visitedDate", Sort.DESCENDING);
 
         boolean createNewFarmVisit = false;
         FarmVisit farmVisit = null;
@@ -599,7 +633,7 @@ public class VisitLog extends BaseFragment  {
             String farmVisitId = Constants.STR_FARMER_ID_PREFIX + String.valueOf(System.currentTimeMillis());
 
             farmVisit = realm.createObject(FarmVisit.class);
-            farmVisit.setAll(farmVisitId, farmer.getFarmId(), farmer.getFarmerId(),
+            farmVisit.setAll(farmVisitId, task.getTaskShambaId(), farmer.getFarmerId(),
                     PreferenceHelper.getInstance().readLoginUserId(),
                     PreferenceHelper.getInstance().readLoginUserType(),
                     System.currentTimeMillis(), true);
@@ -627,5 +661,16 @@ public class VisitLog extends BaseFragment  {
     @Override
     public void onTitleBarLeftIconClicked(View view) {
         ((BaseContainerFragment) getParentFragment()).popFragment();
+    }
+
+    @OnClick(R.id.parent_view)
+    public void hideKeyboard() {
+
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            view.clearFocus();
+        }
     }
 }

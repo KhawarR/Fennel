@@ -104,6 +104,8 @@ public class PersonLogBookFragment extends BaseFragment implements AdapterView.O
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         hideKeyboard();
         FieldAgent clickedAgent = personsList.get(position - logbookListView.getHeaderViewsCount());
+        if (clickedAgent.isHeader())
+            return;
         ((MyLogbook)getParentFragment()).addPersonDetailViewFragment(clickedAgent);
     }
 

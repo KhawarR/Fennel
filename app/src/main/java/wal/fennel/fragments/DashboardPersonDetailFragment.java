@@ -9,10 +9,13 @@ import android.widget.ListView;
 
 import com.squareup.picasso.NetworkPolicy;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
-import io.realm.RealmList;
 import wal.fennel.R;
 import wal.fennel.adapters.TeamDashboardAdapter;
 import wal.fennel.models.DashboardFieldAgent;
@@ -58,9 +61,11 @@ public class DashboardPersonDetailFragment extends BaseFragment {
 
         fieldAgent = (DashboardFieldAgent) getArguments().getParcelable("fieldAgent");
 
-        RealmList<DashboardTask> descriptionList = fieldAgent.getDashboardTasks();
+        DashboardTask[] descriptionList = (DashboardTask[]) fieldAgent.getDashboardTasks().toArray(new DashboardTask[0]);
+        ArrayList<DashboardTask> logsList = new ArrayList<DashboardTask>(Arrays.asList(descriptionList));
+        Collections.sort(logsList);
 
-        dashboardAdapter = new TeamDashboardAdapter(getActivity(), descriptionList);
+        dashboardAdapter = new TeamDashboardAdapter(getActivity(), logsList);
         logbookListView.setAdapter(dashboardAdapter);
 
         ViewGroup myHeader = (ViewGroup)getActivity().getLayoutInflater().inflate(R.layout.header_farmer_info, logbookListView, false);
