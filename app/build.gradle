@@ -27,8 +27,8 @@ android {
         applicationId "wal.fennel"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 54
-        versionName "5.4"
+        versionCode 56
+        versionName "0.5.6"
     }
     buildTypes {
         release {
@@ -80,7 +80,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
 
     // Analytics
-    compile "com.mixpanel.android:mixpanel-android:4.+"
+    compile "com.mixpanel.android:mixpanel-android:4.9.3"
 
     //Dropbox
     compile 'com.dropbox.core:dropbox-core-sdk:2.0.1'
