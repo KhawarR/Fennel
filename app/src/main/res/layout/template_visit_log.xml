@@ -55,9 +55,10 @@
                     android:textSize="@dimen/font_edittext_template_visit_log"
                     android:layout_marginTop="@dimen/padding_10"
                     android:gravity="center"
-                    android:textColorHint="@color/black"
-                    android:textColor="@color/black"
+                    android:textColorHint="@color/grey_box_color"
+                    android:textColor="@color/black_txt_color"
                     android:visibility="gone"
+                    android:fontFamily="Avenir-Book.ttf"
                     android:inputType="number"/>
 
                 <Spinner

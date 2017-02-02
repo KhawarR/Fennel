@@ -5,13 +5,16 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -28,7 +31,7 @@ import wal.fennel.utils.Singleton;
 /**
  * Created by irfanayaz on 12/2/16.
  */
-public class PersonLogBookFragment extends BaseFragment implements AdapterView.OnItemClickListener, TextWatcher {
+public class PersonLogBookFragment extends BaseFragment implements AdapterView.OnItemClickListener, TextWatcher, TextView.OnEditorActionListener {
 
     @Bind(R.id.person_listview)
     ListView logbookListView;
@@ -62,6 +65,7 @@ public class PersonLogBookFragment extends BaseFragment implements AdapterView.O
         logbookListView.setAdapter(logBookAdapter);
 
         searchText.addTextChangedListener(this);
+        searchText.setOnEditorActionListener(this);
     }
 
     private ArrayList<FieldAgent> getPersonLogbookData() {
@@ -133,5 +137,14 @@ public class PersonLogBookFragment extends BaseFragment implements AdapterView.O
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             view.clearFocus();
         }
+    }
+
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+            hideKeyboard();
+            return true;
+        }
+        return false;
     }
 }

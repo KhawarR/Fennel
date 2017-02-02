@@ -28,7 +28,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 54
-        versionName "0.5.4"
+        versionName "5.4"
     }
     buildTypes {
         release {
@@ -36,6 +36,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    dexOptions {
+        jumboMode true
+        maxProcessCount 2
+        javaMaxHeapSize "2g"
+        preDexLibraries true
+    }
+
 
     packagingOptions {
         exclude 'META-INF/LICENSE'

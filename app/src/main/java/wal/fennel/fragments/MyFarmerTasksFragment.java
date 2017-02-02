@@ -9,13 +9,16 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.squareup.picasso.NetworkPolicy;
 
@@ -47,7 +50,7 @@ import wal.fennel.views.TitleBarLayout;
 /**
  * Created by irfanayaz on 11/15/16.
  */
-public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.OnItemClickListener, TextWatcher {
+public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.OnItemClickListener, TextWatcher, TextView.OnEditorActionListener {
 
     private CircleImageView cIvIconRight;
     @Bind(R.id.titleBar)
@@ -76,6 +79,7 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
         farmerTasks.setOnItemClickListener(this);
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
         searchText.addTextChangedListener(this);
+        searchText.setOnEditorActionListener(this);
         getMyFarmerTasks();
     }
 
@@ -219,5 +223,14 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             view.clearFocus();
         }
+    }
+
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+            hideKeyboard();
+            return true;
+        }
+        return false;
     }
 }

@@ -86,6 +86,8 @@ public class VisitLog extends BaseFragment {
     private Farmer farmer;
     private Task task;
 
+    private ArrayList<TaskItem> updatedTaskItems;
+
     public static VisitLog newInstance(String title, Farmer farmer, Task task) {
         VisitLog fragment = new VisitLog();
         Bundle args = new Bundle();
@@ -124,6 +126,8 @@ public class VisitLog extends BaseFragment {
             }
             this.localTaskItems.add(taskItem);
         }
+
+        this.updatedTaskItems = new ArrayList<>();
 
         titleBarLayout.setOnIconClickListener(this);
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
@@ -246,6 +250,8 @@ public class VisitLog extends BaseFragment {
                             taskItem.setLatitude(latitude);
                             taskItem.setLongitude(longitude);
                             taskItem.setGpsTakenTime(FennelUtils.getFormattedTime(System.currentTimeMillis(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS));
+
+                            updatedTaskItems.add(taskItem);
                         }
                         setTaskDone(taskItem);
                     }
@@ -276,6 +282,7 @@ public class VisitLog extends BaseFragment {
                             realm.beginTransaction();
                             taskItem.getOptions().get(0).setValue(!taskItem.getOptions().get(0).isValue());
                             realm.commitTransaction();
+                            updatedTaskItems.add(taskItem);
                         }
                         setTaskDone(taskItem);
                     }
@@ -289,6 +296,7 @@ public class VisitLog extends BaseFragment {
                 tvTitle.setText(taskItem.getName());
                 tvDescription.setVisibility(View.GONE);
                 etHoleCount.setText(taskItem.getTextValue());
+//                etHoleCount.setText((taskItem.getTextValue().equalsIgnoreCase("null") ? "" : ""));
                 etHoleCount.setVisibility(View.VISIBLE);
                 spOption.setVisibility(View.GONE);
 
@@ -298,6 +306,7 @@ public class VisitLog extends BaseFragment {
                         hideKeyboard();
                         taskItem.setTextValue(etHoleCount.getText().toString());
                         setTaskDone(taskItem);
+                        updatedTaskItems.add(taskItem);
                     }
                 });
                 if(!taskItem.isTaskDone()) {
@@ -328,6 +337,7 @@ public class VisitLog extends BaseFragment {
                                 try {
                                     getActivity().startActivity(newIntent);
                                     setTaskDone(taskItem);
+                                    updatedTaskItems.add(taskItem);
                                 } catch (ActivityNotFoundException e) {
                                     Toast.makeText(getActivity(), "No handler for this type of file.", Toast.LENGTH_LONG).show();
                                 }
@@ -404,6 +414,8 @@ public class VisitLog extends BaseFragment {
                             }
                             taskItem.getOptions().get(position).setValue(true);
                             realm.commitTransaction();
+
+                            updatedTaskItems.add(taskItem);
                         }
                     }
 
@@ -418,6 +430,7 @@ public class VisitLog extends BaseFragment {
                     public void onClick(View v) {
                         hideKeyboard();
                         setTaskDone(taskItem);
+                        updatedTaskItems.add(taskItem);
                     }
                 });
                 if(taskItem.isTaskDone()) {
@@ -542,13 +555,12 @@ public class VisitLog extends BaseFragment {
 
     @OnClick(R.id.txtSave)
     void onClickSaveTask() {
-
-        showUpdateTaskDialog();
+        updateTaskItems(Constants.STR_IN_PROGRESS);
     }
 
     @OnClick(R.id.txtSubmitApproval)
     void onClickSubmitForApprovalTask() {
-        updateTaskItems(Constants.STR_COMPLETED);
+        showUpdateTaskDialog();
     }
 
     private void showUpdateTaskDialog() {
@@ -558,7 +570,7 @@ public class VisitLog extends BaseFragment {
             pickerDialog.setPositiveButton("Confirm",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            updateTaskItems(Constants.STR_IN_PROGRESS);
+                            updateTaskItems(Constants.STR_COMPLETED);
                             dialog.dismiss();
                         }
                     });
@@ -576,40 +588,46 @@ public class VisitLog extends BaseFragment {
         realm.beginTransaction();
         task.setStatus(taskStatus);
         task.setDataDirty(true);
-        for (int i = 0; i < localTaskItems.size(); i++) {
+        for (int k = 0; k < updatedTaskItems.size(); k++) {
 
-            TaskItem taskItem = localTaskItems.get(i);
+            TaskItem taskItem = updatedTaskItems.get(k);
 
-            taskItems.get(i).setTaskDone(taskItem.isTaskDone());
-            taskItems.get(i).setDataDirty(true);
+            for (int i=0; i<taskItems.size(); i++) {
 
-            if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Text.toString())){
-                taskItems.get(i).setTextValue(taskItem.getTextValue());
-            } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Gps.toString())){
-                taskItems.get(i).setDescription(taskItem.getDescription());
-                taskItems.get(i).setGpsTakenTime(taskItem.getGpsTakenTime());
-                taskItems.get(i).setLatitude(taskItem.getLatitude());
-                taskItems.get(i).setLongitude(taskItem.getLongitude());
-            } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Checkbox.toString())){
-                if(taskItem.getOptions() != null
-                        && taskItem.getOptions().size() > 0
-                        && taskItems.get(i).getOptions() != null
-                        && taskItems.get(i).getOptions().size() > 0) {
-                    taskItems.get(i).getOptions().get(0).setValue(taskItem.getOptions().get(0).isValue());
-                    taskItems.get(i).getOptions().get(0).setDataDirty(true);
-                }
-            } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.File.toString())){
-                if(taskItem.getFileActionType().equalsIgnoreCase(Constants.STR_VIEW_MEDIA)){
+                if (taskItems.get(i).getId().equalsIgnoreCase(taskItem.getId())) {
 
-                } else {
-                    taskItems.get(i).setAttachmentPath(taskItem.getAttachmentPath());
-                    taskItems.get(i).setPicUploadDirty(taskItem.isPicUploadDirty());
-                }
-            } else if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Options.toString())){
-                for (int j = 0; j < taskItem.getOptions().size(); j++) {
-                    if(taskItem.getOptions().get(j).isValue()) {
-                        taskItems.get(i).getOptions().get(j).setValue(true);
-                        taskItems.get(i).getOptions().get(j).setDataDirty(true);
+                    taskItems.get(i).setTaskDone(taskItem.isTaskDone());
+                    taskItems.get(i).setDataDirty(true);
+
+                    if (taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Text.toString())) {
+                        taskItems.get(i).setTextValue(taskItem.getTextValue());
+                    } else if (taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Gps.toString())) {
+                        taskItems.get(i).setDescription(taskItem.getDescription());
+                        taskItems.get(i).setGpsTakenTime(taskItem.getGpsTakenTime());
+                        taskItems.get(i).setLatitude(taskItem.getLatitude());
+                        taskItems.get(i).setLongitude(taskItem.getLongitude());
+                    } else if (taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Checkbox.toString())) {
+                        if (taskItem.getOptions() != null
+                                && taskItem.getOptions().size() > 0
+                                && taskItems.get(i).getOptions() != null
+                                && taskItems.get(i).getOptions().size() > 0) {
+                            taskItems.get(i).getOptions().get(0).setValue(taskItem.getOptions().get(0).isValue());
+                            taskItems.get(i).getOptions().get(0).setDataDirty(true);
+                        }
+                    } else if (taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.File.toString())) {
+                        if (taskItem.getFileActionType().equalsIgnoreCase(Constants.STR_VIEW_MEDIA)) {
+
+                        } else {
+                            taskItems.get(i).setAttachmentPath(taskItem.getAttachmentPath());
+                            taskItems.get(i).setPicUploadDirty(taskItem.isPicUploadDirty());
+                        }
+                    } else if (taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Options.toString())) {
+                        for (int j = 0; j < taskItem.getOptions().size(); j++) {
+                            if (taskItem.getOptions().get(j).isValue()) {
+                                taskItems.get(i).getOptions().get(j).setValue(true);
+                                taskItems.get(i).getOptions().get(j).setDataDirty(true);
+                            }
+                        }
                     }
                 }
             }

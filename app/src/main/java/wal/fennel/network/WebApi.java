@@ -2583,7 +2583,7 @@ public class WebApi {
 
                     farmingTaskIds = farmingTaskIds + id;
 
-                    if(j + 1 != farmer.getFarmerTasks().size()){
+                    if (i + 1 != Singleton.getInstance().myFarmersList.size() || j + 1 != farmer.getFarmerTasks().size()) {
                         farmingTaskIds = farmingTaskIds + ",";
                     }
                 }

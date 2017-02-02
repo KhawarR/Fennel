@@ -54,7 +54,7 @@
                     android:layout_height="match_parent"
                     android:textSize="@dimen/font_edittext_template_visit_log"
                     android:gravity="center"
-                    android:textColorHint="@color/black"
+                    android:textColorHint="@color/grey_box_color"
                     android:textColor="@color/grey_box_color"
                     android:visibility="gone"
                     android:enabled="false"
