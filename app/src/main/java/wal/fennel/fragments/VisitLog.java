@@ -11,10 +11,12 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
@@ -24,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kbeanie.multipicker.api.CameraImagePicker;
@@ -64,7 +67,7 @@ import wal.fennel.views.FontTextView;
 import wal.fennel.views.NothingSelectedSpinnerAdapter;
 import wal.fennel.views.TitleBarLayout;
 
-public class VisitLog extends BaseFragment {
+public class VisitLog extends BaseFragment implements TextView.OnEditorActionListener {
 
     private static final String TAG = "VisitLog";
     @Bind(R.id.llTaskItemContainer)
@@ -226,6 +229,8 @@ public class VisitLog extends BaseFragment {
             final ImageView ivBlockIcon = (ImageView) vTaskItem.findViewById(R.id.ivBlockIcon);
             final RoundedImageView roundedImageView = (RoundedImageView) vTaskItem.findViewById(R.id.ivBlockBackground);
             Spinner spOption = (Spinner) vTaskItem.findViewById(R.id.spOptions);
+
+            etHoleCount.setOnEditorActionListener(this);
 
             if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Gps.toString())){
 
@@ -692,5 +697,14 @@ public class VisitLog extends BaseFragment {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             view.clearFocus();
         }
+    }
+
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if (actionId == EditorInfo.IME_ACTION_DONE) {
+            hideKeyboard();
+            return true;
+        }
+        return false;
     }
 }
