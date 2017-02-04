@@ -295,8 +295,8 @@ public class VisitLog extends BaseFragment {
 
                 tvTitle.setText(taskItem.getName());
                 tvDescription.setVisibility(View.GONE);
-                etHoleCount.setText(taskItem.getTextValue());
-//                etHoleCount.setText((taskItem.getTextValue().equalsIgnoreCase("null") ? "" : ""));
+
+                etHoleCount.setText((taskItem.getTextValue().equalsIgnoreCase("null") ? "" : taskItem.getTextValue()));
                 etHoleCount.setVisibility(View.VISIBLE);
                 spOption.setVisibility(View.GONE);
 
@@ -415,7 +415,7 @@ public class VisitLog extends BaseFragment {
                             taskItem.getOptions().get(position).setValue(true);
                             realm.commitTransaction();
 
-                            updatedTaskItems.add(taskItem);
+//                            updatedTaskItems.add(taskItem);
                         }
                     }
 
@@ -486,6 +486,7 @@ public class VisitLog extends BaseFragment {
                 ivIcon.setVisibility(View.GONE);
 
                 taskItem.setTaskDone(true);
+                updatedTaskItems.add(taskItem);
             }
 
             @Override
@@ -663,6 +664,7 @@ public class VisitLog extends BaseFragment {
         visitLog.setAll(farmVisit.getFarmVisitId(), task.getTaskId(), true);
 
         realm.commitTransaction();
+        updatedTaskItems.clear();
         ((BaseContainerFragment) getParentFragment()).popFragment();
     }
 

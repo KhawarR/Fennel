@@ -1068,6 +1068,28 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
     }
 
+    private void getTaskItemAttachments() {
+        String taskItemIds = "";
+
+        for (int i = 0; i < Singleton.getInstance().taskItems.size(); i++) {
+
+            TaskItem taskItem = Singleton.getInstance().taskItems.get(i);
+            String id = taskItem.getId();
+            id = "'" + id + "'";
+
+            taskItemIds = taskItemIds + id;
+
+            if (i + 1 != Singleton.getInstance().taskItems.size()) {
+                taskItemIds = taskItemIds + ",";
+            }
+
+        }
+        if (!taskItemIds.isEmpty()) {
+            startingCallsCounter++;
+            WebApi.getAllTaskItemAttachments(taskItemsAttachments, taskItemIds);
+        }
+    }
+
     private Callback<ResponseBody> farmerStatusCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -1079,7 +1101,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         responseStr = response.body().string();
                         ArrayList<TaskItem> allTaskItems = parseTaskItemData(responseStr);
                         Singleton.getInstance().taskItems = allTaskItems;
-                        WebApi.getAllTaskItemAttachments(taskItemsAttachments);
+                        getTaskItemAttachments();
+//                        WebApi.getAllTaskItemAttachments(taskItemsAttachments);
                         Log.i("Parsing", "Complete");
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -1106,6 +1129,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     private ArrayList<TaskItem> parseTaskItemData(String data) throws JSONException {
 
+        Log.w("FENNEL", "DELETING TASK ITEMS");
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         realm.delete(TaskItem.class);

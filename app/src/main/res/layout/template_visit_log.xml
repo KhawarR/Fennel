@@ -57,6 +57,7 @@
                     android:gravity="center"
                     android:textColorHint="@color/grey_box_color"
                     android:textColor="@color/black_txt_color"
+                    android:hint="Type"
                     android:visibility="gone"
                     android:fontFamily="Avenir-Book.ttf"
                     android:inputType="number"/>

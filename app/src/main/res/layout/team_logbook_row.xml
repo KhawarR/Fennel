@@ -13,6 +13,10 @@
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
+        android:layout_marginStart="@dimen/padding_20"
+        android:layout_marginLeft="@dimen/padding_20"
+        android:layout_marginRight="@dimen/padding_15"
+        android:layout_marginEnd="@dimen/padding_15"
         android:layout_height="match_parent">
 
     <de.hdodenhof.circleimageview.CircleImageView
@@ -22,10 +26,6 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:layout_gravity="center_vertical"
-        android:layout_marginStart="5dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginEnd="5dp"
-        android:layout_marginRight="5dp"
         android:src="@drawable/dummy_profile"
         fennel:civ_border_color="@color/app_green"
         fennel:civ_border_width="1dp" />
@@ -33,6 +33,10 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="0dp"
+        android:layout_marginStart="@dimen/padding_20"
+        android:layout_marginLeft="@dimen/padding_20"
+        android:layout_marginRight="@dimen/padding_15"
+        android:layout_marginEnd="@dimen/padding_15"
         android:layout_weight="1"
         android:layout_height="wrap_content">
 
@@ -41,18 +45,16 @@
             android:minHeight="30dp"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:layout_marginLeft="15dp"
             android:layout_marginTop="5dp"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textColor="@color/black_txt_color"
-            fennel:fontName="Avenir-Heavy.ttf"
+            fennel:fontName="Avenir-Medium.ttf"
             android:layout_width="match_parent" />
 
         <wal.fennel.views.FontTextView
             android:id="@+id/tv_time"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:layout_marginLeft="15dp"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
             android:layout_gravity="center_vertical"

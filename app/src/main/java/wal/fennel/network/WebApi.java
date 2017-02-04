@@ -3,6 +3,7 @@ package wal.fennel.network;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -16,6 +17,8 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -331,8 +334,8 @@ public class WebApi {
         return processCall(apiCall, callback);
     }
 
-    public static boolean getAllTaskItemAttachments(Callback<ResponseBody> callback){
-        String query = NetworkHelper.QUERY_TASK_ITEM_ATTACHMENTS;
+    public static boolean getAllTaskItemAttachments(Callback<ResponseBody> callback, String taskItemIds){
+        String query = String.format(NetworkHelper.QUERY_TASK_ITEM_ATTACHMENTS, taskItemIds);
         Call<ResponseBody> apiCall = Fennel.getWebService().query(Session.getAuthToken(), NetworkHelper.API_VERSION, query);
         return processCall(apiCall, callback);
     }
@@ -403,7 +406,10 @@ public class WebApi {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         countCalls--;
+                        Log.i("FENNEL", "About me image upload onResponce.. Count Calls: " + countCalls);
                         if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+                            Log.i("Fennel", "facilitator profile picture uploaded successfully!");
+
                             String responseStr = null;
 
                             try {
@@ -447,6 +453,7 @@ public class WebApi {
 
                     @Override
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.i("FENNEL", "About me image upload onFailure.. Count Calls: " + countCalls);
                         countCalls--;
                         countFailedCalls++;
                         t.printStackTrace();
@@ -458,6 +465,8 @@ public class WebApi {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         countCalls--;
+                        Log.i("FENNEL", "About me image edit onResponce.. Count Calls: " + countCalls);
+
                         if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                             Log.i("Fennel", "facilitator profile picture edited successfully!");
 
@@ -494,6 +503,7 @@ public class WebApi {
 
                     @Override
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.i("FENNEL", "About me image edit onFailure.. Count Calls: " + countCalls);
                         countCalls--;
                         countFailedCalls++;
                         checkSyncComplete();
@@ -756,6 +766,7 @@ public class WebApi {
                     @Override
                     public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
                         countCalls--;
+                        Log.i("FENNEL", "Farm visit onResponce.. Count Calls: " + countCalls);
 
                         FennelUtils.appendDebugLog("FarmVisit create response: " + farmVisit.getFarmVisitId() + " - " + response.code());
 
@@ -824,6 +835,8 @@ public class WebApi {
                     public void onFailure(Call<ResponseModel> call, Throwable t) {
                         countCalls--;
                         countFailedCalls++;
+                        Log.i("FENNEL", "Farm visit onFailure.. Count Calls: " + countCalls);
+
                         FennelUtils.appendDebugLog("FarmVisit create Failed: " + t.getMessage());
                         t.printStackTrace();
                         adjustCountCallFailedFarmVisitLog(farmVisit.getFarmVisitId());
@@ -832,6 +845,7 @@ public class WebApi {
                 }, farmVisitMap);
             } else {
                 countCalls--;
+                Log.i("FENNEL", "Farm visit id not local.. Count Calls: " + countCalls);
                 processFarmVisitLogCalls(farmVisit);
                 checkSyncComplete();
             }
@@ -850,6 +864,7 @@ public class WebApi {
                 @Override
                 public void onResponse(Call<ResponseModel> call, Response<ResponseModel> response) {
                     countCalls--;
+                    Log.i("FENNEL", "Farm visit log onResponse.. Count Calls: " + countCalls);
 
                     FennelUtils.appendDebugLog("FarmVisitLog create response: " + farmVisitLog.getFarmVisitId() + " - " + response.code());
 
@@ -907,6 +922,8 @@ public class WebApi {
                 public void onFailure(Call<ResponseModel> call, Throwable t) {
                     countCalls--;
                     countFailedCalls++;
+                    Log.i("FENNEL", "Farm visit log onFailure.. Count Calls: " + countCalls);
+
                     adjustCountCallFailedFarmingTasks(farmVisitLog.getFarmingTaskId(), false);
                     FennelUtils.appendDebugLog("FarmVisitLog create Failed: " + t.getMessage());
                     t.printStackTrace();
@@ -925,6 +942,8 @@ public class WebApi {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     countCalls--;
+                    Log.i("FENNEL", "Farming task onResponse.. Count Calls: " + countCalls);
+
 
                     FennelUtils.appendDebugLog("FarmingTask edit response: " + farmingTask.getTaskId() + " - " + response.code());
 
@@ -970,6 +989,8 @@ public class WebApi {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     countCalls--;
                     countFailedCalls++;
+                    Log.i("FENNEL", "Farming task onFailure.. Count Calls: " + countCalls);
+
                     FennelUtils.appendDebugLog("FarmingTask edit Failed: " + t.getMessage());
                     t.printStackTrace();
                     checkSyncComplete();
@@ -986,6 +1007,7 @@ public class WebApi {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     countCalls--;
+                    Log.i("FENNEL", "Task items onResponse.. Count Calls: " + countCalls);
 
                     FennelUtils.appendDebugLog("TaskItem edit response: " + taskItem.getId() + " - " + response.code());
 
@@ -1031,6 +1053,8 @@ public class WebApi {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     countCalls--;
                     countFailedCalls++;
+                    Log.i("FENNEL", "Task Items onFailure.. Count Calls: " + countCalls);
+
                     FennelUtils.appendDebugLog("TaskItem edit Failed: " + t.getMessage());
                     t.printStackTrace();
                     checkSyncComplete();
@@ -1057,6 +1081,8 @@ public class WebApi {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     countCalls--;
+                    Log.i("FENNEL", "Task Item option onResponse.. Count Calls: " + countCalls);
+
 
                     FennelUtils.appendDebugLog("TaskItemOption edit response: " + taskItemOption.getId() + " - " + response.code());
 
@@ -1102,6 +1128,8 @@ public class WebApi {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     countCalls--;
                     countFailedCalls++;
+                    Log.i("FENNEL", "Task Item option onFailure.. Count Calls: " + countCalls);
+
                     FennelUtils.appendDebugLog("TaskItemOption edit Failed: " + t.getMessage());
                     t.printStackTrace();
                     checkSyncComplete();
@@ -1672,6 +1700,7 @@ public class WebApi {
     private static void attachImageToTaskItemObject(final TaskItem taskItem) {
 
         if (taskItem.getAttachmentPath() == null || taskItem.getAttachmentPath().isEmpty()) {
+            Log.i("FENNEL", "Task Item Attachment NO PATH.. Count Calls: " + countCalls);
             countCalls--;
             countFailedCalls++;
             checkSyncComplete();
@@ -1725,6 +1754,8 @@ public class WebApi {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         countCalls--;
+                        Log.i("FENNEL", "Task Item attachment onResponce.. Count Calls: " + countCalls);
+
                         if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                             Log.i("Fennel", "TaskItem picture uploaded successfully!");
 
@@ -1764,6 +1795,7 @@ public class WebApi {
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
                         countCalls--;
                         countFailedCalls++;
+                        Log.i("FENNEL", "Task Item attachment onFailure.. Count Calls: " + countCalls);
                         checkSyncComplete();
                         Log.i("Fennel", "TaskItem picture upload failed!");
                     }
@@ -1773,6 +1805,8 @@ public class WebApi {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         countCalls--;
+                        Log.i("FENNEL", "Task Item attachment edit onResponse.. Count Calls: " + countCalls);
+
                         if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
                             Log.i("Fennel", "TaskItem picture edited successfully!");
                             Singleton.getInstance().taskItemPicIdtoInvalidate = taskItem.getId();
@@ -1792,6 +1826,8 @@ public class WebApi {
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
                         countCalls--;
                         countFailedCalls++;
+                        Log.i("FENNEL", "Task Item attachment edit onFailure.. Count Calls: " + countCalls);
+
                         checkSyncComplete();
                         Log.i("Fennel", "TaskItem picture edit failed!");
                     }
@@ -1801,6 +1837,8 @@ public class WebApi {
         else {
             countCalls--;
             countFailedCalls++;
+            Log.i("FENNEL", "Task Item attachment byte array image NULL.. Count Calls: " + countCalls);
+
             Exception e = new Exception("ByteArrayImage: attachImageToTaskItemObject() - " + imagePath);
             Crashlytics.logException(e);
             Log.i("ByteArrayImage" , "attachImageToTaskItemObject() - " + imagePath);
@@ -1883,6 +1921,7 @@ public class WebApi {
         RealmResults<FarmVisitLog> farmVisitLogs = Realm.getDefaultInstance().where(FarmVisitLog.class).equalTo("isDataDirty", true).findAll();
         RealmResults<Task> farmingTasks = Realm.getDefaultInstance().where(Task.class).equalTo("isDataDirty", true).findAll();
         RealmResults<TaskItem> farmingTaskItems = Realm.getDefaultInstance().where(TaskItem.class).equalTo("isDataDirty", true).or().equalTo("isPicUploadDirty", true).findAll();
+        RealmResults<TaskItem> farmingTaskItemAttachments = Realm.getDefaultInstance().where(TaskItem.class).equalTo("isPicUploadDirty", true).findAll();
         RealmResults<TaskItemOption> farmingTaskItemOptions = Realm.getDefaultInstance().where(TaskItemOption.class).equalTo("isDataDirty", true).findAll();
 
         if(farmVisits != null)
@@ -1895,6 +1934,8 @@ public class WebApi {
             count = count + farmingTaskItems.size();
         if(farmingTaskItemOptions != null)
             count = count + farmingTaskItemOptions.size();
+        if (farmingTaskItemAttachments != null)
+            count = count + farmingTaskItemAttachments.size();
 
         return count;
     }
@@ -2593,6 +2634,27 @@ public class WebApi {
         WebApi.getFarmingTaskItems(farmerStatusCallback, farmingTaskIds);
     }
 
+    private static void getTaskItemsAttachments() {
+        String taskItemIds = "";
+
+        for (int i = 0; i < Singleton.getInstance().taskItems.size(); i++) {
+
+            TaskItem taskItem = Singleton.getInstance().taskItems.get(i);
+            String id = taskItem.getId();
+            id = "'" + id + "'";
+
+            taskItemIds = taskItemIds + id;
+
+            if (i + 1 != Singleton.getInstance().taskItems.size()) {
+                taskItemIds = taskItemIds + ",";
+            }
+
+        }
+        if (!taskItemIds.isEmpty()) {
+            WebApi.getAllTaskItemAttachments(taskItemsAttachments, taskItemIds);
+        }
+    }
+
     private static Callback<ResponseBody> farmerStatusCallback = new Callback<ResponseBody>() {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -2603,6 +2665,8 @@ public class WebApi {
                     responseStr = response.body().string();
                     ArrayList<TaskItem> allTaskItems = parseTaskItemData(responseStr);
                     Singleton.getInstance().taskItems = allTaskItems;
+                    getTaskItemsAttachments();
+
                     // TODO Add attachments flow
 //                    WebApi.getAllTaskItemAttachments(taskItemsAttachments);
                     Log.i("Parsing" , "Complete" );
@@ -2622,6 +2686,7 @@ public class WebApi {
 
     private static ArrayList<TaskItem> parseTaskItemData(String data) throws JSONException {
 
+        Log.w("FENNEL", "DELETING TASK ITEMS");
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         realm.delete(TaskItem.class);
@@ -3458,6 +3523,135 @@ public class WebApi {
 //            tasksAdapter.notifyDataSetChanged();
         }
     }
+
+
+
+    private static void parseAllTasksAttachments(String responseStr) throws JSONException {
+        Log.i("FENNEL", responseStr);
+        JSONObject jsonObject = new JSONObject(responseStr);
+        JSONArray arrRecords = jsonObject.getJSONArray("records");
+
+        if (arrRecords.length() > 0) {
+            for (int i = 0; i < arrRecords.length(); i++) {
+
+                JSONObject taskAttachmentRecord = arrRecords.getJSONObject(i);
+                final String taskItemId = taskAttachmentRecord.getString("Id");
+                final String fileType = taskAttachmentRecord.optString("File_Type__c");
+                JSONObject attachments = taskAttachmentRecord.optJSONObject("Attachments");
+                if (attachments != null && fileType != null) {
+
+                    JSONArray attRecords = attachments.getJSONArray("records");
+                    for (int j = 0; j < attRecords.length(); j++) {
+                        JSONObject attachmentObj = attRecords.getJSONObject(j);
+                        final String attachmentId = attachmentObj.getString("Id");
+                        final String attachmentParentId = attachmentObj.getString("ParentId");
+                        final String filename = attachmentObj.optString("Name");
+                        String[] separated = filename.split("\\.");
+                        final String ext = separated[separated.length - 1];
+
+                        Call<ResponseBody> apiCall = Fennel.getWebService().downloadAttachmentForTask(Session.getAuthToken(), NetworkHelper.API_VERSION, attachmentId);
+                        try {
+//                            if (getActivity() == null)
+//                                Fennel.initWebApi();
+//                            if (NetworkHelper.isNetAvailable(getActivity())) {
+                                apiCall.enqueue(new Callback<ResponseBody>() {
+                                    @Override
+                                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                        if (response.code() == Constants.RESPONSE_SUCCESS) {
+                                            String attachmentName = attachmentId + "." + ext;
+                                            try {
+                                                File path = Environment.getExternalStorageDirectory();
+                                                File folder = new File(path + "/" + "Fennel", "TaskAttachments");
+                                                if (!folder.exists()) {
+                                                    folder.mkdirs();
+                                                }
+                                                File file = new File(Environment.getExternalStorageDirectory() + "/Fennel/TaskAttachments", attachmentName);
+//                                                File file = new File(path, attachmentName);
+                                                FileOutputStream fileOutputStream = new FileOutputStream(file);
+                                                try {
+                                                    // Writes bytes from the specified byte array to this file output stream
+                                                    fileOutputStream.write(response.body().bytes());
+                                                } catch (FileNotFoundException e) {
+                                                    System.out.println("File not found" + e);
+                                                } catch (IOException ioe) {
+                                                    System.out.println("Exception while writing file " + ioe);
+                                                } finally {
+                                                    // close the streams using close method
+                                                    try {
+                                                        if (fileOutputStream != null) {
+                                                            fileOutputStream.close();
+                                                            updateTaskItemWithAttachment(taskItemId, file.getAbsolutePath(), attachmentId);
+                                                        } else {
+                                                            file.delete();
+                                                        }
+                                                    } catch (IOException ioe) {
+                                                        System.out.println("Error while closing stream: " + ioe);
+                                                    }
+                                                }
+//                                                Log.i("FENNEL", "Write Success!");
+                                            } catch (IOException e) {
+                                                Log.e("FENNEL", "Error while writing file!");
+                                                Log.e("FENNEL", e.toString());
+                                            }
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                        System.out.println(t.toString());
+                                    }
+                                });
+//                            }
+                        } catch (NullPointerException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static void updateTaskItemWithAttachment(String taskItemId, String filePath, String attachmentId) {
+        ArrayList<TaskItem> allTaskItems = Singleton.getInstance().taskItems;
+        if (allTaskItems == null)
+            return;
+        for (TaskItem taskItem : allTaskItems) {
+            if (taskItem.isValid() && taskItem.getId().equals(taskItemId)) {
+                Realm realm = Realm.getDefaultInstance();
+                realm.beginTransaction();
+                String uri = NetworkHelper.getUriFromPath(filePath);
+                taskItem.setAttachmentId(attachmentId);
+                taskItem.setAttachmentPath(uri);
+                realm.commitTransaction();
+
+                break;
+            }
+        }
+    }
+
+    private static Callback<ResponseBody> taskItemsAttachments = new Callback<ResponseBody>() {
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            if (response.code() == 200) {
+                String responseStr = "";
+
+                try {
+                    responseStr = response.body().string();
+                    parseAllTasksAttachments(responseStr);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            t.printStackTrace();
+        }
+    };
 
 
 }
