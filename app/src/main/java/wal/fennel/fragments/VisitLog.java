@@ -594,6 +594,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
         realm.beginTransaction();
         task.setStatus(taskStatus);
         task.setDataDirty(true);
+
         for (int k = 0; k < updatedTaskItems.size(); k++) {
 
             TaskItem taskItem = updatedTaskItems.get(k);
@@ -639,35 +640,37 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
             }
         }
 
-        RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("shambaId", task.getTaskShambaId()).findAll().sort("visitedDate", Sort.DESCENDING);
+        if (updatedTaskItems.size() > 0) {
 
-        boolean createNewFarmVisit = false;
-        FarmVisit farmVisit = null;
-        if(farmVisits != null && farmVisits.size() > 0) {
-            farmVisit = farmVisits.get(0);
+            RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("shambaId", task.getTaskShambaId()).findAll().sort("visitedDate", Sort.DESCENDING);
 
-            if(!DateUtils.isToday(farmVisit.getVisitedDate())) {
+            boolean createNewFarmVisit = false;
+            FarmVisit farmVisit = null;
+            if (farmVisits != null && farmVisits.size() > 0) {
+                farmVisit = farmVisits.get(0);
+
+                if (!DateUtils.isToday(farmVisit.getVisitedDate())) {
+                    createNewFarmVisit = true;
+                }
+            } else {
                 createNewFarmVisit = true;
             }
-        } else {
-            createNewFarmVisit = true;
+
+            if (createNewFarmVisit) {
+                String farmVisitId = Constants.STR_FARMER_ID_PREFIX + String.valueOf(System.currentTimeMillis());
+
+                farmVisit = realm.createObject(FarmVisit.class);
+                farmVisit.setAll(farmVisitId, task.getTaskShambaId(), farmer.getFarmerId(),
+                        PreferenceHelper.getInstance().readLoginUserId(),
+                        PreferenceHelper.getInstance().readLoginUserType(),
+                        System.currentTimeMillis(), true);
+            } else {
+                farmVisit.setDataDirty(true);
+            }
+
+            FarmVisitLog visitLog = realm.createObject(FarmVisitLog.class);
+            visitLog.setAll(farmVisit.getFarmVisitId(), task.getTaskId(), true);
         }
-
-        if (createNewFarmVisit) {
-            String farmVisitId = Constants.STR_FARMER_ID_PREFIX + String.valueOf(System.currentTimeMillis());
-
-            farmVisit = realm.createObject(FarmVisit.class);
-            farmVisit.setAll(farmVisitId, task.getTaskShambaId(), farmer.getFarmerId(),
-                    PreferenceHelper.getInstance().readLoginUserId(),
-                    PreferenceHelper.getInstance().readLoginUserType(),
-                    System.currentTimeMillis(), true);
-        } else {
-            farmVisit.setDataDirty(true);
-        }
-
-        FarmVisitLog visitLog = realm.createObject(FarmVisitLog.class);
-        visitLog.setAll(farmVisit.getFarmVisitId(), task.getTaskId(), true);
-
         realm.commitTransaction();
         updatedTaskItems.clear();
         ((BaseContainerFragment) getParentFragment()).popFragment();
