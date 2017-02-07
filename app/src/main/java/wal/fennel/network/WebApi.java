@@ -2667,9 +2667,6 @@ public class WebApi {
                     Singleton.getInstance().taskItems = allTaskItems;
                     getTaskItemsAttachments();
 
-                    // TODO Add attachments flow
-//                    WebApi.getAllTaskItemAttachments(taskItemsAttachments);
-                    Log.i("Parsing" , "Complete" );
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (JSONException e) {

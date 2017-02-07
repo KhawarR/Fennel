@@ -11,10 +11,12 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
@@ -24,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kbeanie.multipicker.api.CameraImagePicker;
@@ -64,7 +67,7 @@ import wal.fennel.views.FontTextView;
 import wal.fennel.views.NothingSelectedSpinnerAdapter;
 import wal.fennel.views.TitleBarLayout;
 
-public class VisitLog extends BaseFragment {
+public class VisitLog extends BaseFragment implements TextView.OnEditorActionListener {
 
     private static final String TAG = "VisitLog";
     @Bind(R.id.llTaskItemContainer)
@@ -226,6 +229,8 @@ public class VisitLog extends BaseFragment {
             final ImageView ivBlockIcon = (ImageView) vTaskItem.findViewById(R.id.ivBlockIcon);
             final RoundedImageView roundedImageView = (RoundedImageView) vTaskItem.findViewById(R.id.ivBlockBackground);
             Spinner spOption = (Spinner) vTaskItem.findViewById(R.id.spOptions);
+
+            etHoleCount.setOnEditorActionListener(this);
 
             if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Gps.toString())){
 
@@ -591,6 +596,7 @@ public class VisitLog extends BaseFragment {
         realm.beginTransaction();
         task.setStatus(taskStatus);
         task.setDataDirty(true);
+
         for (int k = 0; k < updatedTaskItems.size(); k++) {
 
             TaskItem taskItem = updatedTaskItems.get(k);
@@ -636,35 +642,37 @@ public class VisitLog extends BaseFragment {
             }
         }
 
-        RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("shambaId", task.getTaskShambaId()).findAll().sort("visitedDate", Sort.DESCENDING);
+        if (updatedTaskItems.size() > 0) {
 
-        boolean createNewFarmVisit = false;
-        FarmVisit farmVisit = null;
-        if(farmVisits != null && farmVisits.size() > 0) {
-            farmVisit = farmVisits.get(0);
+            RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("shambaId", task.getTaskShambaId()).findAll().sort("visitedDate", Sort.DESCENDING);
 
-            if(!DateUtils.isToday(farmVisit.getVisitedDate())) {
+            boolean createNewFarmVisit = false;
+            FarmVisit farmVisit = null;
+            if (farmVisits != null && farmVisits.size() > 0) {
+                farmVisit = farmVisits.get(0);
+
+                if (!DateUtils.isToday(farmVisit.getVisitedDate())) {
+                    createNewFarmVisit = true;
+                }
+            } else {
                 createNewFarmVisit = true;
             }
-        } else {
-            createNewFarmVisit = true;
+
+            if (createNewFarmVisit) {
+                String farmVisitId = Constants.STR_FARMER_ID_PREFIX + String.valueOf(System.currentTimeMillis());
+
+                farmVisit = realm.createObject(FarmVisit.class);
+                farmVisit.setAll(farmVisitId, task.getTaskShambaId(), farmer.getFarmerId(),
+                        PreferenceHelper.getInstance().readLoginUserId(),
+                        PreferenceHelper.getInstance().readLoginUserType(),
+                        System.currentTimeMillis(), true);
+            } else {
+                farmVisit.setDataDirty(true);
+            }
+
+            FarmVisitLog visitLog = realm.createObject(FarmVisitLog.class);
+            visitLog.setAll(farmVisit.getFarmVisitId(), task.getTaskId(), true);
         }
-
-        if (createNewFarmVisit) {
-            String farmVisitId = Constants.STR_FARMER_ID_PREFIX + String.valueOf(System.currentTimeMillis());
-
-            farmVisit = realm.createObject(FarmVisit.class);
-            farmVisit.setAll(farmVisitId, task.getTaskShambaId(), farmer.getFarmerId(),
-                    PreferenceHelper.getInstance().readLoginUserId(),
-                    PreferenceHelper.getInstance().readLoginUserType(),
-                    System.currentTimeMillis(), true);
-        } else {
-            farmVisit.setDataDirty(true);
-        }
-
-        FarmVisitLog visitLog = realm.createObject(FarmVisitLog.class);
-        visitLog.setAll(farmVisit.getFarmVisitId(), task.getTaskId(), true);
-
         realm.commitTransaction();
         updatedTaskItems.clear();
         ((BaseContainerFragment) getParentFragment()).popFragment();
@@ -694,5 +702,14 @@ public class VisitLog extends BaseFragment {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             view.clearFocus();
         }
+    }
+
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if (actionId == EditorInfo.IME_ACTION_DONE) {
+            hideKeyboard();
+            return true;
+        }
+        return false;
     }
 }
