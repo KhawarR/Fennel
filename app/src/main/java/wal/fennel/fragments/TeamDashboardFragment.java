@@ -62,7 +62,7 @@ public class TeamDashboardFragment extends BaseFragment {
                     currentTask.setTotalCount(currentTask.getTotalCount() + task.getTotalCount());
                     currentTask.setCompleted(currentTask.getCompleted() + task.getCompleted());
                 } else {
-                    currentTask = new DashboardTask(task.getTaskId(), task.getTaskName(), task.getDueDate(), task.getCompletionDate(), task.getTotalCount(), task.getCompleted(), task.getState());
+                    currentTask = new DashboardTask(task.getTaskId(), task.getTaskName(), task.getDueDate(), task.getCompletionDate(), task.getShambaId(), task.getFarmerId(), task.getTotalCount(), task.getCompleted(), task.getState());
                     allDashboardTasks.add(currentTask);
                     dashboardMap.put(task.getTaskName(), currentTask);
                 }

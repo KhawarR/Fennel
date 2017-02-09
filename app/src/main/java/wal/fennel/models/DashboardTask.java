@@ -19,6 +19,8 @@ public class DashboardTask extends RealmObject implements Parcelable, Comparable
     String taskName;
     String dueDate;
     String completionDate;
+    String shambaId;
+    String farmerId;
     int totalCount;
     int completed;
     int state;
@@ -27,11 +29,13 @@ public class DashboardTask extends RealmObject implements Parcelable, Comparable
 
     }
 
-    public DashboardTask(String taskId, String taskName, String dueDate, String completionDate, int totalCount, int completed, int state) {
+    public DashboardTask(String taskId, String taskName, String dueDate, String completionDate, String shambaId, String farmerId, int totalCount, int completed, int state) {
         this.taskId = taskId;
         this.taskName = taskName;
         this.dueDate = dueDate;
         this.completionDate = completionDate;
+        this.shambaId = shambaId;
+        this.farmerId = farmerId;
         this.totalCount = totalCount;
         this.completed = completed;
         this.state = state;
@@ -85,6 +89,22 @@ public class DashboardTask extends RealmObject implements Parcelable, Comparable
         this.completionDate = completionDate;
     }
 
+    public String getShambaId() {
+        return shambaId;
+    }
+
+    public void setShambaId(String shambaId) {
+        this.shambaId = shambaId;
+    }
+
+    public String getFarmerId() {
+        return farmerId;
+    }
+
+    public void setFarmerId(String farmerId) {
+        this.farmerId = farmerId;
+    }
+
     public int getState() {
         return state;
     }
@@ -105,6 +125,8 @@ public class DashboardTask extends RealmObject implements Parcelable, Comparable
         dest.writeString(this.taskName);
         dest.writeString(this.dueDate);
         dest.writeString(this.completionDate);
+        dest.writeString(this.shambaId);
+        dest.writeString(this.farmerId);
         dest.writeInt(this.totalCount);
         dest.writeInt(this.completed);
         dest.writeInt(this.state);
@@ -115,6 +137,8 @@ public class DashboardTask extends RealmObject implements Parcelable, Comparable
         this.taskName = in.readString();
         this.dueDate = in.readString();
         this.completionDate = in.readString();
+        this.shambaId = in.readString();
+        this.farmerId = in.readString();
         this.totalCount = in.readInt();
         this.completed = in.readInt();
         this.state = in.readInt();

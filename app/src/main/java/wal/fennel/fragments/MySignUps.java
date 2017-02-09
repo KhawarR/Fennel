@@ -1602,6 +1602,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 String taskId = null;
                 String dueDate = null;
                 String completionDate = null;
+                String shambaId = null;
+                String farmerId = null;
                 String agentType = null;
                 boolean isCompleted = false;
 
@@ -1616,7 +1618,11 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 if (statusStr.equalsIgnoreCase(Constants.STR_COMPLETED)) {
                     isCompleted = true;
                 }
+
+                shambaId = farmingTaskObj.optString("Shamba__c");
                 JSONObject shambaObj = farmingTaskObj.optJSONObject("Shamba__r");
+                JSONObject farmerObj = shambaObj.optJSONObject("Farmer__r");
+                farmerId = farmerObj.optString("Id");
 
                 JSONObject facilitatorObj = shambaObj.optJSONObject("Facilitator_Signup__r");
                 JSONObject fieldOfficerObj = shambaObj.optJSONObject("Field_Officer_Signup__r");
@@ -1702,6 +1708,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                                 task.setTaskId(taskId);
                                 task.setDueDate(dueDate);
                                 task.setCompletionDate(completionDate);
+                                task.setShambaId(shambaId);
+                                task.setFarmerId(farmerId);
                                 task.setTotalCount(task.getTotalCount() + 1);
                                 task.setState(state);
 
@@ -1727,6 +1735,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                             task.setTaskId(taskId);
                             task.setDueDate(dueDate);
                             task.setCompletionDate(completionDate);
+                            task.setShambaId(shambaId);
+                            task.setFarmerId(farmerId);
                             task.setTotalCount(task.getTotalCount() + 1);
                             task.setState(state);
                             if (isCompleted) {

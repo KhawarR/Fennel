@@ -46,11 +46,14 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
 import wal.fennel.R;
 import wal.fennel.activities.AboutMe;
 import wal.fennel.location.GPSTracker;
+import wal.fennel.models.DashboardFieldAgent;
+import wal.fennel.models.DashboardTask;
 import wal.fennel.models.FarmVisit;
 import wal.fennel.models.FarmVisitLog;
 import wal.fennel.models.Farmer;
@@ -564,6 +567,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
     @OnClick(R.id.txtSave)
     void onClickSaveTask() {
         updateTaskItems(Constants.STR_IN_PROGRESS);
+        ((BaseContainerFragment) getParentFragment()).popFragment();
     }
 
     @OnClick(R.id.txtSubmitApproval)
@@ -579,6 +583,8 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             updateTaskItems(Constants.STR_COMPLETED);
+                            markCompleteDashboardTask();
+                            ((BaseContainerFragment) getParentFragment()).popFragment();
                             dialog.dismiss();
                         }
                     });
@@ -642,7 +648,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
             }
         }
 
-        if (updatedTaskItems.size() > 0) {
+        if (updatedTaskItems.size() > 0 || taskStatus.equalsIgnoreCase(Constants.STR_COMPLETED)) {
 
             RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("shambaId", task.getTaskShambaId()).findAll().sort("visitedDate", Sort.DESCENDING);
 
@@ -675,7 +681,22 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
         }
         realm.commitTransaction();
         updatedTaskItems.clear();
-        ((BaseContainerFragment) getParentFragment()).popFragment();
+    }
+
+    private void markCompleteDashboardTask() {
+
+        for (DashboardFieldAgent dashboardFieldAgent : Singleton.getInstance().dashboardFieldAgents) {
+            RealmList<DashboardTask> dashboardTasks = dashboardFieldAgent.getDashboardTasks();
+            for (DashboardTask dTask : dashboardTasks) {
+                if (dTask.getTaskName().equalsIgnoreCase(task.getName())) {
+                    Realm realm = Realm.getDefaultInstance();
+                    realm.beginTransaction();
+                    dTask.setCompleted(dTask.getCompleted()+1);
+                    realm.commitTransaction();
+                    break;
+                }
+            }
+        }
     }
 
     @Override

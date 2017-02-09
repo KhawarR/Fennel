@@ -905,14 +905,14 @@ public class WebApi {
                         Crashlytics.logException(e);
 
                         boolean deleteFromRealm = false;
-
+                        countFailedCalls++;
                         if (errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)) {
                             sessionExpireRedirect();
                         } else if(errorMessage.equalsIgnoreCase(Constants.STR_RESPONSE_ENTITIY_DELETED)) {
                             deleteFromRealm = true;
+                            countFailedCalls--;
                         }
 
-                        countFailedCalls++;
                         adjustCountCallFailedFarmingTasks(farmVisitLog.getFarmingTaskId(), deleteFromRealm);
                         checkSyncComplete();
                     }
@@ -2985,6 +2985,8 @@ public class WebApi {
                 String taskId = null;
                 String dueDate = null;
                 String completionDate = null;
+                String shambaId = null;
+                String farmerId = null;
                 String agentType = null;
                 boolean isCompleted = false;
 
@@ -2999,7 +3001,11 @@ public class WebApi {
                 if (statusStr.equalsIgnoreCase(Constants.STR_COMPLETED)) {
                     isCompleted = true;
                 }
+
+                shambaId = farmingTaskObj.optString("Shamba__c");
                 JSONObject shambaObj = farmingTaskObj.optJSONObject("Shamba__r");
+                JSONObject farmerObj = shambaObj.optJSONObject("Farmer__r");
+                farmerId = farmerObj.optString("Id");
 
                 JSONObject facilitatorObj = shambaObj.optJSONObject("Facilitator_Signup__r");
                 JSONObject fieldOfficerObj = shambaObj.optJSONObject("Field_Officer_Signup__r");
@@ -3086,6 +3092,8 @@ public class WebApi {
                                 task.setTaskId(taskId);
                                 task.setDueDate(dueDate);
                                 task.setCompletionDate(completionDate);
+                                task.setShambaId(shambaId);
+                                task.setFarmerId(farmerId);
                                 task.setTotalCount(task.getTotalCount() + 1);
                                 task.setState(state);
 
@@ -3111,6 +3119,8 @@ public class WebApi {
                             task.setTaskId(taskId);
                             task.setDueDate(dueDate);
                             task.setCompletionDate(completionDate);
+                            task.setShambaId(shambaId);
+                            task.setFarmerId(farmerId);
                             task.setTotalCount(task.getTotalCount() + 1);
                             task.setState(state);
                             if (isCompleted) {
