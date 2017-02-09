@@ -2262,8 +2262,8 @@ public class WebApi {
 
                     Farmer currentFarmer;
                     RealmList<Task> farmingTasks;
-                    if (farmersMap.containsKey(farmerIdNumber)) {
-                        currentFarmer = (Farmer) farmersMap.get(farmerIdNumber);
+                    if (farmersMap.containsKey(farmId)) {
+                        currentFarmer = (Farmer) farmersMap.get(farmId);
                         farmingTasks = currentFarmer.getFarmerTasks();
                         if (farmingTasks != null) {
                             farmingTasks.add(currentTask);
@@ -2289,12 +2289,14 @@ public class WebApi {
                         farmingTasks.add(currentTask);
                         currentFarmer.setFarmerTasks(farmingTasks);
 
-                        farmersMap.put(farmerIdNumber, currentFarmer);
+                        farmersMap.put(farmId, currentFarmer);
+                        farmersTaskList.add(currentFarmer);
+
                     }
 
-                    if (!(farmersTaskList.contains(currentFarmer))) {
-                        farmersTaskList.add(currentFarmer);
-                    }
+//                    if (!(farmersTaskList.contains(currentFarmer))) {
+//                        farmersTaskList.add(currentFarmer);
+//                    }
                 }
             }
         }

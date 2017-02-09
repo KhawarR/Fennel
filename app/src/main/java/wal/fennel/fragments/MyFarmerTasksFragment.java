@@ -163,9 +163,9 @@ public class MyFarmerTasksFragment extends BaseFragment implements AdapterView.O
                         newTaskList.add(new Farmer(dueDate, currentTask.getTaskId(), tempFarmId, currentTask.getName(), "", "", "", "", "", false, "", "", "", "", "", "", "", "", false, "", "", "", "", true, "", "", null, Constants.FarmerType.MYFARMERTASKS));
                         farmersTaskList.add(newTaskList);
                     }
-                    if (farmersMap.get(currentFarmer.getFarmerId()) == null && !currentTask.getStatus().equalsIgnoreCase(Constants.STR_COMPLETED)) {
+                    if (farmersMap.get(currentFarmer.getFarmId()) == null && !currentTask.getStatus().equalsIgnoreCase(Constants.STR_COMPLETED)) {
                         newTaskList.add(currentFarmer);
-                        farmersMap.put(currentFarmer.getFarmerId(), currentFarmer);
+                        farmersMap.put(currentFarmer.getFarmId(), currentFarmer);
                     }
 
 //                }
