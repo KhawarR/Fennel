@@ -395,6 +395,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                 tvDescription.setVisibility(View.GONE);
                 etHoleCount.setVisibility(View.GONE);
                 spOption.setVisibility(View.VISIBLE);
+                spOption.setEnabled(true);
                 final ArrayList<String> arrOptionNames = new ArrayList<>();
 
                 if(taskItem.getOptions() != null) {
@@ -442,6 +443,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                     for (int j = 0; j < taskItem.getOptions().size(); j++) {
                         if(taskItem.getOptions().get(j).isValue()) {
                             spOption.setSelection(j + 1);
+                            spOption.setEnabled(false);
                             break;
                         }
                     }
