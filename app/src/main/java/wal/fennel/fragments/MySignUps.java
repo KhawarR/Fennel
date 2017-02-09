@@ -848,7 +848,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                                 Log.i("Fetch failed", "NAT ID: " + farmer.getNationalCardUrl());
                             }
                         }*/);
-                        break;
+//                        break;
                     }
                 }
             }
@@ -918,8 +918,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                     Farmer currentFarmer;
                     RealmList<Task> farmingTasks;
-                    if (farmersMap.containsKey(farmerIdNumber)) {
-                        currentFarmer = (Farmer) farmersMap.get(farmerIdNumber);
+                    if (farmersMap.containsKey(farmId)) {
+                        currentFarmer = (Farmer) farmersMap.get(farmId);
                         farmingTasks = currentFarmer.getFarmerTasks();
                         realm.beginTransaction();
                         if (farmingTasks != null) {
@@ -952,12 +952,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                         realm.commitTransaction();
 
-                        farmersMap.put(farmerIdNumber, currentFarmer);
+                        farmersMap.put(farmId, currentFarmer);
+                        farmersTaskList.add(currentFarmer);
+
                     }
 
-                    if (!(farmersTaskList.contains(currentFarmer))) {
-                        farmersTaskList.add(currentFarmer);
-                    }
+//                    if (!(farmersTaskList.contains(currentFarmer))) {
+//                        farmersTaskList.add(currentFarmer);
+//                    }
                 }
             }
         }
