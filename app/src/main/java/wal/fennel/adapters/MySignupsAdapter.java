@@ -144,13 +144,23 @@ public class MySignupsAdapter extends BaseAdapter {
             FontTextView village = (FontTextView) view.findViewById(R.id.tv_village);
             FontTextView sublocation = (FontTextView) view.findViewById(R.id.tv_sublocation);
 
-            if(!farmer.getSubLocation().isEmpty())
+            // Replaced "Village, Sublocation" with "Sublocation, Location"
+            /*if(!farmer.getSubLocation().isEmpty())
                 sublocation.setText(farmer.getSubLocation());
             else
                 sublocation.setText("");
 
             if(!farmer.getVillageName().isEmpty())
                 village.setText(farmer.getVillageName() + ", ");
+            else
+                village.setText("");*/
+            if(!farmer.getLocation().isEmpty())
+                sublocation.setText(farmer.getLocation());
+            else
+                sublocation.setText("");
+
+            if(!farmer.getSubLocation().isEmpty())
+                village.setText(farmer.getSubLocation() + ", ");
             else
                 village.setText("");
 

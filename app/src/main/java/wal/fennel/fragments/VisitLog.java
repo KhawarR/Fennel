@@ -39,6 +39,7 @@ import com.squareup.picasso.NetworkPolicy;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.Bind;
@@ -57,6 +58,8 @@ import wal.fennel.models.DashboardTask;
 import wal.fennel.models.FarmVisit;
 import wal.fennel.models.FarmVisitLog;
 import wal.fennel.models.Farmer;
+import wal.fennel.models.FieldAgent;
+import wal.fennel.models.LogTaskItem;
 import wal.fennel.models.Task;
 import wal.fennel.models.TaskItem;
 import wal.fennel.network.NetworkHelper;
@@ -174,11 +177,13 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
 
         FontTextView tvFarmerName = (FontTextView) farmerHeader.findViewById(R.id.tvFullName);
         FontTextView tvFullName = (FontTextView) farmerHeader.findViewById(R.id.tvLocation);
-        FontTextView tvMobile = (FontTextView) farmerHeader.findViewById(R.id.tvMobile);
+        FontTextView tvMobile = (FontTextView) farmerHeader.findViewById(R.id.tvMobileNumber);
 
         tvFarmerName.setText(farmer.getFullName());
-        tvFullName.setText(farmer.getVillageName() + ", " + farmer.getSubLocation());
-        tvMobile.setText("MOBILE " + farmer.getMobileNumber());
+        // Replaced "Village, Sublocation" with "Sublocation, Location"
+//        tvFullName.setText(farmer.getVillageName() + ", " + farmer.getSubLocation());
+        tvFullName.setText(farmer.getSubLocation() + ", " + farmer.getLocation());
+        tvMobile.setText(farmer.getMobileNumber());
 
         tvTaskHeader.setText(task.getName());
         tvTaskHeader.setOnClickListener(new View.OnClickListener() {
@@ -678,9 +683,62 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
 
             FarmVisitLog visitLog = realm.createObject(FarmVisitLog.class);
             visitLog.setAll(farmVisit.getFarmVisitId(), task.getTaskId(), true);
+
+            // Adding updated taskItem into the Agent's log list
+            boolean isAgentFound = false;
+            for (FieldAgent fieldAgent : Singleton.getInstance().fieldAgentsVisitLogs) {
+                if(fieldAgent.getAgentId().equalsIgnoreCase(PreferenceHelper.getInstance().readLoginUserId())) {
+                    isAgentFound = true;
+                    LogTaskItem taskItem = realm.createObject(LogTaskItem.class);
+                    updateTaskItemsInAgentLogs(taskItem, fieldAgent);
+                    break;
+                }
+            }
+
+            if(!isAgentFound) {
+                FieldAgent agent = realm.createObject(FieldAgent.class);
+                agent.setAgentId(PreferenceHelper.getInstance().readLoginUserId());
+                agent.setName(PreferenceHelper.getInstance().readAboutFN());
+                agent.setAgentType(PreferenceHelper.getInstance().readLoginUserType());
+                agent.setAgentEmployeeId(PreferenceHelper.getInstance().readUserEmployeeId());
+
+                LogTaskItem taskItem = realm.createObject(LogTaskItem.class);
+                updateTaskItemsInAgentLogs(taskItem, agent);
+
+                Singleton.getInstance().fieldAgentsVisitLogs.add(agent);
+            }
         }
         realm.commitTransaction();
         updatedTaskItems.clear();
+    }
+
+    private void updateTaskItemsInAgentLogs(LogTaskItem taskItem, FieldAgent agent) {
+        for (TaskItem item : updatedTaskItems) {
+
+            item.setAgentName(PreferenceHelper.getInstance().readEmployeeFullname());
+
+            taskItem.setSequence(item.getSequence());
+            taskItem.setId(item.getId());
+            taskItem.setFarmingTaskId(item.getFarmingTaskId());
+            taskItem.setName(item.getName());
+            taskItem.setRecordType(item.getRecordType());
+            taskItem.setDescription(item.getDescription());
+            taskItem.setTextValue(item.getTextValue());
+            taskItem.setFileType(item.getFileType());
+            taskItem.setFileActionType(item.getFileActionType());
+            taskItem.setFileActionPerformed(item.getFileActionPerformed());
+            taskItem.setGpsTakenTime(item.getGpsTakenTime());
+            taskItem.setLatitude(item.getLatitude());
+            taskItem.setLongitude(item.getLongitude());
+            taskItem.setOptions(item.getOptions());
+            taskItem.setDateModified(new Date());
+            taskItem.setAgentName(item.getAgentName());
+            taskItem.setFarmerName(item.getFarmerName());
+            taskItem.setAgentAttachmentId(item.getAgentAttachmentId());
+            taskItem.setTaskDone(item.isTaskDone());
+            taskItem.setAttachmentPath(item.getAttachmentPath());
+            agent.getVisitLogs().add(taskItem);
+        }
     }
 
     private void markCompleteDashboardTask() {

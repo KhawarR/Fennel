@@ -23,6 +23,7 @@ public class PreferenceHelper {
     private static final String KEY_SESSION_EXPIRE_SYNC_REQ = "_session_expired_sync_req";
     private static final String KEY_NETWORK_CHANGE_SYNC_STAMP = "_key_network_change_sync_stamp";
 
+    private static final String KEY_EMPLOYEE_FULLNAME = "_emp_fullname";
     private static final String KEY_ABOUT_ME_FN = "_about_fn";
     private static final String KEY_ABOUT_ME_MN = "_about_mn";
     private static final String KEY_ABOUT_ME_LN = "_about_ln";
@@ -240,6 +241,17 @@ public class PreferenceHelper {
 
     public String readLastSyncTime() {
         String value = mPref.getString(KEY_LAST_SYNC_TIME, "-");
+        return value;
+    }
+
+    public void writeEmployeeFullname(String value) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putString(KEY_EMPLOYEE_FULLNAME, value);
+        editor.commit();
+    }
+
+    public String readEmployeeFullname() {
+        String value = mPref.getString(KEY_EMPLOYEE_FULLNAME, "-");
         return value;
     }
 

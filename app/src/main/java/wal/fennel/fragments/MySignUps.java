@@ -889,6 +889,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 String mobileNumber = farmerObj.getString("Mobile_Number__c");
                 String farmerIdNumber = farmerObj.getString("Name");
                 String subLocationName = shambaObj.getJSONObject("Sub_LocationLookup__r").getString("Name");
+                String locationName = shambaObj.getJSONObject("LocationLookup__r").getString("Name");
                 String villageName = shambaObj.getJSONObject("Village__r").getString("Name");
                 String signupStatus = shambaObj.optString("Sign_Up_Status__c");
 
@@ -940,6 +941,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         currentFarmer.setIdNumber(farmerIdNumber);
                         currentFarmer.setFullName(farmerName);
                         currentFarmer.setMobileNumber(mobileNumber);
+                        currentFarmer.setLocation(locationName);
                         currentFarmer.setSubLocation(subLocationName);
                         currentFarmer.setVillageName(villageName);
                         currentFarmer.setHeader(false);

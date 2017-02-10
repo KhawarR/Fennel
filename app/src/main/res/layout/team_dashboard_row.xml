@@ -1,34 +1,36 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fennel="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:padding="5dp">
 
     <!--<View-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="0.5dp"-->
-        <!--android:background="@color/cell_separator_color"-->
-        <!--/>-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="0.5dp"-->
+    <!--android:background="@color/cell_separator_color"-->
+    <!--/>-->
     <LinearLayout
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_marginLeft="5dp">
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/img_left"
-                android:layout_width="@dimen/medium_avatar_size"
-                android:layout_height="@dimen/medium_avatar_size"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:layout_marginStart="5dp"
-                android:layout_marginLeft="5dp"
                 android:layout_marginEnd="5dp"
+                android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
+                android:layout_marginStart="5dp"
                 android:src="@color/app_green"
                 fennel:civ_border_color="@color/app_green"
                 fennel:civ_border_width="5dp" />
@@ -37,90 +39,95 @@
                 android:id="@+id/count_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
                 android:text="20"
-                android:textSize="16sp"
                 android:textColor="#FFFFFF"
-                fennel:fontName="Avenir-Black.ttf"
-                android:layout_centerInParent="true"/>
+                android:textSize="18sp"
+                fennel:fontName="Avenir-Black.ttf" />
 
         </RelativeLayout>
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_gravity="center_vertical"
-        android:layout_height="wrap_content">
-
-        <wal.fennel.views.FontTextView
-            android:id="@+id/task_name"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="15dp"
-            android:layout_marginTop="10dp"
-            android:textSize="16sp"
-            android:layout_marginBottom="5dp"
-            android:text="Farmer's Signed Up"
-            android:textColor="@color/black_txt_color"
-            fennel:fontName="Avenir-Heavy.ttf"
-            android:layout_width="match_parent" />
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <ProgressBar
-            android:id="@+id/task_progress"
-            android:layout_width="match_parent"
-            android:layout_height="15dp"
-            android:layout_marginStart="15dp"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="5dp"
-            android:progressDrawable="@drawable/progress_bar_bg"
-            style="@android:style/Widget.ProgressBar.Horizontal"
-            android:progress="80"/>
+            <wal.fennel.views.FontTextView
+                android:id="@+id/task_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="10dp"
+                android:text="Farmer's Signed Up"
+                android:textColor="@color/black_txt_color"
+                android:textSize="16sp"
+                fennel:fontName="Avenir-Heavy.ttf" />
 
-        <wal.fennel.views.FontTextView
-            android:id="@+id/count_total"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:textSize="10sp"
-            android:layout_marginStart="15dp"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="10dp"
-            android:text="Farmer's Signed Up"
-            android:textColor="@color/black_txt_color"
-            fennel:fontName="Avenir-Heavy.ttf"
-            android:layout_width="wrap_content" />
-    </LinearLayout>
+            <ProgressBar
+                android:id="@+id/task_progress"
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="15dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginStart="15dp"
+                android:progress="80"
+                android:progressDrawable="@drawable/progress_bar_bg" />
+
+            <wal.fennel.views.FontTextView
+                android:id="@+id/count_total"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginBottom="10dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginStart="15dp"
+                android:text="Farmer's Signed Up"
+                android:textColor="@color/black_txt_color"
+                android:textSize="10sp"
+                fennel:fontName="Avenir-Heavy.ttf" />
+        </LinearLayout>
 
         <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content">
-        <TextView
-            android:id="@+id/due_date"
-            android:textSize="26sp"
-            android:text="19"
-            android:layout_marginTop="5dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <TextView
-            android:id="@+id/due_date_month"
-            android:textSize="15sp"
-            android:text="AUG"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="5dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/due_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="bottom"
+                android:text="19"
+                android:textColor="@color/black"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/due_date_month"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:gravity="top"
+                android:text="AUG"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
         </LinearLayout>
 
     </LinearLayout>
 
     <!--<View-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="0.5dp"-->
-        <!--android:background="@color/cell_separator_color"-->
-        <!--/>-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="0.5dp"-->
+    <!--android:background="@color/cell_separator_color"-->
+    <!--/>-->
 
 </LinearLayout>

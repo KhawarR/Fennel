@@ -267,6 +267,8 @@ public class Login extends BaseFragment {
                 JSONArray arrRec = objFacilitator.getJSONArray("records");
                 if (arrRec.length() > 0) {
                     JSONObject obj1 = arrRec.getJSONObject(0);
+                    String employeeName = obj1.optString("Name");
+                    PreferenceHelper.getInstance().writeEmployeeFullname(employeeName);
                     JSONObject objFO = obj1.optJSONObject("Field_Officer__r");
                     if (objFO != null) {
                         JSONObject objFOEmployee = objFO.optJSONObject("Employee__r");
@@ -289,6 +291,8 @@ public class Login extends BaseFragment {
                 JSONArray arrRec = objFieldOffice.getJSONArray("records");
                 if (arrRec.length() > 0) {
                     JSONObject obj1 = arrRec.getJSONObject(0);
+                    String employeeName = obj1.optString("Name");
+                    PreferenceHelper.getInstance().writeEmployeeFullname(employeeName);
                     JSONObject objFM = obj1.optJSONObject("Field_Manager__r");
                     if (objFM != null) {
                         JSONObject objFO_FMEmployee = objFM.optJSONObject("Employee__r");
@@ -300,6 +304,12 @@ public class Login extends BaseFragment {
                 saveAboutMeInfo(fn, mn, ln, fo_name, fm_name);
             } else if (objFieldManager != null) {
                 getAndSaveId(objFieldManager, Constants.STR_FIELD_MANAGER);
+                JSONArray arrRec = objFieldManager.getJSONArray("records");
+                if (arrRec.length() > 0) {
+                    JSONObject obj1 = arrRec.getJSONObject(0);
+                    String employeeName = obj1.optString("Name");
+                    PreferenceHelper.getInstance().writeEmployeeFullname(employeeName);
+                }
                 saveAboutMeInfo(fn, mn, ln, fo_name, fm_name);
             } else {
                 Toast.makeText(getActivity(), "Invalid user", Toast.LENGTH_SHORT).show();

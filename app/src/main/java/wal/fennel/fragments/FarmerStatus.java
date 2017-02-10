@@ -103,7 +103,9 @@ public class FarmerStatus extends BaseFragment {
         FontTextView tvMobile = (FontTextView) myHeader.findViewById(R.id.tvMobileNumber);
 
         tvFarmerName.setText(farmer.getFullName());
-        tvFullName.setText(farmer.getVillageName() + ", " + farmer.getSubLocation());
+        // Replaced "Village, Sublocation" with "Sublocation, Location"
+//        tvFullName.setText(farmer.getVillageName() + ", " + farmer.getSubLocation());
+        tvFullName.setText(farmer.getSubLocation() + ", " + farmer.getLocation());
         tvMobile.setText(farmer.getMobileNumber());
 
         mLvFarmers.addHeaderView(myHeader);
