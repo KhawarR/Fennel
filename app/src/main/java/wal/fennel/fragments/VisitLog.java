@@ -689,8 +689,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
             for (FieldAgent fieldAgent : Singleton.getInstance().fieldAgentsVisitLogs) {
                 if(fieldAgent.getAgentId().equalsIgnoreCase(PreferenceHelper.getInstance().readLoginUserId())) {
                     isAgentFound = true;
-                    LogTaskItem taskItem = realm.createObject(LogTaskItem.class);
-                    updateTaskItemsInAgentLogs(taskItem, fieldAgent);
+                    updateTaskItemsInAgentLogs(realm, fieldAgent);
                     break;
                 }
             }
@@ -702,8 +701,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                 agent.setAgentType(PreferenceHelper.getInstance().readLoginUserType());
                 agent.setAgentEmployeeId(PreferenceHelper.getInstance().readUserEmployeeId());
 
-                LogTaskItem taskItem = realm.createObject(LogTaskItem.class);
-                updateTaskItemsInAgentLogs(taskItem, agent);
+                updateTaskItemsInAgentLogs(realm, agent);
 
                 Singleton.getInstance().fieldAgentsVisitLogs.add(agent);
             }
@@ -712,11 +710,12 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
         updatedTaskItems.clear();
     }
 
-    private void updateTaskItemsInAgentLogs(LogTaskItem taskItem, FieldAgent agent) {
+    private void updateTaskItemsInAgentLogs(Realm realm, FieldAgent agent) {
         for (TaskItem item : updatedTaskItems) {
 
             item.setAgentName(PreferenceHelper.getInstance().readEmployeeFullname());
 
+            LogTaskItem taskItem = realm.createObject(LogTaskItem.class);
             taskItem.setSequence(item.getSequence());
             taskItem.setId(item.getId());
             taskItem.setFarmingTaskId(item.getFarmingTaskId());
