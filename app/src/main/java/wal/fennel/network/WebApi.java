@@ -3476,7 +3476,7 @@ public class WebApi {
                 taskItem.setLatitude(item.getLatitude());
                 taskItem.setLongitude(item.getLongitude());
                 taskItem.setOptions(item.getOptions());
-                taskItem.setDateModified(item.getDateModified());
+                taskItem.setDateModified(item.getDateModified() == null ? new Date() : item.getDateModified());
                 taskItem.setAgentName(item.getAgentName());
                 taskItem.setFarmerName(item.getFarmerName());
                 taskItem.setAgentAttachmentId(item.getAgentAttachmentId());
