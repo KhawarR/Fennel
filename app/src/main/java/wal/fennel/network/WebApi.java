@@ -1041,10 +1041,17 @@ public class WebApi {
                         FennelUtils.appendDebugLog("TaskItem edit failed - " + response.code() + " - "  + errorMessage);
                         Exception e = new Exception("TaskItem Edit failed - " + response.code() + " - "  + errorMessage);
                         Crashlytics.logException(e);
+
+                        countFailedCalls++;
+                        boolean deleteFromRealm = false;
                         if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
                             sessionExpireRedirect();
+                        } else if(errorMessage.equalsIgnoreCase(Constants.STR_RESPONSE_ENTITIY_DELETED)) {
+                            deleteFromRealm = true;
+                            countFailedCalls--;
                         }
-                        countFailedCalls++;
+
+                        adjustCountCallFailedTaskItems(taskItem.getId(), deleteFromRealm);
                         checkSyncComplete();
                     }
                 }
@@ -1154,6 +1161,24 @@ public class WebApi {
         if(farmVisitLogs != null && farmVisitLogs.size() > 0) {
             countCalls = countCalls - farmVisitLogs.size();
         }
+    }
+
+    private static void adjustCountCallFailedTaskItems(String taskItemId, boolean deleteFromRealm){
+
+        RealmResults<TaskItem> taskItems = Realm.getDefaultInstance().where(TaskItem.class).equalTo("isDataDirty", true).equalTo("id", taskItemId).findAll();
+        if(taskItems != null && taskItems.size() > 0) {
+            countCalls = countCalls - taskItems.size();
+        }
+
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        if(deleteFromRealm) {
+
+            for (int i = 0; i < taskItems.size(); i++) {
+                taskItems.get(i).deleteFromRealm();
+            }
+        }
+        realm.commitTransaction();
     }
 
     private static void adjustCountCallFailedFarmingTasks(String farmingTaskId, boolean deleteFromRealm){
