@@ -263,10 +263,12 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                             taskItem.setLatitude(latitude);
                             taskItem.setLongitude(longitude);
                             taskItem.setGpsTakenTime(FennelUtils.getFormattedTime(System.currentTimeMillis(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS));
-
-                            updatedTaskItems.add(taskItem);
+                            taskItem.setDateModified(new Date());
                         }
                         setTaskDone(taskItem);
+                        if(taskItem.isTaskDone()) {
+                            updatedTaskItems.add(taskItem);
+                        }
                     }
                 });
                 if(taskItem.isTaskDone()) {
@@ -294,10 +296,13 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                             Realm realm = Realm.getDefaultInstance();
                             realm.beginTransaction();
                             taskItem.getOptions().get(0).setValue(!taskItem.getOptions().get(0).isValue());
+                            taskItem.setDateModified(new Date());
                             realm.commitTransaction();
-                            updatedTaskItems.add(taskItem);
                         }
                         setTaskDone(taskItem);
+                        if(taskItem.isTaskDone()) {
+                            updatedTaskItems.add(taskItem);
+                        }
                     }
                 });
                 if(!taskItem.isTaskDone()) {
@@ -319,7 +324,10 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                         hideKeyboard();
                         taskItem.setTextValue(etHoleCount.getText().toString());
                         setTaskDone(taskItem);
-                        updatedTaskItems.add(taskItem);
+                        taskItem.setDateModified(new Date());
+                        if(taskItem.isTaskDone()) {
+                            updatedTaskItems.add(taskItem);
+                        }
                     }
                 });
                 if(!taskItem.isTaskDone()) {
@@ -350,7 +358,10 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                                 try {
                                     getActivity().startActivity(newIntent);
                                     setTaskDone(taskItem);
-                                    updatedTaskItems.add(taskItem);
+                                    taskItem.setDateModified(new Date());
+                                    if(taskItem.isTaskDone()) {
+                                        updatedTaskItems.add(taskItem);
+                                    }
                                 } catch (ActivityNotFoundException e) {
                                     Toast.makeText(getActivity(), "No handler for this type of file.", Toast.LENGTH_LONG).show();
                                 }
@@ -428,8 +439,6 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                             }
                             taskItem.getOptions().get(position).setValue(true);
                             realm.commitTransaction();
-
-//                            updatedTaskItems.add(taskItem);
                         }
                     }
 
@@ -444,7 +453,10 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                     public void onClick(View v) {
                         hideKeyboard();
                         setTaskDone(taskItem);
-                        updatedTaskItems.add(taskItem);
+                        taskItem.setDateModified(new Date());
+                        if(taskItem.isTaskDone()) {
+                            updatedTaskItems.add(taskItem);
+                        }
                     }
                 });
                 if(taskItem.isTaskDone()) {
@@ -501,7 +513,9 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                 ivIcon.setVisibility(View.GONE);
 
                 taskItem.setTaskDone(true);
-                updatedTaskItems.add(taskItem);
+                if(taskItem.isTaskDone()) {
+                    updatedTaskItems.add(taskItem);
+                }
             }
 
             @Override
@@ -735,7 +749,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
             taskItem.setLatitude(item.getLatitude());
             taskItem.setLongitude(item.getLongitude());
             taskItem.setOptions(item.getOptions());
-            taskItem.setDateModified(new Date());
+            taskItem.setDateModified(item.getDateModified() == null ? new Date() : item.getDateModified());
             taskItem.setAgentName(item.getAgentName());
             taskItem.setFarmerName(item.getFarmerName());
             taskItem.setAgentAttachmentId(item.getAgentAttachmentId());
