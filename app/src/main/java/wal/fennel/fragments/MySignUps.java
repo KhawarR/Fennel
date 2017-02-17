@@ -912,6 +912,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         currentTask.setStatus(status);
                         currentTask.setTaskShambaId(farmId);
                         currentTask.setTaskFarmerId(farmerId);
+                        currentTask.setFarmerName(farmerName);
                     }
                     realm.commitTransaction();
 //                        tasksMap.put(taskName, currentTask);
@@ -1242,6 +1243,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                                 if (Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskItems() == null) {
                                     Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).setTaskItems(new RealmList<TaskItem>());
                                 }
+                                Task parentTask = (Task) Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k);
+                                taskItem.setFarmerName(parentTask.getFarmerName());
                                 Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskItems().add(taskItem);
                                 realm.commitTransaction();
                             }

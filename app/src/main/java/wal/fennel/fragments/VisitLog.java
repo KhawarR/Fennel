@@ -658,6 +658,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
             RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("shambaId", task.getTaskShambaId()).findAll().sort("visitedDate", Sort.DESCENDING);
 
             boolean createNewFarmVisit = false;
+
             FarmVisit farmVisit = null;
             if (farmVisits != null && farmVisits.size() > 0) {
                 farmVisit = farmVisits.get(0);
@@ -681,8 +682,12 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                 farmVisit.setDataDirty(true);
             }
 
-            FarmVisitLog visitLog = realm.createObject(FarmVisitLog.class);
-            visitLog.setAll(farmVisit.getFarmVisitId(), task.getTaskId(), true);
+            for (int i=0; i<updatedTaskItems.size();i++) {
+
+                FarmVisitLog visitLog = realm.createObject(FarmVisitLog.class);
+                String message = getLogDescriptionForTaskItem(updatedTaskItems.get(i));
+                visitLog.setAll(farmVisit.getFarmVisitId(), task.getTaskId(), updatedTaskItems.get(i).getId(), updatedTaskItems.get(i).getDateModified(), message, true);
+            }
 
             // Adding updated taskItem into the Agent's log list
             boolean isAgentFound = false;
@@ -789,5 +794,33 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
             return true;
         }
         return false;
+    }
+
+    private String getLogDescriptionForTaskItem(TaskItem taskItem) {
+        String desciption = "";
+        if (taskItem == null)
+            return desciption;
+        if (taskItem.getRecordType().equalsIgnoreCase("Text")) {
+            desciption = taskItem.getAgentName() + " updated " +  taskItem.getFarmerName() + "'s " + taskItem.getName() + " to " + taskItem.getTextValue();
+        } else if (taskItem.getRecordType().equalsIgnoreCase("Checkbox") || taskItem.getRecordType().equalsIgnoreCase("Options")) {
+            desciption = taskItem.getAgentName() + " updated " + taskItem.getName() + "'s value at " + taskItem.getFarmerName() + "'s farm";;
+        } else if (taskItem.getRecordType().equalsIgnoreCase("GPS")) {
+            desciption = taskItem.getAgentName() + " updated " + taskItem.getName() + ": " + taskItem.getLatitude() + " , " + taskItem.getLongitude() + " at " + taskItem.getFarmerName() + "'s farm";
+        } else if (taskItem.getRecordType().equalsIgnoreCase("File")) {
+            if (taskItem.getFileActionType().equalsIgnoreCase("View Media")) {
+                if (taskItem.getFileType().equalsIgnoreCase("Documents")) {
+                    desciption = taskItem.getAgentName() + " viewed a document for " + taskItem.getName() + " at " + taskItem.getFarmerName() + "'s farm";
+                } else {
+                    desciption = taskItem.getAgentName() + " viewed a picture for " + taskItem.getName() + " at " + taskItem.getFarmerName() + "'s farm";
+                }
+            } else {
+                if (taskItem.getFileType().equalsIgnoreCase("Documents")) {
+                    desciption = taskItem.getAgentName() + " uploaded a document for " + taskItem.getName() + " at " + taskItem.getFarmerName() + "'s farm";
+                } else {
+                    desciption = taskItem.getAgentName() + " uploaded a picture for " + taskItem.getName() + " at " + taskItem.getFarmerName() + "'s farm";
+                }
+            }
+        }
+        return desciption;
     }
 }

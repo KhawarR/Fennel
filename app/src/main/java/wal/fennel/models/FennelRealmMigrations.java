@@ -3,7 +3,6 @@ package wal.fennel.models;
 import java.util.Date;
 
 import io.realm.DynamicRealm;
-import io.realm.FieldAttribute;
 import io.realm.RealmMigration;
 import io.realm.RealmObjectSchema;
 import io.realm.RealmSchema;
@@ -165,6 +164,16 @@ public class FennelRealmMigrations implements RealmMigration{
             schema.get("DashboardTask")
                     .addField("shambaId", String.class)
                     .addField("farmerId", String.class);
+
+            oldVersion++;
+        }
+
+        if (oldVersion == 3) {
+
+            schema.get("FarmVisitLog")
+                    .addField("taskItemId", String.class)
+                    .addField("taskModifiedTime", Date.class)
+                    .addField("logMessage", String.class);
 
             oldVersion++;
         }

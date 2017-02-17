@@ -1302,6 +1302,9 @@ public class WebApi {
         if(taskItem.getLongitude() != 0) {
             newTaskItemMap.put("Location__Longitude__s", taskItem.getLongitude());
         }
+        if (taskItem.getDateModified() != null) {
+            newTaskItemMap.put("LastModifiedDate", taskItem.getDateModified());
+        }
 
         return newTaskItemMap;
     }
@@ -1319,6 +1322,9 @@ public class WebApi {
         final HashMap<String, Object> newFarmVisitLogMap = new HashMap<>();
         newFarmVisitLogMap.put("Farm_Visit__c", farmVisitLog.getFarmVisitId());
         newFarmVisitLogMap.put("Farming_Task__c", farmVisitLog.getFarmingTaskId());
+        newFarmVisitLogMap.put("Task_Item__c", farmVisitLog.getTaskItemId());
+        newFarmVisitLogMap.put("Sync_Date_Time__c", farmVisitLog.getTaskModifiedTime());
+        newFarmVisitLogMap.put("Log_Message__c", farmVisitLog.getLogMessage());
 
         return newFarmVisitLogMap;
     }
