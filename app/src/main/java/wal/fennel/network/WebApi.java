@@ -541,6 +541,8 @@ public class WebApi {
         processTaskItemPicsCalls(taskItemPics);
         //endregion
 
+        processFarmingTaskCalls();
+
         PreferenceHelper.getInstance().writeIsSyncInProgress(true);
     }
 
@@ -896,7 +898,7 @@ public class WebApi {
 
                         FennelUtils.appendDebugLog("FarmVisitLog create finished: " + farmVisitLog.getFarmVisitId());
 
-                        processFarmingTaskCalls();
+//                        processFarmingTaskCalls();
 
                         checkSyncComplete();
                     } else {
@@ -904,16 +906,18 @@ public class WebApi {
                         Exception e = new Exception("FarmVisitLog Create failed - " + response.code() + " - " + errorMessage);
                         Crashlytics.logException(e);
 
-                        boolean deleteFromRealm = false;
                         countFailedCalls++;
                         if (errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)) {
                             sessionExpireRedirect();
                         } else if(errorMessage.equalsIgnoreCase(Constants.STR_RESPONSE_ENTITIY_DELETED)) {
-                            deleteFromRealm = true;
                             countFailedCalls--;
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            farmVisitLog.deleteFromRealm();
+                            realm.commitTransaction();
                         }
 
-                        adjustCountCallFailedFarmingTasks(farmVisitLog.getFarmingTaskId(), deleteFromRealm);
+//                        adjustCountCallFailedFarmingTasks(farmVisitLog.getFarmingTaskId(), deleteFromRealm);
                         checkSyncComplete();
                     }
                 }
@@ -924,7 +928,7 @@ public class WebApi {
                     countFailedCalls++;
                     Log.i("FENNEL", "Farm visit log onFailure.. Count Calls: " + countCalls);
 
-                    adjustCountCallFailedFarmingTasks(farmVisitLog.getFarmingTaskId(), false);
+//                    adjustCountCallFailedFarmingTasks(farmVisitLog.getFarmingTaskId(), false);
                     FennelUtils.appendDebugLog("FarmVisitLog create Failed: " + t.getMessage());
                     t.printStackTrace();
                     checkSyncComplete();
@@ -977,10 +981,16 @@ public class WebApi {
                         FennelUtils.appendDebugLog("FarmingTask edit failed - " + response.code() + " - "  + errorMessage);
                         Exception e = new Exception("FarmingTask Edit failed - " + response.code() + " - "  + errorMessage);
                         Crashlytics.logException(e);
+                        countFailedCalls++;
                         if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
                             sessionExpireRedirect();
+                        } else if (errorMessage.equalsIgnoreCase(Constants.STR_RESPONSE_ENTITIY_DELETED)) {
+                            countFailedCalls--;
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            farmingTask.deleteFromRealm();
+                            realm.commitTransaction();
                         }
-                        countFailedCalls++;
                         checkSyncComplete();
                     }
                 }
@@ -2814,7 +2824,7 @@ public class WebApi {
 
                 taskItems.add(taskItem);
 
-                Log.i(TAG, "TaskItems1: " + taskItems.size());
+//                Log.i(TAG, "TaskItems1: " + taskItems.size());
 
                 for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
 
@@ -3515,7 +3525,7 @@ public class WebApi {
                 taskItem.setTaskDone(item.isTaskDone());
                 taskItem.setAttachmentPath(item.getAttachmentPath());
                 agent.getVisitLogs().add(taskItem);
-                Log.i(TAG, "TaskItems2: " + agent.getVisitLogs().size());
+//                Log.i(TAG, "TaskItems2: " + agent.getVisitLogs().size());
             }
         }
         realm.commitTransaction();
