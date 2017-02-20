@@ -1230,7 +1230,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                 taskItems.add(taskItem);
 
-                Log.i(TAG, "TaskItems3: " + taskItems.size());
+//                Log.i(TAG, "TaskItems3: " + taskItems.size());
 
                 for (int j = 0; j < Singleton.getInstance().myFarmersList.size(); j++) {
 
@@ -2039,7 +2039,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 taskItem.setAttachmentPath(item.getAttachmentPath());
                 agent.getVisitLogs().add(taskItem);
 
-                Log.i(TAG, "TaskItems4: " + agent.getVisitLogs().size());
+//                Log.i(TAG, "TaskItems4: " + agent.getVisitLogs().size());
             }
         }
         realm.commitTransaction();
