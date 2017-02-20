@@ -321,13 +321,17 @@ public class FennelUtils {
     }
 
     public static Date getCurrentUTCDateTime() {
-        SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-        dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
+        Date utcDate = null;
+//
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'"); // Quoted "Z" to indicate UTC, no timezone offset
+        df.setTimeZone(tz);
+        String nowAsISO = df.format(new Date());
         try {
-            return dateFormatGmt.parse( dateFormatGmt.format(new Date()) );
+            utcDate = df.parse(nowAsISO);
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        return new Date();
+        return utcDate;
     }
 }
