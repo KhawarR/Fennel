@@ -319,4 +319,15 @@ public class FennelUtils {
     private static void uploadDropboxFile(Context context, File file, String fileDropboxPath){
         new UploadTask(DropboxClient.getClient(Constants.DropboxConstants.ACCESS_TOKEN), file, context, fileDropboxPath).execute();
     }
+
+    public static Date getCurrentUTCDateTime() {
+        SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
+        try {
+            return dateFormatGmt.parse( dateFormatGmt.format(new Date()) );
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return new Date();
+    }
 }

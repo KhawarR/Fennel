@@ -3255,6 +3255,7 @@ public class WebApi {
                     try {
                         responseStr = response.body().string();
                         parseMyLogbookData(responseStr);
+                        WebApi.getMyLogBookAttachments(myLogbookAttachmentCallback);
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (JSONException e) {
@@ -3276,82 +3277,113 @@ public class WebApi {
 
         String farmingTaskIds = "";
         if (arrRecords.length() > 0) {
-            visitLogFarmingTasks = new HashMap<>();
+
+            ArrayList<Task> allTasks = new ArrayList<>();
             for (int i = 0; i < arrRecords.length(); i++) {
 
                 Map<String, String> taskMap = new HashMap<>();
-                JSONObject farmingTaskObj = arrRecords.getJSONObject(i);
+                JSONObject visitLogObj = arrRecords.getJSONObject(i);
 
-                String taskId = farmingTaskObj.getString("Farming_Task__c");
-                JSONObject farmVisit = farmingTaskObj.getJSONObject("Farm_Visit__r");
-                JSONObject fieldManager = farmVisit.optJSONObject("Field_Manager__r");
-                JSONObject fieldOfficer = farmVisit.optJSONObject("Field_Officer__r");
-                JSONObject facilitator = farmVisit.optJSONObject("Facilitator__r");
-                String name = null;
-                String agentType = null;
-                String agentId = null;
-                String agentPhone = null;
-                String agentEmployeeId = null;
-                JSONObject employeeObj = null;
+                String taskId = visitLogObj.getString("Farming_Task__c");
+                JSONObject farmingTaskObj = visitLogObj.getJSONObject("Farming_Task__r");
+                JSONObject farmVisitObj = visitLogObj.getJSONObject("Farm_Visit__r");
+                JSONObject fieldManager = farmVisitObj.optJSONObject("Field_Manager__r");
+                JSONObject fieldOfficer = farmVisitObj.optJSONObject("Field_Officer__r");
+                JSONObject facilitator = farmVisitObj.optJSONObject("Facilitator__r");
 
-                if (fieldManager != null) {
-                    name = fieldManager.getString("Name");
-                    agentType = Constants.STR_FIELD_MANAGER;
-                    agentId = fieldManager.getString("Id");
-                    agentPhone = fieldManager.optString("Phone__c");
-                    employeeObj = fieldManager.optJSONObject("Employee__r");
-                    agentEmployeeId = employeeObj.optString("Name");
-                } else if (fieldOfficer != null) {
-                    name = fieldOfficer.getString("Name");
-                    agentType = Constants.STR_FIELD_OFFICER;
-                    agentId = fieldOfficer.getString("Id");
-                    agentPhone = fieldOfficer.optString("Phone__c");
-                    employeeObj = fieldOfficer.optJSONObject("Employee__r");
-                    agentEmployeeId = employeeObj.optString("Name");
-                } else if (facilitator != null) {
-                    name = facilitator.getString("Name");
-                    agentType = STR_FACILITATOR;
-                    agentId = facilitator.getString("Id");
-                    agentPhone = facilitator.optString("Phone__c");
-                    agentEmployeeId = facilitator.optString("Employee_ID__c");
-                }
-                taskMap.put("agentName", name);
-                taskMap.put("agentType", agentType);
-                taskMap.put("Id", taskId);
-                taskMap.put("agentId", agentId);
-                taskMap.put("agentPhone", agentPhone);
-                taskMap.put("agentEmployeeId", agentEmployeeId);
-                visitLogFarmingTasks.put(taskId, taskMap);
-                farmingTaskIds = farmingTaskIds + "'" + taskId + "'";
-                if (i < arrRecords.length() - 1) {
-                    farmingTaskIds = farmingTaskIds + ",";
+                JSONObject shambaObj = farmingTaskObj.optJSONObject("Shamba__r");
+                String signupStatus = shambaObj.optString("Sign_Up_Status__c");
+
+                if (signupStatus.equalsIgnoreCase(Constants.STR_APPROVED)) {
+                    String agentName = null;
+                    String agentType = null;
+                    String agentId = null;
+                    String agentPhone = null;
+                    String agentEmployeeId = null;
+                    JSONObject employeeObj = null;
+
+                    if (fieldManager != null) {
+                        agentName = fieldManager.getString("Name");
+                        agentType = Constants.STR_FIELD_MANAGER;
+                        agentId = fieldManager.getString("Id");
+                        agentPhone = fieldManager.optString("Phone__c");
+                        employeeObj = fieldManager.optJSONObject("Employee__r");
+                        agentEmployeeId = employeeObj.optString("Name");
+                    } else if (fieldOfficer != null) {
+                        agentName = fieldOfficer.getString("Name");
+                        agentType = Constants.STR_FIELD_OFFICER;
+                        agentId = fieldOfficer.getString("Id");
+                        agentPhone = fieldOfficer.optString("Phone__c");
+                        employeeObj = fieldOfficer.optJSONObject("Employee__r");
+                        agentEmployeeId = employeeObj.optString("Name");
+                    } else if (facilitator != null) {
+                        agentName = facilitator.getString("Name");
+                        agentType = STR_FACILITATOR;
+                        agentId = facilitator.getString("Id");
+                        agentPhone = facilitator.optString("Phone__c");
+                        agentEmployeeId = facilitator.optString("Employee_ID__c");
+                    }
+
+
+                    Task visitLogTask = new Task();
+                    visitLogTask.setAgentId(agentId);
+                    visitLogTask.setAgentName(agentName);
+                    visitLogTask.setAgentType(agentType);
+                    visitLogTask.setAgentPhoneNumber(agentPhone);
+                    visitLogTask.setAgentEmployeeId(agentEmployeeId);
+                    visitLogTask.setTaskId(taskId);
+                    visitLogTask.setStatus(farmingTaskObj.optString("Status__c"));
+                    visitLogTask.setStartedDate(farmingTaskObj.optString("Started_Date__c"));
+                    visitLogTask.setName(farmingTaskObj.optString("Name"));
+                    visitLogTask.setDueDate(farmingTaskObj.optString("Due_Date__c"));
+                    visitLogTask.setCompletionDate(farmingTaskObj.optString("Completion_Date__c"));
+
+
+                    String shambaName = shambaObj.optString("Name");
+                    if (shambaName != null) {
+                        visitLogTask.setShambaName(shambaName);
+                    }
+                    String farmerName = farmVisitObj.optString("Farmer_Name__c");
+                    visitLogTask.setFarmerName(farmerName);
+
+                    JSONObject taskItem = visitLogObj.optJSONObject("Task_Item__r");
+                    if (taskItem != null) {
+
+                        String id = taskItem.optString("Id");
+                        String textValue = taskItem.optString("Text_Value__c");
+                        int sequence = taskItem.optInt("Sequence__c");
+                        String recordType = taskItem.optJSONObject("RecordType").getString("Name");
+                        String taskItemName = taskItem.optString("Name");
+                        double latitude = taskItem.optDouble("Location__Latitude__s");
+                        if (Double.isNaN(latitude))
+                            latitude = 0;
+                        double longitude = taskItem.optDouble("Location__Longitude__s");
+                        if (Double.isNaN(longitude))
+                            longitude = 0;
+                        String lastModifiedDate = visitLogObj.optString("Sync_Date_Time__c");
+                        SimpleDateFormat serverFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+                        Date lastModified = null;
+                        try {
+                            lastModified = serverFormat.parse(lastModifiedDate);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        String gpsTakenTime = taskItem.getString("GPS_Taken_Time__c");
+                        String fileType = taskItem.getString("File_Type__c");
+                        String fileActionType = taskItem.getString("File_Action__c");
+                        String fileActionPerformed = taskItem.optString("Action_Performed__c");
+                        String description = taskItem.getString("Description__c");
+
+                        RealmList<TaskItemOption> options = new RealmList<>();
+
+                        TaskItem newTaskItem = new TaskItem(sequence, id, taskId, taskItemName, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false, "", "", false, false);
+                        visitLogTask.getTaskItems().add(newTaskItem);
+
+                        allTasks.add(visitLogTask);
+                    }
                 }
             }
-        }
-        if (farmingTaskIds != null && !farmingTaskIds.isEmpty()) {
-            WebApi.getAllVisitLogsForMyLogbook(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        if (response.code() == 200) {
-                            String responseStr = "";
-
-                            try {
-                                responseStr = response.body().string();
-                                parseAllVisitLogsDataForLogbook(responseStr);
-                                WebApi.getMyLogBookAttachments(myLogbookAttachmentCallback);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    t.printStackTrace();
-                }
-            }, farmingTaskIds);
+            parseVisitLogsFromTasks(allTasks);
         }
     }
 
