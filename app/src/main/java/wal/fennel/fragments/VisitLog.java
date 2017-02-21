@@ -37,7 +37,6 @@ import com.kbeanie.multipicker.api.entity.ChosenImage;
 import com.makeramen.roundedimageview.RoundedImageView;
 import com.squareup.picasso.NetworkPolicy;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -560,17 +559,18 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
             e.printStackTrace();
         }
 
-        long timeMillis = System.currentTimeMillis();
+//        long timeMillis = System.currentTimeMillis();
+//
+//        if(time != null && !time.isEmpty()) {
+//            try {
+//                timeMillis = FennelUtils.getTimeInMillis(time, Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS);
+//            } catch (ParseException e) {
+//                e.printStackTrace();
+//            }
+//        }
 
-        if(time != null && !time.isEmpty()) {
-            try {
-                timeMillis = FennelUtils.getTimeInMillis(time, Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        }
-
-        time = FennelUtils.getFormattedTime(timeMillis, Constants.STR_TIME_FORMAT_YYYY_MM_DD_HH_MM_SS);
+//        time = FennelUtils.getFormattedTime(timeMillis, Constants.STR_TIME_FORMAT_YYYY_MM_DD_HH_MM_SS);
+//        time = FennelUtils.getCurrentFormattedTime();
 
         String gpsStamp = "Latitude: %s\nLongitude: %s\nTime: %s";
 

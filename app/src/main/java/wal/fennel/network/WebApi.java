@@ -64,6 +64,7 @@ import wal.fennel.utils.Singleton;
 import static io.realm.Realm.getDefaultInstance;
 import static wal.fennel.utils.Constants.FARMING_STATE_ONTIME;
 import static wal.fennel.utils.Constants.STR_FACILITATOR;
+import static wal.fennel.utils.Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS;
 
 /**
  * Created by Khawar on 21/10/2016.
@@ -1348,7 +1349,7 @@ public class WebApi {
         newFarmVisitLogMap.put("Farm_Visit__c", farmVisitLog.getFarmVisitId());
         newFarmVisitLogMap.put("Farming_Task__c", farmVisitLog.getFarmingTaskId());
         newFarmVisitLogMap.put("Task_Item__c", farmVisitLog.getTaskItemId());
-        newFarmVisitLogMap.put("Sync_Date_Time__c", farmVisitLog.getTaskModifiedTime());
+        newFarmVisitLogMap.put("Sync_Date_Time__c", FennelUtils.getFormattedUTCTime(farmVisitLog.getTaskModifiedTime().getTime(), STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS));
         newFarmVisitLogMap.put("Log_Message__c", farmVisitLog.getLogMessage());
 
         return newFarmVisitLogMap;
@@ -2473,7 +2474,7 @@ public class WebApi {
                 String status = farmObj.getString("Sign_Up_Status__c");
 
                 String strLastModifiedDate = farmObj.getString("LastModifiedDate");
-                Date lastModifiedDate = FennelUtils.getLastModifiedDateFromString(strLastModifiedDate, Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS);
+                Date lastModifiedDate = FennelUtils.getLastModifiedDateFromString(strLastModifiedDate, STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS);
 
                 Farmer farmer = new Farmer(lastModifiedDate, id, farmId, fullName, firstName, secondName, surname, idNumber, gender, leader, location, locationId, subLocation, subLocationId, village, villageId, tree, treeId, isFarmerHome, mobileNumber, "", "", status, false, "", "", null, Constants.FarmerType.MYSIGNUPS);
 

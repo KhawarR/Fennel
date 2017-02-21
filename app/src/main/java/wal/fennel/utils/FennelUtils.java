@@ -17,10 +17,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 import java.util.List;
-import java.util.regex.Pattern;
+import java.util.Locale;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 import wal.fennel.dropbox.DropboxClient;
 import wal.fennel.dropbox.UploadTask;
@@ -318,5 +318,13 @@ public class FennelUtils {
 
     private static void uploadDropboxFile(Context context, File file, String fileDropboxPath){
         new UploadTask(DropboxClient.getClient(Constants.DropboxConstants.ACCESS_TOKEN), file, context, fileDropboxPath).execute();
+    }
+
+    public static String getFormattedUTCTime(long time, String format) {
+        Date date = new Date(time);
+        DateFormat formatter = new SimpleDateFormat(format);
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String dateFormatted = formatter.format(date);
+        return dateFormatted;
     }
 }
