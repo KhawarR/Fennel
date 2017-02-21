@@ -824,10 +824,12 @@ public class WebApi {
                             FennelUtils.appendDebugLog("FarmVisit Create failed - " + response.code() + " - " + errorMessage);
                             Exception e = new Exception("FarmVisit Create failed - " + response.code() + " - " + errorMessage);
                             Crashlytics.logException(e);
+                            countFailedCalls++;
                             if (errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)) {
                                 sessionExpireRedirect();
+                            } else if (errorMessage.equalsIgnoreCase(Constants.STR_RESPONSE_ENTITIY_DELETED)) {
+                                countFailedCalls--;
                             }
-                            countFailedCalls++;
                             adjustCountCallFailedFarmVisitLog(farmVisit.getFarmVisitId());
                             checkSyncComplete();
                         }
@@ -947,7 +949,6 @@ public class WebApi {
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     countCalls--;
                     Log.i("FENNEL", "Farming task onResponse.. Count Calls: " + countCalls);
-
 
                     FennelUtils.appendDebugLog("FarmingTask edit response: " + farmingTask.getTaskId() + " - " + response.code());
 
@@ -1084,8 +1085,12 @@ public class WebApi {
         for (int i = 0; i < taskItemPics.size(); i++) {
             final TaskItem taskItem = taskItemPics.get(i);
 
-            if(taskItem.isPicUploadDirty()) {
-                attachImageToTaskItemObject(taskItem);
+            if(taskItem.isValid()) {
+                if(taskItem.isPicUploadDirty()) {
+                    attachImageToTaskItemObject(taskItem);
+                }
+            } else {
+                countCalls--;
             }
         }
     }
@@ -1133,10 +1138,16 @@ public class WebApi {
                         FennelUtils.appendDebugLog("TaskItemOption edit failed - " + response.code() + " - "  + errorMessage);
                         Exception e = new Exception("TaskItemOption Edit failed - " + response.code() + " - "  + errorMessage);
                         Crashlytics.logException(e);
+                        countFailedCalls++;
                         if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
                             sessionExpireRedirect();
+                        } else if(errorMessage.equalsIgnoreCase(Constants.STR_RESPONSE_ENTITIY_DELETED)){
+                            countFailedCalls--;
+                            Realm realm = Realm.getDefaultInstance();
+                            realm.beginTransaction();
+                            taskItemOption.deleteFromRealm();
+                            realm.commitTransaction();
                         }
-                        countFailedCalls++;
                         checkSyncComplete();
                     }
                 }
@@ -1825,9 +1836,39 @@ public class WebApi {
                             taskItemDBObj.setPicUploadDirty(false);
                             taskItemDBObj.setAttachmentId(newPicId);
                             realm.commitTransaction();
-                        } else {
+                        }
+                        else if(response.code() == 401){
+                            FennelUtils.appendDebugLog("TaskItem picture upload failed!");
                             countFailedCalls++;
-                            Log.i("Fennel", "TaskItem picture upload failed!");
+                            sessionExpireRedirect();
+                        } else {
+                            String errorMessage = "";
+                            if(response.errorBody() != null) {
+                                try {
+                                    errorMessage = response.errorBody().string().toString();
+                                    JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
+                                    errorMessage = objError.getString("message");
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            FennelUtils.appendDebugLog("TaskItem picture upload failed! - " + response.code() + " - "  + errorMessage);
+                            Exception e = new Exception("TaskItem picture upload failed! - " + response.code() + " - "  + errorMessage);
+                            Crashlytics.logException(e);
+                            countFailedCalls++;
+                            if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
+                                sessionExpireRedirect();
+                            } else if (errorMessage.equalsIgnoreCase(Constants.STR_RESPONSE_ENTITIY_DELETED)) {
+                                countFailedCalls--;
+                                Realm realm = Realm.getDefaultInstance();
+                                realm.beginTransaction();
+                                if(taskItem.isValid()) {
+                                    taskItem.deleteFromRealm();
+                                }
+                                realm.commitTransaction();
+                            }
                         }
                         checkSyncComplete();
                     }
@@ -1856,9 +1897,39 @@ public class WebApi {
                             final TaskItem taskItemDBObj = realm.where(TaskItem.class).equalTo("id", taskItem.getId()).findFirst();
                             taskItemDBObj.setPicUploadDirty(false);
                             realm.commitTransaction();
-                        } else {
+                        }
+                        else if(response.code() == 401){
+                            FennelUtils.appendDebugLog("TaskItem picture edit failed!");
                             countFailedCalls++;
-                            Log.i("Fennel", "TaskItem picture edit failed!");
+                            sessionExpireRedirect();
+                        } else {
+                            String errorMessage = "";
+                            if(response.errorBody() != null) {
+                                try {
+                                    errorMessage = response.errorBody().string().toString();
+                                    JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
+                                    errorMessage = objError.getString("message");
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            FennelUtils.appendDebugLog("TaskItem picture edit failed! - " + response.code() + " - "  + errorMessage);
+                            Exception e = new Exception("TaskItem picture edit failed! - " + response.code() + " - "  + errorMessage);
+                            Crashlytics.logException(e);
+                            countFailedCalls++;
+                            if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
+                                sessionExpireRedirect();
+                            } else if (errorMessage.equalsIgnoreCase(Constants.STR_RESPONSE_ENTITIY_DELETED)) {
+                                countFailedCalls--;
+                                Realm realm = Realm.getDefaultInstance();
+                                realm.beginTransaction();
+                                if(taskItem.isValid()) {
+                                    taskItem.deleteFromRealm();
+                                }
+                                realm.commitTransaction();
+                            }
                         }
                         checkSyncComplete();
                     }
