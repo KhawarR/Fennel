@@ -38,7 +38,6 @@ import com.makeramen.roundedimageview.RoundedImageView;
 import com.squareup.picasso.NetworkPolicy;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import butterknife.Bind;
@@ -262,7 +261,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                             taskItem.setLatitude(latitude);
                             taskItem.setLongitude(longitude);
                             taskItem.setGpsTakenTime(FennelUtils.getFormattedTime(System.currentTimeMillis(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS));
-                            taskItem.setDateModified(new Date());
+                            taskItem.setDateModified(FennelUtils.getCurrentUTCDateTime());
                         }
                         setTaskDone(taskItem);
                         if(taskItem.isTaskDone()) {
@@ -295,7 +294,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                             Realm realm = Realm.getDefaultInstance();
                             realm.beginTransaction();
                             taskItem.getOptions().get(0).setValue(!taskItem.getOptions().get(0).isValue());
-                            taskItem.setDateModified(new Date());
+                            taskItem.setDateModified(FennelUtils.getCurrentUTCDateTime());
                             realm.commitTransaction();
                         }
                         setTaskDone(taskItem);
@@ -323,7 +322,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                         hideKeyboard();
                         taskItem.setTextValue(etHoleCount.getText().toString());
                         setTaskDone(taskItem);
-                        taskItem.setDateModified(new Date());
+                        taskItem.setDateModified(FennelUtils.getCurrentUTCDateTime());
                         if(taskItem.isTaskDone()) {
                             updatedTaskItems.add(taskItem);
                         }
@@ -357,7 +356,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                                 try {
                                     getActivity().startActivity(newIntent);
                                     setTaskDone(taskItem);
-                                    taskItem.setDateModified(new Date());
+                                    taskItem.setDateModified(FennelUtils.getCurrentUTCDateTime());
                                     if(taskItem.isTaskDone()) {
                                         updatedTaskItems.add(taskItem);
                                     }
@@ -452,7 +451,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                     public void onClick(View v) {
                         hideKeyboard();
                         setTaskDone(taskItem);
-                        taskItem.setDateModified(new Date());
+                        taskItem.setDateModified(FennelUtils.getCurrentUTCDateTime());
                         if(taskItem.isTaskDone()) {
                             updatedTaskItems.add(taskItem);
                         }
@@ -749,7 +748,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
             taskItem.setLatitude(item.getLatitude());
             taskItem.setLongitude(item.getLongitude());
             taskItem.setOptions(item.getOptions());
-            taskItem.setDateModified(item.getDateModified() == null ? new Date() : item.getDateModified());
+            taskItem.setDateModified(item.getDateModified() == null ? FennelUtils.getCurrentUTCDateTime() : item.getDateModified());
             taskItem.setAgentName(item.getAgentName());
             taskItem.setFarmerName(item.getFarmerName());
             taskItem.setAgentAttachmentId(item.getAgentAttachmentId());
