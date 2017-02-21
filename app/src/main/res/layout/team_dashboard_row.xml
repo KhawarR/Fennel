@@ -19,7 +19,7 @@
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginLeft="5dp">
+            android:layout_margin="10dp">
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/img_left"
@@ -27,10 +27,6 @@
                 android:layout_height="55dp"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:layout_marginEnd="5dp"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginStart="5dp"
                 android:src="@color/app_green"
                 fennel:civ_border_color="@color/app_green"
                 fennel:civ_border_width="5dp" />
@@ -59,7 +55,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
-                android:layout_marginLeft="15dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
                 android:text="Farmer's Signed Up"
                 android:textColor="@color/black_txt_color"
@@ -72,10 +69,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="15dp"
                 android:layout_marginBottom="5dp"
-                android:layout_marginEnd="20dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="20dp"
-                android:layout_marginStart="15dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
                 android:progress="80"
                 android:progressDrawable="@drawable/progress_bar_bg" />
 
@@ -85,9 +80,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginBottom="10dp"
-                android:layout_marginEnd="20dp"
                 android:layout_marginLeft="15dp"
-                android:layout_marginRight="20dp"
                 android:layout_marginStart="15dp"
                 android:text="Farmer's Signed Up"
                 android:textColor="@color/black_txt_color"
@@ -99,9 +92,10 @@
             android:layout_width="60dp"
             android:layout_height="match_parent"
             android:gravity="center"
+            android:layout_marginLeft="5dp"
             android:orientation="vertical">
 
-            <TextView
+            <wal.fennel.views.FontTextView
                 android:id="@+id/due_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -109,7 +103,8 @@
                 android:gravity="bottom"
                 android:text="19"
                 android:textColor="@color/black"
-                android:textSize="24sp" />
+                android:textSize="28sp"
+                fennel:fontName="Avenir-Book.ttf"/>
 
             <TextView
                 android:id="@+id/due_date_month"

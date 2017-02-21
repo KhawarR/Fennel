@@ -100,7 +100,8 @@ public class TeamDashboardAdapter extends BaseAdapter{
         } else {
             dueDateText.setVisibility(View.VISIBLE);
             monthText.setVisibility(View.VISIBLE);
-            dueDateText.setText(String.valueOf(dueDate.getDate()));
+            String dueDateStr = (dueDate.getDate()/10) < 1 ? "0"+String.valueOf(dueDate.getDate()) : String.valueOf(dueDate.getDate());
+            dueDateText.setText(dueDateStr);
             monthText.setText(FennelUtils.getMonthString(dueDate.getMonth()));
         }
 

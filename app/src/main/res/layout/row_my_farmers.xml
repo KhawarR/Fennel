@@ -27,8 +27,8 @@
             android:textColor="@color/black_txt_color"
             android:maxLines="1"
             android:ellipsize="end"
-            android:textSize="24sp"
-            fennel:fontName="Avenir-Medium.ttf"/>
+            android:textSize="28sp"
+            fennel:fontName="Avenir-Book.ttf"/>
 
         <wal.fennel.views.FontTextView
             android:id="@+id/tvDeadlineMonth"

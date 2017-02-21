@@ -237,40 +237,40 @@ public class FennelUtils {
 
         switch (monthIndex) {
             case 0:
-                monthStr = "JAN";
+                monthStr = "Jan";
                 break;
             case 1:
-                monthStr = "FEB";
+                monthStr = "Feb";
                 break;
             case 2:
-                monthStr = "MAR";
+                monthStr = "Mar";
                 break;
             case 3:
-                monthStr = "APR";
+                monthStr = "Apr";
                 break;
             case 4:
-                monthStr = "MAY";
+                monthStr = "May";
                 break;
             case 5:
-                monthStr = "JUN";
+                monthStr = "Jun";
                 break;
             case 6:
-                monthStr = "JUL";
+                monthStr = "Jul";
                 break;
             case 7:
-                monthStr = "AUG";
+                monthStr = "Aug";
                 break;
             case 8:
-                monthStr = "SEP";
+                monthStr = "Sep";
                 break;
             case 9:
-                monthStr = "OCT";
+                monthStr = "Oct";
                 break;
             case 10:
-                monthStr = "NOV";
+                monthStr = "Nov";
                 break;
             case 11:
-                monthStr = "DEC";
+                monthStr = "Dec";
                 break;
         }
         return monthStr;
