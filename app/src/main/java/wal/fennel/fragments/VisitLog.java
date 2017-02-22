@@ -204,7 +204,9 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
     @Override
     public void onDestroy() {
         super.onDestroy();
-        gps.stopUsingGPS();
+        if(gps != null) {
+            gps.stopUsingGPS();
+        }
     }
 
     private void populateTaskItems(){
@@ -291,13 +293,13 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                     @Override
                     public void onClick(View v) {
                         hideKeyboard();
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
                         if(taskItem.getOptions() != null && taskItem.getOptions().size() > 0) {
-                            Realm realm = Realm.getDefaultInstance();
-                            realm.beginTransaction();
                             taskItem.getOptions().get(0).setValue(!taskItem.getOptions().get(0).isValue());
-                            taskItem.setDateModified(new Date());
-                            realm.commitTransaction();
                         }
+                        taskItem.setDateModified(new Date());
+                        realm.commitTransaction();
                         setTaskDone(taskItem);
                         if(taskItem.isTaskDone()) {
                             updatedTaskItems.add(taskItem);
