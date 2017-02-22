@@ -2316,6 +2316,11 @@ public class WebApi {
 
     private static void parseMyFarmersData(String data) throws JSONException {
 
+        Realm realm = Realm.getDefaultInstance();
+        realm.beginTransaction();
+        realm.delete(Task.class);
+        realm.commitTransaction();
+
         Log.i("FENNEL", data);
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
@@ -2356,7 +2361,7 @@ public class WebApi {
 //                    if (tasksMap.containsKey(taskName)) {
 //                        currentTask = (Task) tasksMap.get(taskName);
 //                    } else {
-                        Realm realm = Realm.getDefaultInstance();
+
                         realm.beginTransaction();
 
                         currentTask = realm.createObject(Task.class);
@@ -2368,8 +2373,10 @@ public class WebApi {
                         currentTask.setStatus(status);
                         currentTask.setTaskShambaId(farmId);
                         currentTask.setTaskFarmerId(farmerId);
+                        currentTask.setFarmerName(farmerName);
 
-                        realm.commitTransaction();
+
+                    realm.commitTransaction();
 //                    currentTask = new Tasks(id, taskName, startedDate, completionDate, dueDate, status);
 //                        tasksMap.put(taskName, currentTask);
 //                    }
@@ -2909,6 +2916,8 @@ public class WebApi {
                                 if (Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskItems() == null) {
                                     Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).setTaskItems(new RealmList<TaskItem>());
                                 }
+                                Task parentTask = (Task) Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k);
+                                taskItem.setFarmerName(parentTask.getFarmerName());
                                 Singleton.getInstance().myFarmersList.get(j).getFarmerTasks().get(k).getTaskItems().add(taskItem);
                                 realm.commitTransaction();
                             }
