@@ -14,6 +14,7 @@ import com.google.android.gms.analytics.Tracker;
 
 import butterknife.ButterKnife;
 import wal.fennel.R;
+import wal.fennel.activities.MainActivity;
 import wal.fennel.application.Fennel;
 import wal.fennel.utils.Constants;
 import wal.fennel.views.TitleBarLayout;
@@ -49,6 +50,11 @@ public abstract class BaseFragment extends Fragment implements TitleBarLayout.Ti
             mTracker.setScreenName(screenName);
             mTracker.send(new HitBuilders.ScreenViewBuilder().build());
         }
+    }
+
+    public void refreshAppScreens() {
+        startActivity(new Intent(getActivity(), MainActivity.class));
+        getActivity().finish();
     }
 
     protected abstract String getTrackerScreenName();
