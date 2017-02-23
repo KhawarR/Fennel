@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -2164,7 +2166,35 @@ public class WebApi {
         PreferenceHelper.getInstance().writeLastSyncTime(syncTime);
     }
 
+    private static Handler mHandler = null;
+    private static HandlerThread mHandlerThread = null;
+
+    private static void startHandlerThread(){
+        mHandlerThread = new HandlerThread("HandlerThread");
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper());
+    }
+
+    private static void sendGetServerDataBroadcast(boolean isStarted) {
+        Intent resultsIntent = new Intent(Constants.GET_FULL_SERVER_DATA_BROADCAST_ACTION);
+        resultsIntent.putExtra(Constants.GET_FULL_SERVER_DATE_BROADCAST_INTENT_KEY_IS_STARTED, isStarted);
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(mContext);
+        localBroadcastManager.sendBroadcast(resultsIntent);
+    }
+
     public static void getFullServerData(){
+
+        Toast.makeText(mContext, "Fetching data, please wait", Toast.LENGTH_SHORT).show();
+
+        sendGetServerDataBroadcast(true);
+
+        startHandlerThread();
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                sendGetServerDataBroadcast(false);
+            }
+        }, 7000);
 
         WebApi.getMySignUps(new Callback<ResponseBody>() {
             @Override
