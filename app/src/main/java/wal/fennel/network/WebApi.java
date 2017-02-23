@@ -2194,7 +2194,7 @@ public class WebApi {
             public void run() {
                 sendGetServerDataBroadcast(false);
             }
-        }, 7000);
+        }, 10000);
 
         WebApi.getMySignUps(new Callback<ResponseBody>() {
             @Override
