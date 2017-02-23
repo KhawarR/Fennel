@@ -39,6 +39,8 @@ public class TaskItem extends RealmObject implements Parcelable {
     private String agentAttachmentId = "";
     private boolean isTaskDone = false;
 
+    private String logbookMessage = "";
+
     public TaskItem(){
 
     }
@@ -68,6 +70,8 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.agentAttachmentId = other.agentAttachmentId;
         this.isDataDirty = other.isDataDirty;
         this.isPicUploadDirty = other.isPicUploadDirty;
+
+        this.logbookMessage = other.logbookMessage;
     }
 
     public TaskItem(int sequence, String id, String farmingTaskId, String name, String recordType,
@@ -75,7 +79,7 @@ public class TaskItem extends RealmObject implements Parcelable {
                     String fileActionPerformed, String gpsTakenTime, double latitude,
                     double longitude, RealmList<TaskItemOption> options, Date lastModified,
                     String agent, String farmer, String agentAttachmentId, boolean isTaskDone,
-                    String attachmentPath, String attachmentId, boolean isDataDirty, boolean isPicUploadDirty) {
+                    String attachmentPath, String attachmentId, boolean isDataDirty, boolean isPicUploadDirty, String logbookMessage) {
         this.sequence = sequence;
         this.id = id;
         this.farmingTaskId = farmingTaskId;
@@ -100,6 +104,8 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.agentAttachmentId = agentAttachmentId;
         this.isDataDirty = isDataDirty;
         this.isPicUploadDirty = isPicUploadDirty;
+
+        this.logbookMessage = logbookMessage;
     }
 
     @Override
@@ -128,6 +134,8 @@ public class TaskItem extends RealmObject implements Parcelable {
         dest.writeString(this.agentAttachmentId);
         dest.writeInt(this.isDataDirty ? 1 : 0);
         dest.writeInt(this.isPicUploadDirty ? 1 : 0);
+
+        dest.writeString(this.logbookMessage);
     }
 
     protected TaskItem(Parcel in) {
@@ -156,6 +164,8 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.agentAttachmentId = in.readString();
         this.isDataDirty = in.readInt() == 1 ? true : false;
         this.isPicUploadDirty = in.readInt() == 1 ? true : false;
+
+        this.logbookMessage = in.readString();
     }
 
     public static final Parcelable.Creator<TaskItem> CREATOR = new Parcelable.Creator<TaskItem>() {
@@ -357,5 +367,13 @@ public class TaskItem extends RealmObject implements Parcelable {
 
     public void setPicUploadDirty(boolean picUploadDirty) {
         isPicUploadDirty = picUploadDirty;
+    }
+
+    public String getLogbookMessage() {
+        return logbookMessage;
+    }
+
+    public void setLogbookMessage(String logbookMessage) {
+        this.logbookMessage = logbookMessage;
     }
 }
