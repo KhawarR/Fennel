@@ -178,6 +178,17 @@ public class FennelRealmMigrations implements RealmMigration{
             oldVersion++;
         }
 
+        if (oldVersion == 4) {
+
+            schema.get("TaskItem")
+                    .addField("logbookMessage", String.class);
+
+            schema.get("LogTaskItem")
+                    .addField("logbookMessage", String.class);
+
+            oldVersion++;
+        }
+
         if (oldVersion < newVersion) {
             throw new IllegalStateException(String.format("Migration missing from v%d to v%d", oldVersion, newVersion));
         }

@@ -69,7 +69,8 @@ public class TeamLogBookAdapter extends BaseAdapter {
         }
 
         TextView descriptionText = (TextView) view.findViewById(R.id.tv_desc);
-        String description = getLogDescriptionForTaskItem(taskItem);
+//        String description = getLogDescriptionForTaskItem(taskItem);
+        String description = taskItem.getLogbookMessage();
 //        String logText = taskItem.getAgentName() + " did " + taskItem.getFarmerName()+ "'s task " + taskItem.getName();
         descriptionText.setText(description);
         TextView timeText = (TextView)view.findViewById(R.id.tv_time);

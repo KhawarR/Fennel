@@ -39,6 +39,8 @@ public class LogTaskItem extends RealmObject implements Parcelable, Comparable<L
     private String agentAttachmentId = "";
     private boolean isTaskDone = false;
 
+    private String logbookMessage = "";
+
     public LogTaskItem(){
 
     }
@@ -68,6 +70,37 @@ public class LogTaskItem extends RealmObject implements Parcelable, Comparable<L
         this.agentAttachmentId = other.agentAttachmentId;
         this.isDataDirty = other.isDataDirty;
         this.isPicUploadDirty = other.isPicUploadDirty;
+
+        this.logbookMessage = other.logbookMessage;
+    }
+
+    public LogTaskItem(TaskItem other) {
+        this.sequence = other.getSequence();
+        this.id = other.getId();
+        this.farmingTaskId = other.getFarmingTaskId();
+        this.name = other.getName();
+        this.recordType = other.getRecordType();
+        this.description = other.getDescription();
+        this.textValue = other.getTextValue();
+        this.fileType = other.getFileType();
+        this.fileActionType = other.getFileActionType();
+        this.fileActionPerformed = other.getFileActionPerformed();
+        this.gpsTakenTime = other.getGpsTakenTime();
+        this.latitude = other.getLatitude();
+        this.longitude = other.getLongitude();
+        this.options = other.getOptions();
+        this.isTaskDone = other.isTaskDone();
+
+        this.attachmentPath = other.getAttachmentPath();
+        this.attachmentId = other.getAttachmentId();
+        this.dateModified = other.getDateModified();
+        this.agentName = other.getAgentName();
+        this.farmerName = other.getFarmerName();
+        this.agentAttachmentId = other.getAgentAttachmentId();
+        this.isDataDirty = other.isDataDirty();
+        this.isPicUploadDirty = other.isPicUploadDirty();
+
+        this.logbookMessage = other.getLogbookMessage();
     }
 
     public LogTaskItem(int sequence, String id, String farmingTaskId, String name, String recordType,
@@ -75,7 +108,7 @@ public class LogTaskItem extends RealmObject implements Parcelable, Comparable<L
                        String fileActionPerformed, String gpsTakenTime, double latitude,
                        double longitude, RealmList<TaskItemOption> options, Date lastModified,
                        String agent, String farmer, String agentAttachmentId, boolean isTaskDone,
-                       String attachmentPath, String attachmentId, boolean isDataDirty, boolean isPicUploadDirty) {
+                       String attachmentPath, String attachmentId, boolean isDataDirty, boolean isPicUploadDirty, String logbookMessage) {
         this.sequence = sequence;
         this.id = id;
         this.farmingTaskId = farmingTaskId;
@@ -100,6 +133,8 @@ public class LogTaskItem extends RealmObject implements Parcelable, Comparable<L
         this.agentAttachmentId = agentAttachmentId;
         this.isDataDirty = isDataDirty;
         this.isPicUploadDirty = isPicUploadDirty;
+
+        this.logbookMessage = logbookMessage;
     }
 
     @Override
@@ -128,6 +163,8 @@ public class LogTaskItem extends RealmObject implements Parcelable, Comparable<L
         dest.writeString(this.agentAttachmentId);
         dest.writeInt(this.isDataDirty ? 1 : 0);
         dest.writeInt(this.isPicUploadDirty ? 1 : 0);
+
+        dest.writeString(this.logbookMessage);
     }
 
     protected LogTaskItem(Parcel in) {
@@ -156,6 +193,8 @@ public class LogTaskItem extends RealmObject implements Parcelable, Comparable<L
         this.agentAttachmentId = in.readString();
         this.isDataDirty = in.readInt() == 1 ? true : false;
         this.isPicUploadDirty = in.readInt() == 1 ? true : false;
+
+        this.logbookMessage = in.readString();
     }
 
     public static final Creator<LogTaskItem> CREATOR = new Creator<LogTaskItem>() {
@@ -357,6 +396,14 @@ public class LogTaskItem extends RealmObject implements Parcelable, Comparable<L
 
     public void setPicUploadDirty(boolean picUploadDirty) {
         isPicUploadDirty = picUploadDirty;
+    }
+
+    public String getLogbookMessage() {
+        return logbookMessage;
+    }
+
+    public void setLogbookMessage(String logbookMessage) {
+        this.logbookMessage = logbookMessage;
     }
 
     @Override

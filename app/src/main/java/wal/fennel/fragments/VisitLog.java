@@ -95,6 +95,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
     private Task task;
 
     private ArrayList<TaskItem> updatedTaskItems;
+    private ArrayList<LogTaskItem> updatedLogTaskItems;
 
     public static VisitLog newInstance(String title, Farmer farmer, Task task) {
         VisitLog fragment = new VisitLog();
@@ -136,6 +137,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
         }
 
         this.updatedTaskItems = new ArrayList<>();
+        this.updatedLogTaskItems = new ArrayList<>();
 
         titleBarLayout.setOnIconClickListener(this);
         cIvIconRight = (CircleImageView) titleBarLayout.findViewById(R.id.imgRight);
@@ -268,7 +270,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                         }
                         setTaskDone(taskItem);
                         if(taskItem.isTaskDone()) {
-                            updatedTaskItems.add(taskItem);
+                            addUpdatedTaskItemAndLogTaskItem(taskItem);
                         }
                     }
                 });
@@ -302,7 +304,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                         realm.commitTransaction();
                         setTaskDone(taskItem);
                         if(taskItem.isTaskDone()) {
-                            updatedTaskItems.add(taskItem);
+                            addUpdatedTaskItemAndLogTaskItem(taskItem);
                         }
                     }
                 });
@@ -323,11 +325,11 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                     @Override
                     public void onClick(View v) {
                         hideKeyboard();
-                        taskItem.setTextValue(etHoleCount.getText().toString());
+                        taskItem.setTextValue(etHoleCount.getText().toString().trim());
                         setTaskDone(taskItem);
                         taskItem.setDateModified(new Date());
                         if(taskItem.isTaskDone()) {
-                            updatedTaskItems.add(taskItem);
+                            addUpdatedTaskItemAndLogTaskItem(taskItem);
                         }
                     }
                 });
@@ -361,7 +363,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                                     setTaskDone(taskItem);
                                     taskItem.setDateModified(new Date());
                                     if(taskItem.isTaskDone()) {
-                                        updatedTaskItems.add(taskItem);
+                                        addUpdatedTaskItemAndLogTaskItem(taskItem);
                                     }
                                 } catch (ActivityNotFoundException e) {
                                     Toast.makeText(getActivity(), "No handler for this type of file.", Toast.LENGTH_LONG).show();
@@ -456,7 +458,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                         setTaskDone(taskItem);
                         taskItem.setDateModified(new Date());
                         if(taskItem.isTaskDone()) {
-                            updatedTaskItems.add(taskItem);
+                            addUpdatedTaskItemAndLogTaskItem(taskItem);
                         }
                     }
                 });
@@ -515,7 +517,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
 
                 taskItem.setTaskDone(true);
                 if(taskItem.isTaskDone()) {
-                    updatedTaskItems.add(taskItem);
+                    addUpdatedTaskItemAndLogTaskItem(taskItem);
                 }
             }
 
@@ -532,6 +534,13 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
             cameraImagePicker.setImagePickerCallback(imagePickerCallback);
             cameraImagePicker.pickImage();
         }
+    }
+
+    private void addUpdatedTaskItemAndLogTaskItem(TaskItem taskItem) {
+        taskItem.setAgentName(PreferenceHelper.getInstance().readEmployeeFullname());
+        taskItem.setLogbookMessage(getLogDescriptionForTaskItem(taskItem));
+        updatedTaskItems.add(taskItem);
+        updatedLogTaskItems.add(new LogTaskItem(taskItem));
     }
 
     @Override
@@ -705,66 +714,100 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                 farmVisit.setDataDirty(true);
             }
 
-            for (int i=0; i<updatedTaskItems.size();i++) {
+            for (int i=0; i<updatedLogTaskItems.size();i++) {
 
                 FarmVisitLog visitLog = realm.createObject(FarmVisitLog.class);
-                String message = getLogDescriptionForTaskItem(updatedTaskItems.get(i));
-                visitLog.setAll(farmVisit.getFarmVisitId(), task.getTaskId(), updatedTaskItems.get(i).getId(), updatedTaskItems.get(i).getDateModified(), message, true);
+//                String message = getLogDescriptionForTaskItem(updatedTaskItems.get(i));
+                String message = updatedLogTaskItems.get(i).getLogbookMessage();
+                visitLog.setAll(farmVisit.getFarmVisitId(), task.getTaskId(), updatedLogTaskItems.get(i).getId(), updatedLogTaskItems.get(i).getDateModified(), message, true);
             }
 
-            // Adding updated taskItem into the Agent's log list
-            boolean isAgentFound = false;
-            for (FieldAgent fieldAgent : Singleton.getInstance().fieldAgentsVisitLogs) {
-                if(fieldAgent.getAgentId().equalsIgnoreCase(PreferenceHelper.getInstance().readLoginUserId())) {
-                    isAgentFound = true;
-                    updateTaskItemsInAgentLogs(realm, fieldAgent);
-                    break;
-                }
-            }
-
-            if(!isAgentFound) {
-                FieldAgent agent = realm.createObject(FieldAgent.class);
-                agent.setAgentId(PreferenceHelper.getInstance().readLoginUserId());
-                agent.setName(PreferenceHelper.getInstance().readAboutFN());
-                agent.setAgentType(PreferenceHelper.getInstance().readLoginUserType());
-                agent.setAgentEmployeeId(PreferenceHelper.getInstance().readUserEmployeeId());
-
-                updateTaskItemsInAgentLogs(realm, agent);
-
-                Singleton.getInstance().fieldAgentsVisitLogs.add(agent);
-            }
+            findAndUpdateFieldAgentLogs();
+//            // Adding updated taskItem into the Agent's log list
+//            boolean isAgentFound = false;
+//            for (FieldAgent fieldAgent : Singleton.getInstance().fieldAgentsVisitLogs) {
+//                if(fieldAgent.getAgentId().equalsIgnoreCase(PreferenceHelper.getInstance().readLoginUserId())) {
+//                    isAgentFound = true;
+//                    updateTaskItemsInAgentLogs(realm, fieldAgent);
+//                    break;
+//                }
+//            }
+//
+//            if(!isAgentFound) {
+//                FieldAgent agent = realm.createObject(FieldAgent.class);
+//                agent.setAgentId(PreferenceHelper.getInstance().readLoginUserId());
+//                agent.setName(PreferenceHelper.getInstance().readAboutFN());
+//                agent.setAgentType(PreferenceHelper.getInstance().readLoginUserType());
+//                agent.setAgentEmployeeId(PreferenceHelper.getInstance().readUserEmployeeId());
+//
+//                updateTaskItemsInAgentLogs(realm, agent);
+//
+//                Singleton.getInstance().fieldAgentsVisitLogs.add(agent);
+//            }
         }
         realm.commitTransaction();
         updatedTaskItems.clear();
+        updatedLogTaskItems.clear();
     }
 
-    private void updateTaskItemsInAgentLogs(Realm realm, FieldAgent agent) {
-        for (TaskItem item : updatedTaskItems) {
+//    private void updateTaskItemsInAgentLogs(Realm realm, FieldAgent agent) {
+//        for (TaskItem item : updatedTaskItems) {
+//
+//            item.setAgentName(PreferenceHelper.getInstance().readEmployeeFullname());
+//
+//            LogTaskItem taskItem = realm.createObject(LogTaskItem.class);
+//            taskItem.setSequence(item.getSequence());
+//            taskItem.setId(item.getId());
+//            taskItem.setFarmingTaskId(item.getFarmingTaskId());
+//            taskItem.setName(item.getName());
+//            taskItem.setRecordType(item.getRecordType());
+//            taskItem.setDescription(item.getDescription());
+//            taskItem.setTextValue(item.getTextValue());
+//            taskItem.setFileType(item.getFileType());
+//            taskItem.setFileActionType(item.getFileActionType());
+//            taskItem.setFileActionPerformed(item.getFileActionPerformed());
+//            taskItem.setGpsTakenTime(item.getGpsTakenTime());
+//            taskItem.setLatitude(item.getLatitude());
+//            taskItem.setLongitude(item.getLongitude());
+//            taskItem.setOptions(item.getOptions());
+//            taskItem.setDateModified(item.getDateModified() == null ? new Date() : item.getDateModified());
+//            taskItem.setAgentName(item.getAgentName());
+//            taskItem.setFarmerName(item.getFarmerName());
+//            taskItem.setAgentAttachmentId(item.getAgentAttachmentId());
+//            taskItem.setTaskDone(item.isTaskDone());
+//            taskItem.setAttachmentPath(item.getAttachmentPath());
+//            agent.getVisitLogs().add(taskItem);
+//        }
+//    }
 
-            item.setAgentName(PreferenceHelper.getInstance().readEmployeeFullname());
+    private void findAndUpdateFieldAgentLogs() {
 
-            LogTaskItem taskItem = realm.createObject(LogTaskItem.class);
-            taskItem.setSequence(item.getSequence());
-            taskItem.setId(item.getId());
-            taskItem.setFarmingTaskId(item.getFarmingTaskId());
-            taskItem.setName(item.getName());
-            taskItem.setRecordType(item.getRecordType());
-            taskItem.setDescription(item.getDescription());
-            taskItem.setTextValue(item.getTextValue());
-            taskItem.setFileType(item.getFileType());
-            taskItem.setFileActionType(item.getFileActionType());
-            taskItem.setFileActionPerformed(item.getFileActionPerformed());
-            taskItem.setGpsTakenTime(item.getGpsTakenTime());
-            taskItem.setLatitude(item.getLatitude());
-            taskItem.setLongitude(item.getLongitude());
-            taskItem.setOptions(item.getOptions());
-            taskItem.setDateModified(item.getDateModified() == null ? new Date() : item.getDateModified());
-            taskItem.setAgentName(item.getAgentName());
-            taskItem.setFarmerName(item.getFarmerName());
-            taskItem.setAgentAttachmentId(item.getAgentAttachmentId());
-            taskItem.setTaskDone(item.isTaskDone());
-            taskItem.setAttachmentPath(item.getAttachmentPath());
-            agent.getVisitLogs().add(taskItem);
+        // Adding updated taskItem into the Agent's log list
+        boolean isAgentFound = false;
+        for (FieldAgent fieldAgent : Singleton.getInstance().fieldAgentsVisitLogs) {
+            if(fieldAgent.getAgentId().equalsIgnoreCase(PreferenceHelper.getInstance().readLoginUserId())) {
+                isAgentFound = true;
+                updateTaskItemsInAgentLogs(fieldAgent);
+                break;
+            }
+        }
+
+        if(!isAgentFound) {
+            FieldAgent agent = Realm.getDefaultInstance().createObject(FieldAgent.class);
+            agent.setAgentId(PreferenceHelper.getInstance().readLoginUserId());
+            agent.setName(PreferenceHelper.getInstance().readAboutFN());
+            agent.setAgentType(PreferenceHelper.getInstance().readLoginUserType());
+            agent.setAgentEmployeeId(PreferenceHelper.getInstance().readUserEmployeeId());
+
+            updateTaskItemsInAgentLogs(agent);
+
+            Singleton.getInstance().fieldAgentsVisitLogs.add(agent);
+        }
+    }
+
+    private void updateTaskItemsInAgentLogs(FieldAgent agent) {
+        for (LogTaskItem item : updatedLogTaskItems) {
+            agent.getVisitLogs().add(item);
         }
     }
 
