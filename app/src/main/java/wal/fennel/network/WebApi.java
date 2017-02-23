@@ -1424,10 +1424,10 @@ public class WebApi {
 
         final HashMap<String, Object> newFarmingTaskMap = new HashMap<>();
         newFarmingTaskMap.put("Status__c", farmingTask.getStatus());
-        if (farmingTask.getStartedDate() != null && !farmingTask.getStartedDate().isEmpty()) {
+        if (farmingTask.getStartedDate() != null && !farmingTask.getStartedDate().isEmpty() && !farmingTask.getStartedDate().equalsIgnoreCase("null")) {
             newFarmingTaskMap.put("Started_Date__c", farmingTask.getStartedDate());
         }
-        if (farmingTask.getStatus().equalsIgnoreCase(Constants.STR_APPROVED) && farmingTask.getCompletionDate() != null && !farmingTask.getCompletionDate().isEmpty()) {
+        if (farmingTask.getStatus().equalsIgnoreCase(Constants.STR_APPROVED) && farmingTask.getCompletionDate() != null && !farmingTask.getCompletionDate().isEmpty() && !farmingTask.getCompletionDate().equalsIgnoreCase("null")) {
             newFarmingTaskMap.put("Completion_Date__c", farmingTask.getCompletionDate());
         }
 
