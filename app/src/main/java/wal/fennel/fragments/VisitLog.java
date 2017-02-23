@@ -631,7 +631,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
 
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
-        if ( task.getStatus().equalsIgnoreCase(Constants.STR_NOT_STARTED) && ((taskStatus.equalsIgnoreCase(Constants.STR_IN_PROGRESS) || (taskStatus.equalsIgnoreCase(Constants.STR_COMPLETED))))) {
+        if ( task.getStatus().equalsIgnoreCase(Constants.STR_NOT_STARTED) && ((taskStatus.equalsIgnoreCase(Constants.STR_IN_PROGRESS)) || (taskStatus.equalsIgnoreCase(Constants.STR_COMPLETED)))) {
             task.setStartedDate(FennelUtils.getFormattedUTCTime(new Date().getTime(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS));
         }
         task.setStatus(taskStatus);
