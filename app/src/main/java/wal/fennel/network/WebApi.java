@@ -938,6 +938,15 @@ public class WebApi {
                         }
 
 //                        adjustCountCallFailedFarmingTasks(farmVisitLog.getFarmingTaskId(), deleteFromRealm);
+
+                        if (count == totalCount - 1) {
+                            Set<String> keys = farmingTasks.keySet();
+                            for( String farmingTaskId : keys) {
+                                final Task farmingTask = (Task) Realm.getDefaultInstance().where(Task.class).equalTo("isDataDirty", true).equalTo("taskId", farmingTaskId).findFirst();
+                                processFarmingTask(farmingTask);
+                            }
+                        }
+
                         checkSyncComplete();
                     }
                 }
