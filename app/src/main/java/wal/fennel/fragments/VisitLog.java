@@ -631,14 +631,11 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
 
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
-        if (updatedTaskItems.size() > 0) {
-
-            task.setStatus(taskStatus);
-            if (taskStatus.equalsIgnoreCase(Constants.STR_COMPLETED)) {
-                task.setCompletionDate(FennelUtils.getFormattedUTCTime(new Date().getTime(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS));
-            }
-            task.setDataDirty(true);
+        task.setStatus(taskStatus);
+        if (taskStatus.equalsIgnoreCase(Constants.STR_COMPLETED)) {
+            task.setCompletionDate(FennelUtils.getFormattedUTCTime(new Date().getTime(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS));
         }
+        task.setDataDirty(true);
 
         for (int k = 0; k < updatedTaskItems.size(); k++) {
 
@@ -685,7 +682,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
             }
         }
 
-        if (updatedTaskItems.size() > 0 || taskStatus.equalsIgnoreCase(Constants.STR_COMPLETED)) {
+
 
             RealmResults<FarmVisit> farmVisits = Realm.getDefaultInstance().where(FarmVisit.class).equalTo("shambaId", task.getTaskShambaId()).findAll().sort("visitedDate", Sort.DESCENDING);
 
@@ -713,6 +710,8 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
             } else {
                 farmVisit.setDataDirty(true);
             }
+
+        if (updatedTaskItems.size() > 0 || taskStatus.equalsIgnoreCase(Constants.STR_COMPLETED)) {
 
             for (int i=0; i<updatedLogTaskItems.size();i++) {
 
@@ -744,6 +743,10 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
 //
 //                Singleton.getInstance().fieldAgentsVisitLogs.add(agent);
 //            }
+        } else {
+            FarmVisitLog visitLog = realm.createObject(FarmVisitLog.class);
+            visitLog.setAll(farmVisit.getFarmVisitId(), task.getTaskId(), "", new Date(), "", true);
+
         }
         realm.commitTransaction();
         updatedTaskItems.clear();

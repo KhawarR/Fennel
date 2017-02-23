@@ -1415,7 +1415,9 @@ public class WebApi {
 
         final HashMap<String, Object> newFarmingTaskMap = new HashMap<>();
         newFarmingTaskMap.put("Status__c", farmingTask.getStatus());
-        newFarmingTaskMap.put("Completion_Date__c", farmingTask.getCompletionDate());
+        if (farmingTask.getStatus().equalsIgnoreCase(Constants.STR_APPROVED) && farmingTask.getCompletionDate() != null && !farmingTask.getCompletionDate().isEmpty()) {
+            newFarmingTaskMap.put("Completion_Date__c", farmingTask.getCompletionDate());
+        }
 
         return newFarmingTaskMap;
     }
@@ -1456,9 +1458,11 @@ public class WebApi {
         final HashMap<String, Object> newFarmVisitLogMap = new HashMap<>();
         newFarmVisitLogMap.put("Farm_Visit__c", farmVisitLog.getFarmVisitId());
         newFarmVisitLogMap.put("Farming_Task__c", farmVisitLog.getFarmingTaskId());
-        newFarmVisitLogMap.put("Task_Item__c", farmVisitLog.getTaskItemId());
-        newFarmVisitLogMap.put("Sync_Date_Time__c", FennelUtils.getFormattedUTCTime(farmVisitLog.getTaskModifiedTime().getTime(), STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS));
-        newFarmVisitLogMap.put("Log_Message__c", farmVisitLog.getLogMessage());
+        if (!farmVisitLog.getFarmingTaskId().isEmpty()) {
+            newFarmVisitLogMap.put("Task_Item__c", farmVisitLog.getTaskItemId());
+            newFarmVisitLogMap.put("Sync_Date_Time__c", FennelUtils.getFormattedUTCTime(farmVisitLog.getTaskModifiedTime().getTime(), STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS));
+            newFarmVisitLogMap.put("Log_Message__c", farmVisitLog.getLogMessage());
+        }
 
         return newFarmVisitLogMap;
     }

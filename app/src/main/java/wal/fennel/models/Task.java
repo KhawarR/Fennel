@@ -14,7 +14,7 @@ public class Task extends RealmObject implements Parcelable {
     private String taskId;
     private String name;
     private String startedDate;
-    private String completionDate;
+    private String completionDate = "";
     private String dueDate;
     private String status;
     private boolean isHeader;
