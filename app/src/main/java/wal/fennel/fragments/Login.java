@@ -114,8 +114,8 @@ public class Login extends BaseFragment {
             }
 
             //TODO Test to Production
-            String username = getString(R.string.auth_username_test_env);
-//            String username = getString(R.string.auth_username_test_prod);
+//            String username = getString(R.string.auth_username_test_env);
+            String username = getString(R.string.auth_username_test_prod);
             String password = getString(R.string.auth_password);
             loadingStarted();
             boolean isCallProcessed = WebApi.salesForceAuth(authCallback, username, password);

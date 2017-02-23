@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -542,7 +543,7 @@ public class WebApi {
         processTaskItemPicsCalls(taskItemPics);
         //endregion
 
-        processFarmingTaskCalls();
+//        processFarmingTaskCalls();
 
         PreferenceHelper.getInstance().writeIsSyncInProgress(true);
     }
@@ -860,8 +861,17 @@ public class WebApi {
     private static void processFarmVisitLogCalls(final FarmVisit farmVisit) {
 
         RealmResults<FarmVisitLog> farmVisitLogs = Realm.getDefaultInstance().where(FarmVisitLog.class).equalTo("isDataDirty", true).equalTo("farmVisitId", farmVisit.getFarmVisitId()).findAll();
+        final int totalCount = farmVisitLogs.size();
+
+        final Map<String, Integer> farmingTasks = new HashMap<>();
+        for (FarmVisitLog visitLog : farmVisitLogs) {
+            if (farmingTasks.get(visitLog.getFarmingTaskId()) == null) {
+                farmingTasks.put(visitLog.getFarmingTaskId(), 0);
+            }
+        }
 
         for (int i = 0; i < farmVisitLogs.size(); i++) {
+            final int count = i;
             final FarmVisitLog farmVisitLog = farmVisitLogs.get(i);
             final HashMap<String, Object> farmVisitLogMap = getFarmVisitLogMap(farmVisitLog);
 
@@ -901,6 +911,13 @@ public class WebApi {
 
                         FennelUtils.appendDebugLog("FarmVisitLog create finished: " + farmVisitLog.getFarmVisitId());
 
+                        if (count == totalCount - 1) {
+                            Set<String> keys = farmingTasks.keySet();
+                            for( String farmingTaskId : keys) {
+                                final Task farmingTask = (Task) Realm.getDefaultInstance().where(Task.class).equalTo("isDataDirty", true).equalTo("taskId", farmingTaskId).findFirst();
+                                processFarmingTask(farmingTask);
+                            }
+                        }
 //                        processFarmingTaskCalls();
 
                         checkSyncComplete();
@@ -1009,6 +1026,75 @@ public class WebApi {
                 }
             }, farmingTask.getTaskId(), farmingTaskMap);
         }
+    }
+
+    private static void processFarmingTask(Task task) {
+        final Task farmingTask = task;
+        final HashMap<String, Object> farmingTaskMap = getFarmingTaskMap(farmingTask);
+        WebApi.editFarmingTask(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                countCalls--;
+                Log.i("FENNEL", "Farming task onResponse.. Count Calls: " + countCalls);
+
+                FennelUtils.appendDebugLog("FarmingTask edit response: " + farmingTask.getTaskId() + " - " + response.code());
+
+                if (response.code() == Constants.RESPONSE_SUCCESS || response.code() == Constants.RESPONSE_SUCCESS_ADDED || response.code() == Constants.RESPONSE_SUCCESS_NO_CONTENT) {
+
+                    FennelUtils.appendDebugLog("FarmingTask edit finished: " + farmingTask.getTaskId());
+                    Realm realm = Realm.getDefaultInstance();
+                    realm.beginTransaction();
+                    farmingTask.setDataDirty(false);
+                    realm.commitTransaction();
+
+                    checkSyncComplete();
+                }
+                else if(response.code() == 401){
+                    FennelUtils.appendDebugLog("FarmingTask edit Session Expired, redirected: " + farmingTask.getTaskId());
+                    countFailedCalls++;
+                    sessionExpireRedirect();
+                } else {
+                    String errorMessage = "";
+                    if(response.errorBody() != null) {
+                        try {
+                            errorMessage = response.errorBody().string().toString();
+                            JSONObject objError = new JSONObject(new JSONArray(errorMessage).getJSONObject(0).toString());
+                            errorMessage = objError.getString("message");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    FennelUtils.appendDebugLog("FarmingTask edit failed - " + response.code() + " - "  + errorMessage);
+                    Exception e = new Exception("FarmingTask Edit failed - " + response.code() + " - "  + errorMessage);
+                    Crashlytics.logException(e);
+                    countFailedCalls++;
+                    if(errorMessage.equalsIgnoreCase(Constants.URL_NOT_SET_ERROR_MESSAGE)){
+                        sessionExpireRedirect();
+                    } else if (errorMessage.equalsIgnoreCase(Constants.STR_RESPONSE_ENTITIY_DELETED)) {
+                        countFailedCalls--;
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        farmingTask.deleteFromRealm();
+                        realm.commitTransaction();
+                    }
+                    checkSyncComplete();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                countCalls--;
+                countFailedCalls++;
+                Log.i("FENNEL", "Farming task onFailure.. Count Calls: " + countCalls);
+
+                FennelUtils.appendDebugLog("FarmingTask edit Failed: " + t.getMessage());
+                t.printStackTrace();
+                checkSyncComplete();
+            }
+        }, farmingTask.getTaskId(), farmingTaskMap);
+
     }
 
     private static void processTaskItemCalls(RealmResults<TaskItem> taskItems) {
@@ -1329,6 +1415,7 @@ public class WebApi {
 
         final HashMap<String, Object> newFarmingTaskMap = new HashMap<>();
         newFarmingTaskMap.put("Status__c", farmingTask.getStatus());
+        newFarmingTaskMap.put("Completion_Date__c", farmingTask.getCompletionDate());
 
         return newFarmingTaskMap;
     }
