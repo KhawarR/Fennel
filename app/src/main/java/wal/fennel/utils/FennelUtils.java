@@ -327,4 +327,17 @@ public class FennelUtils {
         String dateFormatted = formatter.format(date);
         return dateFormatted;
     }
+
+    public static String getUTCFormatStringForDateString(String dateString) {
+        SimpleDateFormat formatter = new SimpleDateFormat(Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS);
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date date = new Date();
+        try {
+            date = formatter.parse(dateString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        String newDateString = FennelUtils.getFormattedUTCTime(date.getTime(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS);
+        return newDateString;
+    }
 }

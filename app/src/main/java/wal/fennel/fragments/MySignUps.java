@@ -1183,6 +1183,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 if (Double.isNaN(longitude))
                     longitude = 0;
                 String gpsTakenTime = objTask.getString("GPS_Taken_Time__c");
+                Date gpsDate = null;
+                SimpleDateFormat serverFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+                try {
+                    gpsDate = serverFormat.parse(gpsTakenTime);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 String fileType = objTask.getString("File_Type__c");
                 String fileActionType = objTask.getString("File_Action__c");
                 String fileActionPerformed = objTask.getString("Action_Performed__c");
@@ -1220,7 +1227,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 taskItem.setTextValue(textValue);
                 taskItem.setFileType(fileType);
                 taskItem.setFileActionType(fileActionType);
-                taskItem.setGpsTakenTime(gpsTakenTime);
+                taskItem.setGpsTakenTime(gpsDate);
                 taskItem.setLatitude(latitude);
                 taskItem.setLongitude(longitude);
                 taskItem.setOptions(options);
@@ -1614,6 +1621,12 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                             e.printStackTrace();
                         }
                         String gpsTakenTime = taskItem.getString("GPS_Taken_Time__c");
+                        Date gpsDate = null;
+                        try {
+                            gpsDate = serverFormat.parse(gpsTakenTime);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
                         String fileType = taskItem.getString("File_Type__c");
                         String fileActionType = taskItem.getString("File_Action__c");
                         String fileActionPerformed = taskItem.optString("Action_Performed__c");
@@ -1621,7 +1634,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
                         RealmList<TaskItemOption> options = new RealmList<>();
 
-                        TaskItem newTaskItem = new TaskItem(sequence, id, taskId, taskItemName, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false, "", "", false, false, logbookMessage);
+                        TaskItem newTaskItem = new TaskItem(sequence, id, taskId, taskItemName, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsDate, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false, "", "", false, false, logbookMessage);
                         visitLogTask.getTaskItems().add(newTaskItem);
 
                         allTasks.add(visitLogTask);

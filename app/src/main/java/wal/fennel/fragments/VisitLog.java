@@ -265,7 +265,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
 //                            taskItem.setDescription(gpsStamp);
                             taskItem.setLatitude(latitude);
                             taskItem.setLongitude(longitude);
-                            taskItem.setGpsTakenTime(FennelUtils.getFormattedTime(System.currentTimeMillis(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS));
+                            taskItem.setGpsTakenTime(new Date());
                             taskItem.setDateModified(new Date());
                         }
                         setTaskDone(taskItem);
@@ -275,7 +275,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                     }
                 });
                 if(taskItem.isTaskDone()) {
-                    String gpsStamp = getGpsStamp(taskItem.getLatitude(), taskItem.getLongitude(), taskItem.getGpsTakenTime());
+                    String gpsStamp = getGpsStamp(taskItem.getLatitude(), taskItem.getLongitude(), FennelUtils.getFormattedTime(taskItem.getGpsTakenTime().getTime(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS));
                     tvDescription.setText(gpsStamp);
                 } else {
                     ivBlockIcon.setImageResource(R.drawable.ic_gps);
@@ -631,6 +631,9 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
 
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
+        if (task.getStatus().equalsIgnoreCase(Constants.STR_NOT_STARTED) && (taskStatus.equalsIgnoreCase(Constants.STR_IN_PROGRESS) || taskStatus.equalsIgnoreCase(Constants.STR_COMPLETED))) {
+            task.setStartedDate(FennelUtils.getFormattedUTCTime(new Date().getTime(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS));
+        }
         task.setStatus(taskStatus);
         if (taskStatus.equalsIgnoreCase(Constants.STR_COMPLETED)) {
             task.setCompletionDate(FennelUtils.getFormattedUTCTime(new Date().getTime(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS));

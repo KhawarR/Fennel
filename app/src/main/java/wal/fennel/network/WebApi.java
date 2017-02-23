@@ -1424,6 +1424,9 @@ public class WebApi {
 
         final HashMap<String, Object> newFarmingTaskMap = new HashMap<>();
         newFarmingTaskMap.put("Status__c", farmingTask.getStatus());
+        if (farmingTask.getStartedDate() != null && !farmingTask.getStartedDate().isEmpty()) {
+            newFarmingTaskMap.put("Started_Date__c", farmingTask.getStartedDate());
+        }
         if (farmingTask.getStatus().equalsIgnoreCase(Constants.STR_APPROVED) && farmingTask.getCompletionDate() != null && !farmingTask.getCompletionDate().isEmpty()) {
             newFarmingTaskMap.put("Completion_Date__c", farmingTask.getCompletionDate());
         }
@@ -1438,8 +1441,8 @@ public class WebApi {
         if(taskItem.getTextValue() != null && !taskItem.getTextValue().equalsIgnoreCase("null")) {
             newTaskItemMap.put("Text_Value__c", taskItem.getTextValue());
         }
-        if(taskItem.getGpsTakenTime() != null && !taskItem.getGpsTakenTime().equalsIgnoreCase("null")) {
-            newTaskItemMap.put("GPS_Taken_Time__c", taskItem.getGpsTakenTime());
+        if(taskItem.getGpsTakenTime() != null) {
+            newTaskItemMap.put("GPS_Taken_Time__c", FennelUtils.getFormattedUTCTime(taskItem.getGpsTakenTime().getTime(), Constants.STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS));
         }
         if(taskItem.getLatitude() != 0) {
             newTaskItemMap.put("Location__Latitude__s", taskItem.getLatitude());
@@ -2956,6 +2959,15 @@ public class WebApi {
                 if (Double.isNaN(longitude))
                     longitude = 0;
                 String gpsTakenTime = objTask.getString("GPS_Taken_Time__c");
+
+                Date gpsDate = null;
+                SimpleDateFormat serverFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+                try {
+                    gpsDate = serverFormat.parse(gpsTakenTime);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
                 String fileType = objTask.getString("File_Type__c");
                 String fileActionType = objTask.getString("File_Action__c");
                 String fileActionPerformed = objTask.getString("Action_Performed__c");
@@ -2993,7 +3005,7 @@ public class WebApi {
                 taskItem.setTextValue(textValue);
                 taskItem.setFileType(fileType);
                 taskItem.setFileActionType(fileActionType);
-                taskItem.setGpsTakenTime(gpsTakenTime);
+                taskItem.setGpsTakenTime(gpsDate);
                 taskItem.setLatitude(latitude);
                 taskItem.setLongitude(longitude);
                 taskItem.setOptions(options);
@@ -3363,6 +3375,7 @@ public class WebApi {
                 }
             }
         }
+
         Singleton.getInstance().dashboardFieldAgents = dashboardAgentsList;
     }
 
@@ -3561,6 +3574,13 @@ public class WebApi {
                             e.printStackTrace();
                         }
                         String gpsTakenTime = taskItem.getString("GPS_Taken_Time__c");
+                        Date gpsDate = null;
+                        try {
+                            gpsDate = serverFormat.parse(gpsTakenTime);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+
                         String fileType = taskItem.getString("File_Type__c");
                         String fileActionType = taskItem.getString("File_Action__c");
                         String fileActionPerformed = taskItem.optString("Action_Performed__c");
@@ -3568,7 +3588,7 @@ public class WebApi {
 
                         RealmList<TaskItemOption> options = new RealmList<>();
 
-                        TaskItem newTaskItem = new TaskItem(sequence, id, taskId, taskItemName, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsTakenTime, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false, "", "", false, false, logbookMessage);
+                        TaskItem newTaskItem = new TaskItem(sequence, id, taskId, taskItemName, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsDate, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false, "", "", false, false, logbookMessage);
                         visitLogTask.getTaskItems().add(newTaskItem);
 
                         allTasks.add(visitLogTask);
