@@ -79,8 +79,8 @@ public class Login extends BaseFragment {
         mixPanel.track(MixPanelConstants.PageView.LOGIN);
 
         // TODO Remove on release
-        etId.setText("99100");
-        etPassword.setText("pass");
+//        etId.setText("99100");
+//        etPassword.setText("pass");
 
         if (!PreferenceHelper.getInstance().readToken().isEmpty() && !PreferenceHelper.getInstance().readLoginUserId().isEmpty()) {
             Fennel.restClient.setApiBaseUrl(PreferenceHelper.getInstance().readInstanceUrl());
@@ -114,8 +114,8 @@ public class Login extends BaseFragment {
             }
 
             //TODO Test to Production
-//            String username = getString(R.string.auth_username_test_env);
-            String username = getString(R.string.auth_username_test_prod);
+            String username = getString(R.string.auth_username_test_env);
+//            String username = getString(R.string.auth_username_test_prod);
             String password = getString(R.string.auth_password);
             loadingStarted();
             boolean isCallProcessed = WebApi.salesForceAuth(authCallback, username, password);
