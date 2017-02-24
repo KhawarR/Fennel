@@ -714,7 +714,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                 farmVisit.setDataDirty(true);
             }
 
-        if (updatedTaskItems.size() > 0 || taskStatus.equalsIgnoreCase(Constants.STR_COMPLETED)) {
+        if (updatedTaskItems.size() > 0) {
 
             for (int i=0; i<updatedLogTaskItems.size();i++) {
 
@@ -749,7 +749,6 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
         } else {
             FarmVisitLog visitLog = realm.createObject(FarmVisitLog.class);
             visitLog.setAll(farmVisit.getFarmVisitId(), task.getTaskId(), "", new Date(), "", true);
-
         }
         realm.commitTransaction();
         updatedTaskItems.clear();

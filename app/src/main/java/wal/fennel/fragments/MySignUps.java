@@ -1184,11 +1184,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     longitude = 0;
                 String gpsTakenTime = objTask.getString("GPS_Taken_Time__c");
                 Date gpsDate = null;
-                SimpleDateFormat serverFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-                try {
-                    gpsDate = serverFormat.parse(gpsTakenTime);
-                } catch (ParseException e) {
-                    e.printStackTrace();
+                if (gpsTakenTime != null && !gpsTakenTime.isEmpty() && !gpsTakenTime.equalsIgnoreCase("null")) {
+                    SimpleDateFormat serverFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+                    try {
+                        gpsDate = serverFormat.parse(gpsTakenTime);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                 }
                 String fileType = objTask.getString("File_Type__c");
                 String fileActionType = objTask.getString("File_Action__c");
@@ -1622,10 +1624,12 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                         }
                         String gpsTakenTime = taskItem.getString("GPS_Taken_Time__c");
                         Date gpsDate = null;
-                        try {
-                            gpsDate = serverFormat.parse(gpsTakenTime);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
+                        if (gpsTakenTime != null && !gpsTakenTime.isEmpty() && !gpsTakenTime.equalsIgnoreCase("null")) {
+                            try {
+                                gpsDate = serverFormat.parse(gpsTakenTime);
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
                         }
                         String fileType = taskItem.getString("File_Type__c");
                         String fileActionType = taskItem.getString("File_Action__c");

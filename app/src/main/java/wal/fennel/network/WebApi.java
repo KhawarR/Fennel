@@ -1427,7 +1427,7 @@ public class WebApi {
         if (farmingTask.getStartedDate() != null && !farmingTask.getStartedDate().isEmpty() && !farmingTask.getStartedDate().equalsIgnoreCase("null")) {
             newFarmingTaskMap.put("Started_Date__c", farmingTask.getStartedDate());
         }
-        if (farmingTask.getStatus().equalsIgnoreCase(Constants.STR_APPROVED) && farmingTask.getCompletionDate() != null && !farmingTask.getCompletionDate().isEmpty() && !farmingTask.getCompletionDate().equalsIgnoreCase("null")) {
+        if (farmingTask.getStatus().equalsIgnoreCase(Constants.STR_COMPLETED) && farmingTask.getCompletionDate() != null && !farmingTask.getCompletionDate().isEmpty() && !farmingTask.getCompletionDate().equalsIgnoreCase("null")) {
             newFarmingTaskMap.put("Completion_Date__c", farmingTask.getCompletionDate());
         }
 
@@ -2961,11 +2961,13 @@ public class WebApi {
                 String gpsTakenTime = objTask.getString("GPS_Taken_Time__c");
 
                 Date gpsDate = null;
-                SimpleDateFormat serverFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-                try {
-                    gpsDate = serverFormat.parse(gpsTakenTime);
-                } catch (ParseException e) {
-                    e.printStackTrace();
+                if (gpsTakenTime != null && !gpsTakenTime.isEmpty() && !gpsTakenTime.equalsIgnoreCase("null")) {
+                    SimpleDateFormat serverFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+                    try {
+                        gpsDate = serverFormat.parse(gpsTakenTime);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 String fileType = objTask.getString("File_Type__c");
@@ -3575,10 +3577,12 @@ public class WebApi {
                         }
                         String gpsTakenTime = taskItem.getString("GPS_Taken_Time__c");
                         Date gpsDate = null;
-                        try {
-                            gpsDate = serverFormat.parse(gpsTakenTime);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
+                        if (gpsTakenTime != null && !gpsTakenTime.isEmpty() && !gpsTakenTime.equalsIgnoreCase("null")) {
+                            try {
+                                gpsDate = serverFormat.parse(gpsTakenTime);
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
                         }
 
                         String fileType = taskItem.getString("File_Type__c");
