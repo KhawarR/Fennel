@@ -45,6 +45,8 @@ public class Constants {
     public static final String STR_FARMER_ID_PREFIX = "off-";
 
     public static final String MY_SIGNPS_BROADCAST_ACTION = "wal.fennel.action.MY_SIGUPS_UPDATED";
+    public static final String GET_FULL_SERVER_DATA_BROADCAST_ACTION = "wal.fennel.action.GET_FULL_SERVER_DATA_BROADCAST_ACTION";
+    public static final String GET_FULL_SERVER_DATE_BROADCAST_INTENT_KEY_IS_STARTED = "is_started";
 
     public static final String STR_TIME_FORMAT_YYYY_MM_DD = "yyyy-MM-dd";
     public static final String STR_TIME_FORMAT_YYYY_MM_DD_T_HH_MM_SS = "yyyy-MM-dd'T'HH:mm:ss";

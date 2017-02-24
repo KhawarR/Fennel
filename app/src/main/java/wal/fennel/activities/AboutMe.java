@@ -2,10 +2,14 @@ package wal.fennel.activities;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -146,6 +150,37 @@ public class AboutMe extends Activity implements TitleBarLayout.TitleBarIconClic
 
         loadAttachment();
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        IntentFilter iff = new IntentFilter(Constants.GET_FULL_SERVER_DATA_BROADCAST_ACTION);
+        LocalBroadcastManager.getInstance(AboutMe.this).registerReceiver(onGetFullServerData, iff);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(AboutMe.this).unregisterReceiver(onGetFullServerData);
+    }
+
+    private BroadcastReceiver onGetFullServerData = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean isStarted = intent.getExtras().getBoolean(Constants.GET_FULL_SERVER_DATE_BROADCAST_INTENT_KEY_IS_STARTED);
+
+            if(isStarted) {
+                if(pbSync != null) {
+                    pbSync.setVisibility(View.VISIBLE);
+                }
+            } else {
+                if(pbSync != null) {
+                    pbSync.setVisibility(View.GONE);
+                }
+            }
+        }
+    };
 
     @OnClick(R.id.txtSignOut)
     void onClickSignOut(View view) {
