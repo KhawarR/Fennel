@@ -172,13 +172,13 @@ public class WebApi {
             if (!facilitators.trim().isEmpty()) {
                 query = query + String.format(NetworkHelper.FACILITATOR_ADDON_DASHBOARD, facilitators);
             }
-            query = query + NetworkHelper.DASHBOARD_QUERY_ORDER;
+            query = query + ")" + NetworkHelper.DASHBOARD_QUERY_ORDER;
         } else if (userType.equalsIgnoreCase(Constants.STR_FIELD_OFFICER)) {
             query = String.format(NetworkHelper.GET_MY_DASHBOARD_DATA_FIELD_OFFICER, PreferenceHelper.getInstance().readLoginUserId(), facilitators);
             if (!facilitators.trim().isEmpty()) {
                 query = query + String.format(NetworkHelper.FACILITATOR_ADDON_DASHBOARD, facilitators);
             }
-            query = query + NetworkHelper.DASHBOARD_QUERY_ORDER;
+            query = query + ")" + NetworkHelper.DASHBOARD_QUERY_ORDER;
         } else {
             query = String.format(NetworkHelper.GET_MY_DASHBOARD_DATA_FACILITATOR, PreferenceHelper.getInstance().readLoginUserId());
         }
