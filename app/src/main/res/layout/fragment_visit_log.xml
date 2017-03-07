@@ -42,7 +42,7 @@
             <wal.fennel.views.FontTextView
                 android:id="@+id/tvTaskHeader"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="@dimen/header_height_30"
                 android:gravity="center"
                 android:textSize="18sp"
                 android:textColor="@color/black_txt_color"
@@ -85,7 +85,7 @@
             <wal.fennel.views.FontTextView
                 android:id="@+id/tvTaskComplete"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="@dimen/header_height_30"
                 android:gravity="center"
                 android:textSize="18sp"
                 android:textColor="@color/black_txt_color"
