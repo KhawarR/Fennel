@@ -1,5 +1,6 @@
 package wal.fennel.fragments;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -38,6 +39,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -114,6 +116,22 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     private ArrayList<Farmer> mySignupsList = null;
 
+    private ISwitchTabAfterLoading onSwitchTabAfterLoadingListener;
+
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            onSwitchTabAfterLoadingListener = (ISwitchTabAfterLoading) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement ISwitchTabAfterLoading");
+        }
+    }
 
     @Nullable
     @Override
@@ -121,6 +139,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_my_sign_ups, container, false);
         ButterKnife.bind(this, view);
+
+        getMySignups();
+
         return view;
     }
 
@@ -237,8 +258,6 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
         });
-
-        getMySignups();
     }
 
     @Override
@@ -291,6 +310,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 WebApi.syncAll(null);
             }
             loadingFinished();
+            onSwitchTabAfterLoadingListener.onSwitchTabAfterLoading();
         }
     }
 
@@ -394,10 +414,17 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         startingCallsCounter--;
         if(startingCallsCounter == 0) {
             loadingFinished();
+            onSwitchTabAfterLoadingListener.onSwitchTabAfterLoading();
         }
     }
 
+    public interface ISwitchTabAfterLoading {
+        public void onSwitchTabAfterLoading();
+    }
+
     private void parseData(String data) throws JSONException {
+
+        logTimeStamp("started - parseData");
 
         ArrayList<Farmer> incompleteFarmersList = new ArrayList<>();
         ArrayList<Farmer> pendingFarmersList = new ArrayList<>();
@@ -528,6 +555,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         mySignupsList = Singleton.getInstance().mySignupsList;
         adapter = new MySignupsAdapter(getActivity(), mySignupsList);
         mLvMySignups.setAdapter(adapter);
+
+        logTimeStamp("finished - parseData");
+
     }
 
     private Callback<ResponseBody> myFarmersAttachments = new Callback<ResponseBody>() {
@@ -574,6 +604,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     }
 
     private void parseFarmerAttachmentData(String data) throws JSONException {
+
+        logTimeStamp("started - parseFarmerAttachmentData");
+
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
@@ -665,6 +698,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             }
             adapter.notifyDataSetChanged();
         }
+
+        logTimeStamp("finished - parseFarmerAttachmentData");
     }
 
     private Callback<ResponseBody> aboutMeAttachmentCallback = new Callback<ResponseBody>() {
@@ -700,6 +735,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     };
 
     private String parseAboutMeDataAttachment(String data) throws JSONException {
+
+        logTimeStamp("started - parseAboutMeDataAttachment");
+
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
@@ -711,10 +749,15 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 if (attRecords.length() > 0) {
                     JSONObject objFarmerPhoto = attRecords.getJSONObject(0);
                     String idAttachment = objFarmerPhoto.getString("Id");
+
+                    logTimeStamp("finished - parseAboutMeDataAttachment");
                     return idAttachment;
                 }
             }
         }
+
+        logTimeStamp("finished - parseAboutMeDataAttachment");
+
         return "";
     }
     //endregion
@@ -776,6 +819,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     }
 
     private void parseMyFarmersAttachmentData(String data) throws JSONException {
+
+        logTimeStamp("started - parseMyFarmersAttachmentData");
+
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
@@ -853,9 +899,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
         }
+
+        logTimeStamp("finished - parseMyFarmersAttachmentData");
     }
 
     private void parseMyFarmersData(String data) throws JSONException {
+
+        logTimeStamp("started - parseMyFarmersData");
+
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         realm.delete(Task.class);
@@ -967,6 +1018,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             }
         }
         Singleton.getInstance().myFarmersList = (ArrayList<Farmer>) farmersTaskList;
+
+        logTimeStamp("finished - parseMyFarmersData");
+
     }
 
     private void addFarmerTasksToDB(List<Farmer> farmersTaskList) {
@@ -1134,13 +1188,15 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
     private ArrayList<TaskItem> parseTaskItemData(String data) throws JSONException {
 
-        Log.w("FENNEL", "DELETING TASK ITEMS");
+        logTimeStamp("started - parseTaskItemData");
+
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         realm.delete(TaskItem.class);
         realm.delete(TaskItemOption.class);
         realm.commitTransaction();
 
+        logTimeStamp("deletion done - parseTaskItemData");
 
         ArrayList<TaskItem> taskItems = new ArrayList<>();
 
@@ -1161,10 +1217,16 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             }
         }
 
+        logTimeStamp("clear old list done - parseTaskItemData");
+
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
+        logTimeStamp("parseTaskItemData - records = " + arrRecords.length());
+
         if (arrRecords.length() > 0) {
+
+            logTimeStamp("loop started - parseTaskItemData");
 
             for (int i = 0; i < arrRecords.length(); i++) {
 
@@ -1261,7 +1323,12 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                     }
                 }
             }
+
+            logTimeStamp("loop finished - parseTaskItemData");
         }
+
+        logTimeStamp("finished - parseTaskItemData");
+
         return taskItems;
     }
 
@@ -1298,7 +1365,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     };
 
     private void parseAllTasksAttachments(String responseStr) throws JSONException {
-        Log.i("FENNEL", responseStr);
+
+        logTimeStamp("started - parseAllTasksAttachments");
+
         JSONObject jsonObject = new JSONObject(responseStr);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
@@ -1380,6 +1449,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
         }
+
+        logTimeStamp("finished - parseAllTasksAttachments");
+
     }
 
     private void updateTaskItemWithAttachment(String taskItemId, String filePath, String attachmentId) {
@@ -1524,7 +1596,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
     }
 
     private void parseMyLogbookData(String responseStr) throws JSONException {
-        Log.i("FENNEL", responseStr);
+
+        logTimeStamp("started - parseMyLogbookData");
+
         JSONObject jsonObject = new JSONObject(responseStr);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
@@ -1647,9 +1721,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             }
             parseVisitLogsFromTasks(allTasks);
         }
+
+        logTimeStamp("finished - parseMyLogbookData");
     }
 
     private void parseMyDashboardData(String responseStr) throws JSONException {
+
+        logTimeStamp("started - parseMyDashboardData");
+
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         realm.delete(DashboardFieldAgent.class);
@@ -1827,10 +1906,14 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             }
         }
         Singleton.getInstance().dashboardFieldAgents = dashboardAgentsList;
+
+        logTimeStamp("finished - parseMyDashboardData");
     }
 
     private void parseMyLogbookFOFacData(String responseStr) throws JSONException {
-        Log.i("FENNEL", responseStr);
+
+        logTimeStamp("started - parseMyLogbookFOFacData");
+
         JSONObject jsonObject = new JSONObject(responseStr);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
@@ -1864,10 +1947,15 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
         getMyLogbookData(fieldOfficers, facilitators);
         getMyDashboardData(fieldOfficers, facilitators);
+
+        logTimeStamp("finished - parseMyLogbookFOFacData");
+
     }
 
     private void parseMyLogbookFacData(String responseStr) throws JSONException {
-        Log.i("FENNEL", responseStr);
+
+        logTimeStamp("started - parseMyLogbookFacData");
+
         JSONObject jsonObject = new JSONObject(responseStr);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
@@ -1884,6 +1972,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
             getMyLogbookData("", facilitators);
             getMyDashboardData("", facilitators);
+
+        logTimeStamp("finished - parseMyLogbookFacData");
+
     }
 
 //    private void getAllVisitLogsData(String farmingTaskIds) {
@@ -2006,6 +2097,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 //    }
 
     private void parseVisitLogsFromTasks(ArrayList<Task> allTasks) {
+
+        logTimeStamp("started - parseVisitLogsFromTasks");
+
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         realm.delete(FieldAgent.class);
@@ -2063,6 +2157,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         }
         realm.commitTransaction();
         Singleton.getInstance().fieldAgentsVisitLogs = allAgentsList;
+
+        logTimeStamp("finished - parseVisitLogsFromTasks");
     }
 
     private Callback<ResponseBody> myLogbookAttachmentCallback = new Callback<ResponseBody>() {
@@ -2101,6 +2197,7 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             loadingFinished();
+            onSwitchTabAfterLoadingListener.onSwitchTabAfterLoading();
             if(isValid())
             {
                 if (response.code() == 200) {
@@ -2137,6 +2234,9 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
 
     private void parseMyLogbookAttachments(String data) throws JSONException {
+
+        logTimeStamp("started - parseMyLogbookAttachments");
+
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
 
@@ -2185,9 +2285,13 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
 
 //            tasksAdapter.notifyDataSetChanged();
         }
+
+        logTimeStamp("finished - parseMyLogbookAttachments");
     }
 
     private void parseMyDashboardAttachments(String data) throws JSONException {
+
+        logTimeStamp("started - parseMyDashboardAttachments");
 
         JSONObject jsonObject = new JSONObject(data);
         JSONArray arrRecords = jsonObject.getJSONArray("records");
@@ -2233,6 +2337,8 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
                 }
             }
         }
+
+        logTimeStamp("finished - parseMyDashboardAttachments");
     }
 
     private void getMyLogbookDataFromDB() {
@@ -2262,5 +2368,15 @@ public class MySignUps extends BaseFragment implements View.OnClickListener {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             view.clearFocus();
         }
+    }
+
+    private void logTimeStamp(String tag) {
+//        Date date = new Date();
+//        DateFormat formatter = new SimpleDateFormat("HH:mm:ss:SSS");
+//        String dateFormatted = formatter.format(date);
+//
+//        if(tag.contains("parseTaskItemData")) {
+//            Log.d(tag, dateFormatted);
+//        }
     }
 }

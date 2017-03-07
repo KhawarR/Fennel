@@ -16,11 +16,12 @@ import wal.fennel.fragments.BaseContainerFragment;
 import wal.fennel.fragments.MyDashboardContainerFragment;
 import wal.fennel.fragments.MyFarmerTasksContainerFragment;
 import wal.fennel.fragments.MyLogbookContainerFragment;
+import wal.fennel.fragments.MySignUps;
 import wal.fennel.fragments.MySignUpsContainerFragment;
 import wal.fennel.utils.Constants;
 import wal.fennel.utils.MixPanelConstants;
 
-public class MainActivity extends BaseActivity implements TabHost.OnTabChangeListener {
+public class MainActivity extends BaseActivity implements TabHost.OnTabChangeListener, MySignUps.ISwitchTabAfterLoading {
 
     private MixpanelAPI mixPanel;
 
@@ -29,6 +30,7 @@ public class MainActivity extends BaseActivity implements TabHost.OnTabChangeLis
     private static final String TAB_3_TAG = "tab_3";
     private static final String TAB_4_TAG = "tab_4";
     private FragmentTabHost mTabHost;
+    private boolean isAllowedToSwitchTab = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,5 +112,13 @@ public class MainActivity extends BaseActivity implements TabHost.OnTabChangeLis
     protected void onDestroy() {
         mixPanel.flush();
         super.onDestroy();
+    }
+
+    @Override
+    public void onSwitchTabAfterLoading() {
+        if(isAllowedToSwitchTab) {
+            mTabHost.setCurrentTabByTag(TAB_2_TAG);
+            isAllowedToSwitchTab = false;
+        }
     }
 }
