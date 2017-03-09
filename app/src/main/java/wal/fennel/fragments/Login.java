@@ -82,6 +82,8 @@ public class Login extends BaseFragment {
         etId.setText("99100");
         etPassword.setText("pass");
 
+        etPassword.setSelection(etPassword.getText().length());
+
         if (!PreferenceHelper.getInstance().readToken().isEmpty() && !PreferenceHelper.getInstance().readLoginUserId().isEmpty()) {
             Fennel.restClient.setApiBaseUrl(PreferenceHelper.getInstance().readInstanceUrl());
             startActivity(new Intent(getActivity(), MainActivity.class));
