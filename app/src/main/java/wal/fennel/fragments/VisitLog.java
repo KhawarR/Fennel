@@ -9,7 +9,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
+import android.text.SpannableString;
 import android.text.format.DateUtils;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -184,7 +186,19 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
         // Replaced "Village, Sublocation" with "Sublocation, Location"
 //        tvFullName.setText(farmer.getVillageName() + ", " + farmer.getSubLocation());
         tvFullName.setText(farmer.getSubLocation() + ", " + farmer.getLocation());
-        tvMobile.setText(farmer.getMobileNumber());
+
+        SpannableString content = new SpannableString(farmer.getMobileNumber());
+        content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
+        tvMobile.setText(content);
+        tvMobile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:" + farmer.getMobileNumber()));
+                startActivity(intent);
+            }
+        });
+//      tvMobile.setText(farmer.getMobileNumber());
 
         tvTaskHeader.setText(task.getName());
         tvTaskHeader.setOnClickListener(new View.OnClickListener() {

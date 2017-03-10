@@ -11,6 +11,7 @@
     <color name="cell_separator_color">#9b9b9b</color>
     <color name="app_green">#00d55a</color>
     <color name="dark_green">#00d55a</color>
+    <color name="phone_green">#008000</color>
     <color name="transparent_white_overlay">#40FFFFFF</color>
     <color name="btn_disabled_bg_color">#f5bfc4</color>
     <color name="grey_light">#F5F5F5</color>

@@ -1,9 +1,12 @@
 package wal.fennel.fragments;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -109,7 +112,18 @@ public class FarmerStatus extends BaseFragment {
             // Replaced "Village, Sublocation" with "Sublocation, Location"
 //        tvFullName.setText(farmer.getVillageName() + ", " + farmer.getSubLocation());
             tvFullName.setText(farmer.getSubLocation() + ", " + farmer.getLocation());
-            tvMobile.setText(farmer.getMobileNumber());
+
+            SpannableString content = new SpannableString(farmer.getMobileNumber());
+            content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
+            tvMobile.setText(content);tvMobile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(Intent.ACTION_DIAL);
+                    intent.setData(Uri.parse("tel:" + farmer.getMobileNumber()));
+                    startActivity(intent);
+                }
+            });
+//            tvMobile.setText(farmer.getMobileNumber());
 
             mLvFarmers.addHeaderView(myHeader);
 

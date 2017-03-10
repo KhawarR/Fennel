@@ -1,7 +1,11 @@
 package wal.fennel.fragments;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -78,7 +82,20 @@ public class LogBookPersonDetailFragment extends BaseFragment {
         FontTextView tvLocation = (FontTextView) myHeader.findViewById(R.id.tvLocation);
         tvLocation.setVisibility(View.GONE);
         FontTextView tvMobile = (FontTextView) myHeader.findViewById(R.id.tvMobileNumber);
-        tvMobile.setText((fieldAgent.getPhoneNumber() != null && !fieldAgent.getPhoneNumber().isEmpty() && !fieldAgent.getPhoneNumber().equalsIgnoreCase("null") ? fieldAgent.getPhoneNumber() : "-"));
+
+        final String number = (fieldAgent.getPhoneNumber() != null && !fieldAgent.getPhoneNumber().isEmpty() && !fieldAgent.getPhoneNumber().equalsIgnoreCase("null") ? fieldAgent.getPhoneNumber() : "-");
+
+        SpannableString content = new SpannableString(number);
+        content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
+        tvMobile.setText(content);tvMobile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:" + number));
+                startActivity(intent);
+            }
+        });
+//        tvMobile.setText(number);
 
         logbookListView.addHeaderView(myHeader);
 

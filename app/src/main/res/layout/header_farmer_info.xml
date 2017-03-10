@@ -57,7 +57,7 @@
             android:id="@+id/tvMobileNumber"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/black_txt_color"
+            android:textColor="@color/phone_green"
             android:textSize="18sp"
             fennel:fontName="Avenir-Medium.ttf"
             android:textStyle="bold"
