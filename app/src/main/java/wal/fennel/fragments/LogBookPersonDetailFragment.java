@@ -87,12 +87,15 @@ public class LogBookPersonDetailFragment extends BaseFragment {
 
         SpannableString content = new SpannableString(number);
         content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
-        tvMobile.setText(content);tvMobile.setOnClickListener(new View.OnClickListener() {
+        tvMobile.setText(content);
+        tvMobile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_DIAL);
-                intent.setData(Uri.parse("tel:" + number));
-                startActivity(intent);
+                if(number != null && !number.isEmpty() && !number.trim().equalsIgnoreCase("-")) {
+                    Intent intent = new Intent(Intent.ACTION_DIAL);
+                    intent.setData(Uri.parse("tel:" + number));
+                    startActivity(intent);
+                }
             }
         });
 //        tvMobile.setText(number);

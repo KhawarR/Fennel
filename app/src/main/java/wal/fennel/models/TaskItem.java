@@ -21,6 +21,7 @@ public class TaskItem extends RealmObject implements Parcelable {
     private String recordType = "";
     private String description = "";
     private String textValue = "";
+    private String textInputType = "";
     private String fileType = "";
     private String fileActionType = "";
     private String fileActionPerformed = "";
@@ -72,6 +73,7 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.isPicUploadDirty = other.isPicUploadDirty;
 
         this.logbookMessage = other.logbookMessage;
+        this.textInputType = other.textInputType;
     }
 
     public TaskItem(int sequence, String id, String farmingTaskId, String name, String recordType,
@@ -79,7 +81,7 @@ public class TaskItem extends RealmObject implements Parcelable {
                     String fileActionPerformed, Date gpsTakenTime, double latitude,
                     double longitude, RealmList<TaskItemOption> options, Date lastModified,
                     String agent, String farmer, String agentAttachmentId, boolean isTaskDone,
-                    String attachmentPath, String attachmentId, boolean isDataDirty, boolean isPicUploadDirty, String logbookMessage) {
+                    String attachmentPath, String attachmentId, boolean isDataDirty, boolean isPicUploadDirty, String logbookMessage, String textInputType) {
         this.sequence = sequence;
         this.id = id;
         this.farmingTaskId = farmingTaskId;
@@ -106,6 +108,7 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.isPicUploadDirty = isPicUploadDirty;
 
         this.logbookMessage = logbookMessage;
+        this.textInputType = textInputType;
     }
 
     @Override
@@ -136,6 +139,7 @@ public class TaskItem extends RealmObject implements Parcelable {
         dest.writeInt(this.isPicUploadDirty ? 1 : 0);
 
         dest.writeString(this.logbookMessage);
+        dest.writeString(this.textInputType);
     }
 
     protected TaskItem(Parcel in) {
@@ -166,6 +170,7 @@ public class TaskItem extends RealmObject implements Parcelable {
         this.isPicUploadDirty = in.readInt() == 1 ? true : false;
 
         this.logbookMessage = in.readString();
+        this.textInputType = in.readString();
     }
 
     public static final Parcelable.Creator<TaskItem> CREATOR = new Parcelable.Creator<TaskItem>() {
@@ -234,6 +239,14 @@ public class TaskItem extends RealmObject implements Parcelable {
 
     public void setTextValue(String textValue) {
         this.textValue = textValue;
+    }
+
+    public String getTextInputType() {
+        return textInputType;
+    }
+
+    public void setTextInputType(String textInputType) {
+        this.textInputType = textInputType;
     }
 
     public String getFileType() {

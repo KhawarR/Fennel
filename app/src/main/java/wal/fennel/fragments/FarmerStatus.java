@@ -110,17 +110,20 @@ public class FarmerStatus extends BaseFragment {
 
             tvFarmerName.setText(farmer.getFullName());
             // Replaced "Village, Sublocation" with "Sublocation, Location"
-//        tvFullName.setText(farmer.getVillageName() + ", " + farmer.getSubLocation());
+            // tvFullName.setText(farmer.getVillageName() + ", " + farmer.getSubLocation());
             tvFullName.setText(farmer.getSubLocation() + ", " + farmer.getLocation());
 
             SpannableString content = new SpannableString(farmer.getMobileNumber());
             content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
-            tvMobile.setText(content);tvMobile.setOnClickListener(new View.OnClickListener() {
+            tvMobile.setText(content);
+            tvMobile.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(Intent.ACTION_DIAL);
-                    intent.setData(Uri.parse("tel:" + farmer.getMobileNumber()));
-                    startActivity(intent);
+                    if(farmer.getMobileNumber()!= null && !farmer.getMobileNumber().isEmpty() && !farmer.getMobileNumber().trim().equalsIgnoreCase("-")) {
+                        Intent intent = new Intent(Intent.ACTION_DIAL);
+                        intent.setData(Uri.parse("tel:" + farmer.getMobileNumber()));
+                        startActivity(intent);
+                    }
                 }
             });
 //            tvMobile.setText(farmer.getMobileNumber());

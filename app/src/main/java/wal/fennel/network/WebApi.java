@@ -2979,6 +2979,7 @@ public class WebApi {
                 String id = objTask.getString("Id");
                 boolean isDone = objTask.getBoolean("Completed__c");
                 String textValue = objTask.getString("Text_Value__c");
+                String textInputType = objTask.optString("Input_Type__c");
                 int sequence = objTask.getInt("Sequence__c");
                 String recordType = objTask.getJSONObject("RecordType").getString("Name");
                 String name = objTask.getString("Name");
@@ -3043,6 +3044,7 @@ public class WebApi {
                 taskItem.setOptions(options);
                 taskItem.setAttachmentPath("");
                 taskItem.setTaskDone(isDone);
+                taskItem.setTextInputType(textInputType);
                 realm.commitTransaction();
 
                 taskItems.add(taskItem);
@@ -3587,6 +3589,7 @@ public class WebApi {
 
                         String id = taskItem.optString("Id");
                         String textValue = taskItem.optString("Text_Value__c");
+                        String textInputType = taskItem.optString("Input_Type__c");
                         int sequence = taskItem.optInt("Sequence__c");
                         String recordType = taskItem.optJSONObject("RecordType").getString("Name");
                         String taskItemName = taskItem.optString("Name");
@@ -3622,7 +3625,7 @@ public class WebApi {
 
                         RealmList<TaskItemOption> options = new RealmList<>();
 
-                        TaskItem newTaskItem = new TaskItem(sequence, id, taskId, taskItemName, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsDate, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false, "", "", false, false, logbookMessage);
+                        TaskItem newTaskItem = new TaskItem(sequence, id, taskId, taskItemName, recordType, description, textValue, fileType, fileActionType, fileActionPerformed, gpsDate, latitude, longitude, options, lastModified, visitLogTask.getAgentName(), farmerName, null, false, "", "", false, false, logbookMessage, textInputType);
                         visitLogTask.getTaskItems().add(newTaskItem);
 
                         allTasks.add(visitLogTask);

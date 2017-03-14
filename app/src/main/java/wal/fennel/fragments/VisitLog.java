@@ -9,7 +9,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.format.DateUtils;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
@@ -193,9 +196,11 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
         tvMobile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_DIAL);
-                intent.setData(Uri.parse("tel:" + farmer.getMobileNumber()));
-                startActivity(intent);
+                if(farmer.getMobileNumber()!= null && !farmer.getMobileNumber().isEmpty() && !farmer.getMobileNumber().trim().equalsIgnoreCase("-")) {
+                    Intent intent = new Intent(Intent.ACTION_DIAL);
+                    intent.setData(Uri.parse("tel:" + farmer.getMobileNumber()));
+                    startActivity(intent);
+                }
             }
         });
 //      tvMobile.setText(farmer.getMobileNumber());
@@ -249,13 +254,13 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
 
             FontTextView tvTitle = (FontTextView) vTaskItem.findViewById(R.id.tvTitle);
             final FontTextView tvDescription = (FontTextView) vTaskItem.findViewById(R.id.tvDescription);
-            final EditText etHoleCount = (EditText) vTaskItem.findViewById(R.id.etInput);
+            final EditText etDataInput = (EditText) vTaskItem.findViewById(R.id.etInput);
             RelativeLayout rlBlockButton = (RelativeLayout) vTaskItem.findViewById(R.id.rlBlockButton);
             final ImageView ivBlockIcon = (ImageView) vTaskItem.findViewById(R.id.ivBlockIcon);
             final RoundedImageView roundedImageView = (RoundedImageView) vTaskItem.findViewById(R.id.ivBlockBackground);
             Spinner spOption = (Spinner) vTaskItem.findViewById(R.id.spOptions);
 
-            etHoleCount.setOnEditorActionListener(this);
+            etDataInput.setOnEditorActionListener(this);
 
             if(taskItem.getRecordType().equalsIgnoreCase(Constants.TaskItemType.Gps.toString())){
 
@@ -264,7 +269,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                 String description = taskItem.getDescription() == null ? "" : taskItem.getDescription().trim();
                 description = description.equalsIgnoreCase("null") ? "" : description;
                 tvDescription.setText(description);
-                etHoleCount.setVisibility(View.GONE);
+                etDataInput.setVisibility(View.GONE);
                 spOption.setVisibility(View.GONE);
 
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
@@ -302,7 +307,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                     tvDescription.setText(taskItem.getOptions().get(0).getName());
                 }
                 tvDescription.setVisibility(View.VISIBLE);
-                etHoleCount.setVisibility(View.GONE);
+                etDataInput.setVisibility(View.GONE);
                 spOption.setVisibility(View.GONE);
 
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
@@ -331,15 +336,20 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                 tvTitle.setText(taskItem.getName());
                 tvDescription.setVisibility(View.GONE);
 
-                etHoleCount.setText((taskItem.getTextValue().equalsIgnoreCase("null") ? "" : taskItem.getTextValue()));
-                etHoleCount.setVisibility(View.VISIBLE);
+                etDataInput.setText((taskItem.getTextValue().equalsIgnoreCase("null") ? "" : taskItem.getTextValue()));
+                etDataInput.setVisibility(View.VISIBLE);
+                if(taskItem.getTextInputType() != null && !taskItem.getTextInputType().isEmpty() && taskItem.getTextInputType().equalsIgnoreCase("Numeric")) {
+                    etDataInput.setInputType(InputType.TYPE_CLASS_NUMBER);
+                } else {
+                    etDataInput.setInputType(InputType.TYPE_CLASS_TEXT);
+                }
                 spOption.setVisibility(View.GONE);
 
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         hideKeyboard();
-                        taskItem.setTextValue(etHoleCount.getText().toString().trim());
+                        taskItem.setTextValue(etDataInput.getText().toString().trim());
                         setTaskDone(taskItem);
                         taskItem.setDateModified(new Date());
                         if(taskItem.isTaskDone()) {
@@ -356,7 +366,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                 tvTitle.setText(taskItem.getName());
                 tvDescription.setText(taskItem.getDescription());
                 tvDescription.setVisibility(View.VISIBLE);
-                etHoleCount.setVisibility(View.GONE);
+                etDataInput.setVisibility(View.GONE);
                 spOption.setVisibility(View.GONE);
 
                 rlBlockButton.setOnClickListener(new View.OnClickListener() {
@@ -429,7 +439,7 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
 
                 tvTitle.setText(taskItem.getName());
                 tvDescription.setVisibility(View.GONE);
-                etHoleCount.setVisibility(View.GONE);
+                etDataInput.setVisibility(View.GONE);
                 spOption.setVisibility(View.VISIBLE);
                 spOption.setEnabled(true);
                 final ArrayList<String> arrOptionNames = new ArrayList<>();
