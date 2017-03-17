@@ -200,6 +200,13 @@ public class FennelRealmMigrations implements RealmMigration{
             oldVersion++;
         }
 
+        if (oldVersion == 6) {
+
+            schema.get("TaskItem").addField("textInputType", String.class);
+
+            oldVersion++;
+        }
+
         if (oldVersion < newVersion) {
             throw new IllegalStateException(String.format("Migration missing from v%d to v%d", oldVersion, newVersion));
         }

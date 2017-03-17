@@ -58,7 +58,7 @@ public class Fennel extends Application {
 //        Realm.setDefaultConfiguration(config);
 
         RealmConfiguration config = new RealmConfiguration.Builder()
-                .schemaVersion(6) // Must be bumped when the schema changes
+                .schemaVersion(7) // Must be bumped when the schema changes
                 .migration(new FennelRealmMigrations()) // Migration to run
                 .build();
         Realm.setDefaultConfiguration(config);
