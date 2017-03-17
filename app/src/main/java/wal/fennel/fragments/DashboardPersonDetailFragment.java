@@ -83,19 +83,24 @@ public class DashboardPersonDetailFragment extends BaseFragment {
         FontTextView tvMobile = (FontTextView) myHeader.findViewById(R.id.tvMobileNumber);
         final String number = (fieldAgent.getAgentNumber() != null && !fieldAgent.getAgentNumber().isEmpty() && !fieldAgent.getAgentNumber().equalsIgnoreCase("null") ? fieldAgent.getAgentNumber() : "-");
 
-        SpannableString content = new SpannableString(number);
-        content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
-        tvMobile.setText(content);
-        tvMobile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(number != null && !number.isEmpty() && !number.trim().equalsIgnoreCase("-")) {
-                    Intent intent = new Intent(Intent.ACTION_DIAL);
-                    intent.setData(Uri.parse("tel:" + number));
-                    startActivity(intent);
+        if(!number.trim().equalsIgnoreCase("-")) {
+            SpannableString content = new SpannableString(number);
+            content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
+            tvMobile.setText(content);
+            tvMobile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(number != null && !number.isEmpty()) {
+                        Intent intent = new Intent(Intent.ACTION_DIAL);
+                        intent.setData(Uri.parse("tel:" + number));
+                        startActivity(intent);
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            tvMobile.setText(number);
+        }
+
 //        tvMobile.setText(number);
 
         logbookListView.addHeaderView(myHeader);

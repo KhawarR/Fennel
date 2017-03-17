@@ -113,19 +113,23 @@ public class FarmerStatus extends BaseFragment {
             // tvFullName.setText(farmer.getVillageName() + ", " + farmer.getSubLocation());
             tvFullName.setText(farmer.getSubLocation() + ", " + farmer.getLocation());
 
-            SpannableString content = new SpannableString(farmer.getMobileNumber());
-            content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
-            tvMobile.setText(content);
-            tvMobile.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(farmer.getMobileNumber()!= null && !farmer.getMobileNumber().isEmpty() && !farmer.getMobileNumber().trim().equalsIgnoreCase("-")) {
-                        Intent intent = new Intent(Intent.ACTION_DIAL);
-                        intent.setData(Uri.parse("tel:" + farmer.getMobileNumber()));
-                        startActivity(intent);
+            if(!farmer.getMobileNumber().trim().equalsIgnoreCase("-")) {
+                SpannableString content = new SpannableString(farmer.getMobileNumber());
+                content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
+                tvMobile.setText(content);
+                tvMobile.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(farmer.getMobileNumber()!= null && !farmer.getMobileNumber().isEmpty()) {
+                            Intent intent = new Intent(Intent.ACTION_DIAL);
+                            intent.setData(Uri.parse("tel:" + farmer.getMobileNumber()));
+                            startActivity(intent);
+                        }
                     }
-                }
-            });
+                });
+            } else {
+                tvMobile.setText(farmer.getMobileNumber());
+            }
 //            tvMobile.setText(farmer.getMobileNumber());
 
             mLvFarmers.addHeaderView(myHeader);

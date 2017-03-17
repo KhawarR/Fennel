@@ -85,19 +85,23 @@ public class LogBookPersonDetailFragment extends BaseFragment {
 
         final String number = (fieldAgent.getPhoneNumber() != null && !fieldAgent.getPhoneNumber().isEmpty() && !fieldAgent.getPhoneNumber().equalsIgnoreCase("null") ? fieldAgent.getPhoneNumber() : "-");
 
-        SpannableString content = new SpannableString(number);
-        content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
-        tvMobile.setText(content);
-        tvMobile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(number != null && !number.isEmpty() && !number.trim().equalsIgnoreCase("-")) {
-                    Intent intent = new Intent(Intent.ACTION_DIAL);
-                    intent.setData(Uri.parse("tel:" + number));
-                    startActivity(intent);
+        if(!number.trim().equalsIgnoreCase("-")) {
+            SpannableString content = new SpannableString(number);
+            content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
+            tvMobile.setText(content);
+            tvMobile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(number != null && !number.isEmpty()) {
+                        Intent intent = new Intent(Intent.ACTION_DIAL);
+                        intent.setData(Uri.parse("tel:" + number));
+                        startActivity(intent);
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            tvMobile.setText(number);
+        }
 //        tvMobile.setText(number);
 
         logbookListView.addHeaderView(myHeader);
