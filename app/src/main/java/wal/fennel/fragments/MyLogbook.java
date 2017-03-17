@@ -1,5 +1,6 @@
 package wal.fennel.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -95,6 +97,7 @@ public class MyLogbook extends BaseFragment {
             getChildFragmentManager().executePendingTransactions();
         }
         titleBarLayout.setTxtLeft("");
+        hideKeyboard();
     }
 
     public void showPersonViewFragment() {
@@ -106,6 +109,7 @@ public class MyLogbook extends BaseFragment {
             getChildFragmentManager().executePendingTransactions();
         }
         titleBarLayout.setTxtLeft("");
+        hideKeyboard();
     }
 
     public void addPersonDetailViewFragment(FieldAgent fieldAgent) {
@@ -152,6 +156,15 @@ public class MyLogbook extends BaseFragment {
     public void onTitleBarRightIconClicked(View view) {
 //        ((BaseContainerFragment) getParentFragment()).addFragment(new AboutMe(), true);
         startActivity(new Intent(getActivity(), AboutMe.class));
+    }
+
+    public void hideKeyboard() {
+        View view = getActivity().getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            view.clearFocus();
+        }
     }
 
 }
