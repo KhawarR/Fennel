@@ -9,10 +9,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
-import android.text.InputFilter;
 import android.text.InputType;
 import android.text.SpannableString;
-import android.text.Spanned;
 import android.text.format.DateUtils;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
@@ -847,14 +845,16 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
     private void markCompleteDashboardTask() {
 
         for (DashboardFieldAgent dashboardFieldAgent : Singleton.getInstance().dashboardFieldAgents) {
-            RealmList<DashboardTask> dashboardTasks = dashboardFieldAgent.getDashboardTasks();
-            for (DashboardTask dTask : dashboardTasks) {
-                if (dTask.getTaskName().equalsIgnoreCase(task.getName())) {
-                    Realm realm = Realm.getDefaultInstance();
-                    realm.beginTransaction();
-                    dTask.setCompleted(dTask.getCompleted()+1);
-                    realm.commitTransaction();
-                    break;
+            if(dashboardFieldAgent.getAgentId().equalsIgnoreCase(PreferenceHelper.getInstance().readLoginUserId())) {
+                RealmList<DashboardTask> dashboardTasks = dashboardFieldAgent.getDashboardTasks();
+                for (DashboardTask dTask : dashboardTasks) {
+                    if (dTask.getTaskName().equalsIgnoreCase(task.getName())) {
+                        Realm realm = Realm.getDefaultInstance();
+                        realm.beginTransaction();
+                        dTask.setCompleted(dTask.getCompleted() + 1);
+                        realm.commitTransaction();
+                        break;
+                    }
                 }
             }
         }
