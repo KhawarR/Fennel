@@ -35,6 +35,8 @@ public class PreferenceHelper {
 
     private static final String KEY_IS_SYNC_IN_PROGRESS = "_is_sync_in_progress";
 
+    private static final String KEY_VERSION_ON_MIXPANEL = "_version_mixpanel";
+
 
     private static PreferenceHelper sInstance;
     private final SharedPreferences mPref;
@@ -285,6 +287,17 @@ public class PreferenceHelper {
 
     public String readNetworkChangeSyncStamp() {
         String value = mPref.getString(KEY_NETWORK_CHANGE_SYNC_STAMP, "-");
+        return value;
+    }
+
+    public void writeMixPanelAppVersion(String value) {
+        SharedPreferences.Editor editor = mPref.edit();
+        editor.putString(KEY_VERSION_ON_MIXPANEL, value);
+        editor.commit();
+    }
+
+    public String readMixPanelAppVersion() {
+        String value = mPref.getString(KEY_VERSION_ON_MIXPANEL, "");
         return value;
     }
 

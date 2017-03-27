@@ -11,6 +11,7 @@ import android.widget.TabHost;
 
 import com.mixpanel.android.mpmetrics.MixpanelAPI;
 
+import wal.fennel.BuildConfig;
 import wal.fennel.R;
 import wal.fennel.fragments.BaseContainerFragment;
 import wal.fennel.fragments.MyDashboardContainerFragment;
@@ -20,6 +21,7 @@ import wal.fennel.fragments.MySignUps;
 import wal.fennel.fragments.MySignUpsContainerFragment;
 import wal.fennel.utils.Constants;
 import wal.fennel.utils.MixPanelConstants;
+import wal.fennel.utils.PreferenceHelper;
 
 public class MainActivity extends BaseActivity implements TabHost.OnTabChangeListener, MySignUps.ISwitchTabAfterLoading {
 
@@ -38,6 +40,13 @@ public class MainActivity extends BaseActivity implements TabHost.OnTabChangeLis
         setContentView(R.layout.activity_main);
 
         mixPanel = MixpanelAPI.getInstance(this, MixPanelConstants.MIXPANEL_TOKEN);
+        String currentVersion = Constants.STR_FENNEL_VERSION + BuildConfig.VERSION_NAME;
+
+        // sending current app version to mix panel for one time for each version.
+        if(!currentVersion.equalsIgnoreCase(PreferenceHelper.getInstance().readMixPanelAppVersion())) {
+            mixPanel.track(currentVersion);
+            PreferenceHelper.getInstance().writeMixPanelAppVersion(currentVersion);
+        }
 
 //        getWindow().setSoftInputMode(
 //                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
