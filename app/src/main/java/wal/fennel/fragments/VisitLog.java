@@ -16,6 +16,7 @@ import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
@@ -474,6 +475,15 @@ public class VisitLog extends BaseFragment implements TextView.OnEditorActionLis
                     @Override
                     public void onNothingSelected(AdapterView<?> parent) {
 
+                    }
+                });
+                spOption.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        if (event.getAction() == MotionEvent.ACTION_UP) {
+                            hideKeyboard();
+                        }
+                        return false;
                     }
                 });
 
